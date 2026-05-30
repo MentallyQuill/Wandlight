@@ -277,7 +277,7 @@ ${String(rawResponse || '').slice(0, 12000)}
  * @param {number} [count=20] - Max messages to include
  * @returns {string} Formatted messages text
  */
-function getRecentMessages(count = 20) {
+function getRecentMessages(count = 8) {
     try {
         const ctx = SillyTavern.getContext();
         const chat = ctx?.chat || [];
@@ -324,8 +324,8 @@ export async function runLoreContextDetection() {
             loreContext: state.loreContext,
         }, null, 0);
 
-        const messages = getRecentMessages(20);
-        const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nDetect the current lore context (JSON only):`;
+        const messages = getRecentMessages();
+        const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nDetect the current lore context. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
 
         const response = await quietPrompt(LORE_CONTEXT_DETECTION_SYSTEM_PROMPT, userMessage);
         if (!response) return null;
@@ -418,8 +418,23 @@ export async function runLoreGeneration(options = {}) {
         const settings = getSettings();
         const contextKey = buildLoreGenerationKey(state);
 
-        // Skip if loreContext hasn't been detected yet
+        // Auto-detect context if none exists (only for manual/forced generation)
         if (!state.loreContext?.lastDetectedAt) {
+            if (force) {
+                console.debug(`${LOG_PREFIX} Auto-detecting lore context before generation…`);
+                const detected = await runLoreContextDetection();
+                if (!detected) {
+                    _generationRunning = false;
+                    return { status: 'no_context_detected', contextKey };
+                }
+                // Re-read state and contextKey (context detection may have updated it)
+                const freshState = getState();
+                const freshKey = buildLoreGenerationKey(freshState);
+                // Restart the generation with fresh state, release guard first
+                // so the recursive call doesn't conflict with _generationRunning
+                _generationRunning = false;
+                return await runLoreGeneration({ force, allowReplacePending });
+            }
             if (settings.debugMode) {
                 console.debug(`${LOG_PREFIX} Skipping lore generation — no lore context detected yet`);
             }
@@ -526,8 +541,8 @@ export async function runLoreGeneration(options = {}) {
             loreMatrix: (state.loreMatrix || []).slice(0, 3),
         }, null, 0);
 
-        const messages = getRecentMessages(20);
-        const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nGenerate relevant lore entries (JSON only):`;
+        const messages = getRecentMessages();
+        const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nGenerate relevant lore entries. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
 
         const response = await quietPrompt(LORE_GENERATION_SYSTEM_PROMPT, userMessage);
         if (!response) {

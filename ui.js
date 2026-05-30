@@ -13,7 +13,8 @@ import {
     normalizeLoreContext,
     getActiveLoreEntries,
 } from './lore-matrix.js';
-import { loadApiKey, storeApiKey, deleteApiKey } from './secure-keyring.js';
+import { storeApiKey, deleteApiKey } from './secure-keyring.js';
+import { loadApiKey, fetchLoreModels } from './lore-llm-client.js';
 
 /**
  * Renders the settings panel HTML into the container.
@@ -380,7 +381,7 @@ function setupLoreProviderPanel(container) {
     if (providerSelect) providerSelect.value = settings.loreProvider || 'st';
     if (openaiBaseUrl) openaiBaseUrl.value = settings.loreOpenAIBaseUrl || '';
     if (openaiModel) openaiModel.value = settings.loreOpenAIModel || '';
-    if (openaiJsonMode) openaiJsonMode.checked = !!settings.loreOpenAIJsonMode;
+    if (openaiJsonMode) openaiJsonMode.checked = !!settings.loreOpenAIUseJsonMode;
     if (tempInput) tempInput.value = settings.loreTemperature ?? 0.1;
     if (topPInput) topPInput.value = settings.loreTopP ?? 0.9;
     if (maxTokensInput) maxTokensInput.value = settings.loreMaxTokens ?? 2048;
@@ -472,7 +473,7 @@ function setupLoreProviderPanel(container) {
     }
     if (openaiJsonMode) {
         openaiJsonMode.addEventListener('change', () => {
-            settings.loreOpenAIJsonMode = openaiJsonMode.checked;
+            settings.loreOpenAIUseJsonMode = openaiJsonMode.checked;
             saveLoreProviderSettings(settings);
         });
     }
@@ -498,6 +499,8 @@ function setupLoreProviderPanel(container) {
     }
 
     // ── API key: load status ─────────────────────────────────────────
+    // Never put the decrypted key in the DOM. The input is only for
+    // entering a new key; stored keys are never revealed.
     async function refreshKeyStatus() {
         if (!openaiKeyStatus) return;
         try {
@@ -505,14 +508,6 @@ function setupLoreProviderPanel(container) {
             if (key) {
                 openaiKeyStatus.textContent = 'Key stored (encrypted at rest)';
                 openaiKeyStatus.style.color = '#88cc88';
-                if (openaiKey) openaiKey.value = key; // Masked, reveal on focus
-                // Show actual key only on focus
-                if (openaiKey) {
-                    openaiKey.addEventListener('focus', async () => {
-                        const fresh = await loadApiKey();
-                        if (fresh) openaiKey.value = fresh;
-                    }, { once: true });
-                }
             } else {
                 openaiKeyStatus.textContent = 'No key stored';
                 openaiKeyStatus.style.color = '';
@@ -550,6 +545,43 @@ function setupLoreProviderPanel(container) {
                 await refreshKeyStatus();
             } catch (e) {
                 if (typeof toastr !== 'undefined') toastr.error('Failed to clear key: ' + e.message);
+            }
+        });
+    }
+
+    // ── Fetch Models button ──────────────────────────────────────────
+    const fetchModelsBtn = container.querySelector('#wandlight_lore_fetch_models');
+    if (fetchModelsBtn && openaiModel) {
+        fetchModelsBtn.addEventListener('click', async () => {
+            fetchModelsBtn.disabled = true;
+            const origText = fetchModelsBtn.textContent;
+            fetchModelsBtn.textContent = 'Fetching...';
+            try {
+                const models = await fetchLoreModels();
+                const currentVal = openaiModel.value;
+                openaiModel.innerHTML = '';
+                if (models.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = '(No models found)';
+                    openaiModel.appendChild(opt);
+                }
+                for (const m of models) {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.name || m.id;
+                    openaiModel.appendChild(opt);
+                }
+                // Restore previous selection if it's still in the list
+                if (currentVal && models.some(m => m.id === currentVal)) {
+                    openaiModel.value = currentVal;
+                }
+                if (typeof toastr !== 'undefined') toastr.success(`${models.length} model(s) fetched`);
+            } catch (e) {
+                if (typeof toastr !== 'undefined') toastr.error('Fetch failed: ' + e.message);
+            } finally {
+                fetchModelsBtn.disabled = false;
+                fetchModelsBtn.textContent = origText;
             }
         });
     }

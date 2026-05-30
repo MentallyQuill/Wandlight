@@ -347,7 +347,7 @@ export function getPanelLoreState(state) {
     const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
 
     const categories = new Set();
-    const counts = { all: 0, active: 0, pinned: 0, pending: pendingEntries.length };
+    const counts = { all: 0, active: 0, pinned: 0, suppressed: 0, pending: pendingEntries.length };
 
     const entries = allEntries.map(entry => {
         const isActive = isLoreEntryActive(entry, state);
@@ -359,6 +359,7 @@ export function getPanelLoreState(state) {
         counts.all++;
         if (isActive) counts.active++;
         if (isPinned) counts.pinned++;
+        if (isSuppressed) counts.suppressed++;
 
         return {
             ...entry,
@@ -386,9 +387,19 @@ export function getPanelLoreState(state) {
     const uniquePending = pendingAnnotated.filter(e => !entryIds.has(e.id));
     const allAnnotated = [...entries, ...uniquePending];
 
+    // Count suppressed across all annotated entries (including pending)
+    counts.suppressed = allAnnotated.filter(e => e.isSuppressed).length;
+
     return {
         entries: allAnnotated,
-        categories: ['all', ...Array.from(categories).sort()],
+        categories: [
+            'all',
+            'active',
+            'pinned',
+            'suppressed',
+            'pending',
+            ...Array.from(categories).sort(),
+        ],
         counts,
     };
 }

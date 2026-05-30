@@ -1258,7 +1258,117 @@ export function acceptPendingLoreEntries() {
  * and auto-generation will not repeat it until context changes.
  * @returns {Object} Updated state
  */
-export function rejectPendingLoreEntries() {
+/**
+ * Accepts a single pending lore entry by index, merging it into the lore matrix.
+ * The remaining pending entries stay pending.
+ * @param {number} entryIndex - Index into pendingLoreEntries array
+ * @returns {{ state: Object, accepted: Object|null }} Updated state and the accepted entry
+ */
+export function acceptPendingLoreEntry(entryIndex) {
+    const state = getState();
+    const pending = normalizeLoreMatrix(state.pendingLoreEntries || []);
+    const existing = normalizeLoreMatrix(state.loreMatrix || []);
+
+    if (entryIndex < 0 || entryIndex >= pending.length || pending.length === 0) {
+        return { state, accepted: null };
+    }
+
+    const acceptedEntry = pending[entryIndex];
+    const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
+
+    // Merge the single entry into loreMatrix
+    const settings = getSettings();
+    let merged = mergeLoreEntries(existing, [acceptedEntry]);
+
+    // Enforce cap
+    const max = Number(settings.maxLoreEntriesInMatrix) || 50;
+    if (merged.length > max) {
+        const protectedEntries = merged.filter(e => e.locked || e.userEdited || e.status === 'pinned');
+        const regularEntries = merged
+            .filter(e => !(e.locked || e.userEdited || e.status === 'pinned'))
+            .sort((a, b) => (b.priority || 50) - (a.priority || 50) || (a.title || '').localeCompare(b.title || ''));
+        if (protectedEntries.length > max) {
+            merged = protectedEntries;
+        } else {
+            merged = [...protectedEntries, ...regularEntries].slice(0, max);
+        }
+    }
+
+    state.loreMatrix = merged;
+
+    // Remove the accepted entry from pending
+    state.pendingLoreEntries = pending.filter((_, i) => i !== entryIndex);
+
+    // If no more pending entries, clear the meta
+    if (state.pendingLoreEntries.length === 0) {
+        state.pendingLoreMeta = null;
+        if (state.loreContext) {
+            state.loreContext.lastGenerationSummary = '';
+        }
+    }
+
+    // Update generation ledger
+    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+        state.loreGeneration = getDefaultState().loreGeneration;
+    }
+    state.loreGeneration.lastAcceptedFor = contextKey;
+    state.loreGeneration.attempts[contextKey] = {
+        ...(state.loreGeneration.attempts[contextKey] || {}),
+        status: state.pendingLoreEntries.length === 0 ? 'accepted' : 'partial_accept',
+        acceptedAt: Date.now(),
+        acceptedEntryCount: (state.loreGeneration.attempts[contextKey]?.acceptedEntryCount || 0) + 1,
+    };
+
+    saveState(state);
+    return { state, accepted: acceptedEntry };
+}
+
+/**
+ * Rejects a single pending lore entry by index, removing it from pending.
+ * The remaining pending entries stay pending.
+ * @param {number} entryIndex - Index into pendingLoreEntries array
+ * @returns {{ state: Object, rejected: Object|null }} Updated state and the rejected entry
+ */
+export function rejectPendingLoreEntry(entryIndex) {
+    const state = getState();
+    const pending = normalizeLoreMatrix(state.pendingLoreEntries || []);
+
+    if (entryIndex < 0 || entryIndex >= pending.length || pending.length === 0) {
+        return { state, rejected: null };
+    }
+
+    const rejectedEntry = pending[entryIndex];
+    const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
+
+    // Remove the rejected entry from pending
+    state.pendingLoreEntries = pending.filter((_, i) => i !== entryIndex);
+
+    // If no more pending entries, clear the meta
+    if (state.pendingLoreEntries.length === 0) {
+        state.pendingLoreMeta = null;
+        if (state.loreContext) {
+            state.loreContext.lastGenerationSummary = '';
+        }
+    }
+
+    // Update generation ledger
+    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+        state.loreGeneration = getDefaultState().loreGeneration;
+    }
+    state.loreGeneration.lastRejectedFor = contextKey;
+    state.loreGeneration.attempts[contextKey] = {
+        ...(state.loreGeneration.attempts[contextKey] || {}),
+        status: state.pendingLoreEntries.length === 0 ? 'rejected' : 'partial_reject',
+        rejectedAt: Date.now(),
+        rejectedEntryCount: (state.loreGeneration.attempts[contextKey]?.rejectedEntryCount || 0) + 1,
+    };
+
+    saveState(state);
+    return { state, rejected: rejectedEntry };
+}
+
+/**
+ * Rejects pending lore entries by clearing them without merging.
     const state = getState();
     const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
 

@@ -76,6 +76,7 @@ export const DEFAULT_SETTINGS = {
     loreOpenAIKeyIv: '',
     loreOpenAIKeySet: false,
     loreOpenAIUseJsonMode: true,
+    loreOpenAIUseSTProxy: false,
 
     // Lore generation parameters (separate from main RP model settings)
     loreTemperature: 0.1,
@@ -123,6 +124,7 @@ export function getDefaultState() {
             lastAcceptedFor: '',
             lastRejectedFor: '',
             lastFailedFor: '',
+            lastForcePendingFor: '',
             attempts: {},
         },
 

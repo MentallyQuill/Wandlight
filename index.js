@@ -195,6 +195,79 @@ function registerSlashCommands(ctx) {
         });
     }, undefined, '\uD83D\uDCC4 Export full continuity state as JSON', 'Wandlight');
 
+    // ── Lore slash commands ──────────────────────────────────────────────────
+
+    // /wandlight-lore-detect — re-run lore context detection
+    register('wandlight-lore-detect', async () => {
+        try {
+            if (typeof toastr !== 'undefined') toastr.info('Running lore context detection…');
+            await runLoreContextDetection({ force: true });
+            if (typeof toastr !== 'undefined') toastr.success('Lore context detection completed');
+        } catch (e) {
+            console.error(`${LOG_PREFIX} Lore detection failed:`, e);
+            if (typeof toastr !== 'undefined') toastr.error(`Lore detection failed: ${e.message}`);
+        }
+    }, undefined, '\uD83D\uDD0D Re-run lore context detection', 'Wandlight Lore');
+
+    // /wandlight-lore-generate — trigger lore matrix generation
+    register('wandlight-lore-generate', async () => {
+        try {
+            if (typeof toastr !== 'undefined') toastr.info('Generating lore matrix entries…');
+            await runLoreGeneration({ force: true, allowReplacePending: true });
+            refreshLorePanel();
+            if (typeof toastr !== 'undefined') toastr.success('Lore matrix generation completed');
+        } catch (e) {
+            console.error(`${LOG_PREFIX} Lore generation failed:`, e);
+            if (typeof toastr !== 'undefined') toastr.error(`Lore generation failed: ${e.message}`);
+        }
+    }, undefined, '\u2728 Generate lore matrix entries', 'Wandlight Lore');
+
+    // /wandlight-lore-accept — accept all pending lore entries
+    register('wandlight-lore-accept', async () => {
+        try {
+            const state = getState();
+            const pendingCount = (state?.pendingLoreEntries || []).length;
+            acceptPendingLoreEntries();
+            refreshLorePanel();
+            if (typeof toastr !== 'undefined') toastr.success(`Accepted ${pendingCount} pending lore entr${pendingCount === 1 ? 'y' : 'ies'}`);
+        } catch (e) {
+            console.error(`${LOG_PREFIX} Accept lore failed:`, e);
+            if (typeof toastr !== 'undefined') toastr.error(`Accept lore failed: ${e.message}`);
+        }
+    }, undefined, '\u2705 Accept all pending lore entries', 'Wandlight Lore');
+
+    // /wandlight-lore-reject — reject all pending lore entries
+    register('wandlight-lore-reject', async () => {
+        try {
+            const state = getState();
+            const pendingCount = (state?.pendingLoreEntries || []).length;
+            rejectPendingLoreEntries();
+            refreshLorePanel();
+            if (typeof toastr !== 'undefined') toastr.success(`Rejected ${pendingCount} pending lore entr${pendingCount === 1 ? 'y' : 'ies'}`);
+        } catch (e) {
+            console.error(`${LOG_PREFIX} Reject lore failed:`, e);
+            if (typeof toastr !== 'undefined') toastr.error(`Reject lore failed: ${e.message}`);
+        }
+    }, undefined, '\u274C Reject all pending lore entries', 'Wandlight Lore');
+
+    // /wandlight-lore-panel — toggle the floating lore panel
+    register('wandlight-lore-panel', async () => {
+        try {
+            const state = getState();
+            const isOpen = state?.lorePanel?.isOpen || false;
+            if (isOpen) {
+                hideLorePanel();
+                if (typeof toastr !== 'undefined') toastr.info('Lore panel hidden');
+            } else {
+                showLorePanel();
+                if (typeof toastr !== 'undefined') toastr.info('Lore panel shown');
+            }
+        } catch (e) {
+            console.error(`${LOG_PREFIX} Toggle lore panel failed:`, e);
+            if (typeof toastr !== 'undefined') toastr.error(`Toggle lore panel failed: ${e.message}`);
+        }
+    }, undefined, '\uD83D\uDCD6 Toggle the floating lore matrix panel', 'Wandlight Lore');
+
     console.log(`${LOG_PREFIX} Slash commands registered`);
 }
 
@@ -265,6 +338,16 @@ async function mountSettingsPanel(ctx) {
     }, 100);
 
     console.log(`${LOG_PREFIX} Settings panel mounted`);
+
+    // ── Auto-open lore panel if it was previously open ────────────────
+    try {
+        const state = getState();
+        if (state?.lorePanel?.isOpen !== false) {
+            showLorePanel();
+        }
+    } catch (_) {
+        // Silently ignore — panel may not be needed
+    }
 }
 
 /**
@@ -504,7 +587,6 @@ function wireSettingsPanel(container) {
             const origHTML = generateLoreBtn.innerHTML;
             generateLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
             try {
-                pushStateSnapshot(state, 'Generate pending lore entries', getSettings().maxSnapshots);
                 const result = await runLoreGeneration({ force: true, allowReplacePending: true });
 
                 if (result.status === 'proposed') {
@@ -589,6 +671,9 @@ function exposeGlobalBridge() {
     globalThis._wandlightRefreshUI = refreshStatePanel;
     globalThis._wandlightGetState = getState;
     globalThis._wandlightValidateDelta = validateDelta;
+    globalThis._wandlightShowLorePanel = showLorePanel;
+    globalThis._wandlightHideLorePanel = hideLorePanel;
+    globalThis._wandlightRefreshLorePanel = refreshLorePanel;
     console.log(`${LOG_PREFIX} Global bridge exposed`);
 }
 
@@ -664,5 +749,12 @@ function refreshStatePanel() {
         refreshMemoPreview();
     } catch (e2) {
         // Silently ignore — memo preview might not be in DOM
+    }
+
+    // ── Refresh lore panel if open ─────────────────────────────────────────
+    try {
+        refreshLorePanel();
+    } catch (_) {
+        // Panel may not be open
     }
 }

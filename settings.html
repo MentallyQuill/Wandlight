@@ -272,9 +272,17 @@
                                 style="width: 100%;">
 
                             <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Model</label>
-                            <input id="wandlight_lore_openai_model" class="text_pole" type="text"
-                                placeholder="gpt-4o"
-                                style="width: 100%;">
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <select id="wandlight_lore_openai_model" class="text_pole"
+                                    style="flex: 1;">
+                                    <option value="">— Type or fetch models —</option>
+                                </select>
+                                <button id="wandlight_lore_fetch_models" class="menu_button interactable"
+                                    style="background: rgba(80, 140, 255, 0.18); border-color: #5588ff; font-size: 0.78em; padding: 2px 8px; white-space: nowrap;"
+                                    title="Fetch available models from the configured API endpoint">
+                                    <i class="fa-solid fa-cloud-arrow-down"></i> Fetch Models
+                                </button>
+                            </div>
 
                             <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">API Key</label>
                             <div style="display: flex; gap: 6px; align-items: center;">
@@ -292,11 +300,21 @@
                                     <i class="fa-solid fa-trash"></i> Clear
                                 </button>
                             </div>
-                            <small id="wandlight_lore_openai_key_status" style="opacity: 0.6; margin-top: 2px;"></small>
+                            <small id="wandlight_lore_openai_key_status" style="opacity: 0.6; margin-top: 2px; display: block;"></small>
+                            <small style="opacity: 0.5; font-style: italic; margin-top: 2px; display: block;">
+                                Your key is encrypted locally with a machine-derived key before being stored on disk.
+                            </small>
 
                             <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85em;">
                                 <input id="wandlight_lore_openai_json_mode" type="checkbox">
                                 Use JSON mode (response_format: json_object)
+                            </label>
+
+                            <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85em;">
+                                <input id="wandlight_lore_openai_use_st_proxy" type="checkbox">
+                                Route through SillyTavern proxy
+                                <i class="fa-solid fa-circle-question interactable"
+                                    title="When enabled, API requests go through SillyTavern's built-in proxy (seamless). When disabled, requests go directly to the endpoint (requires CORS support)."></i>
                             </label>
                         </div>
 

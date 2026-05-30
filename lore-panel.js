@@ -16,6 +16,8 @@ import {
     saveState,
     acceptPendingLoreEntries,
     rejectPendingLoreEntries,
+    acceptPendingLoreEntry,
+    rejectPendingLoreEntry,
 } from './state-manager.js';
 
 // ── DOM cache ───────────────────────────────────────────────────────────────────
@@ -27,6 +29,10 @@ let dragOffsetY = 0;
 const PANEL_ID = 'wandlight-lore-panel';
 const CATEGORY_LABELS = {
     all: 'All',
+    active: 'Active',
+    pinned: 'Pinned',
+    suppressed: 'Muted',
+    pending: 'Pending',
     canon: 'Canon',
     au: 'AU',
     secret: 'Secret',
@@ -45,10 +51,17 @@ const CATEGORY_LABELS = {
  * Call this from index.js on CHAT_CHANGED or when the user clicks a button.
  */
 export function showLorePanel() {
+    // Persist isOpen = true
+    const state = getState();
+    if (state?.lorePanel) {
+        state.lorePanel.isOpen = true;
+        saveState(state);
+    }
+
     removeLorePanel();
 
-    const state = getState();
-    const panelState = state?.lorePanel || { isOpen: true, collapsed: false };
+    const freshState = getState();
+    const panelState = freshState?.lorePanel || { isOpen: true, collapsed: false };
 
     panelRoot = document.createElement('div');
     panelRoot.id = PANEL_ID;
@@ -216,9 +229,20 @@ function renderPanelBody(container, state) {
             tab.classList.add('wandlight-lore-tab-active');
         }
         const label = CATEGORY_LABELS[cat] || cat;
-        const catCount = cat === 'all'
-            ? counts.all
-            : entries.filter(e => e.category === cat).length;
+        let catCount;
+        if (cat === 'all') {
+            catCount = counts.all;
+        } else if (cat === 'active') {
+            catCount = counts.active;
+        } else if (cat === 'pinned') {
+            catCount = counts.pinned;
+        } else if (cat === 'suppressed') {
+            catCount = counts.suppressed;
+        } else if (cat === 'pending') {
+            catCount = counts.pending;
+        } else {
+            catCount = entries.filter(e => e.category === cat).length;
+        }
         tab.textContent = `${label} (${catCount})`;
         tab.addEventListener('click', () => {
             setPanelFilter('category', cat);
@@ -259,7 +283,15 @@ function renderPanelBody(container, state) {
 
     // ── Filter entries ──
     let filtered = entries;
-    if (panelState.selectedCategory !== 'all') {
+    if (panelState.selectedCategory === 'active') {
+        filtered = filtered.filter(e => e.isActive || e.isPinned);
+    } else if (panelState.selectedCategory === 'pinned') {
+        filtered = filtered.filter(e => e.isPinned);
+    } else if (panelState.selectedCategory === 'suppressed') {
+        filtered = filtered.filter(e => e.isSuppressed);
+    } else if (panelState.selectedCategory === 'pending') {
+        filtered = filtered.filter(e => e.isPending);
+    } else if (panelState.selectedCategory !== 'all') {
         filtered = filtered.filter(e => e.category === panelState.selectedCategory);
     }
     if (panelState.search) {
@@ -473,6 +505,47 @@ function createEntryCard(entry, state) {
             details.appendChild(notesEl);
         }
 
+        // ── Per-entry accept/reject buttons (only for pending entries) ──
+        if (entry.isPending) {
+            const entryActions = document.createElement('div');
+            entryActions.className = 'wandlight-lore-entry-pending-actions';
+
+            const acceptBtn = document.createElement('button');
+            acceptBtn.className = 'wandlight-lore-entry-accept';
+            acceptBtn.textContent = '✓ Accept';
+            acceptBtn.title = 'Accept this lore entry into the matrix';
+            acceptBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Find the index of this entry in pending list
+                const currentState = getState();
+                const pending = normalizeLoreMatrix(currentState?.pendingLoreEntries || []);
+                const idx = pending.findIndex(pe => pe.id === entry.id);
+                if (idx >= 0) {
+                    acceptPendingLoreEntry(idx);
+                    refreshLorePanel();
+                }
+            });
+            entryActions.appendChild(acceptBtn);
+
+            const rejectBtn = document.createElement('button');
+            rejectBtn.className = 'wandlight-lore-entry-reject';
+            rejectBtn.textContent = '✗ Reject';
+            rejectBtn.title = 'Reject this lore entry';
+            rejectBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const currentState = getState();
+                const pending = normalizeLoreMatrix(currentState?.pendingLoreEntries || []);
+                const idx = pending.findIndex(pe => pe.id === entry.id);
+                if (idx >= 0) {
+                    rejectPendingLoreEntry(idx);
+                    refreshLorePanel();
+                }
+            });
+            entryActions.appendChild(rejectBtn);
+
+            details.appendChild(entryActions);
+        }
+
         card.appendChild(details);
     }
 
@@ -547,7 +620,7 @@ function toggleCollapse() {
 /**
  * Re-renders the panel body while keeping the panel root in place.
  */
-function refreshLorePanel() {
+function refreshLorePanelBody() {
     if (!panelRoot) return;
     const body = panelRoot.querySelector('.wandlight-lore-panel-body');
     if (!body) return;

@@ -22,8 +22,16 @@ export const EXTENSION_FOLDER = 'third-party/WandlightContinuity';
 export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
     try {
         const scripts = Array.from(document.querySelectorAll('script[src]'));
-        const script = scripts.find(s => s.src.includes('/third-party/') && s.src.endsWith('/index.js'));
-        const match = script?.src.match(/third-party\/([^/]+)\/index\.js/);
+        // Narrow candidates: only match /third-party/.../index.js AND contain "wandlight" (case-insensitive).
+        const candidates = scripts
+            .map(s => s.src)
+            .filter(src =>
+                src.includes('/third-party/') &&
+                src.endsWith('/index.js') &&
+                /wandlight/i.test(src)
+            );
+        const src = candidates[0];
+        const match = src?.match(/third-party\/([^/]+)\/index\.js/);
         if (match?.[1]) {
             return `third-party/${decodeURIComponent(match[1])}`;
         }

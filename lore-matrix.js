@@ -168,7 +168,15 @@ function anyOverlap(a, b) {
 
 function entryBranchMatches(entry, state) {
     const branch = state?.loreContext?.branchId || 'main';
-    return !entry.branchId || entry.branchId === 'main' || entry.branchId === branch;
+
+    // No branchId means the entry applies everywhere (legacy behavior).
+    if (!entry.branchId) return true;
+    // Explicit "global" means the entry applies in all branches.
+    if (entry.branchId === 'global') return true;
+    // "main" entries only activate in the main branch.
+    if (entry.branchId === 'main') return branch === 'main';
+    // Otherwise match the exact branch.
+    return entry.branchId === branch;
 }
 
 function activeWhenMatches(entry, state) {
@@ -185,21 +193,45 @@ function activeWhenMatches(entry, state) {
 }
 
 /**
- * MVP date matching is intentionally conservative.
- * It treats empty validity ranges as always eligible.
- * Exact date parsing is avoided because HP dates may be "early September 1993".
+ * Determines whether the current scene date falls within an entry's date window.
+ * Supports ISO 8601 YYYY-MM-DD dates for precise comparison,
+ * and falls back to permissive fuzzy matching for HP-era dates.
  */
 function dateWindowMatches(entry, state) {
-    const sceneDate = state?.loreContext?.sceneDate || state?.canon?.inUniverseDate || '';
-    if (!sceneDate) return true;
+    const raw = state?.loreContext?.sceneDate || state?.canon?.inUniverseDate || '';
+    if (!raw) return true;
 
-    // For MVP, only exact string windows are compared.
-    // Avoid brittle Date parsing because HP dates may be "early September 1993".
-    if (entry.validFrom && entry.validTo && entry.validFrom === entry.validTo) {
-        return sceneDate.includes(entry.validFrom) || entry.validFrom.includes(sceneDate);
+    const scene = parseIsoDate(raw);
+    const from = parseIsoDate(entry.validFrom);
+    const to = parseIsoDate(entry.validTo);
+
+    // If we have ISO dates on both sides, do a precise comparison.
+    if (scene && (from || to)) {
+        if (from && scene < from) return false;
+        if (to && scene > to) return false;
+        return true;
     }
 
+    // Fallback: permissive substring matching for non-ISO dates
+    // (e.g. "early September 1993", "Half-Blood Prince era")
+    if (entry.validFrom && entry.validTo && entry.validFrom === entry.validTo) {
+        return raw.includes(entry.validFrom) || entry.validFrom.includes(raw);
+    }
+
+    // If no ISO parse on either side and no exact window, treat as always eligible.
     return true;
+}
+
+/**
+ * Parses a value as an ISO 8601 date (YYYY-MM-DD).
+ * Returns a Date object at midnight UTC, or null if the value is not ISO.
+ * @param {string} value
+ * @returns {Date|null}
+ */
+function parseIsoDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+    const date = new Date(`${value}T00:00:00Z`);
+    return Number.isNaN(date.getTime()) ? null : date;
 }
 
 /**

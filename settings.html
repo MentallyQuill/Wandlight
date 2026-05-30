@@ -174,6 +174,29 @@
                             <span id="wandlight_lore_count">0</span> accepted entries
                         </div>
 
+                        <!-- Lore Matrix JSON Editor -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+                            <span style="font-size: 0.82em; opacity: 0.7;">Lore Matrix JSON Editor</span>
+                            <button id="wandlight_lore_matrix_toggle_editor" class="menu_button interactable"
+                                style="font-size: 0.78em; padding: 2px 10px;"
+                                title="Toggle raw JSON editor for the accepted lore matrix">
+                                <i class="fa-solid fa-code"></i> Toggle Editor
+                            </button>
+                        </div>
+                        <textarea id="wandlight_lore_matrix_json" class="wandlight-lore-editor"
+                            style="min-height: 180px; font-family: monospace; font-size: 0.78em;
+                            background: rgba(0,0,0,0.3); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.15);
+                            border-radius: 4px; padding: 10px; resize: vertical; width: 100%; box-sizing: border-box;
+                            display: none;"></textarea>
+                        <div id="wandlight_lore_matrix_save_row" style="display: none;">
+                            <button id="wandlight_lore_matrix_save" class="menu_button interactable"
+                                style="background: rgba(80, 140, 255, 0.18); border-color: #5588ff; margin-top: 4px;"
+                                title="Save JSON edits to the accepted lore matrix">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Lore Matrix
+                            </button>
+                            <small style="opacity: 0.6; margin-left: 8px;">Edits affect the accepted matrix only (not pending)</small>
+                        </div>
+
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                             <button id="wandlight_detect_lore_context" class="menu_button interactable"
                                 title="Analyze current scene for era, location, and characters to determine lore context">

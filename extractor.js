@@ -281,52 +281,49 @@ export async function onExtractionTriggered(options = {}) {
         // Run the extraction LLM call
         const delta = await runExtractionCall(stateJson, messages);
 
-        if (!delta) {
-            if (settings.debugMode) {
-                console.log(`${LOG_PREFIX} Extraction returned no valid delta`);
+        if (delta) {
+            // Check for no-op delta (empty changes)
+            const hasChanges = delta.changes && Object.keys(delta.changes).length > 0;
+
+            if (hasChanges) {
+                if (settings.debugMode) {
+                    console.log(`${LOG_PREFIX} Extraction delta valid:`, delta.summary || '(no summary)');
+                    console.debug(`${LOG_PREFIX} Change keys:`, Object.keys(delta.changes));
+                }
+
+                // \u2500\u2500 Manual vs auto-apply branching \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+                const currentState = getState();
+
+                if (settings.autoApplyDelta) {
+                    // Push a snapshot BEFORE applying for undo support,
+                    // then apply the delta and save
+                    pushStateSnapshot(currentState, 'Auto-extract: ' + (delta.summary || 'unnamed change'), settings.maxSnapshots);
+
+                    const newState = applyDelta(currentState, delta);
+                    newState.lastDelta = null; // critical: do not leave applied delta pending
+                    saveState(newState);
+
+                    if (settings.debugMode) {
+                        console.log(`${LOG_PREFIX} Delta auto-applied and state saved`);
+                    }
+                } else {
+                    // Manual mode: store delta as lastDelta but don't apply
+                    currentState.lastDelta = delta;
+                    saveState(currentState);
+
+                    if (settings.debugMode) {
+                        console.log(`${LOG_PREFIX} Delta stored as lastDelta (manual review mode)`);
+                    }
+                }
+            } else if (settings.debugMode) {
+                console.log(`${LOG_PREFIX} Extraction delta has no changes \u2014 skipping`);
             }
-            return;
+        } else if (settings.debugMode) {
+            console.log(`${LOG_PREFIX} Extraction returned no valid delta`);
         }
 
-        // Check for no-op delta (empty changes)
-        if (!delta.changes || Object.keys(delta.changes).length === 0) {
-            if (settings.debugMode) {
-                console.log(`${LOG_PREFIX} Extraction delta has no changes — skipping`);
-            }
-            return;
-        }
-
-        if (settings.debugMode) {
-            console.log(`${LOG_PREFIX} Extraction delta valid:`, delta.summary || '(no summary)');
-            console.debug(`${LOG_PREFIX} Change keys:`, Object.keys(delta.changes));
-        }
-
-        // ── Manual vs auto-apply branching ────────────────────────────────────
-        const currentState = getState();
-
-        if (settings.autoApplyDelta) {
-            // Push a snapshot BEFORE applying for undo support,
-            // then apply the delta and save
-            pushStateSnapshot(currentState, 'Auto-extract: ' + (delta.summary || 'unnamed change'), settings.maxSnapshots);
-
-            const newState = applyDelta(currentState, delta);
-            newState.lastDelta = null; // critical: do not leave applied delta pending
-            saveState(newState);
-
-            if (settings.debugMode) {
-                console.log(`${LOG_PREFIX} Delta auto-applied and state saved`);
-            }
-        } else {
-            // Manual mode: store delta as lastDelta but don't apply
-            currentState.lastDelta = delta;
-            saveState(currentState);
-
-            if (settings.debugMode) {
-                console.log(`${LOG_PREFIX} Delta stored as lastDelta (manual review mode)`);
-            }
-        }
-
-        // ── Auto-run lore context detection + generation after extraction ──
+        // \u2500\u2500 Auto-run lore context detection + generation after extraction \u2500\u2500
+        // Runs independently of whether the continuity delta produced changes.
         if (settings.autoGenerateLore) {
             try {
                 const detected = await runLoreContextDetection();

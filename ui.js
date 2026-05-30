@@ -2,7 +2,7 @@
  * ui.js — Wandlight Continuity
  * Renders the settings panel and state viewer UI.
  *
- * Exports: renderSettingsPanel, renderStatePanel
+ * Exports: renderSettingsPanel, renderStatePanel, renderLoreContextPreview, renderLoreMatrixPreview
  * Imported by: index.js
  */
 
@@ -30,6 +30,9 @@ export function renderSettingsPanel(container) {
     wireRangeDisplay('wandlight_max_snapshots', 'wandlight_max_snapshots_value');
     wireRangeDisplay('wandlight_max_lore_entries_in_memo', 'wandlight_max_lore_entries_in_memo_value');
     wireRangeDisplay('wandlight_max_lore_entries_in_matrix', 'wandlight_max_lore_entries_in_matrix_value');
+
+    // Wire the lore-matrix JSON editor
+    wireLoreMatrixEditor();
 
     // Refresh memo preview on button
     const refreshMemoBtn = container.querySelector('#wandlight_refresh_memo');
@@ -403,6 +406,95 @@ export function renderLoreMatrixPreview() {
         preview.textContent = '(Error: ' + e.message + ')';
     }
 }
+
+// ── Lore Matrix JSON Editor ────────────────────────────────────────────────────
+
+/**
+ * Populates the lore-matrix JSON editor textarea with the accepted matrix.
+ * @param {Object} state - WandlightState
+ */
+function populateLoreMatrixEditor(state) {
+    const textarea = document.getElementById('wandlight_lore_matrix_json');
+    if (!textarea) return;
+    const entries = (state && state.loreMatrix) ? state.loreMatrix : [];
+    textarea.value = JSON.stringify(entries, null, 2);
+}
+
+/**
+ * Hides the lore-matrix JSON editor and the save row.
+ */
+function hideLoreMatrixEditor() {
+    const textarea = document.getElementById('wandlight_lore_matrix_json');
+    const saveRow = document.getElementById('wandlight_lore_matrix_save_row');
+    if (textarea) textarea.style.display = 'none';
+    if (saveRow) saveRow.style.display = 'none';
+}
+
+/**
+ * Wires the lore-matrix JSON editor toggle and save buttons.
+ * Uses the module-level imports getState(), saveState(), getSettings().
+ */
+function wireLoreMatrixEditor() {
+    const toggleBtn = document.getElementById('wandlight_lore_matrix_toggle_editor');
+    const textarea = document.getElementById('wandlight_lore_matrix_json');
+    const saveRow = document.getElementById('wandlight_lore_matrix_save_row');
+    const saveBtn = document.getElementById('wandlight_lore_matrix_save');
+
+    if (!toggleBtn || !textarea || !saveRow || !saveBtn) return;
+
+    toggleBtn.addEventListener('click', () => {
+        const isVisible = textarea.style.display !== 'none';
+        if (isVisible) {
+            textarea.style.display = 'none';
+            saveRow.style.display = 'none';
+        } else {
+            populateLoreMatrixEditor(getState());
+            textarea.style.display = '';
+            saveRow.style.display = '';
+        }
+    });
+
+    saveBtn.addEventListener('click', () => {
+        try {
+            const raw = textarea.value.trim();
+            if (!raw) {
+                if (typeof toastr !== 'undefined') toastr.warning('Lore matrix JSON is empty. Nothing saved.');
+                return;
+            }
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) {
+                if (typeof toastr !== 'undefined') toastr.error('Lore matrix must be a JSON array of entries.');
+                return;
+            }
+
+            const state = getState();
+            // Snapshot before modifying so the user can undo
+            pushStateSnapshot(state, 'Edit lore matrix via JSON editor', getSettings().maxSnapshots);
+
+            state.loreMatrix = parsed;
+
+            // Apply maxLoreEntriesInMatrix cap
+            const maxEntries = getSettings().maxLoreEntriesInMatrix || 50;
+            if (state.loreMatrix.length > maxEntries) {
+                state.loreMatrix = state.loreMatrix.slice(0, maxEntries);
+            }
+
+            saveState(state);
+            if (typeof toastr !== 'undefined') toastr.success('Lore matrix saved (' + parsed.length + ' entries).');
+
+            hideLoreMatrixEditor();
+            // Refresh the main state panel and lore previews
+            if (typeof globalThis._wandlightRefreshUI === 'function') {
+                globalThis._wandlightRefreshUI();
+            }
+            renderLoreMatrixPreview();
+        } catch (e) {
+            if (typeof toastr !== 'undefined') toastr.error('Invalid JSON: ' + e.message);
+        }
+    });
+}
+
+// ── Range helper ────────────────────────────────────────────────────────────────
 
 /**
  * Wires a range input to display its live value next to it.

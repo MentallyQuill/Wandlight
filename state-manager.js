@@ -896,15 +896,31 @@ export function setPendingLoreEntries(entries, summary, generationKey) {
  * @returns {Object} Updated state
  */
 export function acceptPendingLoreEntries() {
+    const settings = getSettings();
     const state = getState();
     const pending = normalizeLoreMatrix(state.pendingLoreEntries || []);
     const existing = normalizeLoreMatrix(state.loreMatrix || []);
-    state.loreMatrix = mergeLoreEntries(existing, pending);
+
+    let merged = mergeLoreEntries(existing, pending);
+
+    // Enforce maxLoreEntriesInMatrix cap, preserving locked/userEdited/pinned entries
+    const max = Number(settings.maxLoreEntriesInMatrix) || 50;
+    if (merged.length > max) {
+        const protectedEntries = merged.filter(e => e.locked || e.userEdited || e.status === 'pinned');
+        const regularEntries = merged
+            .filter(e => !(e.locked || e.userEdited || e.status === 'pinned'))
+            .sort((a, b) => (b.priority || 50) - (a.priority || 50) || (a.title || '').localeCompare(b.title || ''));
+        merged = [...protectedEntries, ...regularEntries].slice(0, max);
+    }
+
+    state.loreMatrix = merged;
     state.pendingLoreEntries = [];
+
     if (state.loreContext) {
-        state.loreContext.lastGeneratedFor = '';
+        // Keep lastGeneratedFor so auto-generation does not repeat unchanged context.
         state.loreContext.lastGenerationSummary = '';
     }
+
     saveState(state);
     return state;
 }
@@ -917,7 +933,7 @@ export function rejectPendingLoreEntries() {
     const state = getState();
     state.pendingLoreEntries = [];
     if (state.loreContext) {
-        state.loreContext.lastGeneratedFor = '';
+        // Keep lastGeneratedFor so rejected proposals do not immediately regenerate.
         state.loreContext.lastGenerationSummary = '';
     }
     saveState(state);

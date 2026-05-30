@@ -871,13 +871,19 @@ export function setLoreContext(contextUpdate) {
  * Used after lore generation — entries go into pending for user review.
  * @param {Object[]} entries - Array of lore entry objects
  * @param {string} [summary] - One-line generation summary
+ * @param {string} [generationKey] - Context key this generation was produced for
  * @returns {Object} Updated state
  */
-export function setPendingLoreEntries(entries, summary) {
+export function setPendingLoreEntries(entries, summary, generationKey) {
     const state = getState();
     state.pendingLoreEntries = normalizeLoreMatrix(entries || []);
-    if (summary && state.loreContext) {
-        state.loreContext.lastGenerationSummary = summary;
+    if (state.loreContext) {
+        if (generationKey) {
+            state.loreContext.lastGeneratedFor = generationKey;
+        }
+        if (summary !== undefined) {
+            state.loreContext.lastGenerationSummary = summary || '';
+        }
     }
     saveState(state);
     return state;

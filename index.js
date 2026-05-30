@@ -21,6 +21,8 @@ import {
     importState,
     validateDelta,
     getDefaultState,
+    acceptPendingLoreEntries,
+    rejectPendingLoreEntries,
 } from './state-manager.js';
 import { buildMemo } from './memo-builder.js';
 import { installInterceptor } from './prompt-injector.js';
@@ -31,10 +33,6 @@ import {
     renderLoreContextPreview,
     renderLoreMatrixPreview,
 } from './ui.js';
-import {
-    normalizeLoreMatrix,
-    mergeLoreEntries,
-} from './lore-matrix.js';
 import {
     runLoreContextDetection,
     runLoreGeneration,
@@ -456,6 +454,8 @@ function wireSettingsPanel(container) {
             const origHTML = detectLoreBtn.innerHTML;
             detectLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting...';
             try {
+                const state = getState();
+                pushStateSnapshot(state, 'Detect lore context', getSettings().maxSnapshots);
                 await runLoreContextDetection();
                 renderLoreContextPreview();
                 renderLoreMatrixPreview();
@@ -477,7 +477,10 @@ function wireSettingsPanel(container) {
             const origHTML = generateLoreBtn.innerHTML;
             generateLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
             try {
-                const pending = await runLoreGeneration();
+                const state = getState();
+                pushStateSnapshot(state, 'Generate pending lore entries', getSettings().maxSnapshots);
+                const pending = await runLoreGeneration({ force: true });
+                renderLoreContextPreview();
                 renderLoreMatrixPreview();
                 if (typeof toastr !== 'undefined') toastr.success(`${pending.length} lore entries generated (pending review)`);
             } catch (e2) {
@@ -494,16 +497,18 @@ function wireSettingsPanel(container) {
     if (acceptAllBtn) {
         acceptAllBtn.addEventListener('click', () => {
             const state = getState();
-            const pending = state._pendingLore || [];
+            const pending = state.pendingLoreEntries || [];
             if (pending.length === 0) {
                 if (typeof toastr !== 'undefined') toastr.info('No pending lore entries to accept');
                 return;
             }
-            const merged = mergeLoreEntries(state.loreMatrix || [], pending);
-            state.loreMatrix = merged;
-            state._pendingLore = [];
-            saveState(state);
+
+            pushStateSnapshot(state, 'Accept pending lore entries', getSettings().maxSnapshots);
+            acceptPendingLoreEntries();
+
+            renderLoreContextPreview();
             renderLoreMatrixPreview();
+
             if (typeof toastr !== 'undefined') toastr.success(`${pending.length} lore entries accepted`);
         });
     }
@@ -513,14 +518,18 @@ function wireSettingsPanel(container) {
     if (rejectAllBtn) {
         rejectAllBtn.addEventListener('click', () => {
             const state = getState();
-            const pending = state._pendingLore || [];
+            const pending = state.pendingLoreEntries || [];
             if (pending.length === 0) {
                 if (typeof toastr !== 'undefined') toastr.info('No pending lore entries to reject');
                 return;
             }
-            state._pendingLore = [];
-            saveState(state);
+
+            pushStateSnapshot(state, 'Reject pending lore entries', getSettings().maxSnapshots);
+            rejectPendingLoreEntries();
+
+            renderLoreContextPreview();
             renderLoreMatrixPreview();
+
             if (typeof toastr !== 'undefined') toastr.info(`${pending.length} lore entries rejected`);
         });
     }

@@ -52,6 +52,7 @@ export const DEFAULT_SETTINGS = {
     // Lore matrix
     injectLore: true,
     maxLoreEntriesInMemo: 6,
+    maxLoreEntriesInMatrix: 50,
     autoGenerateLore: false,
 };
 

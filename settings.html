@@ -128,12 +128,26 @@
                                 title="After each extraction, automatically detect scene context and generate/update lore entries."></i>
                         </label>
 
+                        <label class="checkbox_label">
+                            <input id="wandlight_inject_lore" type="checkbox" data-setting="injectLore" checked />
+                            <span>Inject Active Lore in Memo</span>
+                            <i class="fa-solid fa-circle-question interactable"
+                                title="Adds active lore matrix entries to the ephemeral continuity memo. Disable to keep lore in state without injecting it into prompts."></i>
+                        </label>
+
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                            <span style="flex-shrink: 0;">Max Lore Entries:</span>
-                            <input id="wandlight_max_lore_entries" type="range" data-setting="maxLoreEntries" min="5" max="50" value="20" style="flex: 1;" />
-                            <span id="wandlight_max_lore_entries_value" style="min-width: 24px; text-align: right;">20</span>
+                            <span style="flex-shrink: 0;">Max Lore in Memo:</span>
+                            <input id="wandlight_max_lore_entries_in_memo" type="range" data-setting="maxLoreEntriesInMemo" min="1" max="12" value="6" style="flex: 1;" />
+                            <span id="wandlight_max_lore_entries_in_memo_value" style="min-width: 24px; text-align: right;">6</span>
                         </div>
-                        <small style="opacity: 0.6; margin-top: -4px;">Maximum lore entries kept in the matrix. Least-relevant entries are retired when exceeded.</small>
+                        <small style="opacity: 0.6; margin-top: -4px;">Maximum active lore entries injected into the continuity memo.</small>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px;">
+                            <span style="flex-shrink: 0;">Max Lore in Matrix:</span>
+                            <input id="wandlight_max_lore_entries_in_matrix" type="range" data-setting="maxLoreEntriesInMatrix" min="10" max="100" value="50" style="flex: 1;" />
+                            <span id="wandlight_max_lore_entries_in_matrix_value" style="min-width: 24px; text-align: right;">50</span>
+                        </div>
+                        <small style="opacity: 0.6; margin-top: -4px;">Maximum lore entries retained in the accepted matrix.</small>
 
                         <div id="wandlight_lore_context_preview" class="wandlight-lore-context"
                             style="font-family: monospace; font-size: 0.78em; line-height: 1.35;
@@ -149,8 +163,15 @@
                             <em>No lore entries</em>
                         </div>
 
+                        <div id="wandlight_pending_lore_preview" class="wandlight-lore-matrix"
+                            style="font-family: monospace; font-size: 0.78em; line-height: 1.35;
+                            background: rgba(80, 140, 255, 0.12); padding: 8px 10px; border-radius: 4px;
+                            max-height: 180px; overflow-y: auto; margin: 4px 0;">
+                            <em>No pending lore entries</em>
+                        </div>
+
                         <div class="wandlight-lore-entry-count" style="font-size: 0.8em; opacity: 0.7;">
-                            <span id="wandlight_lore_count">0</span> entries
+                            <span id="wandlight_lore_count">0</span> accepted entries
                         </div>
 
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">

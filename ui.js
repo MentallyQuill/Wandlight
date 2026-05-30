@@ -28,6 +28,8 @@ export function renderSettingsPanel(container) {
     // Wire range-input live value displays
     wireRangeDisplay('wandlight_extraction_interval', 'wandlight_extraction_interval_value');
     wireRangeDisplay('wandlight_max_snapshots', 'wandlight_max_snapshots_value');
+    wireRangeDisplay('wandlight_max_lore_entries_in_memo', 'wandlight_max_lore_entries_in_memo_value');
+    wireRangeDisplay('wandlight_max_lore_entries_in_matrix', 'wandlight_max_lore_entries_in_matrix_value');
 
     // Refresh memo preview on button
     const refreshMemoBtn = container.querySelector('#wandlight_refresh_memo');
@@ -339,6 +341,7 @@ export function renderLoreContextPreview() {
  */
 export function renderLoreMatrixPreview() {
     const preview = document.getElementById('wandlight_lore_matrix_preview');
+    const pendingPreview = document.getElementById('wandlight_pending_lore_preview');
     const countEl = document.getElementById('wandlight_lore_count');
     if (!preview) return;
 
@@ -351,10 +354,22 @@ export function renderLoreMatrixPreview() {
         }
 
         const entries = normalizeLoreMatrix(state.loreMatrix || []);
+        const pendingEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
         if (countEl) countEl.textContent = String(entries.length);
 
+        if (pendingPreview) {
+            if (pendingEntries.length === 0) {
+                pendingPreview.textContent = '(No pending lore entries)';
+            } else {
+                pendingPreview.textContent = pendingEntries.map((entry, i) => {
+                    const detail = entry.fact ? ` — ${entry.fact}` : '';
+                    return `${i + 1}. <${entry.category}> ${entry.title} [${entry.canonStatus}]${detail}`;
+                }).join('\n');
+            }
+        }
+
         if (entries.length === 0) {
-            preview.textContent = '(No lore entries — generate some to get started)';
+            preview.textContent = '(No accepted lore entries — generate and accept entries to get started)';
             return;
         }
 

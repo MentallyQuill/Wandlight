@@ -34,8 +34,8 @@ let _generationRunning = false;
 // ── Helper: quiet LLM prompt ────────────────────────────────────────────────────
 
 /**
- * Sends a quiet prompt to the LLM via SillyTavern's generateQuietPrompt.
- * Falls back to generateRaw if generateQuietPrompt is unavailable.
+ * Sends a controlled JSON task to the LLM using current SillyTavern object-style APIs.
+ * Prefers generateRaw for system/user separation, then falls back to generateQuietPrompt.
  * @param {string} systemPrompt - System message text
  * @param {string} userMessage - User message text
  * @returns {Promise<string>} LLM response text
@@ -45,26 +45,26 @@ async function quietPrompt(systemPrompt, userMessage) {
         const ctx = SillyTavern.getContext();
         if (!ctx) throw new Error('SillyTavern context unavailable');
 
-        // Prefer generateQuietPrompt
-        if (typeof ctx.generateQuietPrompt === 'function') {
-            const result = await ctx.generateQuietPrompt(systemPrompt, userMessage);
-            return typeof result === 'string' ? result : '';
-        }
-
-        // Fall back to generateRaw
         if (typeof ctx.generateRaw === 'function') {
-            const messages = [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userMessage },
-            ];
-            const result = await ctx.generateRaw(messages);
+            const result = await ctx.generateRaw({
+                systemPrompt,
+                prompt: userMessage,
+                prefill: '',
+            });
             return typeof result === 'string' ? result : '';
         }
 
-        console.warn(`${LOG_PREFIX} No quiet prompt API available`);
+        if (typeof ctx.generateQuietPrompt === 'function') {
+            const result = await ctx.generateQuietPrompt({
+                quietPrompt: `${systemPrompt}\n\n${userMessage}`,
+            });
+            return typeof result === 'string' ? result : '';
+        }
+
+        console.warn(`${LOG_PREFIX} No generation API available for lore task`);
         return '';
     } catch (e) {
-        console.error(`${LOG_PREFIX} Quiet prompt failed:`, e);
+        console.error(`${LOG_PREFIX} Lore generation prompt failed:`, e);
         return '';
     }
 }
@@ -195,9 +195,13 @@ export async function runLoreContextDetection() {
  * Runs lore matrix generation via LLM.
  * Guarded by _generationRunning. Results go to pendingLoreEntries (review required).
  * Only runs if contexts have changed since last generation (buildLoreGenerationKey).
+ * @param {Object} [options]
+ * @param {boolean} [options.force=false] - If true, bypass unchanged-context skip
  * @returns {Promise<Object[]>} Generated lore entries (or empty on skip/failure)
  */
-export async function runLoreGeneration() {
+export async function runLoreGeneration(options = {}) {
+    const { force = false } = options;
+
     if (_generationRunning) {
         console.debug(`${LOG_PREFIX} Lore generation already running, skipping`);
         return [];
@@ -216,10 +220,14 @@ export async function runLoreGeneration() {
             return [];
         }
 
-        // Check if context has changed since last generation
+        // Check if context has changed since last generation. Manual generation passes
+        // force:true so the user can intentionally refresh pending proposals.
         const currentKey = buildLoreGenerationKey(state);
-        if (currentKey === state.loreContext.lastGeneratedFor && settings.debugMode) {
-            console.debug(`${LOG_PREFIX} Lore context unchanged since last generation, skipping`);
+        if (!force && currentKey === state.loreContext.lastGeneratedFor) {
+            if (settings.debugMode) {
+                console.debug(`${LOG_PREFIX} Lore context unchanged since last generation, skipping`);
+            }
+            return [];
         }
 
         const stateSummary = JSON.stringify({
@@ -244,15 +252,8 @@ export async function runLoreGeneration() {
         const entries = normalizeLoreMatrix(parsed.entries);
         const summary = parsed.summary || '';
 
-        // Set as pending (user review required)
-        setPendingLoreEntries(entries, summary);
-
-        // Track that generation was done for this context
-        const updatedState = getState();
-        if (updatedState.loreContext) {
-            updatedState.loreContext.lastGeneratedFor = currentKey;
-            updatedState.loreContext.lastGenerationSummary = summary;
-        }
+        // Set as pending (user review required) and persist the generation key atomically.
+        setPendingLoreEntries(entries, summary, currentKey);
 
         if (settings.debugMode) {
             console.log(`${LOG_PREFIX} Lore generated: ${entries.length} entries pending review`, entries);
@@ -276,7 +277,7 @@ export async function runLoreGeneration() {
  */
 export async function runLorePipeline() {
     const detected = await runLoreContextDetection();
-    const generated = detected ? await runLoreGeneration() : [];
+    const generated = detected ? await runLoreGeneration({ force: false }) : [];
     return { detected, generated };
 }
 

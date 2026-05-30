@@ -20,7 +20,7 @@ import {
     pushStateSnapshot,
     validateDelta,
 } from './state-manager.js';
-import { runLoreContextDetection } from './lore-generator.js';
+import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
 
 /** Guard flag to prevent concurrent extraction passes. */
 let _extractionRunning = false;
@@ -326,13 +326,16 @@ export async function onExtractionTriggered(options = {}) {
             }
         }
 
-        // ── Auto-run lore context detection after extraction ──
+        // ── Auto-run lore context detection + generation after extraction ──
         if (settings.autoGenerateLore) {
             try {
-                await runLoreContextDetection();
+                const detected = await runLoreContextDetection();
+                if (detected) {
+                    await runLoreGeneration({ force: false });
+                }
             } catch (loreErr) {
                 if (settings.debugMode) {
-                    console.warn(`${LOG_PREFIX} Lore context detection after extraction failed:`, loreErr);
+                    console.warn(`${LOG_PREFIX} Lore generation after extraction failed:`, loreErr);
                 }
             }
         }

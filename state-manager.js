@@ -309,6 +309,12 @@ export function migrateState(state) {
         state._version = 2;
     }
 
+    // ── Always normalize lore fields post-migration ────────────────────────
+    // Even v2 states can become malformed through manual editing or old imports.
+    state.loreContext = normalizeLoreContext(state.loreContext || {});
+    state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []);
+    state.pendingLoreEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
+
     return state;
 }
 
@@ -854,14 +860,48 @@ export function exportState(state) {
  * @param {Object} contextUpdate - Partial lore context to merge
  * @returns {Object} Updated state (the live object, not a clone)
  */
+/**
+ * If the candidate is a non-blank string, return it; otherwise keep the fallback.
+ * Prevents an empty detection result from overwriting a known context value.
+ * @param {*} candidate - The detected value (may be empty string, null, undefined)
+ * @param {string} fallback - The previous known value
+ * @returns {string}
+ */
+function keepIfBlank(candidate, fallback) {
+    return typeof candidate === 'string' && candidate.trim()
+        ? candidate.trim()
+        : (fallback || '');
+}
+
+/**
+ * Updates loreContext on the live state object and persists.
+ * Used after lore context detection completes.
+ *
+ * Empty-string detector results are treated as "unknown" and do NOT overwrite
+ * previously known context. Only non-blank values replace existing fields.
+ *
+ * @param {Object} contextUpdate - Partial lore context to merge
+ * @returns {Object} Updated state (the live object, not a clone)
+ */
 export function setLoreContext(contextUpdate) {
     const state = getState();
-    const normalized = normalizeLoreContext(contextUpdate || {});
-    state.loreContext = {
-        ...state.loreContext,
-        ...normalized,
+    const previous = state.loreContext || {};
+
+    // Only allow detection to update actual context fields, never metadata.
+    // normalizeLoreContext fills missing fields with empty strings,
+    // so spreading it unconditionally would clear lastGeneratedFor/lastGenerationSummary.
+    state.loreContext = normalizeLoreContext({
+        ...previous,
+        sceneDate: keepIfBlank(contextUpdate?.sceneDate, previous.sceneDate),
+        subjectiveDate: keepIfBlank(contextUpdate?.subjectiveDate, previous.subjectiveDate),
+        canonBoundary: keepIfBlank(contextUpdate?.canonBoundary, previous.canonBoundary),
+        branchId: keepIfBlank(contextUpdate?.branchId, previous.branchId || 'main'),
+        timeTravelMode: keepIfBlank(contextUpdate?.timeTravelMode, previous.timeTravelMode || 'none'),
         lastDetectedAt: Date.now(),
-    };
+        lastGeneratedFor: previous.lastGeneratedFor || '',
+        lastGenerationSummary: previous.lastGenerationSummary || '',
+    });
+
     saveState(state);
     return state;
 }
@@ -903,14 +943,22 @@ export function acceptPendingLoreEntries() {
 
     let merged = mergeLoreEntries(existing, pending);
 
-    // Enforce maxLoreEntriesInMatrix cap, preserving locked/userEdited/pinned entries
+    // Enforce maxLoreEntriesInMatrix cap, preserving locked/userEdited/pinned entries.
+    // Protected entries are allowed to exceed the cap rather than being silently dropped.
     const max = Number(settings.maxLoreEntriesInMatrix) || 50;
     if (merged.length > max) {
         const protectedEntries = merged.filter(e => e.locked || e.userEdited || e.status === 'pinned');
         const regularEntries = merged
             .filter(e => !(e.locked || e.userEdited || e.status === 'pinned'))
             .sort((a, b) => (b.priority || 50) - (a.priority || 50) || (a.title || '').localeCompare(b.title || ''));
-        merged = [...protectedEntries, ...regularEntries].slice(0, max);
+
+        if (protectedEntries.length > max) {
+            // Enough protected entries to exceed the cap — keep them all
+            // instead of silently dropping user-locked data.
+            merged = protectedEntries;
+        } else {
+            merged = [...protectedEntries, ...regularEntries].slice(0, max);
+        }
     }
 
     state.loreMatrix = merged;

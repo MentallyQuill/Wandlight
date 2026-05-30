@@ -473,11 +473,28 @@ function wireSettingsPanel(container) {
     const generateLoreBtn = container.querySelector('#wandlight_generate_lore');
     if (generateLoreBtn) {
         generateLoreBtn.addEventListener('click', async () => {
+            // Warn if there are already pending entries that will be replaced
+            const state = getState();
+            const pendingCount = (state.pendingLoreEntries || []).length;
+            if (pendingCount > 0) {
+                const proceed = typeof Popup !== 'undefined' && typeof Popup.show !== 'undefined'
+                    ? await Popup.show.confirm(
+                        'Generate Lore — Overwrite Pending?',
+                        `There are already ${pendingCount} pending lore entries awaiting review. Generating new lore will replace them. Continue?`
+                    )
+                    : (typeof confirm === 'function'
+                        ? confirm(
+                            `There are already ${pendingCount} pending lore entries awaiting review.\n\nGenerating new lore will replace them. Continue?`
+                        )
+                        : true);
+
+                if (!proceed) return;
+            }
+
             generateLoreBtn.disabled = true;
             const origHTML = generateLoreBtn.innerHTML;
             generateLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
             try {
-                const state = getState();
                 pushStateSnapshot(state, 'Generate pending lore entries', getSettings().maxSnapshots);
                 const pending = await runLoreGeneration({ force: true });
                 renderLoreContextPreview();

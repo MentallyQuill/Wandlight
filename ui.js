@@ -471,16 +471,42 @@ function wireLoreMatrixEditor() {
             // Snapshot before modifying so the user can undo
             pushStateSnapshot(state, 'Edit lore matrix via JSON editor', getSettings().maxSnapshots);
 
-            state.loreMatrix = parsed;
+            // Normalize and mark every entry as user-edited + locked so model-generated
+            // entries with the same id cannot overwrite the user's AU/fanon edits.
+            const normalized = normalizeLoreMatrix(parsed).map(entry => ({
+                ...entry,
+                source: entry.source === 'model-generated' ? 'user' : entry.source,
+                userEdited: true,
+                locked: true,
+            }));
+            state.loreMatrix = normalized;
 
-            // Apply maxLoreEntriesInMatrix cap
-            const maxEntries = getSettings().maxLoreEntriesInMatrix || 50;
-            if (state.loreMatrix.length > maxEntries) {
-                state.loreMatrix = state.loreMatrix.slice(0, maxEntries);
+            // Enforce maxLoreEntriesInMatrix cap, preserving protected entries
+            const maxEntries = Number(getSettings().maxLoreEntriesInMatrix) || 50;
+            const protectedEntries = state.loreMatrix.filter(e =>
+                e.locked || e.userEdited || e.status === 'pinned'
+            );
+            const regularEntries = state.loreMatrix.filter(e =>
+                !(e.locked || e.userEdited || e.status === 'pinned')
+            );
+
+            if (protectedEntries.length > maxEntries) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning(
+                        `Lore matrix has ${protectedEntries.length} protected entries, ` +
+                        `exceeding the configured cap of ${maxEntries}. Keeping all protected entries.`
+                    );
+                }
+                state.loreMatrix = protectedEntries;
+            } else {
+                state.loreMatrix = [
+                    ...protectedEntries,
+                    ...regularEntries.sort((a, b) => (b.priority || 50) - (a.priority || 50)),
+                ].slice(0, maxEntries);
             }
 
             saveState(state);
-            if (typeof toastr !== 'undefined') toastr.success('Lore matrix saved (' + parsed.length + ' entries).');
+            if (typeof toastr !== 'undefined') toastr.success('Lore matrix saved (' + normalized.length + ' entries).');
 
             hideLoreMatrixEditor();
             // Refresh the main state panel and lore previews

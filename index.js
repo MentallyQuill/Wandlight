@@ -38,6 +38,7 @@ import {
     runLoreContextDetection,
     runLoreGeneration,
 } from './lore-generator.js';
+import { showLorePanel, hideLorePanel, refreshLorePanel } from './lore-panel.js';
 
 // ════════════════════════════════════════════════════════════════════════════════
 // jQuery ready — this is the SillyTavern extension lifecycle entrypoint.
@@ -102,6 +103,8 @@ function wireEvents(ctx) {
         ctx.eventSource.on(ctx.event_types.CHAT_CHANGED, () => {
             try {
                 resetExtractionCounter();
+                // Refresh lore panel if open
+                refreshLorePanel();
                 // Refresh state panel if visible
                 if (typeof globalThis._wandlightRefreshUI === 'function') {
                     globalThis._wandlightRefreshUI();

@@ -7,12 +7,13 @@
  */
 
 import { buildMemo } from './memo-builder.js';
-import { getState, saveState, pushStateSnapshot, importState, getSettings } from './state-manager.js';
+import { getState, saveState, pushStateSnapshot, importState, getSettings, saveSettings } from './state-manager.js';
 import {
     normalizeLoreMatrix,
     normalizeLoreContext,
     getActiveLoreEntries,
 } from './lore-matrix.js';
+import { loadApiKey, storeApiKey, deleteApiKey } from './secure-keyring.js';
 
 /**
  * Renders the settings panel HTML into the container.
@@ -33,6 +34,9 @@ export function renderSettingsPanel(container) {
 
     // Wire the lore-matrix JSON editor
     wireLoreMatrixEditor();
+
+    // Wire the lore model provider panel
+    setupLoreProviderPanel(container);
 
     // Refresh memo preview on button
     const refreshMemoBtn = container.querySelector('#wandlight_refresh_memo');
@@ -342,6 +346,230 @@ export function renderLoreContextPreview() {
 /**
  * Renders the lore matrix preview from current state.
  */
+// ── Lore Model Provider setup ──────────────────────────────────────────────────
+
+/**
+ * Wires the lore model provider UI controls.
+ * Reads/stores API keys via secure-keyring, populates connection profile dropdowns,
+ * and saves lore provider settings.
+ * @param {HTMLElement} container - The settings panel container
+ */
+function setupLoreProviderPanel(container) {
+    if (!container) return;
+
+    const settings = getSettings();
+
+    // ── Elements ─────────────────────────────────────────────────────
+    const providerSelect = container.querySelector('#wandlight_lore_provider');
+    const profileRow = container.querySelector('#wandlight_lore_profile_row');
+    const profileIdSelect = container.querySelector('#wandlight_lore_profile_id');
+    const completionPresetSelect = container.querySelector('#wandlight_lore_completion_preset_id');
+    const openaiRow = container.querySelector('#wandlight_lore_openai_row');
+    const openaiBaseUrl = container.querySelector('#wandlight_lore_openai_base_url');
+    const openaiModel = container.querySelector('#wandlight_lore_openai_model');
+    const openaiKey = container.querySelector('#wandlight_lore_openai_key');
+    const openaiKeySaveBtn = container.querySelector('#wandlight_lore_openai_key_save');
+    const openaiKeyClearBtn = container.querySelector('#wandlight_lore_openai_key_clear');
+    const openaiKeyStatus = container.querySelector('#wandlight_lore_openai_key_status');
+    const openaiJsonMode = container.querySelector('#wandlight_lore_openai_json_mode');
+    const tempInput = container.querySelector('#wandlight_lore_temperature');
+    const topPInput = container.querySelector('#wandlight_lore_top_p');
+    const maxTokensInput = container.querySelector('#wandlight_lore_max_tokens');
+
+    // ── Set initial values ────────────────────────────────────────────
+    if (providerSelect) providerSelect.value = settings.loreProvider || 'st';
+    if (openaiBaseUrl) openaiBaseUrl.value = settings.loreOpenAIBaseUrl || '';
+    if (openaiModel) openaiModel.value = settings.loreOpenAIModel || '';
+    if (openaiJsonMode) openaiJsonMode.checked = !!settings.loreOpenAIJsonMode;
+    if (tempInput) tempInput.value = settings.loreTemperature ?? 0.1;
+    if (topPInput) topPInput.value = settings.loreTopP ?? 0.9;
+    if (maxTokensInput) maxTokensInput.value = settings.loreMaxTokens ?? 2048;
+
+    // ── Show/hide provider-specific rows ──────────────────────────────
+    function refreshProviderRows() {
+        const provider = providerSelect?.value || 'st';
+        if (profileRow) profileRow.style.display = provider === 'profile' ? '' : 'none';
+        if (openaiRow) openaiRow.style.display = provider === 'openai_compatible' ? '' : 'none';
+    }
+
+    if (providerSelect) {
+        providerSelect.addEventListener('change', () => {
+            const val = providerSelect.value;
+            settings.loreProvider = val;
+            saveLoreProviderSettings(settings);
+            refreshProviderRows();
+        });
+    }
+
+    // ── Populate connection profiles from ST ─────────────────────────
+    function populateProfiles() {
+        if (!profileIdSelect) return;
+        try {
+            const ctx = SillyTavern?.getContext();
+            const profiles = ctx?.connectionProfiles || [];
+            // Preserve current selection
+            const currentVal = profileIdSelect.value;
+            profileIdSelect.innerHTML = '<option value="">— Select Profile —</option>';
+            for (const p of profiles) {
+                const opt = document.createElement('option');
+                opt.value = p.id || p.name || '';
+                opt.textContent = p.name || p.id || 'Unknown';
+                profileIdSelect.appendChild(opt);
+            }
+            if (currentVal) profileIdSelect.value = currentVal;
+
+            // Populate completion presets
+            if (completionPresetSelect) {
+                const presets = ctx?.completionPresets || [];
+                const curPreset = completionPresetSelect.value;
+                completionPresetSelect.innerHTML = '<option value="">— Default —</option>';
+                for (const pr of presets) {
+                    const opt = document.createElement('option');
+                    opt.value = pr.name || pr.id || '';
+                    opt.textContent = pr.name || pr.id || 'Unknown';
+                    completionPresetSelect.appendChild(opt);
+                }
+                if (curPreset) completionPresetSelect.value = curPreset;
+            }
+        } catch (_) {}
+    }
+
+    populateProfiles();
+    // Re-populate on focus since user may have added profiles since panel opened
+    if (profileIdSelect) {
+        profileIdSelect.addEventListener('focus', populateProfiles);
+    }
+
+    if (profileIdSelect) profileIdSelect.value = settings.loreProfileId || '';
+    if (completionPresetSelect) completionPresetSelect.value = settings.loreCompletionPresetId || '';
+
+    // ── Profile save handlers ────────────────────────────────────────
+    if (profileIdSelect) {
+        profileIdSelect.addEventListener('change', () => {
+            settings.loreProfileId = profileIdSelect.value;
+            saveLoreProviderSettings(settings);
+        });
+    }
+    if (completionPresetSelect) {
+        completionPresetSelect.addEventListener('change', () => {
+            settings.loreCompletionPresetId = completionPresetSelect.value;
+            saveLoreProviderSettings(settings);
+        });
+    }
+
+    // ── OpenAI-compatible save handlers ───────────────────────────────
+    if (openaiBaseUrl) {
+        openaiBaseUrl.addEventListener('change', () => {
+            settings.loreOpenAIBaseUrl = openaiBaseUrl.value.trim();
+            saveLoreProviderSettings(settings);
+        });
+    }
+    if (openaiModel) {
+        openaiModel.addEventListener('change', () => {
+            settings.loreOpenAIModel = openaiModel.value.trim();
+            saveLoreProviderSettings(settings);
+        });
+    }
+    if (openaiJsonMode) {
+        openaiJsonMode.addEventListener('change', () => {
+            settings.loreOpenAIJsonMode = openaiJsonMode.checked;
+            saveLoreProviderSettings(settings);
+        });
+    }
+
+    // ── Generation parameter handlers ─────────────────────────────────
+    if (tempInput) {
+        tempInput.addEventListener('change', () => {
+            settings.loreTemperature = parseFloat(tempInput.value) || 0.1;
+            saveLoreProviderSettings(settings);
+        });
+    }
+    if (topPInput) {
+        topPInput.addEventListener('change', () => {
+            settings.loreTopP = parseFloat(topPInput.value) || 0.9;
+            saveLoreProviderSettings(settings);
+        });
+    }
+    if (maxTokensInput) {
+        maxTokensInput.addEventListener('change', () => {
+            settings.loreMaxTokens = parseInt(maxTokensInput.value, 10) || 2048;
+            saveLoreProviderSettings(settings);
+        });
+    }
+
+    // ── API key: load status ─────────────────────────────────────────
+    async function refreshKeyStatus() {
+        if (!openaiKeyStatus) return;
+        try {
+            const key = await loadApiKey();
+            if (key) {
+                openaiKeyStatus.textContent = 'Key stored (encrypted at rest)';
+                openaiKeyStatus.style.color = '#88cc88';
+                if (openaiKey) openaiKey.value = key; // Masked, reveal on focus
+                // Show actual key only on focus
+                if (openaiKey) {
+                    openaiKey.addEventListener('focus', async () => {
+                        const fresh = await loadApiKey();
+                        if (fresh) openaiKey.value = fresh;
+                    }, { once: true });
+                }
+            } else {
+                openaiKeyStatus.textContent = 'No key stored';
+                openaiKeyStatus.style.color = '';
+            }
+        } catch (_) {
+            openaiKeyStatus.textContent = 'Keyring unavailable';
+            openaiKeyStatus.style.color = '#cc8888';
+        }
+    }
+
+    // ── Key save/clear handlers ──────────────────────────────────────
+    if (openaiKeySaveBtn && openaiKey) {
+        openaiKeySaveBtn.addEventListener('click', async () => {
+            const raw = openaiKey.value.trim();
+            if (!raw) {
+                if (typeof toastr !== 'undefined') toastr.warning('Enter an API key first.');
+                return;
+            }
+            try {
+                await storeApiKey(raw);
+                openaiKey.value = '';
+                if (typeof toastr !== 'undefined') toastr.success('API key encrypted and stored.');
+                await refreshKeyStatus();
+            } catch (e) {
+                if (typeof toastr !== 'undefined') toastr.error('Failed to store key: ' + e.message);
+            }
+        });
+    }
+    if (openaiKeyClearBtn) {
+        openaiKeyClearBtn.addEventListener('click', async () => {
+            try {
+                await deleteApiKey();
+                if (openaiKey) openaiKey.value = '';
+                if (typeof toastr !== 'undefined') toastr.success('API key removed.');
+                await refreshKeyStatus();
+            } catch (e) {
+                if (typeof toastr !== 'undefined') toastr.error('Failed to clear key: ' + e.message);
+            }
+        });
+    }
+
+    // ── Initial state ─────────────────────────────────────────────────
+    refreshProviderRows();
+    refreshKeyStatus();
+}
+
+/**
+ * Helper: saves lore provider settings via the settings manager.
+ * @param {Object} settings - Current settings object
+ */
+function saveLoreProviderSettings(settings) {
+    try {
+        saveSettings(settings);
+    } catch (e) {
+        console.warn('[Wandlight] Failed to save lore provider settings:', e);
+    }
+}
 export function renderLoreMatrixPreview() {
     const preview = document.getElementById('wandlight_lore_matrix_preview');
     const pendingPreview = document.getElementById('wandlight_pending_lore_preview');

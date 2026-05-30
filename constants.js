@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -62,6 +62,26 @@ export const DEFAULT_SETTINGS = {
     maxLoreEntriesInMemo: 6,
     maxLoreEntriesInMatrix: 50,
     autoGenerateLore: false,
+
+    // Lore model provider
+    loreProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
+    loreProfileId: '',
+    loreCompletionPresetId: '',
+
+    // Lore OpenAI-compatible endpoint
+    loreOpenAIBaseUrl: '',
+    loreOpenAIModel: '',
+    loreOpenAIKeyEncrypted: null,
+    loreOpenAIKeySalt: '',
+    loreOpenAIKeyIv: '',
+    loreOpenAIKeySet: false,
+    loreOpenAIUseJsonMode: true,
+
+    // Lore generation parameters (separate from main RP model settings)
+    loreTemperature: 0.1,
+    loreTopP: 0.9,
+    loreMaxTokens: 2048,
+    loreRepairOnParseFail: true,
 };
 
 // ── Default per-chat state ──────────────────────────────────────────────────────
@@ -107,6 +127,22 @@ export function getDefaultState() {
         },
 
         pendingLoreMeta: null,
+
+        // Lore panel UI state (schema v4)
+        lorePanel: {
+            isOpen: true,
+            collapsed: false,
+            selectedCategory: 'all',
+            search: '',
+            selectedEntryId: '',
+            showOnlyActive: false,
+        },
+
+        // Lore selection (user overrides for active loring)
+        loreSelection: {
+            pinnedIds: [],
+            suppressedIds: [],
+        },
 
         knowledge: {},
         secrets: [],
@@ -259,6 +295,19 @@ Rules:
 - If a fact is secret in this era, include publicVersion and revealPolicy.
 - Do not overwrite user-edited lore. This pass only proposes entries.
 - Output JSON only.`;
+
+// ── JSON repair prompt ──────────────────────────────────────────────────────────
+export const JSON_REPAIR_SYSTEM_PROMPT = `You repair malformed JSON.
+
+Return ONLY valid JSON.
+Do not add markdown.
+Do not explain.
+Preserve the user's intended data.
+The output must have this shape:
+{
+  "summary": "string",
+  "entries": []
+}`;
 
 // ── Token budget for memo ───────────────────────────────────────────────────────
 export const MEMO_MAX_TOKENS = 500;

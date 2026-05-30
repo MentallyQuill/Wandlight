@@ -18,7 +18,7 @@ import {
     MAX_LORE_ENTRIES_IN_MEMO,
 } from './constants.js';
 import { getSettings } from './state-manager.js';
-import { getActiveLoreEntries } from './lore-matrix.js';
+import { getInjectableLoreEntries } from './lore-matrix.js';
 
 /**
  * Builds a compact continuity memo string from the given state object.
@@ -198,7 +198,7 @@ export function buildMemo(state) {
     const settings = getSettings();
     if (settings.injectLore) {
         const maxLore = Number(settings.maxLoreEntriesInMemo) || MAX_LORE_ENTRIES_IN_MEMO;
-        const activeLore = getActiveLoreEntries(state, maxLore);
+        const activeLore = getInjectableLoreEntries(state, maxLore);
         if (activeLore.length > 0) {
             lines.push('');
             lines.push('## Story Lore');

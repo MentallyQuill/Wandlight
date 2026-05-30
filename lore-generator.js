@@ -11,6 +11,7 @@ import {
     LOG_PREFIX,
     LORE_CONTEXT_DETECTION_SYSTEM_PROMPT,
     LORE_GENERATION_SYSTEM_PROMPT,
+    JSON_REPAIR_SYSTEM_PROMPT,
 } from './constants.js';
 
 import {
@@ -29,6 +30,8 @@ import {
     buildLoreGenerationKey,
 } from './lore-matrix.js';
 
+import { sendLoreRequest } from './lore-llm-client.js';
+
 // ── Guard flags ─────────────────────────────────────────────────────────────────
 
 let _detectionRunning = false;
@@ -37,75 +40,232 @@ let _generationRunning = false;
 // ── Helper: quiet LLM prompt ────────────────────────────────────────────────────
 
 /**
- * Sends a controlled JSON task to the LLM using current SillyTavern object-style APIs.
- * Prefers generateRaw for system/user separation, then falls back to generateQuietPrompt.
+ * Sends a controlled JSON task to the LLM via the configured lore provider.
+ * Uses sendLoreRequest which dispatches to the provider selected in settings
+ * (current ST model, connection profile, or OpenAI-compatible endpoint).
  * @param {string} systemPrompt - System message text
  * @param {string} userMessage - User message text
- * @returns {Promise<string>} LLM response text
+ * @returns {Promise<string>} LLM response text (may be empty on failure)
  */
 async function quietPrompt(systemPrompt, userMessage) {
     try {
-        const ctx = SillyTavern.getContext();
-        if (!ctx) throw new Error('SillyTavern context unavailable');
-
-        if (typeof ctx.generateRaw === 'function') {
-            const result = await ctx.generateRaw({
-                systemPrompt,
-                prompt: userMessage,
-                prefill: '',
-            });
-            return typeof result === 'string' ? result : '';
-        }
-
-        if (typeof ctx.generateQuietPrompt === 'function') {
-            const result = await ctx.generateQuietPrompt({
-                quietPrompt: `${systemPrompt}\n\n${userMessage}`,
-            });
-            return typeof result === 'string' ? result : '';
-        }
-
-        console.warn(`${LOG_PREFIX} No generation API available for lore task`);
-        return '';
+        const settings = getSettings();
+        return await sendLoreRequest(systemPrompt, userMessage, {
+            maxTokens: settings.loreMaxTokens || 2048,
+            prefill: '{',
+        });
     } catch (e) {
         console.error(`${LOG_PREFIX} Lore generation prompt failed:`, e);
         return '';
     }
 }
 
+// ── Robust JSON response parsing ─────────────────────────────────────────────────
+
 /**
- * Parses a JSON response from the LLM. Handles markdown fences.
+ * Strips markdown code fences from text.
+ * @param {string} text - Raw text
+ * @returns {string} Cleaned text
+ */
+function stripJsonFences(text) {
+    let cleaned = String(text || '').trim();
+
+    const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (fenceMatch) return fenceMatch[1].trim();
+
+    return cleaned;
+}
+
+/**
+ * Removes think/reasoning blocks that thinking models sometimes emit.
+ * @param {string} text - Raw text
+ * @returns {string} Cleaned text
+ */
+function removeLikelyReasoningBlocks(text) {
+    return String(text || '')
+        .replace(/<think\b[^>]*>[\s\S]*?<\/think>/gi, '')
+        .replace(/<thinking\b[^>]*>[\s\S]*?<\/thinking>/gi, '')
+        .replace(/<reasoning\b[^>]*>[\s\S]*?<\/reasoning>/gi, '')
+        .trim();
+}
+
+/**
+ * Applies common JSON-ish sanitization (smart quotes, trailing commas, comments, control chars).
+ * @param {string} text - Raw text
+ * @returns {string} Sanitized text
+ */
+function sanitizeJsonish(text) {
+    return String(text || '')
+        .replace(/^\uFEFF/, '')
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/,\s*([}\]])/g, '$1')
+        .replace(/\/\/.*$/gm, '')
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/[\u0000-\u001F]+/g, match =>
+            match === '\n' || match === '\r' || match === '\t' ? match : ''
+        )
+        .trim();
+}
+
+/**
+ * Finds the first balanced JSON object {...} in a string by tracking depth.
+ * Handles nested braces, strings, and escape sequences.
+ * @param {string} text - Raw text
+ * @returns {string} The balanced object substring, or empty string
+ */
+function findBalancedJsonObject(text) {
+    const s = String(text || '');
+    let start = -1;
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = 0; i < s.length; i++) {
+        const ch = s[i];
+
+        if (start === -1) {
+            if (ch === '{') {
+                start = i;
+                depth = 1;
+            }
+            continue;
+        }
+
+        if (escaped) {
+            escaped = false;
+            continue;
+        }
+
+        if (ch === '\\') {
+            escaped = true;
+            continue;
+        }
+
+        if (ch === '"') {
+            inString = !inString;
+            continue;
+        }
+
+        if (inString) continue;
+
+        if (ch === '{') depth++;
+        if (ch === '}') depth--;
+
+        if (depth === 0) {
+            return s.slice(start, i + 1);
+        }
+    }
+
+    return start >= 0 ? s.slice(start) : '';
+}
+
+/**
+ * Coerces various shapes the model may return into the expected { summary, entries } structure.
+ * @param {*} parsed - Already-parsed (but possibly wrong-shaped) JSON
+ * @returns {Object|null} Normalized shape or null
+ */
+function coerceLoreShape(parsed) {
+    if (!parsed || typeof parsed !== 'object') return null;
+
+    // Already correct.
+    if (Array.isArray(parsed.entries)) {
+        return {
+            summary: typeof parsed.summary === 'string' ? parsed.summary : '',
+            entries: parsed.entries,
+        };
+    }
+
+    // Some models return the array directly under lore/loreMatrix.
+    if (Array.isArray(parsed.loreMatrix)) {
+        return {
+            summary: typeof parsed.summary === 'string' ? parsed.summary : '',
+            entries: parsed.loreMatrix,
+        };
+    }
+
+    if (Array.isArray(parsed.lore)) {
+        return {
+            summary: typeof parsed.summary === 'string' ? parsed.summary : '',
+            entries: parsed.lore,
+        };
+    }
+
+    // Some models return a single entry.
+    if (parsed.id && (parsed.title || parsed.fact)) {
+        return {
+            summary: '',
+            entries: [parsed],
+        };
+    }
+
+    return null;
+}
+
+/**
+ * Parses a JSON response from the LLM. Tolerant of markdown fences,
+ * reasoning blocks, smart quotes, trailing commas, JS comments, and
+ * wrong-shaped objects. Tries multiple candidate extraction strategies
+ * before giving up.
  * @param {string} text - Raw LLM response
  * @returns {Object|null} Parsed JSON or null
  */
 function parseJsonResponse(text) {
     if (!text || typeof text !== 'string') return null;
 
-    // Strip markdown fences
-    let cleaned = text.trim();
-    if (cleaned.startsWith('```')) {
-        const firstNewline = cleaned.indexOf('\n');
-        if (firstNewline > 0) {
-            cleaned = cleaned.slice(firstNewline + 1);
-        }
-        if (cleaned.endsWith('```')) {
-            cleaned = cleaned.slice(0, -3);
+    const candidates = [];
+
+    const noReasoning = removeLikelyReasoningBlocks(text);
+    candidates.push(noReasoning);
+    candidates.push(stripJsonFences(noReasoning));
+    candidates.push(findBalancedJsonObject(noReasoning));
+    candidates.push(findBalancedJsonObject(stripJsonFences(noReasoning)));
+
+    for (const candidate of candidates) {
+        if (!candidate || !candidate.trim()) continue;
+
+        const cleaned = sanitizeJsonish(candidate);
+
+        try {
+            const parsed = JSON.parse(cleaned);
+            return coerceLoreShape(parsed) || parsed;
+        } catch (_) {
+            // Continue trying candidates.
         }
     }
-    cleaned = cleaned.trim();
+
+    return null;
+}
+
+/**
+ * When initial parsing fails, sends the raw response to a repair LLM pass.
+ * Only attempted when settings.loreRepairOnParseFail is true.
+ * @param {string} rawResponse - The raw LLM response that failed parsing
+ * @returns {Promise<Object|null>} Repaired and re-parsed JSON, or null
+ */
+async function repairLoreJsonResponse(rawResponse) {
+    const settings = getSettings();
+    if (!settings.loreRepairOnParseFail) return null;
 
     try {
-        return JSON.parse(cleaned);
-    } catch (_) {
-        // Try to find JSON object boundary
-        const start = cleaned.indexOf('{');
-        const end = cleaned.lastIndexOf('}');
-        if (start >= 0 && end > start) {
-            try {
-                return JSON.parse(cleaned.slice(start, end + 1));
-            } catch (_2) {
-                return null;
-            }
-        }
+        const repairPrompt = `Repair this malformed lore-generation response into valid JSON.
+
+Required shape:
+{
+  "summary": "string",
+  "entries": []
+}
+
+Malformed response:
+${String(rawResponse || '').slice(0, 12000)}
+`;
+
+        const repaired = await quietPrompt(JSON_REPAIR_SYSTEM_PROMPT, repairPrompt);
+        if (!repaired) return null;
+
+        return parseJsonResponse(repaired);
+    } catch (e) {
+        console.warn(`${LOG_PREFIX} JSON repair pass failed:`, e);
         return null;
     }
 }
@@ -379,7 +539,18 @@ export async function runLoreGeneration(options = {}) {
         }
 
         // ── Parse & validate ──────────────────────────────────────────
-        const parsed = parseJsonResponse(response);
+        let parsed = parseJsonResponse(response);
+
+        // Repair pass when initial parsing fails
+        if (!parsed || !Array.isArray(parsed?.entries)) {
+            if (settings.loreRepairOnParseFail) {
+                if (settings.debugMode) {
+                    console.debug(`${LOG_PREFIX} Initial lore parse failed, attempting repair pass`);
+                }
+                parsed = await repairLoreJsonResponse(response);
+            }
+        }
+
         if (!parsed || !Array.isArray(parsed.entries)) {
             recordLoreAttempt(contextKey, {
                 status: 'failed_parse',

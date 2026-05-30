@@ -333,6 +333,127 @@ function normalizeList(values) {
 }
 
 /**
+ * Returns all lore entries filtered/annotated for the floating lore panel.
+ * Does NOT filter by activeWhen — the panel shows all entries, not just active ones.
+ * Annotations include: isPinned, isSuppressed, isActive, and category matches.
+ *
+ * @param {Object} state - WandlightState
+ * @returns {{ entries: Object[], categories: string[], counts: Object }}
+ */
+export function getPanelLoreState(state) {
+    const allEntries = normalizeLoreMatrix(state?.loreMatrix || []);
+    const pendingEntries = normalizeLoreMatrix(state?.pendingLoreEntries || []);
+    const pinnedIds = new Set(state?.loreSelection?.pinnedIds || []);
+    const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
+
+    const categories = new Set();
+    const counts = { all: 0, active: 0, pinned: 0, pending: pendingEntries.length };
+
+    const entries = allEntries.map(entry => {
+        const isActive = isLoreEntryActive(entry, state);
+        const isPinned = pinnedIds.has(entry.id);
+        const isSuppressed = suppressedIds.has(entry.id);
+
+        if (entry.category) categories.add(entry.category);
+
+        counts.all++;
+        if (isActive) counts.active++;
+        if (isPinned) counts.pinned++;
+
+        return {
+            ...entry,
+            isActive,
+            isPinned,
+            isSuppressed,
+            isPending: false,
+        };
+    });
+
+    // Add pending entries (not yet in loreMatrix)
+    const pendingAnnotated = pendingEntries.map(entry => {
+        if (entry.category) categories.add(entry.category);
+        return {
+            ...entry,
+            isActive: true,  // pending entries are assumed active since they were just generated
+            isPinned: pinnedIds.has(entry.id),
+            isSuppressed: suppressedIds.has(entry.id),
+            isPending: true,
+        };
+    });
+
+    // Merge: pending entries should not duplicate active matrix entries by id
+    const entryIds = new Set(entries.map(e => e.id));
+    const uniquePending = pendingAnnotated.filter(e => !entryIds.has(e.id));
+    const allAnnotated = [...entries, ...uniquePending];
+
+    return {
+        entries: allAnnotated,
+        categories: ['all', ...Array.from(categories).sort()],
+        counts,
+    };
+}
+
+/**
+ * Returns the list of lore entries that should be injected into the memo/prompt.
+ * Respects user selection: pinned entries are always included (even if suppressed by activeWhen),
+ * suppressed entries are excluded regardless of activeWhen.
+ * Falls back to getActiveLoreEntries if loreSelection is missing.
+ *
+ * @param {Object} state - WandlightState
+ * @param {number} limit - Max entries to return
+ * @returns {Object[]} Injectable lore entries
+ */
+export function getInjectableLoreEntries(state, limit) {
+    const allEntries = normalizeLoreMatrix(state?.loreMatrix || []);
+    const pinnedIds = new Set(state?.loreSelection?.pinnedIds || []);
+    const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
+    const max = limit || 6;
+    const settingsCap = Number(state?._settings?.maxLoreEntriesInMemo) || max;
+    const effectiveLimit = Math.min(max, settingsCap);
+
+    if (allEntries.length === 0) return [];
+
+    // Partition: pinned entries (always included), active non-suppressed, the rest
+    const pinnedEntries = [];
+    const activeCandidateEntries = [];
+    const inactiveEntries = [];
+
+    for (const entry of allEntries) {
+        if (suppressedIds.has(entry.id)) continue;  // user-suppressed: nope
+
+        const isActive = isLoreEntryActive(entry, state);
+
+        if (pinnedIds.has(entry.id)) {
+            pinnedEntries.push(entry);
+        } else if (isActive) {
+            activeCandidateEntries.push(entry);
+        } else {
+            inactiveEntries.push(entry);
+        }
+    }
+
+    // Sort active candidates by priority descending
+    activeCandidateEntries.sort((a, b) => b.priority - a.priority || a.title.localeCompare(b.title));
+
+    // If pinned entries exceed the limit, they still all go through (user intent)
+    let result = [...pinnedEntries];
+    let remaining = effectiveLimit - result.length;
+
+    if (remaining > 0) {
+        result = result.concat(activeCandidateEntries.slice(0, remaining));
+        remaining = effectiveLimit - result.length;
+    }
+
+    // Only fill with inactive if pinned < limit and no active candidates remain
+    if (remaining > 0 && activeCandidateEntries.length === 0) {
+        inactiveEntries.sort((a, b) => b.priority - a.priority || a.title.localeCompare(b.title));
+        result = result.concat(inactiveEntries.slice(0, remaining));
+    }
+
+    return result;
+}
+
+/**
  * Builds a fingerprint string representing the current context.
  * Used to detect when lore should be regenerated.
  *

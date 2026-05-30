@@ -340,11 +340,39 @@ export function migrateState(state) {
         state._version = 3;
     }
 
+    // ── Schema v4: lore panel UI state and lore selection ────────────────────
+    if (state._version < 4) {
+        const defaults = getDefaultState();
+        state.lorePanel = mergeDefaults(state.lorePanel, defaults.lorePanel);
+        state.loreSelection = mergeDefaults(state.loreSelection, defaults.loreSelection);
+        state._version = 4;
+    }
+
     // ── Always normalize lore fields post-migration ────────────────────────
-    // Even v3 states can become malformed through manual editing or old imports.
+    // Even v4 states can become malformed through manual editing or old imports.
     state.loreContext = normalizeLoreContext(state.loreContext || {});
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []);
     state.pendingLoreEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
+
+    // Normalize lorePanel
+    if (!state.lorePanel || typeof state.lorePanel !== 'object') {
+        state.lorePanel = getDefaultState().lorePanel;
+    } else {
+        state.lorePanel.isOpen = state.lorePanel.isOpen !== false;
+        state.lorePanel.collapsed = !!state.lorePanel.collapsed;
+        state.lorePanel.selectedCategory = state.lorePanel.selectedCategory || 'all';
+        state.lorePanel.search = state.lorePanel.search || '';
+        state.lorePanel.selectedEntryId = state.lorePanel.selectedEntryId || '';
+        state.lorePanel.showOnlyActive = !!state.lorePanel.showOnlyActive;
+    }
+
+    // Normalize loreSelection
+    if (!state.loreSelection || typeof state.loreSelection !== 'object') {
+        state.loreSelection = getDefaultState().loreSelection;
+    } else {
+        state.loreSelection.pinnedIds = Array.isArray(state.loreSelection.pinnedIds) ? state.loreSelection.pinnedIds : [];
+        state.loreSelection.suppressedIds = Array.isArray(state.loreSelection.suppressedIds) ? state.loreSelection.suppressedIds : [];
+    }
 
     // Ensure ledger always has a valid structure
     if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
@@ -1254,6 +1282,28 @@ export function rejectPendingLoreEntries() {
 
     saveState(state);
     return state;
+}
+
+// ── Utility: deep-merge defaults ────────────────────────────────────────────────
+
+/**
+ * Deep-merges default values into target for missing or invalid keys.
+ * Returns target (mutated in place, but safe since these are schema-level objects).
+ * @param {*} target - The existing value (may be undefined/null/non-object)
+ * @param {Object} defaults - Default object to merge
+ * @returns {Object} target with defaults filled in
+ */
+function mergeDefaults(target, defaults) {
+    if (!target || typeof target !== 'object' || Array.isArray(target)) {
+        return { ...defaults };
+    }
+    const result = { ...target };
+    for (const key of Object.keys(defaults)) {
+        if (result[key] === undefined || result[key] === null) {
+            result[key] = defaults[key];
+        }
+    }
+    return result;
 }
 
 // ── Export the default state factory for convenience ────────────────────────────

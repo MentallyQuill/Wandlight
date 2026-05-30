@@ -1,0 +1,135 @@
+/**
+ * style.css — Wandlight Continuity
+ * Minimal styling for the settings panel. Extends ST's built-in styles.
+ * Loaded by manifest.json as "css": "style.css".
+ */
+
+/* ── Settings panel container ─────────────────────────────────────────────────── */
+.wandlight-settings {
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+}
+
+/* ── Memo preview block ───────────────────────────────────────────────────────── */
+.wandlight-memo-preview {
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.82em;
+    line-height: 1.45;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 10px 12px;
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 0;
+    color: #d4a028;
+    word-break: break-word;
+}
+
+/* ── State JSON editor ────────────────────────────────────────────────────────── */
+.wandlight-state-editor {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.78em;
+    line-height: 1.4;
+    background: rgba(0, 0, 0, 0.35);
+    color: #b8c7d6;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    padding: 10px 12px;
+    resize: vertical;
+    min-height: 280px;
+    max-height: 600px;
+    width: 100%;
+    box-sizing: border-box;
+    tab-size: 2;
+}
+
+.wandlight-state-editor:focus {
+    border-color: rgba(80, 140, 255, 0.5);
+    outline: none;
+    box-shadow: 0 0 4px rgba(80, 140, 255, 0.2);
+}
+
+/* ── Slider spacing ───────────────────────────────────────────────────────────── */
+.wandlight-settings input[type="range"] {
+    flex: 1;
+    min-width: 80px;
+}
+
+/* ── Description text ─────────────────────────────────────────────────────────── */
+.wandlight-settings small {
+    color: var(--SmartThemeBodyColor, #999);
+    opacity: 0.65;
+    font-size: 0.78em;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────────── */
+.wandlight-settings .menu_button {
+    font-size: 0.85em;
+    padding: 5px 12px;
+}
+
+.wandlight-settings .menu_button + .menu_button {
+    margin-left: 6px;
+}
+
+/* ── State display (read-only view) ──────────────────────────────────────────── */
+.wandlight-state-display {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 10px 12px;
+    max-height: 360px;
+    overflow-y: auto;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.wandlight-state-display:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Delta preview block ─────────────────────────────────────────────────────── */
+.wandlight-delta-preview {
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.78em;
+    line-height: 1.4;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(80, 140, 255, 0.2);
+    border-radius: 4px;
+    padding: 8px 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    color: #a8c8e8;
+    word-break: break-word;
+}
+
+/* ── State section styling (used by renderStatePanel) ─────────────────────────── */
+.wandlight-state-section {
+    border-left: 2px solid rgba(255, 255, 255, 0.08);
+    padding-left: 8px;
+}
+
+.wandlight-state-section:last-child {
+    margin-bottom: 0;
+}
+
+/* ── Toast error/warning compat ───────────────────────────────────────────────── */
+.wandlight-error {
+    color: #e88888;
+    border-color: rgba(255, 100, 100, 0.3);
+}
+
+.wandlight-warning {
+    color: #e8c888;
+    border-color: rgba(255, 200, 100, 0.3);
+}
+
+/* ── Flex row helper for button groups ──────────────────────────────────────── */
+.wandlight-button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}

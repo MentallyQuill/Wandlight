@@ -1,0 +1,298 @@
+/**
+ * ui.js — Wandlight Continuity
+ * Renders the settings panel and state viewer UI.
+ *
+ * Exports: renderSettingsPanel, renderStatePanel
+ * Imported by: index.js
+ */
+
+import { buildMemo } from './memo-builder.js';
+import { getState, saveState, pushStateSnapshot, importState, getSettings } from './state-manager.js';
+
+/**
+ * Renders the settings panel HTML into the container.
+ * Since settings.html is loaded via renderExtensionTemplateAsync(),
+ * this function populates dynamic values, wires range displays,
+ * and initializes the memo preview.
+ *
+ * @param {HTMLElement} container - The settings panel div
+ */
+export function renderSettingsPanel(container) {
+    if (!container) return;
+
+    // Wire range-input live value displays
+    wireRangeDisplay('wandlight_extraction_interval', 'wandlight_extraction_interval_value');
+    wireRangeDisplay('wandlight_max_snapshots', 'wandlight_max_snapshots_value');
+
+    // Refresh memo preview on button
+    const refreshMemoBtn = container.querySelector('#wandlight_refresh_memo');
+    if (refreshMemoBtn) {
+        refreshMemoBtn.addEventListener('click', () => {
+            refreshMemoPreview();
+        });
+    }
+
+    // State viewer: double-click to edit raw JSON
+    const stateDisplay = container.querySelector('#wandlight_state_display');
+    const stateEditor = container.querySelector('#wandlight_state_json');
+    if (stateDisplay && stateEditor) {
+        stateDisplay.addEventListener('dblclick', () => {
+            const state = getState();
+            stateEditor.value = JSON.stringify(state, null, 2);
+            stateDisplay.style.display = 'none';
+            stateEditor.style.display = 'block';
+            stateEditor.focus();
+        });
+    }
+
+    // Save edited state — with snapshot, migration, and validation
+    const saveStateBtn = container.querySelector('#wandlight_save_state');
+    if (saveStateBtn && stateEditor && stateDisplay) {
+        saveStateBtn.addEventListener('click', () => {
+            try {
+                const parsed = JSON.parse(stateEditor.value);
+                if (!parsed || typeof parsed !== 'object') {
+                    if (typeof toastr !== 'undefined') toastr.error('Invalid state JSON');
+                    return;
+                }
+                // Use importState for migration + validation
+                const previous = getState();
+                const { state: imported, error } = importState(JSON.stringify(parsed));
+                if (error) {
+                    if (typeof toastr !== 'undefined') toastr.error('State validation failed: ' + error);
+                    return;
+                }
+                // Snapshot the current state before overwriting
+                const settings = getSettings();
+                pushStateSnapshot(previous, 'Manual state edit', settings.maxSnapshots);
+                // Carry forward stateHistory so the snapshot isn't orphaned
+                imported.stateHistory = previous.stateHistory;
+                imported.memoHistory = previous.memoHistory || [];
+                saveState(imported);
+                if (typeof toastr !== 'undefined') toastr.success('State saved (edit snapshotted, undo available)');
+                stateEditor.style.display = 'none';
+                stateDisplay.style.display = 'block';
+                if (typeof globalThis._wandlightRefreshUI === 'function') {
+                    globalThis._wandlightRefreshUI();
+                }
+            } catch (e) {
+                if (typeof toastr !== 'undefined') toastr.error('Invalid JSON: ' + e.message);
+            }
+        });
+    }
+
+    // Refresh state button
+    const refreshStateBtn = container.querySelector('#wandlight_refresh_state');
+    if (refreshStateBtn) {
+        refreshStateBtn.addEventListener('click', () => {
+            if (typeof globalThis._wandlightRefreshUI === 'function') {
+                globalThis._wandlightRefreshUI();
+            }
+        });
+    }
+
+    // Initial memo refresh
+    setTimeout(() => refreshMemoPreview(), 50);
+}
+
+/**
+ * Refreshes the memo preview area from current state.
+ */
+function refreshMemoPreview() {
+    const preview = document.getElementById('wandlight_memo_preview');
+    if (!preview) return;
+
+    try {
+        const state = getState();
+        if (!state) {
+            preview.textContent = '(No continuity state loaded)';
+            return;
+        }
+        const memo = buildMemo(state);
+        if (!memo || !memo.trim()) {
+            preview.textContent = '(Memo is empty \u2014 populate continuity state via extraction or manual editing)';
+        } else {
+            preview.textContent = memo;
+        }
+    } catch (e) {
+        preview.textContent = '(Error building memo: ' + e.message + ')';
+    }
+}
+
+/**
+ * Renders the state viewer panel content.
+ * Shows a formatted summary of each state section with edit capability.
+ * Uses textContent for all user-derived data to prevent HTML injection.
+ *
+ * @param {HTMLElement} container - The state display div
+ * @param {Object} state - Current WandlightState
+ */
+export function renderStatePanel(container, state) {
+    if (!container || !state) return;
+
+    const sections = [];
+
+    /**
+     * Adds a titled section using safe DOM construction (textContent, not innerHTML).
+     * @param {string} title - Section title
+     * @param {*} data - The data to render
+     * @param {string} icon - Emoji icon prefix
+     */
+    function addSection(title, data, icon) {
+        if (!data) return;
+
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'wandlight-state-section';
+        sectionDiv.style.marginBottom = '8px';
+
+        const headerDiv = document.createElement('div');
+        headerDiv.style.fontWeight = 'bold';
+        headerDiv.style.opacity = '0.9';
+        headerDiv.style.marginBottom = '2px';
+        headerDiv.textContent = (icon ? icon + ' ' : '') + title;
+        sectionDiv.appendChild(headerDiv);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.style.paddingLeft = '12px';
+        contentDiv.style.fontSize = '0.95em';
+        sectionDiv.appendChild(contentDiv);
+
+        let hasContent = false;
+
+        if (typeof data === 'string') {
+            const lineDiv = document.createElement('div');
+            lineDiv.textContent = data;
+            contentDiv.appendChild(lineDiv);
+            hasContent = true;
+        } else if (Array.isArray(data)) {
+            if (data.length === 0) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.style.opacity = '0.5';
+                emptyDiv.textContent = '(empty)';
+                contentDiv.appendChild(emptyDiv);
+                hasContent = true;
+            } else {
+                data.forEach((item, i) => {
+                    const lineDiv = document.createElement('div');
+                    if (typeof item === 'string') {
+                        const numSpan = document.createElement('span');
+                        numSpan.style.opacity = '0.7';
+                        numSpan.textContent = (i + 1) + '. ';
+                        lineDiv.appendChild(numSpan);
+                        lineDiv.appendChild(document.createTextNode(item));
+                    } else if (item && typeof item === 'object') {
+                        const numSpan = document.createElement('span');
+                        numSpan.style.opacity = '0.7';
+                        numSpan.textContent = (i + 1) + '. ';
+                        lineDiv.appendChild(numSpan);
+                        const label = item.name || item.id || item.topic || 'Item ' + (i + 1);
+                        const labelStrong = document.createElement('strong');
+                        labelStrong.textContent = String(label);
+                        lineDiv.appendChild(labelStrong);
+                        const detail = item.content || item.detail || item.status || item.state || '';
+                        if (detail) {
+                            const arrowSpan = document.createElement('span');
+                            arrowSpan.textContent = ' \u2192 ';
+                            lineDiv.appendChild(arrowSpan);
+                            const detailSpan = document.createElement('span');
+                            detailSpan.style.opacity = '0.7';
+                            detailSpan.textContent = String(detail);
+                            lineDiv.appendChild(detailSpan);
+                        }
+                    }
+                    contentDiv.appendChild(lineDiv);
+                });
+                hasContent = true;
+            }
+        } else if (data && typeof data === 'object') {
+            Object.entries(data).forEach(([k, v]) => {
+                if (v === null || v === undefined || v === '') return;
+                const lineDiv = document.createElement('div');
+                const keyStrong = document.createElement('strong');
+                keyStrong.textContent = k + ': ';
+                lineDiv.appendChild(keyStrong);
+                const valSpan = document.createElement('span');
+                valSpan.style.opacity = '0.8';
+                valSpan.textContent = typeof v === 'object' ? JSON.stringify(v) : String(v);
+                lineDiv.appendChild(valSpan);
+                contentDiv.appendChild(lineDiv);
+            });
+            hasContent = true;
+        }
+
+        if (hasContent) {
+            sections.push(sectionDiv);
+        }
+    }
+
+    addSection('Canon Facts', state.canon, '\uD83D\uDCD6');
+    addSection('Scene', state.scene, '\uD83C\uDFAC');
+    addSection('Knowledge', state.knowledge, '\uD83E\uDDE0');
+    addSection('Secrets', state.secrets, '\uD83D\uDD12');
+    addSection('Relationships', state.relationships, '\uD83D\uDC65');
+    addSection('Threads', state.threads, '\uD83E\uDDF5');
+    addSection('Continuity Flags', state.continuityFlags, '\uD83C\uDFF4');
+
+    if (state.stateHistory && state.stateHistory.length > 0) {
+        const historyDiv = document.createElement('div');
+        historyDiv.className = 'wandlight-state-section';
+        historyDiv.style.marginBottom = '8px';
+
+        const historyHeader = document.createElement('div');
+        historyHeader.style.fontWeight = 'bold';
+        historyHeader.style.opacity = '0.9';
+        historyHeader.style.marginBottom = '2px';
+        historyHeader.textContent = '\uD83D\uDCCB History';
+        historyDiv.appendChild(historyHeader);
+
+        const historyContent = document.createElement('div');
+        historyContent.style.paddingLeft = '12px';
+        historyContent.style.fontSize = '0.95em';
+        historyContent.style.opacity = '0.7';
+        historyContent.textContent = state.stateHistory.length + ' snapshot(s) available for undo';
+        historyDiv.appendChild(historyContent);
+
+        sections.push(historyDiv);
+    }
+
+    // Version and metadata footer
+    const footerDiv = document.createElement('div');
+    footerDiv.style.marginTop = '8px';
+    footerDiv.style.paddingTop = '6px';
+    footerDiv.style.borderTop = '1px solid rgba(255,255,255,0.1)';
+    footerDiv.style.fontSize = '0.75em';
+    footerDiv.style.opacity = '0.5';
+    let footerText = 'Schema version: ' + (state.schemaVersion || '1');
+    if (state.lastModified) {
+        footerText += ' | Modified: ' + state.lastModified;
+    }
+    footerDiv.textContent = footerText;
+    sections.push(footerDiv);
+
+    // Clear container and append all section divs
+    container.textContent = '';
+    if (sections.length > 0) {
+        sections.forEach(s => container.appendChild(s));
+    } else {
+        const em = document.createElement('em');
+        em.textContent = 'No continuity state data available';
+        container.appendChild(em);
+    }
+}
+
+/**
+ * Wires a range input to display its live value next to it.
+ * @param {string} inputId - ID of the range input
+ * @param {string} displayId - ID of the value display span
+ */
+function wireRangeDisplay(inputId, displayId) {
+    const input = document.getElementById(inputId);
+    const display = document.getElementById(displayId);
+    if (!input || !display) return;
+
+    const updateDisplay = () => {
+        display.textContent = input.value;
+    };
+    input.addEventListener('input', updateDisplay);
+    updateDisplay();
+}

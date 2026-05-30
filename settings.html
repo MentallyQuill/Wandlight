@@ -1,0 +1,221 @@
+<div id="wandlight_continuity_settings" class="wandlight-settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b>Wandlight Continuity</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+
+            <!-- General Settings -->
+            <div class="inline-drawer">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <i class="fa-solid fa-gears" style="margin-right: 8px; opacity: 0.7;"></i>
+                    <b>General Settings</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <div class="flex-container flexFlowColumn gap-1">
+
+                        <label class="checkbox_label">
+                            <input id="wandlight_enabled" type="checkbox" data-setting="enabled" checked />
+                            <span>Enable Wandlight Continuity</span>
+                        </label>
+
+                        <label class="checkbox_label">
+                            <input id="wandlight_inject_memo" type="checkbox" data-setting="injectMemo" checked />
+                            <span>Inject Continuity Memo</span>
+                            <i class="fa-solid fa-circle-question interactable"
+                                title="Prepends a compact continuity memo to the last user message before each generation. Ephemeral — never persists to chat."></i>
+                        </label>
+
+                        <label class="checkbox_label">
+                            <input id="wandlight_auto_extract" type="checkbox" data-setting="autoExtract" checked />
+                            <span>Auto-Extract State Deltas</span>
+                            <i class="fa-solid fa-circle-question interactable"
+                                title="After each generation, silently calls the LLM to extract continuity changes as JSON deltas and merge them into state."></i>
+                        </label>
+
+                        <label class="checkbox_label">
+                            <input id="wandlight_auto_apply" type="checkbox" data-setting="autoApplyDelta" checked />
+                            <span>Auto-Apply Deltas</span>
+                            <i class="fa-solid fa-circle-question interactable"
+                                title="Automatically apply extracted deltas to the continuity state. Disable to review deltas before applying."></i>
+                        </label>
+
+                        <label class="checkbox_label">
+                            <input id="wandlight_debug_mode" type="checkbox" data-setting="debugMode" />
+                            <span>Debug Mode</span>
+                            <i class="fa-solid fa-circle-question interactable"
+                                title="Enables verbose console logging for troubleshooting."></i>
+                        </label>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extraction Settings -->
+            <div class="inline-drawer">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <i class="fa-solid fa-microscope" style="margin-right: 8px; opacity: 0.7;"></i>
+                    <b>Extraction Settings</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <div class="flex-container flexFlowColumn gap-1">
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                            <span style="flex-shrink: 0;">Extraction Interval:</span>
+                            <input id="wandlight_extraction_interval" type="range" data-setting="extractionInterval" min="1" max="10" value="1" style="flex: 1;" />
+                            <span id="wandlight_extraction_interval_value" style="min-width: 20px; text-align: right;">1</span>
+                        </div>
+                        <small style="opacity: 0.6; margin-top: -4px;">Run extraction every N generations. 1 = every turn, 3 = every 3rd turn.</small>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px;">
+                            <span style="flex-shrink: 0;">Max Snapshots:</span>
+                            <input id="wandlight_max_snapshots" type="range" data-setting="maxSnapshots" min="5" max="100" value="20" style="flex: 1;" />
+                            <span id="wandlight_max_snapshots_value" style="min-width: 24px; text-align: right;">20</span>
+                        </div>
+                        <small style="opacity: 0.6; margin-top: -4px;">Maximum state/memo snapshots kept in history for undo support.</small>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="inline-drawer">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <i class="fa-solid fa-bolt" style="margin-right: 8px; opacity: 0.7;"></i>
+                    <b>Actions</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <div class="flex-container flexFlowColumn gap-1">
+
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button id="wandlight_extract_now" class="menu_button interactable"
+                                title="Manually run continuity state extraction now">
+                                <i class="fa-solid fa-eye"></i> Extract Now
+                            </button>
+                            <button id="wandlight_undo_change" class="menu_button interactable"
+                                title="Undo the last change to continuity state">
+                                <i class="fa-solid fa-undo"></i> Undo Last Change
+                            </button>
+                            <button id="wandlight_reset_state" class="menu_button interactable"
+                                style="color: #ff6666;"
+                                title="Reset all continuity state to defaults (undo available via Undo Last Change)">
+                                <i class="fa-solid fa-trash"></i> Reset State
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Continuity Memo Preview -->
+            <div class="inline-drawer">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <i class="fa-solid fa-scroll" style="margin-right: 8px; opacity: 0.7;"></i>
+                    <b>Continuity Memo Preview</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <div class="flex-container flexFlowColumn gap-1">
+                        <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
+                            This is the text injected before each generation. It reflects the current continuity state.
+                        </p>
+                        <pre id="wandlight_memo_preview" class="wandlight-memo-preview"
+                            style="white-space: pre-wrap; font-family: monospace; font-size: 0.82em;
+                            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;
+                            max-height: 300px; overflow-y: auto; margin: 0;">(Loading continuity state...)</pre>
+                        <button id="wandlight_refresh_memo" class="menu_button interactable"
+                            style="align-self: flex-start; margin-top: 4px;"
+                            title="Refresh the memo preview from the current state">
+                            <i class="fa-solid fa-rotate"></i> Refresh Preview
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Last Delta Preview -->
+            <div class="inline-drawer">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <i class="fa-solid fa-code-merge" style="margin-right: 8px; opacity: 0.7;"></i>
+                    <b>Last Delta</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <div class="flex-container flexFlowColumn gap-1">
+                        <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
+                            Most recent extraction delta. Apply to merge into state, or dismiss to discard.
+                        </p>
+                        <div id="wandlight_delta_preview" class="wandlight-delta-preview"
+                            style="font-family: monospace; font-size: 0.82em;
+                            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;
+                            max-height: 250px; overflow-y: auto; margin: 0;">
+                            <em>No pending delta</em>
+                        </div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">
+                            <button id="wandlight_apply_delta" class="menu_button interactable"
+                                style="background: rgba(80, 180, 100, 0.18); border-color: #55bb66;"
+                                title="Apply the pending delta to the continuity state">
+                                <i class="fa-solid fa-check"></i> Apply Delta
+                            </button>
+                            <button id="wandlight_dismiss_delta" class="menu_button interactable"
+                                title="Dismiss the pending delta without applying">
+                                <i class="fa-solid fa-xmark"></i> Dismiss Delta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- State Viewer -->
+            <div class="inline-drawer">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <i class="fa-solid fa-database" style="margin-right: 8px; opacity: 0.7;"></i>
+                    <b>State Viewer</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <div class="flex-container flexFlowColumn gap-1">
+                        <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
+                            Current continuity state. Edit the raw JSON or use Import/Export.
+                        </p>
+                        <div id="wandlight_state_display" class="wandlight-state-display"
+                            style="font-family: monospace; font-size: 0.78em;
+                            background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px;
+                            max-height: 400px; overflow-y: auto; margin: 0; color: #e0e0e0;">
+                            <em>No continuity state loaded</em>
+                        </div>
+                        <textarea id="wandlight_state_json" class="wandlight-state-editor"
+                            style="min-height: 200px; font-family: monospace; font-size: 0.78em;
+                            background: rgba(0,0,0,0.3); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.15);
+                            border-radius: 4px; padding: 10px; resize: vertical; width: 100%; box-sizing: border-box;
+                            display: none;"></textarea>
+
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button id="wandlight_refresh_state" class="menu_button interactable"
+                                title="Reload state from storage">
+                                <i class="fa-solid fa-rotate"></i> Refresh
+                            </button>
+                            <button id="wandlight_save_state" class="menu_button interactable"
+                                style="background: rgba(80, 140, 255, 0.18); border-color: #5588ff;"
+                                title="Save edited state">
+                                <i class="fa-solid fa-floppy-disk"></i> Save State
+                            </button>
+                            <button id="wandlight_import_state" class="menu_button interactable"
+                                title="Import state from a JSON file">
+                                <i class="fa-solid fa-file-import"></i> Import
+                            </button>
+                            <button id="wandlight_export_state" class="menu_button interactable"
+                                title="Download current state as JSON">
+                                <i class="fa-solid fa-file-export"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

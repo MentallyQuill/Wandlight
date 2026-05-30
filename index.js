@@ -7,7 +7,7 @@
  *                    prompt-injector.js, extractor.js, ui.js
  */
 
-import { LOG_PREFIX, DEFAULT_SETTINGS, EXTENSION_FOLDER } from './constants.js';
+import { LOG_PREFIX, DEFAULT_SETTINGS, EXTENSION_FOLDER, detectExtensionFolder } from './constants.js';
 import {
     getSettings,
     saveSettings,
@@ -201,8 +201,10 @@ async function mountSettingsPanel(ctx) {
     // ── Render the template async ────────────────────────────────────────────
     if (ctx.renderExtensionTemplateAsync) {
         try {
+            // Detect the actual installed folder name dynamically, falling back to EXTENSION_FOLDER
+            const folder = detectExtensionFolder();
             const html = await ctx.renderExtensionTemplateAsync(
-                EXTENSION_FOLDER,
+                folder,
                 'settings'
             );
             const extensionsSettings = document.getElementById('extensions_settings2');

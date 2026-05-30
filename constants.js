@@ -13,6 +13,25 @@ export const MODULE_KEY = 'wandlight_continuity';
  */
 export const EXTENSION_FOLDER = 'third-party/WandlightContinuity';
 
+/**
+ * Dynamically detects the actual installed extension folder from the script src.
+ * Falls back to EXTENSION_FOLDER if detection fails.
+ * @param {string} [fallback] - Folder to use if detection fails
+ * @returns {string} The detected extension folder path
+ */
+export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
+    try {
+        const scripts = Array.from(document.querySelectorAll('script[src]'));
+        const script = scripts.find(s => s.src.includes('/third-party/') && s.src.endsWith('/index.js'));
+        const match = script?.src.match(/third-party\/([^/]+)\/index\.js/);
+        if (match?.[1]) {
+            return `third-party/${decodeURIComponent(match[1])}`;
+        }
+    } catch (_) {
+        // Silently fall through
+    }
+    return fallback;
+}
 // ── Logging prefix ──────────────────────────────────────────────────────────────
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
@@ -24,7 +43,7 @@ export const DEFAULT_SETTINGS = {
     enabled: true,
     injectMemo: true,
     autoExtract: true,
-    autoApplyDelta: true,
+    autoApplyDelta: false,
     extractionInterval: 1,
     maxSnapshots: 20,
     debugMode: false,

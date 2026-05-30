@@ -659,6 +659,97 @@ export function applyDelta(state, delta) {
     return next;
 }
 
+// ── Entry normalizers (defensive — prevent malformed imports from crashing memo builder) ──
+
+/**
+ * Normalizes a secret entry to its canonical shape.
+ * If whoKnows/whoSuspects are strings instead of arrays, wraps them.
+ * @param {*} s - Raw secret entry
+ * @returns {Object} Normalized secret
+ */
+function normalizeSecret(s) {
+    return {
+        fact: typeof s?.fact === 'string' ? s.fact : '',
+        trueState: typeof s?.trueState === 'string' ? s.trueState : '',
+        whoKnows: Array.isArray(s?.whoKnows) ? s.whoKnows.filter(x => typeof x === 'string') : [],
+        whoSuspects: Array.isArray(s?.whoSuspects) ? s.whoSuspects.filter(x => typeof x === 'string') : [],
+        publicVersion: typeof s?.publicVersion === 'string' ? s.publicVersion : '',
+    };
+}
+
+/**
+ * Normalizes a relationship entry to its canonical shape.
+ * @param {*} r - Raw relationship entry
+ * @returns {Object} Normalized relationship
+ */
+function normalizeRelationship(r) {
+    return {
+        pair: typeof r?.pair === 'string' ? r.pair : '',
+        notes: typeof r?.notes === 'string' ? r.notes : '',
+        tension: (r?.tension && VALID_ENUMS.tension.has(r.tension)) ? r.tension : '',
+        trust: (r?.trust && VALID_ENUMS.trust.has(r.trust)) ? r.trust : '',
+    };
+}
+
+/**
+ * Normalizes a thread entry to its canonical shape.
+ * @param {*} t - Raw thread entry
+ * @returns {Object} Normalized thread
+ */
+function normalizeThread(t) {
+    return {
+        description: typeof t?.description === 'string' ? t.description : '',
+        status: (t?.status && VALID_ENUMS.threadStatus.has(t.status)) ? t.status : 'active',
+        unresolvedConsequences: Array.isArray(t?.unresolvedConsequences)
+            ? t.unresolvedConsequences.filter(x => typeof x === 'string') : [],
+    };
+}
+
+/**
+ * Normalizes a continuity flag entry to its canonical shape.
+ * @param {*} f - Raw flag entry
+ * @returns {Object} Normalized flag
+ */
+function normalizeFlag(f) {
+    return {
+        type: (f?.type && VALID_ENUMS.flagType.has(f.type)) ? f.type : 'warning',
+        description: typeof f?.description === 'string' ? f.description : '',
+        severity: (f?.severity && VALID_ENUMS.flagSeverity.has(f.severity)) ? f.severity : 'low',
+        timestamp: Number.isFinite(f?.timestamp) ? f.timestamp : Date.now(),
+        resolved: typeof f?.resolved === 'boolean' ? f.resolved : false,
+    };
+}
+
+/**
+ * Normalizes all arrays in a state object (secrets, relationships, threads, flags).
+ * Mutates the state in place.
+ * @param {Object} state - WandlightState to normalize
+ */
+function normalizeStateEntries(state) {
+    if (Array.isArray(state.secrets)) {
+        state.secrets = state.secrets.map(normalizeSecret);
+    }
+    if (Array.isArray(state.relationships)) {
+        state.relationships = state.relationships.map(normalizeRelationship);
+    }
+    if (Array.isArray(state.threads)) {
+        state.threads = state.threads.map(normalizeThread);
+    }
+    if (Array.isArray(state.continuityFlags)) {
+        state.continuityFlags = state.continuityFlags.map(normalizeFlag);
+    }
+    // Also normalize knowledge values: ensure each char has an array of strings
+    if (state.knowledge && typeof state.knowledge === 'object' && !Array.isArray(state.knowledge)) {
+        for (const [char, facts] of Object.entries(state.knowledge)) {
+            if (!Array.isArray(facts)) {
+                state.knowledge[char] = typeof facts === 'string' ? [facts] : [];
+            } else {
+                state.knowledge[char] = facts.filter(x => typeof x === 'string');
+            }
+        }
+    }
+}
+
 // ── State import (validated) ────────────────────────────────────────────────────
 
 /**
@@ -695,6 +786,9 @@ export function importState(json) {
             lastDelta: parsed.lastDelta || null,
             _version: SCHEMA_VERSION,
         };
+
+        // Normalize all array entries to prevent malformed imports from crashing memo builder
+        normalizeStateEntries(merged);
 
         // Re-migrate to ensure current schema
         const migrated = migrateState(merged);

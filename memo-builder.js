@@ -111,8 +111,10 @@ export function buildMemo(state) {
     if (state.secrets?.length > 0) {
         const nonPublicSecrets = state.secrets.filter(s => {
             // Consider "non-public" if whoKnows does NOT include "everyone" or "all"
-            if (!s.whoKnows || s.whoKnows.length === 0) return true; // unknown audience = non-public
-            const whoLower = s.whoKnows.map(w => w.toLowerCase());
+            // Defensive: normalize whoKnows to array if it came in as a string
+            const who = Array.isArray(s?.whoKnows) ? s.whoKnows : (typeof s?.whoKnows === 'string' ? [s.whoKnows] : []);
+            if (who.length === 0) return true; // unknown audience = non-public
+            const whoLower = who.map(w => w.toLowerCase());
             return !whoLower.includes('everyone') && !whoLower.includes('all') && !whoLower.includes('public');
         });
         if (nonPublicSecrets.length > 0) {
@@ -122,7 +124,8 @@ export function buildMemo(state) {
                 const parts = [`- ${s.fact}`];
                 if (s.trueState) parts.push(`(Truth: ${s.trueState})`);
                 if (s.publicVersion) parts.push(`(Public: ${s.publicVersion})`);
-                if (s.whoKnows?.length > 0) parts.push(`[Known by: ${s.whoKnows.join(', ')}]`);
+                const whoDisplay = Array.isArray(s?.whoKnows) ? s.whoKnows : (typeof s?.whoKnows === 'string' ? [s.whoKnows] : []);
+                if (whoDisplay.length > 0) parts.push(`[Known by: ${whoDisplay.join(', ')}]`);
                 lines.push(parts.join(' '));
             }
             hasContent = true;
@@ -174,7 +177,8 @@ export function buildMemo(state) {
     }
 
     // ── Continuity Flags ──
-    const unresolvedFlags = state.continuityFlags?.filter(f => !f.resolved) || [];
+    // Defensive: flags may not have a "resolved" property; treat missing as unresolved
+    const unresolvedFlags = (state.continuityFlags || []).filter(f => !f?.resolved);
     if (unresolvedFlags.length > 0) {
         lines.push('');
         lines.push('## Continuity Flags');

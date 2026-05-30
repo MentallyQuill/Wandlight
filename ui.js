@@ -346,6 +346,9 @@ export function renderLoreMatrixPreview() {
     const preview = document.getElementById('wandlight_lore_matrix_preview');
     const pendingPreview = document.getElementById('wandlight_pending_lore_preview');
     const countEl = document.getElementById('wandlight_lore_count');
+    const staleBadge = document.getElementById('wandlight_lore_stale_badge');
+    const batchStatus = document.getElementById('wandlight_lore_batch_status');
+    const pendingCountEl = document.getElementById('wandlight_pending_lore_count');
     if (!preview) return;
 
     try {
@@ -353,12 +356,51 @@ export function renderLoreMatrixPreview() {
         if (!state) {
             preview.textContent = '(No continuity state loaded)';
             if (countEl) countEl.textContent = '0';
+            if (staleBadge) staleBadge.style.display = 'none';
+            if (batchStatus) batchStatus.textContent = '';
+            if (pendingCountEl) pendingCountEl.textContent = '0';
             return;
         }
 
         const entries = normalizeLoreMatrix(state.loreMatrix || []);
         const pendingEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
         if (countEl) countEl.textContent = String(entries.length);
+        if (pendingCountEl) pendingCountEl.textContent = String(pendingEntries.length);
+
+        // ── Stale badge: show when pending lore was generated before a state change ──
+        if (staleBadge) {
+            const meta = state.pendingLoreMeta || {};
+            if (pendingEntries.length > 0 && meta.status === 'stale') {
+                staleBadge.style.display = '';
+                staleBadge.textContent = '\u26A0\uFE0F Stale — state has changed since these were generated';
+            } else {
+                staleBadge.style.display = 'none';
+            }
+        }
+
+        // ── Batch status: show when the pending batch was generated and its size ──
+        if (batchStatus) {
+            const meta = state.pendingLoreMeta || {};
+            if (pendingEntries.length > 0 && meta.createdAt) {
+                const generatedDate = new Date(meta.createdAt);
+                const timeStr = generatedDate.toLocaleString();
+                const parts = [`Generated ${timeStr}`];
+                if (meta.validEntryCount !== undefined) {
+                    parts.push(`${meta.validEntryCount} valid`);
+                }
+                if (meta.rawEntryCount !== undefined) {
+                    parts.push(`${meta.rawEntryCount} raw`);
+                }
+                if (meta.droppedEntryCount > 0) {
+                    parts.push(`${meta.droppedEntryCount} dropped`);
+                }
+                batchStatus.textContent = parts.join(' • ');
+            } else if (pendingEntries.length > 0) {
+                batchStatus.textContent = `${pendingEntries.length} entries pending review`;
+            } else {
+                batchStatus.textContent = '';
+            }
+        }
 
         if (pendingPreview) {
             if (pendingEntries.length === 0) {

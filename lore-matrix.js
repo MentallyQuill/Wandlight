@@ -304,20 +304,59 @@ export function mergeLoreEntries(existing, incoming) {
 // ── Generation key (for tracking when lore was last generated) ─────────────────
 
 /**
+ * Normalizes a single key part to a trimmed lowercase string.
+ * Used by buildLoreGenerationKey for deterministic comparisons.
+ * @param {string|*} value
+ * @returns {string}
+ */
+function normalizeKeyPart(value) {
+    return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, ' ');
+}
+
+/**
+ * Normalizes a list of values for deterministic key inclusion.
+ * Strips blanks, sorts alphabetically, and joins with comma.
+ * @param {string[]} values
+ * @returns {string}
+ */
+function normalizeList(values) {
+    return Array.isArray(values)
+        ? values
+            .map(v => normalizeKeyPart(v))
+            .filter(Boolean)
+            .sort()
+            .join(',')
+        : '';
+}
+
+/**
  * Builds a fingerprint string representing the current context.
  * Used to detect when lore should be regenerated.
+ *
+ * Fields included are those that should trigger a meaningfully different
+ * lore proposal. Transient fields like weather or current activity are
+ * deliberately excluded to avoid unnecessary regeneration.
+ *
  * @param {Object} state - WandlightState
  * @returns {string} Context fingerprint
  */
 export function buildLoreGenerationKey(state) {
     const ctx = normalizeLoreContext(state?.loreContext || {});
+    const canon = state?.canon || {};
+    const scene = state?.scene || {};
+
     return [
-        ctx.sceneDate,
-        ctx.subjectiveDate,
-        ctx.canonBoundary || state?.canon?.canonBoundary || '',
-        ctx.branchId,
-        ctx.timeTravelMode,
-        state?.scene?.location || '',
-        ...(state?.scene?.presentCharacters || []),
-    ].filter(Boolean).join('|');
+        normalizeKeyPart(ctx.sceneDate || canon.inUniverseDate),
+        normalizeKeyPart(ctx.subjectiveDate),
+        normalizeKeyPart(ctx.canonBoundary || canon.canonBoundary),
+        normalizeKeyPart(canon.era),
+        normalizeKeyPart(ctx.branchId),
+        normalizeKeyPart(ctx.timeTravelMode),
+        normalizeKeyPart(scene.location),
+        normalizeList(scene.presentCharacters),
+        normalizeList(scene.nearbyCharacters),
+    ].join('|');
 }

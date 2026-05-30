@@ -502,10 +502,27 @@ function wireSettingsPanel(container) {
             generateLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
             try {
                 pushStateSnapshot(state, 'Generate pending lore entries', getSettings().maxSnapshots);
-                const pending = await runLoreGeneration({ force: true });
+                const result = await runLoreGeneration({ force: true, allowReplacePending: true });
+
+                if (result.status === 'proposed') {
+                    if (typeof toastr !== 'undefined') toastr.success(`${result.validEntryCount} lore entries generated (pending review)`);
+                    if (result.droppedEntryCount > 0 && typeof toastr !== 'undefined') {
+                        toastr.warning(`${result.droppedEntryCount} entry(s) dropped during normalization`);
+                    }
+                } else if (result.status === 'empty_valid_entries') {
+                    if (typeof toastr !== 'undefined') toastr.warning('Lore generation produced no valid entries');
+                } else if (result.status === 'failed_parse') {
+                    if (typeof toastr !== 'undefined') toastr.error('Could not parse lore generation response');
+                } else if (result.status === 'failed_no_response') {
+                    if (typeof toastr !== 'undefined') toastr.error('Lore generation returned no response');
+                } else if (result.status === 'failed_exception') {
+                    if (typeof toastr !== 'undefined') toastr.error('Lore generation error: ' + (result.error || 'Unknown'));
+                } else {
+                    if (typeof toastr !== 'undefined') toastr.info('Lore generation: ' + result.status);
+                }
+
                 renderLoreContextPreview();
                 renderLoreMatrixPreview();
-                if (typeof toastr !== 'undefined') toastr.success(`${pending.length} lore entries generated (pending review)`);
             } catch (e2) {
                 if (typeof toastr !== 'undefined') toastr.error('Lore generation failed: ' + e2.message);
             } finally {

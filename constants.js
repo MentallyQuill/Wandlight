@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -95,6 +95,18 @@ export function getDefaultState() {
         },
         loreMatrix: [],
         pendingLoreEntries: [],
+
+        // Lore generation lifecycle ledger (schema v3)
+        loreGeneration: {
+            lastAttemptedFor: '',
+            lastProposedFor: '',
+            lastAcceptedFor: '',
+            lastRejectedFor: '',
+            lastFailedFor: '',
+            attempts: {},
+        },
+
+        pendingLoreMeta: null,
 
         knowledge: {},
         secrets: [],

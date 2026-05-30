@@ -8,7 +8,7 @@
  */
 
 import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
-import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry } from './lore-matrix.js';
+import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey } from './lore-matrix.js';
 
 // ── Settings I/O ────────────────────────────────────────────────────────────────
 
@@ -309,11 +309,54 @@ export function migrateState(state) {
         state._version = 2;
     }
 
+    // ── Schema v2 → v3: Lore generation lifecycle ledger ───────────────────
+    if (state._version < 3) {
+        const defaults = getDefaultState();
+
+        // Add loreGeneration ledger if missing
+        if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+            state.loreGeneration = { ...defaults.loreGeneration };
+        } else {
+            state.loreGeneration.lastAttemptedFor = state.loreGeneration.lastAttemptedFor || '';
+            state.loreGeneration.lastProposedFor = state.loreGeneration.lastProposedFor || '';
+            state.loreGeneration.lastAcceptedFor = state.loreGeneration.lastAcceptedFor || '';
+            state.loreGeneration.lastRejectedFor = state.loreGeneration.lastRejectedFor || '';
+            state.loreGeneration.lastFailedFor = state.loreGeneration.lastFailedFor || '';
+            if (!state.loreGeneration.attempts || typeof state.loreGeneration.attempts !== 'object') {
+                state.loreGeneration.attempts = {};
+            }
+        }
+
+        // Add pendingLoreMeta if missing (preserve existing null)
+        if (state.pendingLoreMeta === undefined) {
+            state.pendingLoreMeta = null;
+        } else if (state.pendingLoreMeta && typeof state.pendingLoreMeta !== 'object') {
+            state.pendingLoreMeta = null;
+        } else if (state.pendingLoreMeta && state.pendingLoreEntries?.length === 0) {
+            // Stale metadata with no actual pending entries — clean up
+            state.pendingLoreMeta = null;
+        }
+
+        state._version = 3;
+    }
+
     // ── Always normalize lore fields post-migration ────────────────────────
-    // Even v2 states can become malformed through manual editing or old imports.
+    // Even v3 states can become malformed through manual editing or old imports.
     state.loreContext = normalizeLoreContext(state.loreContext || {});
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []);
     state.pendingLoreEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
+
+    // Ensure ledger always has a valid structure
+    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+        state.loreGeneration = getDefaultState().loreGeneration;
+    }
+    if (typeof state.loreGeneration.attempts !== 'object' || Array.isArray(state.loreGeneration.attempts)) {
+        state.loreGeneration.attempts = {};
+    }
+    // Clean up orphaned metadata
+    if (state.pendingLoreMeta && state.pendingLoreEntries?.length === 0) {
+        state.pendingLoreMeta = null;
+    }
 
     return state;
 }
@@ -824,6 +867,22 @@ export function importState(json) {
             loreContext: normalizeLoreContext(parsed.loreContext || {}),
             loreMatrix: normalizeLoreMatrix(parsed.loreMatrix || []),
             pendingLoreEntries: normalizeLoreMatrix(parsed.pendingLoreEntries || []),
+
+            // Lore generation lifecycle ledger (schema v3)
+            loreGeneration: parsed.loreGeneration && typeof parsed.loreGeneration === 'object' && !Array.isArray(parsed.loreGeneration)
+                ? {
+                    lastAttemptedFor: parsed.loreGeneration.lastAttemptedFor || '',
+                    lastProposedFor: parsed.loreGeneration.lastProposedFor || '',
+                    lastAcceptedFor: parsed.loreGeneration.lastAcceptedFor || '',
+                    lastRejectedFor: parsed.loreGeneration.lastRejectedFor || '',
+                    lastFailedFor: parsed.loreGeneration.lastFailedFor || '',
+                    attempts: parsed.loreGeneration.attempts && typeof parsed.loreGeneration.attempts === 'object' && !Array.isArray(parsed.loreGeneration.attempts)
+                        ? parsed.loreGeneration.attempts : {},
+                }
+                : { ...getDefaultState().loreGeneration },
+
+            pendingLoreMeta: parsed.pendingLoreMeta && typeof parsed.pendingLoreMeta === 'object' && !Array.isArray(parsed.pendingLoreMeta)
+                ? parsed.pendingLoreMeta : null,
         };
 
         // Normalize all array entries to prevent malformed imports from crashing memo builder
@@ -906,32 +965,193 @@ export function setLoreContext(contextUpdate) {
     return state;
 }
 
+// ── Lore generation lifecycle ledger ────────────────────────────────────────────
+
 /**
- * Sets pending lore entries on the live state object and persists.
- * Used after lore generation — entries go into pending for user review.
+ * Records a lore generation attempt in the ledger.
+ * Does NOT mark the context as proposed — just logs the attempt.
+ * Safe to call even if loreGeneration doesn't exist yet (initializes on demand).
+ *
+ * The attemptCount only increments when options.increment is true (default).
+ * Pass { increment: false } for status updates that follow an already-counted
+ * attempt (e.g. recording a failure for an attempt that was already started),
+ * so a single real generation attempt is not counted multiple times.
+ *
+ * When the patched status is a failure ('failed_*') or 'empty', the top-level
+ * loreGeneration.lastFailedFor is updated to this context key.
+ *
+ * @param {string} contextKey - The current lore generation key
+ * @param {Object} [patch={}] - Additional fields to merge into the attempt record
+ * @param {Object} [options={}] - { increment?: boolean } — whether to bump attemptCount
+ * @returns {Object} Updated state
+ */
+export function recordLoreAttempt(contextKey, patch = {}, options = {}) {
+    const { increment = true } = options;
+    const state = getState();
+
+    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+        state.loreGeneration = getDefaultState().loreGeneration;
+    }
+
+    const previous = state.loreGeneration.attempts[contextKey] || {
+        attemptCount: 0,
+    };
+
+    state.loreGeneration.attempts[contextKey] = {
+        ...previous,
+        ...patch,
+        attemptCount: previous.attemptCount + (increment ? 1 : 0),
+        lastAttemptAt: increment ? Date.now() : previous.lastAttemptAt,
+        lastUpdatedAt: Date.now(),
+    };
+
+    if (increment) {
+        state.loreGeneration.lastAttemptedFor = contextKey;
+    }
+
+    // Track the most recent failed/empty context at the top level
+    const status = String(patch.status || '');
+    if (status.startsWith('failed') || status === 'empty') {
+        state.loreGeneration.lastFailedFor = contextKey;
+    }
+
+    saveState(state);
+    return state;
+}
+
+/**
+ * Sets pending lore entries with full lifecycle metadata.
+ * This is the authoritative way to create a pending lore proposal.
+ * Normalizes entries, creates pendingLoreMeta, and updates the ledger.
+ *
+ * Does NOT update loreContext.lastGeneratedFor directly — that's handled
+ * by loreContext metadata in setLoreContext.
+ *
+ * @param {Object[]} entries - Array of raw lore entry objects
+ * @param {Object} meta - Proposal metadata
+ * @param {string} meta.contextKey - The generation context key
+ * @param {string} [meta.source='manual'] - 'auto' or 'manual'
+ * @param {string} [meta.summary=''] - One-line generation summary
+ * @param {string} [meta.id] - Optional batch id (auto-generated if omitted)
+ * @param {number} [meta.rawEntryCount] - Pre-normalization entry count
+ * @returns {{ state: Object, changed: boolean }} Updated state and whether a proposal was created
+ */
+export function setPendingLoreProposal(entries, meta) {
+    const state = getState();
+    const normalized = normalizeLoreMatrix(entries || []);
+
+    if (normalized.length === 0) {
+        return { state, changed: false };
+    }
+
+    const contextKey = meta.contextKey || buildLoreGenerationKey(state);
+    const rawEntryCount = meta.rawEntryCount ?? normalized.length;
+
+    state.pendingLoreEntries = normalized;
+    state.pendingLoreMeta = {
+        id: meta.id || `lore_batch_${Date.now()}`,
+        contextKey,
+        source: meta.source || 'manual',
+        status: 'pending',
+        createdAt: Date.now(),
+        summary: meta.summary || '',
+        rawEntryCount,
+        validEntryCount: normalized.length,
+        droppedEntryCount: Math.max(0, rawEntryCount - normalized.length),
+    };
+
+    // Sync loreContext for backward compatibility
+    if (state.loreContext) {
+        state.loreContext.lastGeneratedFor = contextKey;
+        state.loreContext.lastGenerationSummary = meta.summary || '';
+    }
+
+    // Update generation ledger
+    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+        state.loreGeneration = getDefaultState().loreGeneration;
+    }
+    state.loreGeneration.lastProposedFor = contextKey;
+    state.loreGeneration.attempts[contextKey] = {
+        ...(state.loreGeneration.attempts[contextKey] || {}),
+        status: 'pending',
+        lastProposedAt: Date.now(),
+        validEntryCount: normalized.length,
+        lastSource: meta.source || 'manual',
+    };
+
+    saveState(state);
+    return { state, changed: true };
+}
+
+/**
+ * Marks the current pending lore batch as stale because the context changed.
+ * Updates pendingLoreMeta.status to 'stale' and persists.
+ *
+ * @param {string} [reason=''] - Why the pending lore is stale
+ * @returns {Object} Updated state
+ */
+export function markPendingLoreStale(reason = '') {
+    const state = getState();
+
+    if (state.pendingLoreMeta && state.pendingLoreEntries?.length > 0) {
+        state.pendingLoreMeta.status = 'stale';
+        state.pendingLoreMeta.staleAt = Date.now();
+        state.pendingLoreMeta.staleReason = reason || 'Context changed';
+        saveState(state);
+    }
+
+    return state;
+}
+
+/**
+ * Marks the old pending lore batch's ledger entry as 'replaced' when a new
+ * generation overwrites it for a different context. Keeps the ledger truthful
+ * so an abandoned 'pending' entry is not left dangling.
+ *
+ * No-op when there is no old pending context, or when the old context equals
+ * the incoming one (a re-generation for the same context).
+ *
+ * @param {string} newContextKey - The context key of the incoming proposal
+ * @returns {Object} Updated state
+ */
+export function markPendingLoreReplaced(newContextKey) {
+    const state = getState();
+    const oldKey = state.pendingLoreMeta?.contextKey;
+
+    if (oldKey && oldKey !== newContextKey && state.loreGeneration?.attempts?.[oldKey]) {
+        state.loreGeneration.attempts[oldKey] = {
+            ...state.loreGeneration.attempts[oldKey],
+            status: 'replaced',
+            replacedAt: Date.now(),
+            replacedBy: newContextKey,
+        };
+        saveState(state);
+    }
+
+    return state;
+}
+
+/**
+ * Backward-compatible wrapper that delegates to setPendingLoreProposal.
+ * Used by code that hasn't been updated to the lifecycle ledger yet.
+ *
  * @param {Object[]} entries - Array of lore entry objects
  * @param {string} [summary] - One-line generation summary
  * @param {string} [generationKey] - Context key this generation was produced for
  * @returns {Object} Updated state
  */
 export function setPendingLoreEntries(entries, summary, generationKey) {
-    const state = getState();
-    state.pendingLoreEntries = normalizeLoreMatrix(entries || []);
-    if (state.loreContext) {
-        if (generationKey) {
-            state.loreContext.lastGeneratedFor = generationKey;
-        }
-        if (summary !== undefined) {
-            state.loreContext.lastGenerationSummary = summary || '';
-        }
-    }
-    saveState(state);
-    return state;
+    return setPendingLoreProposal(entries, {
+        contextKey: generationKey || buildLoreGenerationKey(getState()),
+        source: 'manual',
+        summary,
+        rawEntryCount: (entries || []).length,
+    }).state;
 }
 
 /**
  * Accepts pending lore entries by merging them into loreMatrix.
- * Pending entries are cleared after merge.
+ * Updates the generation ledger so the context is marked as accepted.
  * Locked/user-edited entries in the matrix are preserved.
  * @returns {Object} Updated state
  */
@@ -941,10 +1161,13 @@ export function acceptPendingLoreEntries() {
     const pending = normalizeLoreMatrix(state.pendingLoreEntries || []);
     const existing = normalizeLoreMatrix(state.loreMatrix || []);
 
+    if (pending.length === 0) return state;
+
+    const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
+
     let merged = mergeLoreEntries(existing, pending);
 
     // Enforce maxLoreEntriesInMatrix cap, preserving locked/userEdited/pinned entries.
-    // Protected entries are allowed to exceed the cap rather than being silently dropped.
     const max = Number(settings.maxLoreEntriesInMatrix) || 50;
     if (merged.length > max) {
         const protectedEntries = merged.filter(e => e.locked || e.userEdited || e.status === 'pinned');
@@ -953,8 +1176,6 @@ export function acceptPendingLoreEntries() {
             .sort((a, b) => (b.priority || 50) - (a.priority || 50) || (a.title || '').localeCompare(b.title || ''));
 
         if (protectedEntries.length > max) {
-            // Enough protected entries to exceed the cap — keep them all
-            // instead of silently dropping user-locked data.
             merged = protectedEntries;
         } else {
             merged = [...protectedEntries, ...regularEntries].slice(0, max);
@@ -963,11 +1184,23 @@ export function acceptPendingLoreEntries() {
 
     state.loreMatrix = merged;
     state.pendingLoreEntries = [];
+    state.pendingLoreMeta = null;
 
     if (state.loreContext) {
-        // Keep lastGeneratedFor so auto-generation does not repeat unchanged context.
         state.loreContext.lastGenerationSummary = '';
     }
+
+    // Update generation ledger
+    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+        state.loreGeneration = getDefaultState().loreGeneration;
+    }
+    state.loreGeneration.lastAcceptedFor = contextKey;
+    state.loreGeneration.attempts[contextKey] = {
+        ...(state.loreGeneration.attempts[contextKey] || {}),
+        status: 'accepted',
+        acceptedAt: Date.now(),
+        validEntryCount: pending.length,
+    };
 
     saveState(state);
     return state;
@@ -975,15 +1208,32 @@ export function acceptPendingLoreEntries() {
 
 /**
  * Rejects pending lore entries by clearing them without merging.
+ * Updates the generation ledger so the context is marked as rejected
+ * and auto-generation will not repeat it until context changes.
  * @returns {Object} Updated state
  */
 export function rejectPendingLoreEntries() {
     const state = getState();
+    const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
+
     state.pendingLoreEntries = [];
+    state.pendingLoreMeta = null;
+
     if (state.loreContext) {
-        // Keep lastGeneratedFor so rejected proposals do not immediately regenerate.
         state.loreContext.lastGenerationSummary = '';
     }
+
+    // Update generation ledger
+    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+        state.loreGeneration = getDefaultState().loreGeneration;
+    }
+    state.loreGeneration.lastRejectedFor = contextKey;
+    state.loreGeneration.attempts[contextKey] = {
+        ...(state.loreGeneration.attempts[contextKey] || {}),
+        status: 'rejected',
+        rejectedAt: Date.now(),
+    };
+
     saveState(state);
     return state;
 }

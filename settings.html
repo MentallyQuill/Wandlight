@@ -170,8 +170,19 @@
                             <em>No pending lore entries</em>
                         </div>
 
+                        <div id="wandlight_lore_stale_badge" class="wandlight-lore-stale-badge"
+                            style="display: none; font-size: 0.78em; color: #ffaa44; background: rgba(255, 170, 68, 0.12);
+                            border: 1px solid rgba(255, 170, 68, 0.3); border-radius: 4px; padding: 4px 8px; margin: 2px 0;">
+                        </div>
+
+                        <div id="wandlight_lore_batch_status" class="wandlight-lore-batch-status"
+                            style="font-size: 0.75em; opacity: 0.65; margin: 1px 0 4px 0; font-style: italic;">
+                        </div>
+
                         <div class="wandlight-lore-entry-count" style="font-size: 0.8em; opacity: 0.7;">
-                            <span id="wandlight_lore_count">0</span> accepted entries
+                            <span id="wandlight_lore_count">0</span> accepted
+                            <span style="opacity: 0.4; margin: 0 6px;">|</span>
+                            <span id="wandlight_pending_lore_count" style="color: #88aaff;">0</span> pending
                         </div>
 
                         <!-- Lore Matrix JSON Editor -->

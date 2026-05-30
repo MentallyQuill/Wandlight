@@ -7,7 +7,7 @@
  * Imported by: index.js, memo-builder.js, extractor.js, ui.js
  */
 
-import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX, EXTENSION_FOLDER } from './constants.js';
+import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
 
 // ── Settings I/O ────────────────────────────────────────────────────────────────
 

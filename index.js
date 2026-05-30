@@ -7,7 +7,7 @@
  *                    prompt-injector.js, extractor.js, ui.js
  */
 
-import { MODULE_KEY, LOG_PREFIX, DEFAULT_SETTINGS, EXTENSION_FOLDER } from './constants.js';
+import { LOG_PREFIX, DEFAULT_SETTINGS, EXTENSION_FOLDER } from './constants.js';
 import {
     getSettings,
     saveSettings,
@@ -23,7 +23,7 @@ import {
 } from './state-manager.js';
 import { buildMemo } from './memo-builder.js';
 import { installInterceptor } from './prompt-injector.js';
-import { onExtractionTriggered, resetExtractionCounter, isExtractionRunning } from './extractor.js';
+import { onExtractionTriggered, resetExtractionCounter } from './extractor.js';
 import { renderSettingsPanel, renderStatePanel } from './ui.js';
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -192,6 +192,12 @@ function registerSlashCommands(ctx) {
  * @param {Object} ctx - SillyTavern.getContext() result
  */
 async function mountSettingsPanel(ctx) {
+    // ── Duplicate panel guard ────────────────────────────────────────────────
+    if (document.getElementById('wandlight_continuity_settings')) {
+        console.warn(`${LOG_PREFIX} Settings panel already mounted; skipping duplicate mount`);
+        return;
+    }
+
     // ── Render the template async ────────────────────────────────────────────
     if (ctx.renderExtensionTemplateAsync) {
         try {

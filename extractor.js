@@ -17,7 +17,6 @@ import {
     getState,
     applyDelta,
     saveState,
-    saveStateWithSnapshot,
     pushStateSnapshot,
     validateDelta,
 } from './state-manager.js';
@@ -291,12 +290,8 @@ export async function onExtractionTriggered(options = {}) {
         // Check for no-op delta (empty changes)
         if (!delta.changes || Object.keys(delta.changes).length === 0) {
             if (settings.debugMode) {
-                console.log(`${LOG_PREFIX} Extraction delta has no changes \u2014 skipping`);
+                console.log(`${LOG_PREFIX} Extraction delta has no changes — skipping`);
             }
-            // Still store the no-op delta for diagnostic transparency
-            const currentState = getState();
-            currentState.lastDelta = delta;
-            saveState(currentState);
             return;
         }
 
@@ -310,10 +305,11 @@ export async function onExtractionTriggered(options = {}) {
 
         if (settings.autoApplyDelta) {
             // Push a snapshot BEFORE applying for undo support,
-            // then save (saveStateWithSnapshot handles its own snapshot internally)
+            // then apply the delta and save
             pushStateSnapshot(currentState, 'Auto-extract: ' + (delta.summary || 'unnamed change'), settings.maxSnapshots);
 
             const newState = applyDelta(currentState, delta);
+            newState.lastDelta = null; // critical: do not leave applied delta pending
             saveState(newState);
 
             if (settings.debugMode) {

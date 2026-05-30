@@ -108,7 +108,7 @@ export function renderSettingsPanel(container) {
 /**
  * Refreshes the memo preview area from current state.
  */
-function refreshMemoPreview() {
+export function refreshMemoPreview() {
     const preview = document.getElementById('wandlight_memo_preview');
     if (!preview) return;
 

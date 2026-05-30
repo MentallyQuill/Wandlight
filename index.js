@@ -32,6 +32,7 @@ import {
     renderStatePanel,
     renderLoreContextPreview,
     renderLoreMatrixPreview,
+    refreshMemoPreview,
 } from './ui.js';
 import {
     runLoreContextDetection,
@@ -477,7 +478,12 @@ function wireSettingsPanel(container) {
             const state = getState();
             const pendingCount = (state.pendingLoreEntries || []).length;
             if (pendingCount > 0) {
-                const proceed = typeof Popup !== 'undefined' && typeof Popup.show !== 'undefined'
+                const hasPopupConfirm =
+                    typeof Popup !== 'undefined' &&
+                    Popup.show &&
+                    typeof Popup.show.confirm === 'function';
+
+                const proceed = hasPopupConfirm
                     ? await Popup.show.confirm(
                         'Generate Lore — Overwrite Pending?',
                         `There are already ${pendingCount} pending lore entries awaiting review. Generating new lore will replace them. Continue?`
@@ -631,5 +637,12 @@ function refreshStatePanel() {
         renderLoreMatrixPreview();
     } catch (e2) {
         // Silently ignore — lore panels might not be in DOM
+    }
+
+    // ── Refresh memo preview ───────────────────────────────────────────────
+    try {
+        refreshMemoPreview();
+    } catch (e2) {
+        // Silently ignore — memo preview might not be in DOM
     }
 }

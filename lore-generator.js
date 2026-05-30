@@ -220,6 +220,14 @@ export async function runLoreGeneration(options = {}) {
             return [];
         }
 
+        // Auto-generation must not silently overwrite unreviewed pending lore.
+        if (!force && Array.isArray(state.pendingLoreEntries) && state.pendingLoreEntries.length > 0) {
+            if (settings.debugMode) {
+                console.debug(`${LOG_PREFIX} Skipping auto lore generation — pending lore already awaits review`);
+            }
+            return [];
+        }
+
         // Check if context has changed since last generation. Manual generation passes
         // force:true so the user can intentionally refresh pending proposals.
         const currentKey = buildLoreGenerationKey(state);
@@ -250,6 +258,11 @@ export async function runLoreGeneration(options = {}) {
         }
 
         const entries = normalizeLoreMatrix(parsed.entries);
+        if (entries.length === 0) {
+            console.warn(`${LOG_PREFIX} Lore generation returned no valid entries after normalization`);
+            return [];
+        }
+
         const summary = parsed.summary || '';
 
         // Set as pending (user review required) and persist the generation key atomically.

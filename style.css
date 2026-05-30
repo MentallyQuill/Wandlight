@@ -133,3 +133,44 @@
     gap: 6px;
     margin-top: 4px;
 }
+
+/* ── Lore context display ───────────────────────────────────────────────────── */
+.wandlight-lore-context {
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.78em;
+    line-height: 1.35;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(180, 150, 200, 0.2);
+    border-radius: 4px;
+    padding: 8px 10px;
+    max-height: 120px;
+    overflow-y: auto;
+    margin: 4px 0;
+    color: #c8b8d8;
+    word-break: break-word;
+}
+
+/* ── Lore matrix preview ────────────────────────────────────────────────────── */
+.wandlight-lore-matrix {
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.78em;
+    line-height: 1.35;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(180, 160, 140, 0.2);
+    border-radius: 4px;
+    padding: 8px 10px;
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 4px 0;
+    color: #d4c8a8;
+    word-break: break-word;
+}
+
+/* ── Lore entry count indicator ─────────────────────────────────────────────── */
+.wandlight-lore-entry-count {
+    font-size: 0.8em;
+    opacity: 0.7;
+    padding: 2px 0;
+}

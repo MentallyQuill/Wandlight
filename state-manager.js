@@ -8,6 +8,7 @@
  */
 
 import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
+import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry } from './lore-matrix.js';
 
 // ── Settings I/O ────────────────────────────────────────────────────────────────
 
@@ -278,8 +279,35 @@ export function migrateState(state) {
         state.stateHistory = [];
     }
 
-    // Future migration steps would go here:
-    // if (state._version < 2) { ... state._version = 2; }
+    // ── Schema v1 → v2: Lore Matrix migration ───────────────────────────────
+    if (state._version < 2) {
+        const defaults = getDefaultState();
+
+        // Add loreContext if missing
+        state.loreContext = normalizeLoreContext(state.loreContext || {});
+        if (!state.loreContext.sceneDate && state.canon?.inUniverseDate) {
+            state.loreContext.sceneDate = state.canon.inUniverseDate;
+        }
+        if (!state.loreContext.canonBoundary && state.canon?.canonBoundary) {
+            state.loreContext.canonBoundary = state.canon.canonBoundary;
+        }
+
+        // Add loreMatrix if missing
+        if (!Array.isArray(state.loreMatrix)) {
+            state.loreMatrix = [];
+        } else {
+            state.loreMatrix = normalizeLoreMatrix(state.loreMatrix);
+        }
+
+        // Add pendingLoreEntries if missing
+        if (!Array.isArray(state.pendingLoreEntries)) {
+            state.pendingLoreEntries = [];
+        } else {
+            state.pendingLoreEntries = normalizeLoreMatrix(state.pendingLoreEntries);
+        }
+
+        state._version = 2;
+    }
 
     return state;
 }
@@ -785,6 +813,11 @@ export function importState(json) {
             stateHistory: Array.isArray(parsed.stateHistory) ? parsed.stateHistory : [],
             lastDelta: parsed.lastDelta || null,
             _version: SCHEMA_VERSION,
+
+            // Lore fields (schema v2)
+            loreContext: normalizeLoreContext(parsed.loreContext || {}),
+            loreMatrix: normalizeLoreMatrix(parsed.loreMatrix || []),
+            pendingLoreEntries: normalizeLoreMatrix(parsed.pendingLoreEntries || []),
         };
 
         // Normalize all array entries to prevent malformed imports from crashing memo builder
@@ -811,6 +844,78 @@ export function exportState(state) {
         console.error(`${LOG_PREFIX} Failed to export state:`, e);
         return '{}';
     }
+}
+
+// ── Lore-specific state operations ──────────────────────────────────────────────
+
+/**
+ * Updates loreContext on the live state object and persists.
+ * Used after lore context detection completes.
+ * @param {Object} contextUpdate - Partial lore context to merge
+ * @returns {Object} Updated state (the live object, not a clone)
+ */
+export function setLoreContext(contextUpdate) {
+    const state = getState();
+    const normalized = normalizeLoreContext(contextUpdate || {});
+    state.loreContext = {
+        ...state.loreContext,
+        ...normalized,
+        lastDetectedAt: Date.now(),
+    };
+    saveState(state);
+    return state;
+}
+
+/**
+ * Sets pending lore entries on the live state object and persists.
+ * Used after lore generation — entries go into pending for user review.
+ * @param {Object[]} entries - Array of lore entry objects
+ * @param {string} [summary] - One-line generation summary
+ * @returns {Object} Updated state
+ */
+export function setPendingLoreEntries(entries, summary) {
+    const state = getState();
+    state.pendingLoreEntries = normalizeLoreMatrix(entries || []);
+    if (summary && state.loreContext) {
+        state.loreContext.lastGenerationSummary = summary;
+    }
+    saveState(state);
+    return state;
+}
+
+/**
+ * Accepts pending lore entries by merging them into loreMatrix.
+ * Pending entries are cleared after merge.
+ * Locked/user-edited entries in the matrix are preserved.
+ * @returns {Object} Updated state
+ */
+export function acceptPendingLoreEntries() {
+    const state = getState();
+    const pending = normalizeLoreMatrix(state.pendingLoreEntries || []);
+    const existing = normalizeLoreMatrix(state.loreMatrix || []);
+    state.loreMatrix = mergeLoreEntries(existing, pending);
+    state.pendingLoreEntries = [];
+    if (state.loreContext) {
+        state.loreContext.lastGeneratedFor = '';
+        state.loreContext.lastGenerationSummary = '';
+    }
+    saveState(state);
+    return state;
+}
+
+/**
+ * Rejects pending lore entries by clearing them without merging.
+ * @returns {Object} Updated state
+ */
+export function rejectPendingLoreEntries() {
+    const state = getState();
+    state.pendingLoreEntries = [];
+    if (state.loreContext) {
+        state.loreContext.lastGeneratedFor = '';
+        state.loreContext.lastGenerationSummary = '';
+    }
+    saveState(state);
+    return state;
 }
 
 // ── Export the default state factory for convenience ────────────────────────────

@@ -4,7 +4,8 @@
  * slash commands, and exposes globalThis bridge functions.
  *
  * Imported modules: constants.js, state-manager.js, memo-builder.js,
- *                    prompt-injector.js, extractor.js, ui.js
+ *                    prompt-injector.js, extractor.js, ui.js,
+ *                    lore-matrix.js, lore-generator.js
  */
 
 import { LOG_PREFIX, DEFAULT_SETTINGS, EXTENSION_FOLDER, detectExtensionFolder } from './constants.js';
@@ -24,7 +25,20 @@ import {
 import { buildMemo } from './memo-builder.js';
 import { installInterceptor } from './prompt-injector.js';
 import { onExtractionTriggered, resetExtractionCounter } from './extractor.js';
-import { renderSettingsPanel, renderStatePanel } from './ui.js';
+import {
+    renderSettingsPanel,
+    renderStatePanel,
+    renderLoreContextPreview,
+    renderLoreMatrixPreview,
+} from './ui.js';
+import {
+    normalizeLoreMatrix,
+    mergeLoreEntries,
+} from './lore-matrix.js';
+import {
+    runLoreContextDetection,
+    runLoreGeneration,
+} from './lore-generator.js';
 
 // ════════════════════════════════════════════════════════════════════════════════
 // jQuery ready — this is the SillyTavern extension lifecycle entrypoint.
@@ -151,7 +165,7 @@ function registerSlashCommands(ctx) {
     // ── /wandlight-extract ───────────────────────────────────────────────────
     register('wandlight-extract', async () => {
         await onExtractionTriggered({ force: true });
-    }, undefined, '👁️ Manually run continuity state extraction', 'Wandlight');
+    }, undefined, '\uD83D\uDC41\uFE0F Manually run continuity state extraction', 'Wandlight');
 
     // ── /wandlight-memo ─────────────────────────────────────────────────────
     register('wandlight-memo', async () => {
@@ -166,7 +180,7 @@ function registerSlashCommands(ctx) {
                 if (typeof toastr !== 'undefined') toastr.info(`[Wandlight Continuity State]\n${memo}`);
             });
         }
-    }, undefined, '📋 Copy continuity memo to clipboard', 'Wandlight');
+    }, undefined, '\uD83D\uDCCB Copy continuity memo to clipboard', 'Wandlight');
 
     // ── /wandlight-state ────────────────────────────────────────────────────
     register('wandlight-state', async () => {
@@ -177,7 +191,7 @@ function registerSlashCommands(ctx) {
         }).catch(() => {
             if (typeof toastr !== 'undefined') toastr.info(`State JSON (${json.length} chars) ready; clipboard unavailable`);
         });
-    }, undefined, '📄 Export full continuity state as JSON', 'Wandlight');
+    }, undefined, '\uD83D\uDCC4 Export full continuity state as JSON', 'Wandlight');
 
     console.log(`${LOG_PREFIX} Slash commands registered`);
 }
@@ -240,8 +254,10 @@ async function mountSettingsPanel(ctx) {
             // is not yet exposed by exposeGlobalBridge() at this point.
             try {
                 refreshStatePanel();
+                renderLoreContextPreview();
+                renderLoreMatrixPreview();
             } catch (e) {
-                // Silently ignore — state panel might not exist yet
+                // Silently ignore — panels might not exist yet
             }
         }
     }, 100);
@@ -250,7 +266,7 @@ async function mountSettingsPanel(ctx) {
 }
 
 /**
- * Wires the settings panel form controls (save, buttons).
+ * Wires the settings panel form controls (save, buttons, lore).
  * Called after the settings HTML is rendered into the DOM.
  * @param {HTMLElement} container - The settings panel div
  */
@@ -432,6 +448,83 @@ function wireSettingsPanel(container) {
         });
     }
 
+    // ── Lore Matrix: Detect Context button ────────────────────────────────
+    const detectLoreBtn = container.querySelector('#wandlight_detect_lore_context');
+    if (detectLoreBtn) {
+        detectLoreBtn.addEventListener('click', async () => {
+            detectLoreBtn.disabled = true;
+            const origHTML = detectLoreBtn.innerHTML;
+            detectLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting...';
+            try {
+                await runLoreContextDetection();
+                renderLoreContextPreview();
+                renderLoreMatrixPreview();
+                if (typeof toastr !== 'undefined') toastr.success('Lore context detected');
+            } catch (e2) {
+                if (typeof toastr !== 'undefined') toastr.error('Detection failed: ' + e2.message);
+            } finally {
+                detectLoreBtn.disabled = false;
+                detectLoreBtn.innerHTML = origHTML;
+            }
+        });
+    }
+
+    // ── Lore Matrix: Generate Lore button ─────────────────────────────────
+    const generateLoreBtn = container.querySelector('#wandlight_generate_lore');
+    if (generateLoreBtn) {
+        generateLoreBtn.addEventListener('click', async () => {
+            generateLoreBtn.disabled = true;
+            const origHTML = generateLoreBtn.innerHTML;
+            generateLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+            try {
+                const pending = await runLoreGeneration();
+                renderLoreMatrixPreview();
+                if (typeof toastr !== 'undefined') toastr.success(`${pending.length} lore entries generated (pending review)`);
+            } catch (e2) {
+                if (typeof toastr !== 'undefined') toastr.error('Lore generation failed: ' + e2.message);
+            } finally {
+                generateLoreBtn.disabled = false;
+                generateLoreBtn.innerHTML = origHTML;
+            }
+        });
+    }
+
+    // ── Lore Matrix: Accept All button ────────────────────────────────────
+    const acceptAllBtn = container.querySelector('#wandlight_accept_all_lore');
+    if (acceptAllBtn) {
+        acceptAllBtn.addEventListener('click', () => {
+            const state = getState();
+            const pending = state._pendingLore || [];
+            if (pending.length === 0) {
+                if (typeof toastr !== 'undefined') toastr.info('No pending lore entries to accept');
+                return;
+            }
+            const merged = mergeLoreEntries(state.loreMatrix || [], pending);
+            state.loreMatrix = merged;
+            state._pendingLore = [];
+            saveState(state);
+            renderLoreMatrixPreview();
+            if (typeof toastr !== 'undefined') toastr.success(`${pending.length} lore entries accepted`);
+        });
+    }
+
+    // ── Lore Matrix: Reject All button ────────────────────────────────────
+    const rejectAllBtn = container.querySelector('#wandlight_reject_all_lore');
+    if (rejectAllBtn) {
+        rejectAllBtn.addEventListener('click', () => {
+            const state = getState();
+            const pending = state._pendingLore || [];
+            if (pending.length === 0) {
+                if (typeof toastr !== 'undefined') toastr.info('No pending lore entries to reject');
+                return;
+            }
+            state._pendingLore = [];
+            saveState(state);
+            renderLoreMatrixPreview();
+            if (typeof toastr !== 'undefined') toastr.info(`${pending.length} lore entries rejected`);
+        });
+    }
+
     console.log(`${LOG_PREFIX} Settings panel wired`);
 }
 
@@ -505,6 +598,12 @@ function refreshStatePanel() {
             deltaContainer.appendChild(em);
         }
     }
+
+    // ── Refresh lore previews ──────────────────────────────────────────────
+    try {
+        renderLoreContextPreview();
+        renderLoreMatrixPreview();
+    } catch (e2) {
+        // Silently ignore — lore panels might not be in DOM
+    }
 }
-
-

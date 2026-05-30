@@ -1,7 +1,7 @@
 /**
  * constants.js — Wandlight Continuity
  * Module key, default state object, default settings, extraction prompt template,
- * and logging prefix. No other dependencies. This is the root constants file.
+ * lore generation prompts, and logging prefix. No other dependencies.
  */
 
 // ── Module key ──────────────────────────────────────────────────────────────────
@@ -32,11 +32,12 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
     }
     return fallback;
 }
+
 // ── Logging prefix ──────────────────────────────────────────────────────────────
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -47,6 +48,11 @@ export const DEFAULT_SETTINGS = {
     extractionInterval: 1,
     maxSnapshots: 20,
     debugMode: false,
+
+    // Lore matrix
+    injectLore: true,
+    maxLoreEntriesInMemo: 6,
+    autoGenerateLore: false,
 };
 
 // ── Default per-chat state ──────────────────────────────────────────────────────
@@ -66,6 +72,21 @@ export function getDefaultState() {
             nearbyCharacters: [],
             currentActivity: '',
         },
+
+        // Lore matrix (schema v2)
+        loreContext: {
+            sceneDate: '',
+            subjectiveDate: '',
+            canonBoundary: '',
+            branchId: 'main',
+            timeTravelMode: 'none',
+            lastDetectedAt: 0,
+            lastGeneratedFor: '',
+            lastGenerationSummary: '',
+        },
+        loreMatrix: [],
+        pendingLoreEntries: [],
+
         knowledge: {},
         secrets: [],
         relationships: [],
@@ -143,8 +164,86 @@ Recent roleplay messages:
 // ── Extraction prompt (user message) ────────────────────────────────────────────
 export const EXTRACTION_USER_PROMPT = `Analyze the messages above and extract any changes to the continuity state. Remember: only output fields that actually changed, in valid JSON format.`;
 
+// ── Lore Context Detection prompt ───────────────────────────────────────────────
+export const LORE_CONTEXT_DETECTION_SYSTEM_PROMPT = `You are the Wandlight Lore Context Detector for a Harry Potter / Hogwarts roleplay.
+
+Read the current continuity state and recent messages. Infer only the story's current lore context.
+
+Output ONLY valid JSON:
+{
+  "sceneDate": "string, or empty if unknown",
+  "subjectiveDate": "string, or empty if same/unknown",
+  "canonBoundary": "string, or empty if unknown",
+  "branchId": "main|alternate|custom string",
+  "timeTravelMode": "none|visitor_from_future|past_changed|alternate_branch",
+  "summary": "one sentence"
+}
+
+Rules:
+- Do not invent a precise date if only an era is known.
+- Prefer canon boundary phrases when precise dates are unclear.
+- If time travel is implied, separate sceneDate from subjectiveDate.
+- Output JSON only.`;
+
+// ── Lore Generation prompt ──────────────────────────────────────────────────────
+export const LORE_GENERATION_SYSTEM_PROMPT = `You are the Wandlight Lore Matrix Generator for a Harry Potter / Hogwarts roleplay.
+
+Generate a small set of lore entries relevant to the current story context. Do not generate a Harry Potter encyclopedia.
+
+Prioritize:
+1. Current era/date/canon boundary.
+2. Present or nearby characters.
+3. Current location.
+4. Secrets, public misconceptions, reveal constraints.
+5. Facts likely to matter in the next 10-20 turns.
+
+Output ONLY valid JSON:
+{
+  "summary": "one sentence",
+  "entries": [
+    {
+      "id": "stable_snake_case_id",
+      "title": "short title",
+      "category": "canon|au|secret|rumor|lie|relationship|location|rule|timeline",
+      "fact": "what is actually true or believed",
+      "canonStatus": "canon|divergent|au|fanon|unknown",
+      "truthStatus": "true|false|public-belief|rumor|contested|hidden",
+      "validFrom": "string or empty",
+      "validTo": "string or empty",
+      "branchId": "main",
+      "whoKnowsTruth": ["string"],
+      "whoSuspects": ["string"],
+      "whoBelievesPublicVersion": ["string"],
+      "publicVersion": "string",
+      "revealPolicy": "public|private|do_not_reveal|only_if_knower_present|only_if_user_reveals",
+      "activeWhen": {
+        "erasAny": ["string"],
+        "locationsAny": ["string"],
+        "charactersPresentAny": ["string"],
+        "tagsAny": ["string"]
+      },
+      "priority": 50,
+      "status": "active",
+      "source": "model-generated",
+      "userEdited": false,
+      "locked": false,
+      "notes": ""
+    }
+  ]
+}
+
+Rules:
+- Generate 4-10 entries only.
+- Prefer constraints over trivia.
+- If a fact is secret in this era, include publicVersion and revealPolicy.
+- Do not overwrite user-edited lore. This pass only proposes entries.
+- Output JSON only.`;
+
 // ── Token budget for memo ───────────────────────────────────────────────────────
 export const MEMO_MAX_TOKENS = 500;
+
+// ── Lore entry limits ───────────────────────────────────────────────────────────
+export const MAX_LORE_ENTRIES_IN_MEMO = 6;
 
 // ── Character list truncation limits ────────────────────────────────────────────
 export const MAX_PRESENT_CHARS_IN_MEMO = 8;

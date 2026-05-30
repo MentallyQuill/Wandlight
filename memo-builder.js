@@ -15,8 +15,10 @@ import {
     MAX_ACTIVE_THREADS_IN_MEMO,
     MAX_RELATIONSHIPS_IN_MEMO,
     MAX_FLAGS_IN_MEMO,
+    MAX_LORE_ENTRIES_IN_MEMO,
 } from './constants.js';
 import { getState } from './state-manager.js';
+import { getActiveLoreEntries } from './lore-matrix.js';
 
 /**
  * Builds a compact continuity memo string from the given state object.
@@ -188,6 +190,32 @@ export function buildMemo(state) {
         }
         if (unresolvedFlags.length > MAX_FLAGS_IN_MEMO) {
             lines.push(`  (+${unresolvedFlags.length - MAX_FLAGS_IN_MEMO} more flags)`);
+        }
+        hasContent = true;
+    }
+
+    // ── Lore Matrix (inject active lore entries) ──
+    const activeLore = getActiveLoreEntries(state, MAX_LORE_ENTRIES_IN_MEMO);
+    if (activeLore.length > 0) {
+        lines.push('');
+        lines.push('## Story Lore');
+        for (const entry of activeLore) {
+            const parts = [`- <${entry.category}> **${entry.title}**`];
+            if (entry.fact) {
+                parts.push(`\n    ${entry.fact}`);
+            }
+            // Show reveal policy hint
+            if (entry.revealPolicy === 'do_not_reveal') {
+                parts.push('\n    (Do Not Reveal — keep hidden from characters)');
+            } else if (entry.revealPolicy === 'only_if_knower_present') {
+                parts.push(`\n    (Only reveal if knowers present: ${(entry.whoKnowsTruth || []).join(', ') || 'unknown'})`);
+            } else if (entry.revealPolicy === 'only_if_user_reveals') {
+                parts.push('\n    (Only reveal if {{user}} brings it up)');
+            }
+            if (entry.publicVersion && entry.truthStatus !== 'true') {
+                parts.push(`\n    (Public version: ${entry.publicVersion})`);
+            }
+            lines.push(parts.join(''));
         }
         hasContent = true;
     }

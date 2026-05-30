@@ -20,6 +20,7 @@ import {
     pushStateSnapshot,
     validateDelta,
 } from './state-manager.js';
+import { runLoreContextDetection } from './lore-generator.js';
 
 /** Guard flag to prevent concurrent extraction passes. */
 let _extractionRunning = false;
@@ -322,6 +323,17 @@ export async function onExtractionTriggered(options = {}) {
 
             if (settings.debugMode) {
                 console.log(`${LOG_PREFIX} Delta stored as lastDelta (manual review mode)`);
+            }
+        }
+
+        // ── Auto-run lore context detection after extraction ──
+        if (settings.autoGenerateLore) {
+            try {
+                await runLoreContextDetection();
+            } catch (loreErr) {
+                if (settings.debugMode) {
+                    console.warn(`${LOG_PREFIX} Lore context detection after extraction failed:`, loreErr);
+                }
             }
         }
 

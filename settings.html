@@ -111,6 +111,73 @@
                 </div>
             </div>
 
+            <!-- Lore Matrix -->
+            <div class="inline-drawer">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <i class="fa-solid fa-book-atlas" style="margin-right: 8px; opacity: 0.7;"></i>
+                    <b>Lore Matrix</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <div class="flex-container flexFlowColumn gap-1">
+
+                        <label class="checkbox_label">
+                            <input id="wandlight_auto_generate_lore" type="checkbox" data-setting="autoGenerateLore" />
+                            <span>Auto-Generate Lore</span>
+                            <i class="fa-solid fa-circle-question interactable"
+                                title="After each extraction, automatically detect scene context and generate/update lore entries."></i>
+                        </label>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                            <span style="flex-shrink: 0;">Max Lore Entries:</span>
+                            <input id="wandlight_max_lore_entries" type="range" data-setting="maxLoreEntries" min="5" max="50" value="20" style="flex: 1;" />
+                            <span id="wandlight_max_lore_entries_value" style="min-width: 24px; text-align: right;">20</span>
+                        </div>
+                        <small style="opacity: 0.6; margin-top: -4px;">Maximum lore entries kept in the matrix. Least-relevant entries are retired when exceeded.</small>
+
+                        <div id="wandlight_lore_context_preview" class="wandlight-lore-context"
+                            style="font-family: monospace; font-size: 0.78em; line-height: 1.35;
+                            background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 4px;
+                            max-height: 120px; overflow-y: auto; margin: 4px 0; opacity: 0.8;">
+                            <em>Context not yet detected</em>
+                        </div>
+
+                        <div id="wandlight_lore_matrix_preview" class="wandlight-lore-matrix"
+                            style="font-family: monospace; font-size: 0.78em; line-height: 1.35;
+                            background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 4px;
+                            max-height: 220px; overflow-y: auto; margin: 4px 0;">
+                            <em>No lore entries</em>
+                        </div>
+
+                        <div class="wandlight-lore-entry-count" style="font-size: 0.8em; opacity: 0.7;">
+                            <span id="wandlight_lore_count">0</span> entries
+                        </div>
+
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button id="wandlight_detect_lore_context" class="menu_button interactable"
+                                title="Analyze current scene for era, location, and characters to determine lore context">
+                                <i class="fa-solid fa-magnifying-glass"></i> Detect Context
+                            </button>
+                            <button id="wandlight_generate_lore" class="menu_button interactable"
+                                title="Generate new lore entries based on recent messages and current scene context">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Lore
+                            </button>
+                            <button id="wandlight_accept_all_lore" class="menu_button interactable"
+                                style="background: rgba(80, 180, 100, 0.18); border-color: #55bb66;"
+                                title="Accept all pending lore generation results">
+                                <i class="fa-solid fa-check-double"></i> Accept All
+                            </button>
+                            <button id="wandlight_reject_all_lore" class="menu_button interactable"
+                                style="background: rgba(200, 100, 80, 0.18); border-color: #cc6655;"
+                                title="Reject all pending lore generation results">
+                                <i class="fa-solid fa-xmark"></i> Reject All
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
             <!-- Continuity Memo Preview -->
             <div class="inline-drawer">
                 <div class="inline-drawer-toggle inline-drawer-header">

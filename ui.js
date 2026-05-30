@@ -8,6 +8,11 @@
 
 import { buildMemo } from './memo-builder.js';
 import { getState, saveState, pushStateSnapshot, importState, getSettings } from './state-manager.js';
+import {
+    normalizeLoreMatrix,
+    normalizeLoreContext,
+    getActiveLoreEntries,
+} from './lore-matrix.js';
 
 /**
  * Renders the settings panel HTML into the container.
@@ -233,6 +238,19 @@ export function renderStatePanel(container, state) {
     addSection('Threads', state.threads, '\uD83E\uDDF5');
     addSection('Continuity Flags', state.continuityFlags, '\uD83C\uDFF4');
 
+    // ── Lore Context ──
+    if (state.loreContext) {
+        addSection('Lore Context', state.loreContext, '\uD83D\uDCD6');
+    }
+
+    // ── Lore Matrix ──
+    const loreEntries = normalizeLoreMatrix(state.loreMatrix || []);
+    if (loreEntries.length > 0) {
+        const activeEntries = getActiveLoreEntries(state, 999);
+        const label = 'Lore Matrix (' + loreEntries.length + ' entries, ' + activeEntries.length + ' active)';
+        addSection(label, loreEntries, '\uD83D\uDCDA');
+    }
+
     if (state.stateHistory && state.stateHistory.length > 0) {
         const historyDiv = document.createElement('div');
         historyDiv.className = 'wandlight-state-section';
@@ -277,6 +295,97 @@ export function renderStatePanel(container, state) {
         const em = document.createElement('em');
         em.textContent = 'No continuity state data available';
         container.appendChild(em);
+    }
+}
+
+/**
+ * Renders the lore context preview from current state.
+ */
+export function renderLoreContextPreview() {
+    const preview = document.getElementById('wandlight_lore_context_preview');
+    if (!preview) return;
+
+    try {
+        const state = getState();
+        if (!state) {
+            preview.textContent = '(No continuity state loaded)';
+            return;
+        }
+        const ctx = normalizeLoreContext(state.loreContext || {});
+        const parts = [];
+        if (ctx.sceneDate) parts.push('Scene Date: ' + ctx.sceneDate);
+        if (ctx.subjectiveDate) parts.push('Subjective Date: ' + ctx.subjectiveDate);
+        if (ctx.canonBoundary) parts.push('Canon Boundary: ' + ctx.canonBoundary);
+        if (ctx.branchId && ctx.branchId !== 'main') parts.push('Branch: ' + ctx.branchId);
+        if (ctx.timeTravelMode && ctx.timeTravelMode !== 'none') parts.push('Time Travel: ' + ctx.timeTravelMode);
+        if (ctx.lastDetectedAt) {
+            const date = new Date(ctx.lastDetectedAt);
+            parts.push('Last Detected: ' + date.toLocaleString());
+        }
+        if (ctx.lastGenerationSummary) parts.push('Last Generation: ' + ctx.lastGenerationSummary);
+
+        if (parts.length > 0) {
+            preview.textContent = parts.join('\n');
+        } else {
+            preview.textContent = 'Context pending detection';
+        }
+    } catch (e) {
+        preview.textContent = '(Error: ' + e.message + ')';
+    }
+}
+
+/**
+ * Renders the lore matrix preview from current state.
+ */
+export function renderLoreMatrixPreview() {
+    const preview = document.getElementById('wandlight_lore_matrix_preview');
+    const countEl = document.getElementById('wandlight_lore_count');
+    if (!preview) return;
+
+    try {
+        const state = getState();
+        if (!state) {
+            preview.textContent = '(No continuity state loaded)';
+            if (countEl) countEl.textContent = '0';
+            return;
+        }
+
+        const entries = normalizeLoreMatrix(state.loreMatrix || []);
+        if (countEl) countEl.textContent = String(entries.length);
+
+        if (entries.length === 0) {
+            preview.textContent = '(No lore entries — generate some to get started)';
+            return;
+        }
+
+        const activeEntries = getActiveLoreEntries(state, 999);
+        const activeIds = new Set(activeEntries.map(e => e.id));
+        const lines = [];
+
+        entries.forEach((entry, i) => {
+            const isActive = activeIds.has(entry.id);
+            const prefix = isActive ? '\u25CF' : '\u25CB'; // ● active, ○ inactive
+            const statusIcons = {
+                pinned: '\uD83D\uDCCC',
+                archived: '\uD83D\uDCC1',
+                disabled: '\u2B55',
+            };
+            const statusIcon = statusIcons[entry.status] || '';
+
+            const line = [
+                `${i + 1}. ${prefix} ${statusIcon}`,
+                `<${entry.category}>`,
+                `**${entry.title}**`,
+                `[${entry.canonStatus}]`,
+                entry.truthStatus !== 'true' ? `truth:${entry.truthStatus}` : '',
+                entry.revealPolicy !== 'private' ? `reveal:${entry.revealPolicy}` : '',
+            ].filter(Boolean).join(' ');
+            lines.push(line);
+        });
+
+        preview.textContent = lines.join('\n');
+    } catch (e) {
+        preview.textContent = '(Error: ' + e.message + ')';
     }
 }
 

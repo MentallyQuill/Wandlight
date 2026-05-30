@@ -274,28 +274,43 @@ export async function runLoreGeneration(options = {}) {
             pendingMeta.contextKey !== contextKey;
 
         // ── Pending lore guard ─────────────────────────────────────────
-        if (force) {
-            // Forced runs may NOT silently replace pending lore for a *different*
-            // context unless the caller explicitly confirmed replacement.
-            if (pendingIsDifferentContext && !allowReplacePending) {
-                if (settings.debugMode) {
-                    console.debug(`${LOG_PREFIX} Forced generation blocked — pending lore for a different context awaits review (confirmation required)`);
-                }
-                return { status: 'blocked_pending_exists', contextKey };
-            }
-        } else if (pending.length > 0) {
-            if (pendingIsDifferentContext) {
-                markPendingLoreStale(`Current context changed to ${contextKey}`);
-                if (settings.debugMode) {
-                    console.debug(`${LOG_PREFIX} Pending lore is stale (context changed) — skipping auto-generation`);
-                }
-                return { status: 'skipped_stale_pending_exists', contextKey };
+        // Invariant:
+        // - Auto generation never overwrites pending lore.
+        // - Manual generation only overwrites pending lore if caller explicitly
+        //   passed allowReplacePending:true after user confirmation.
+        if (pending.length > 0) {
+            const pendingKey = pendingMeta?.contextKey || '';
+
+            if (force && !allowReplacePending) {
+                return {
+                    status: 'blocked_pending_exists',
+                    contextKey,
+                    pendingContextKey: pendingKey,
+                    pendingStatus: pendingMeta?.status || 'pending',
+                };
             }
 
-            if (settings.debugMode) {
-                console.debug(`${LOG_PREFIX} Skipping auto lore generation — pending lore already awaits review`);
+            if (!force) {
+                if (pendingKey && pendingKey !== contextKey) {
+                    markPendingLoreStale(`Current context changed to ${contextKey}`);
+                    return {
+                        status: 'skipped_stale_pending_exists',
+                        contextKey,
+                        pendingContextKey: pendingKey,
+                    };
+                }
+
+                return {
+                    status: 'skipped_same_context_pending',
+                    contextKey,
+                    pendingContextKey: pendingKey,
+                };
             }
-            return { status: 'skipped_same_context_pending', contextKey };
+
+            // Manual replacement was explicitly confirmed by caller.
+            if (force && allowReplacePending) {
+                markPendingLoreReplaced(contextKey);
+            }
         }
 
         // ── Ledger-based skip guards (auto only) ──────────────────────
@@ -404,6 +419,9 @@ export async function runLoreGeneration(options = {}) {
             source,
             summary,
             rawEntryCount,
+        }, {
+            snapshot: source === 'manual',
+            snapshotLabel: 'Generate pending lore entries',
         });
 
         if (settings.debugMode) {

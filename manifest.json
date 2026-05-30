@@ -8,5 +8,5 @@
     "loading_order": 21,
     "generate_interceptor": "wandlightContinuityInterceptor",
     "homePage": "https://github.com/MentallyQuill/ST-Wandlight",
-    "auto_update": true
+    "auto_update": false
 }

@@ -1036,12 +1036,22 @@ export function recordLoreAttempt(contextKey, patch = {}, options = {}) {
  * @param {number} [meta.rawEntryCount] - Pre-normalization entry count
  * @returns {{ state: Object, changed: boolean }} Updated state and whether a proposal was created
  */
-export function setPendingLoreProposal(entries, meta) {
+export function setPendingLoreProposal(entries, meta, options = {}) {
+    const {
+        snapshot = true,
+        snapshotLabel = 'Generate pending lore entries',
+    } = options;
+
     const state = getState();
+    const settings = getSettings();
     const normalized = normalizeLoreMatrix(entries || []);
 
     if (normalized.length === 0) {
         return { state, changed: false };
+    }
+
+    if (snapshot) {
+        pushStateSnapshot(state, snapshotLabel, settings.maxSnapshots);
     }
 
     const contextKey = meta.contextKey || buildLoreGenerationKey(state);
@@ -1116,18 +1126,26 @@ export function markPendingLoreStale(reason = '') {
  */
 export function markPendingLoreReplaced(newContextKey) {
     const state = getState();
-    const oldKey = state.pendingLoreMeta?.contextKey;
 
-    if (oldKey && oldKey !== newContextKey && state.loreGeneration?.attempts?.[oldKey]) {
-        state.loreGeneration.attempts[oldKey] = {
-            ...state.loreGeneration.attempts[oldKey],
-            status: 'replaced',
-            replacedAt: Date.now(),
-            replacedBy: newContextKey,
-        };
-        saveState(state);
+    const oldMeta = state.pendingLoreMeta;
+    const oldKey = oldMeta?.contextKey || '';
+    const oldBatchId = oldMeta?.id || '';
+
+    if (!oldKey || !state.loreGeneration?.attempts) {
+        return state;
     }
 
+    const previousAttempt = state.loreGeneration.attempts[oldKey] || {};
+
+    state.loreGeneration.attempts[oldKey] = {
+        ...previousAttempt,
+        status: 'replaced',
+        replacedAt: Date.now(),
+        replacedBy: newContextKey || '',
+        replacedBatchId: oldBatchId,
+    };
+
+    saveState(state);
     return state;
 }
 

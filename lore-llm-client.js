@@ -7,12 +7,15 @@
  *   'profile'          — SillyTavern connection profile (ConnectionManagerRequestService)
  *   'openai_compatible' — Any /v1/chat/completions endpoint
  *
- * Exports: sendLoreRequest
- * Imported by: lore-generator.js
+ * Exports: sendLoreRequest, fetchLoreModels, loadApiKey
+ * Imported by: lore-generator.js, ui.js
  */
 
 import { getSettings } from './state-manager.js';
 import { decryptSecretIfAvailable } from './secure-keyring.js';
+
+// ── Cached decrypted API key ─────────────────────────────────────────────────────
+let _cachedApiKey = null;
 
 // ── Endpoint normalization ──────────────────────────────────────────────────────
 
@@ -26,6 +29,16 @@ function normalizeOpenAIChatEndpoint(baseUrl) {
     return `${base}/v1/chat/completions`;
 }
 
+/**
+ * Returns the base URL without /chat/completions, for models endpoint.
+ */
+function normalizeOpenAIBaseUrl(baseUrl) {
+    const base = String(baseUrl || '').trim().replace(/\/+$/, '');
+    if (base.endsWith('/v1')) return base;
+    if (base.endsWith('/v1/chat/completions')) return base.replace(/\/chat\/completions$/, '/v1');
+    return `${base}/v1`;
+}
+
 // ── Response content extraction ─────────────────────────────────────────────────
 
 function extractChatCompletionText(json) {
@@ -36,18 +49,94 @@ function extractChatCompletionText(json) {
         ?? '';
 }
 
+// ── API Key helpers ─────────────────────────────────────────────────────────────
+
+/**
+ * Loads and caches the decrypted API key.
+ * Call once at startup or when user changes provider/key.
+ * Subsequent calls return the cached value.
+ * @returns {Promise<string|null>}
+ */
+export async function loadApiKey() {
+    _cachedApiKey = await decryptSecretIfAvailable('loreOpenAI');
+    return _cachedApiKey;
+}
+
+/**
+ * Clears the cached API key. Call after saving a new key.
+ */
+export function clearCachedApiKey() {
+    _cachedApiKey = null;
+}
+
+/**
+ * Returns the currently cached API key without async.
+ * @returns {string|null}
+ */
+function getCachedApiKey() {
+    return _cachedApiKey;
+}
+
 // ── Provider: OpenAI-compatible endpoint ────────────────────────────────────────
 
 /**
+ * Returns the headers for an OpenAI-compatible request.
+ * If loreOpenAIUseSTProxy is enabled and ST's proxy is available, keys are omitted
+ * (the proxy handles auth).
+ * @returns {Object} Headers object
+ */
+function buildOpenAIHeaders() {
+    const settings = getSettings();
+
+    // If user enabled ST proxy, don't send the key — the proxy handles it
+    if (settings.loreOpenAIUseSTProxy) {
+        return { 'Content-Type': 'application/json' };
+    }
+
+    const headers = { 'Content-Type': 'application/json' };
+    const apiKey = getCachedApiKey();
+    if (apiKey) {
+        headers.Authorization = `Bearer ${apiKey}`;
+    }
+    return headers;
+}
+
+/**
+ * Returns the effective endpoint URL, respecting proxy mode.
+ * @returns {string}
+ */
+function buildOpenAIEndpoint() {
+    const settings = getSettings();
+
+    if (settings.loreOpenAIUseSTProxy) {
+        try {
+            const ctx = SillyTavern.getContext();
+            const proxyUrl = ctx.openaiProxyUrl;
+            if (proxyUrl) {
+                return normalizeOpenAIChatEndpoint(proxyUrl);
+            }
+        } catch (_) {
+            // Fall through to direct URL
+        }
+    }
+
+    return normalizeOpenAIChatEndpoint(settings.loreOpenAIBaseUrl);
+}
+
+/**
  * Sends a lore request to an OpenAI-compatible /v1/chat/completions endpoint.
- * Retrieves the decrypted key from the in-memory keyring.
+ * Retrieves the decrypted key from the in-memory cache (or keyring if not cached).
  * Retries once without response_format if the endpoint rejects it.
  */
 async function sendViaOpenAICompatible(systemPrompt, userPrompt, options = {}) {
     const settings = getSettings();
 
-    const endpoint = normalizeOpenAIChatEndpoint(settings.loreOpenAIBaseUrl);
-    const apiKey = await decryptSecretIfAvailable('loreOpenAI');
+    const endpoint = buildOpenAIEndpoint();
+    const apiKey = getCachedApiKey() || await decryptSecretIfAvailable('loreOpenAI');
+    // Update cache so subsequent calls don't hit keyring again
+    if (apiKey && !getCachedApiKey()) {
+        _cachedApiKey = apiKey;
+    }
 
     if (!settings.loreOpenAIModel) {
         throw new Error('Lore OpenAI-compatible model is missing.');
@@ -69,13 +158,7 @@ async function sendViaOpenAICompatible(systemPrompt, userPrompt, options = {}) {
         requestBody.response_format = { type: 'json_object' };
     }
 
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-
-    if (apiKey) {
-        headers.Authorization = `Bearer ${apiKey}`;
-    }
+    const headers = buildOpenAIHeaders();
 
     let response = await fetch(endpoint, {
         method: 'POST',
@@ -188,6 +271,110 @@ async function sendViaConnectionProfile(systemPrompt, userPrompt, options = {}) 
             ?? raw?.choices?.[0]?.message?.content
             ?? raw?.choices?.[0]?.text
             ?? '';
+}
+
+// ── Model fetching ──────────────────────────────────────────────────────────────
+
+/**
+ * Fetches available models from the configured lore provider.
+ *
+ * Returns an array of model objects with at least { id }.
+ * For the 'st' provider, returns a single entry with the current model name.
+ * For 'profile', returns the profile's model info.
+ * For 'openai_compatible', fetches from the /v1/models endpoint.
+ *
+ * @returns {Promise<Array<{id: string, name?: string}>>}
+ */
+export async function fetchLoreModels() {
+    const settings = getSettings();
+
+    if (settings.loreProvider === 'openai_compatible') {
+        return await fetchOpenAICompatibleModels();
+    }
+
+    if (settings.loreProvider === 'profile') {
+        return await fetchProfileModels();
+    }
+
+    // 'st' or default: return current model
+    return fetchSTModel();
+}
+
+/**
+ * Fetches models from an OpenAI-compatible /v1/models endpoint.
+ * Uses proxy if enabled.
+ */
+async function fetchOpenAICompatibleModels() {
+    const settings = getSettings();
+    const baseUrl = normalizeOpenAIBaseUrl(settings.loreOpenAIBaseUrl);
+
+    let modelsUrl = `${baseUrl}/models`;
+    const headers = buildOpenAIHeaders();
+
+    if (settings.loreOpenAIUseSTProxy) {
+        try {
+            const ctx = SillyTavern.getContext();
+            const proxyUrl = ctx.openaiProxyUrl;
+            if (proxyUrl) {
+                const proxyBase = normalizeOpenAIBaseUrl(proxyUrl);
+                modelsUrl = `${proxyBase}/models`;
+            }
+        } catch (_) {
+            // Fall through to direct URL
+        }
+    }
+
+    const response = await fetch(modelsUrl, {
+        method: 'GET',
+        headers,
+        credentials: 'omit',
+    });
+
+    if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(`Failed to fetch models (${response.status}): ${text.slice(0, 300)}`);
+    }
+
+    const json = await response.json();
+    const models = json?.data || json?.models || [];
+
+    return models
+        .map(m => ({
+            id: m.id || m.name || '',
+            name: m.name || m.id || '',
+        }))
+        .filter(m => m.id);
+}
+
+/**
+ * Returns model list for the 'profile' provider.
+ */
+async function fetchProfileModels() {
+    const settings = getSettings();
+    const ctx = SillyTavern.getContext();
+    const profiles = ctx.connectionProfiles || ctx.chatCompletionSettings?.profiles || [];
+
+    const profile = profiles.find(p => p.id === settings.loreProfileId);
+    if (!profile) {
+        return [{ id: 'unknown', name: settings.loreProfileId || 'Unknown profile' }];
+    }
+
+    return [{
+        id: profile.model || profile.modelName || 'unknown',
+        name: profile.name || settings.loreProfileId,
+    }];
+}
+
+/**
+ * Returns current ST model info for the 'st' provider.
+ */
+function fetchSTModel() {
+    const ctx = SillyTavern.getContext();
+    const modelName = ctx.onlineApiModel
+        || ctx.model
+        || 'Current ST model';
+
+    return [{ id: modelName, name: modelName }];
 }
 
 // ── Public API: dispatches to the selected provider ─────────────────────────────

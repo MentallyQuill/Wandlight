@@ -339,6 +339,9 @@ async function mountSettingsPanel(ctx) {
 
     console.log(`${LOG_PREFIX} Settings panel mounted`);
 
+    // ── Install #extensionsMenu launcher button ──────────────────────
+    installExtensionsMenuButton();
+
     // ── Auto-open lore panel if it was previously open ────────────────
     try {
         const state = getState();
@@ -348,6 +351,49 @@ async function mountSettingsPanel(ctx) {
     } catch (_) {
         // Silently ignore — panel may not be needed
     }
+}
+
+/**
+ * Installs a launcher button in #extensionsMenu that links to the extension's
+ * settings panel and provides quick-access commands.
+ */
+function installExtensionsMenuButton() {
+    const menu = document.getElementById('extensionsMenu');
+    if (!menu) return;
+
+    // Guard against double-installation
+    if (document.getElementById('wandlight-extensions-menu-button')) return;
+
+    // Clear any stale "no extensions" placeholder
+    const placeholder = document.getElementById('extensionsMenuDefault');
+    if (placeholder) placeholder.remove();
+
+    const btn = document.createElement('div');
+    btn.id = 'wandlight-extensions-menu-button';
+    btn.className = 'list-group-item flex-container flexGap5 interactable';
+    btn.title = 'Wandlight Continuity — Settings, State Viewer, Lore Matrix Panel';
+
+    btn.innerHTML = `\uD83E\uDE84 <span>Wandlight Continuity</span>`;
+
+    // Click opens settings panel + optionally lore panel
+    btn.addEventListener('click', () => {
+        // Scroll/focus the settings panel
+        const panel = document.getElementById('wandlight_continuity_settings');
+        if (panel) {
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Expand all inline drawers so settings are visible
+            const toggles = panel.querySelectorAll('.inline-drawer-toggle');
+            toggles.forEach(t => {
+                if (t.classList.contains('closed')) {
+                    t.click();
+                }
+            });
+        } else {
+            if (typeof toastr !== 'undefined') toastr.info('Wandlight Continuity settings panel not yet mounted. It will appear shortly.');
+        }
+    });
+
+    menu.appendChild(btn);
 }
 
 /**

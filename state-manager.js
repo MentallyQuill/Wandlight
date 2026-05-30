@@ -1258,6 +1258,32 @@ export function acceptPendingLoreEntries() {
  * and auto-generation will not repeat it until context changes.
  * @returns {Object} Updated state
  */
+export function rejectPendingLoreEntries() {
+    const state = getState();
+    const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
+
+    state.pendingLoreEntries = [];
+    state.pendingLoreMeta = null;
+
+    if (state.loreContext) {
+        state.loreContext.lastGenerationSummary = '';
+    }
+
+    // Update generation ledger
+    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+        state.loreGeneration = getDefaultState().loreGeneration;
+    }
+    state.loreGeneration.lastRejectedFor = contextKey;
+    state.loreGeneration.attempts[contextKey] = {
+        ...(state.loreGeneration.attempts[contextKey] || {}),
+        status: 'rejected',
+        rejectedAt: Date.now(),
+    };
+
+    saveState(state);
+    return state;
+}
+
 /**
  * Accepts a single pending lore entry by index, merging it into the lore matrix.
  * The remaining pending entries stay pending.
@@ -1367,32 +1393,6 @@ export function rejectPendingLoreEntry(entryIndex) {
     return { state, rejected: rejectedEntry };
 }
 
-/**
- * Rejects pending lore entries by clearing them without merging.
-    const state = getState();
-    const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
-
-    state.pendingLoreEntries = [];
-    state.pendingLoreMeta = null;
-
-    if (state.loreContext) {
-        state.loreContext.lastGenerationSummary = '';
-    }
-
-    // Update generation ledger
-    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
-        state.loreGeneration = getDefaultState().loreGeneration;
-    }
-    state.loreGeneration.lastRejectedFor = contextKey;
-    state.loreGeneration.attempts[contextKey] = {
-        ...(state.loreGeneration.attempts[contextKey] || {}),
-        status: 'rejected',
-        rejectedAt: Date.now(),
-    };
-
-    saveState(state);
-    return state;
-}
 
 // ── Utility: deep-merge defaults ────────────────────────────────────────────────
 

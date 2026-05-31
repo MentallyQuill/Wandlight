@@ -968,15 +968,6 @@ function createStoryLoreGenerationPanel(state) {
     help.textContent = 'Model-based generation. Uses the Lore provider, source-message window, and chunk size settings. Output stays pending until accepted.';
     panel.appendChild(help);
 
-    panel.appendChild(createAutomationModeCard(
-        'Story Lore Generation',
-        'loreGenerationMode',
-        'loreGenerationAutoInterval',
-        'Only runs when you click Generate Story Lore.',
-        'Runs automatically after roleplay turns on this interval, using the Lore provider. Generated lore still waits in Pending Lore Review.',
-        'Automatic story-lore generation interval in completed model turns.'
-    ));
-
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
     const generateBtn = createButton('Generate Story Lore', 'Generates searchable story/AU lore entries in message chunks and places them in Pending Lore Review.', async (btn) => {
@@ -997,10 +988,33 @@ function createStoryLoreGenerationPanel(state) {
     actions.appendChild(cancelBtn);
     panel.appendChild(actions);
 
-    panel.appendChild(createCollapsibleSection('lore.storyGenerationSettings', 'Story Lore Settings', 'source, chunks, tags, guards', false, createGenerationSettingsCard(), { tooltip: 'Advanced model-based story lore generation controls.' }));
     appendGenerationStatus(panel, state, 'lore');
 
+    panel.appendChild(createCollapsibleSection(
+        'lore.storyGenerationSettings',
+        'Story Lore Settings',
+        'automation, source, chunks, tags, guards',
+        false,
+        createStoryLoreSettingsContent(),
+        { tooltip: 'Advanced model-based story lore generation controls.' }
+    ));
+
     return panel;
+}
+
+function createStoryLoreSettingsContent() {
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-story-lore-settings-content';
+    wrap.appendChild(createAutomationModeCard(
+        'Story Lore Generation',
+        'loreGenerationMode',
+        'loreGenerationAutoInterval',
+        'Only runs when you click Generate Story Lore.',
+        'Runs automatically after roleplay turns on this interval, using the Lore provider. Generated lore still waits in Pending Lore Review.',
+        'Automatic story-lore generation interval in completed model turns.'
+    ));
+    wrap.appendChild(createGenerationSettingsCard());
+    return wrap;
 }
 
 function appendGenerationStatus(card, state, kind = 'lore') {
@@ -1719,13 +1733,13 @@ function renderContinuityTab(container, state) {
     container.appendChild(createCollapsibleSection('continuity.canonDivergences', 'Canon Divergences', getCountLabel(state?.canon?.divergences || [], 'divergence'), false, createCanonDivergencesEditorCard(state), { tooltip: 'AU or changed-canon facts separated from the core scene fields.' }));
     container.appendChild(createCollapsibleSection('continuity.characters', 'Characters', getCountLabel(state.characters || [], 'character'), false, createCharacterStateEditorCard(state), { tooltip: 'Character-specific state: clothing, posture, emotion, goals, and notes.' }));
     container.appendChild(createCollapsibleSection('continuity.storyMilestones', 'Story Milestones', getCountLabel(state.storyMilestones || {}, 'milestone'), false, createStoryMilestonesEditorCard(state), { tooltip: 'Story-state switches that control lore activation and expiration.' }));
-    container.appendChild(createCollapsibleSection('continuity.knowledge', 'Knowledge', getCountLabel(state.knowledge || {}, 'character'), false, createJsonEditorCard('Knowledge', 'Character-keyed facts. Example: { "Harry": ["knows X"] }', 'knowledge', state.knowledge || {}), { tooltip: 'Character-keyed knowledge facts.' }));
-    container.appendChild(createCollapsibleSection('continuity.secrets', 'Secrets', getCountLabel(state.secrets || [], 'secret'), false, createJsonEditorCard('Secrets', 'Non-public facts, who knows them, suspicions, and public versions.', 'secrets', state.secrets || []), { tooltip: 'Secret facts and reveal state.' }));
-    container.appendChild(createCollapsibleSection('continuity.relationships', 'Relationships', getCountLabel(state.relationships || [], 'relationship'), false, createJsonEditorCard('Relationships', 'Relationship state such as trust, tension, and notes.', 'relationships', state.relationships || []), { tooltip: 'Relationship state such as trust, tension, and notes.' }));
-    container.appendChild(createCollapsibleSection('continuity.threads', 'Threads', getCountLabel(state.threads || [], 'thread'), false, createJsonEditorCard('Threads', 'Active, dormant, or resolved story threads and unresolved consequences.', 'threads', state.threads || []), { tooltip: 'Story threads and unresolved consequences.' }));
-    container.appendChild(createCollapsibleSection('continuity.inventory', 'Inventory / Objects', getCountLabel(state.inventory || [], 'item'), false, createJsonEditorCard('Inventory / Objects', 'Tracked items, owners, locations, and object status.', 'inventory', state.inventory || []), { tooltip: 'Tracked items, owners, locations, and object status.' }));
-    container.appendChild(createCollapsibleSection('continuity.objectives', 'Objectives', getCountLabel(state.objectives || [], 'objective'), false, createJsonEditorCard('Objectives', 'Character or story goals, status, and stakes.', 'objectives', state.objectives || []), { tooltip: 'Character or story goals, status, and stakes.' }));
-    container.appendChild(createCollapsibleSection('continuity.flags', 'Continuity Flags', getCountLabel(state.continuityFlags || [], 'flag'), false, createJsonEditorCard('Continuity Flags', 'Contradictions, warnings, uncertainties, and resolved flags.', 'continuityFlags', state.continuityFlags || []), { tooltip: 'Contradictions, warnings, uncertainties, and resolved flags.' }));
+    container.appendChild(createCollapsibleSection('continuity.knowledge', 'Knowledge', getCountLabel(state.knowledge || {}, 'character'), false, createJsonEditorCard('Knowledge', 'Character-keyed facts. Example: { "Harry": ["knows X"] }', 'knowledge', state.knowledge || {}, false, 'knowledge'), { tooltip: 'Character-keyed knowledge facts.' }));
+    container.appendChild(createCollapsibleSection('continuity.secrets', 'Secrets', getCountLabel(state.secrets || [], 'secret'), false, createJsonEditorCard('Secrets', 'Non-public facts, who knows them, suspicions, and public versions.', 'secrets', state.secrets || [], false, 'secrets'), { tooltip: 'Secret facts and reveal state.' }));
+    container.appendChild(createCollapsibleSection('continuity.relationships', 'Relationships', getCountLabel(state.relationships || [], 'relationship'), false, createJsonEditorCard('Relationships', 'Relationship state such as trust, tension, and notes.', 'relationships', state.relationships || [], false, 'relationships'), { tooltip: 'Relationship state such as trust, tension, and notes.' }));
+    container.appendChild(createCollapsibleSection('continuity.threads', 'Threads', getCountLabel(state.threads || [], 'thread'), false, createJsonEditorCard('Threads', 'Active, dormant, or resolved story threads and unresolved consequences.', 'threads', state.threads || [], false, 'threads'), { tooltip: 'Story threads and unresolved consequences.' }));
+    container.appendChild(createCollapsibleSection('continuity.inventory', 'Inventory / Objects', getCountLabel(state.inventory || [], 'item'), false, createJsonEditorCard('Inventory / Objects', 'Tracked items, owners, locations, and object status.', 'inventory', state.inventory || [], false, 'inventory'), { tooltip: 'Tracked items, owners, locations, and object status.' }));
+    container.appendChild(createCollapsibleSection('continuity.objectives', 'Objectives', getCountLabel(state.objectives || [], 'objective'), false, createJsonEditorCard('Objectives', 'Character or story goals, status, and stakes.', 'objectives', state.objectives || [], false, 'objectives'), { tooltip: 'Character or story goals, status, and stakes.' }));
+    container.appendChild(createCollapsibleSection('continuity.flags', 'Continuity Flags', getCountLabel(state.continuityFlags || [], 'flag'), false, createJsonEditorCard('Continuity Flags', 'Contradictions, warnings, uncertainties, and resolved flags.', 'continuityFlags', state.continuityFlags || [], false, 'flags'), { tooltip: 'Contradictions, warnings, uncertainties, and resolved flags.' }));
 }
 
 function createContinuitySectionToggleCard(state) {
@@ -1782,6 +1796,7 @@ function createCanonSceneEditorCard(state) {
 
     card.appendChild(createArrayTextField('Present characters', state?.scene?.presentCharacters || [], 'scene', 'presentCharacters', 'Comma-separated characters currently present.'));
     card.appendChild(createArrayTextField('Nearby characters', state?.scene?.nearbyCharacters || [], 'scene', 'nearbyCharacters', 'Comma-separated characters nearby but not necessarily in the active conversation.'));
+    card.appendChild(createContinuitySectionPromptEditor('canonScene', 'Canon and Scene'));
     return card;
 }
 
@@ -1797,7 +1812,9 @@ function createCanonDivergencesEditorCard(state) {
         'Canon Divergences',
         'AU or changed-canon facts with optional sinceDate fields. Kept separate from Canon and Scene so it can stay collapsed during normal play.',
         'canon.divergences',
-        state?.canon?.divergences || []
+        state?.canon?.divergences || [],
+        false,
+        'canonDivergences'
     );
 }
 
@@ -1806,7 +1823,9 @@ function createStoryMilestonesEditorCard(state) {
         'Story Milestones',
         'Story-state switches used by Lore entries. Canon dates can suggest entries, but milestones decide whether reveal/knowledge entries are actually true. Example: { "horcruxes_revealed_to_trio": { "status": "not_happened", "evidence": [] } }',
         'storyMilestones',
-        state?.storyMilestones || {}
+        state?.storyMilestones || {},
+        false,
+        'storyMilestones'
     );
     const schema = document.createElement('div');
     schema.className = 'wandlight-runtime-help';
@@ -1820,13 +1839,67 @@ function createCharacterStateEditorCard(state) {
         'Characters',
         'Character state supports name, role, location, clothing, posture, physicalState, emotionalState, inventory, goals, and notes. Emotional numeric values are -5 to +5 and cool toward neutral in injection previews unless reinforced.',
         'characters',
-        state?.characters || []
+        state?.characters || [],
+        false,
+        'characters'
     );
     const schema = document.createElement('div');
     schema.className = 'wandlight-runtime-help';
     schema.textContent = 'Recommended character object: { "name": "Harry", "clothing": "school robes", "physicalState": "tired", "emotionalState": { "trust": 2, "fear": 1, "notes": "uneasy but cooperative" }, "goals": ["find the source of the curse"] }';
     card.appendChild(schema);
     return card;
+}
+
+
+function createContinuitySectionPromptEditor(sectionKey, label) {
+    const settings = getSettings();
+    const prompts = settings.continuitySectionPrompts || {};
+    const defaults = DEFAULT_SETTINGS.continuitySectionPrompts || {};
+
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-section-prompt-editor-wrap';
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'wandlight-section-prompt-editor';
+    textarea.spellcheck = false;
+    textarea.value = String(prompts[sectionKey] || defaults[sectionKey] || '');
+    addTooltip(textarea, `User-editable scan prompt for ${label}. This is appended to Scan Continuity State when this section is enabled/tracked.`);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions wandlight-section-prompt-actions';
+    actions.appendChild(createButton('Save Prompt', `Save the Scan Continuity prompt for ${label}.`, () => {
+        const next = getSettings();
+        next.continuitySectionPrompts = {
+            ...(DEFAULT_SETTINGS.continuitySectionPrompts || {}),
+            ...(next.continuitySectionPrompts || {}),
+            [sectionKey]: textarea.value.trim(),
+        };
+        saveSettings(next);
+        toast(`${label} scan prompt saved.`);
+    }, 'wandlight-primary-button'));
+    actions.appendChild(createButton('Reset Default', `Restore the default Scan Continuity prompt for ${label}.`, () => {
+        textarea.value = String(defaults[sectionKey] || '');
+        const next = getSettings();
+        next.continuitySectionPrompts = {
+            ...(DEFAULT_SETTINGS.continuitySectionPrompts || {}),
+            ...(next.continuitySectionPrompts || {}),
+            [sectionKey]: textarea.value.trim(),
+        };
+        saveSettings(next);
+        toast(`${label} scan prompt reset.`);
+    }));
+
+    wrap.appendChild(textarea);
+    wrap.appendChild(actions);
+
+    return createCollapsibleSection(
+        `continuity.prompt.${sectionKey}`,
+        'Scan Prompt',
+        'used when this section is tracked',
+        false,
+        wrap,
+        { tooltip: `Editable prompt guidance appended to continuity scans for ${label}.` }
+    );
 }
 
 function createContinuityTextField(label, value, section, field, tooltip) {
@@ -1860,7 +1933,7 @@ function createArrayTextField(label, values, section, field, tooltip) {
     return wrap;
 }
 
-function createJsonEditorCard(titleText, helpText, path, value, embedded = false) {
+function createJsonEditorCard(titleText, helpText, path, value, embedded = false, promptSectionKey = '') {
     const card = document.createElement('div');
     card.className = embedded ? 'wandlight-json-editor-embedded' : 'wandlight-runtime-card wandlight-json-editor-card';
     const title = document.createElement('div');
@@ -1901,6 +1974,9 @@ function createJsonEditorCard(titleText, helpText, path, value, embedded = false
         refreshPanelBody({ preserveScroll: true });
     }));
     card.appendChild(actions);
+    if (promptSectionKey) {
+        card.appendChild(createContinuitySectionPromptEditor(promptSectionKey, titleText));
+    }
     return card;
 }
 
@@ -3937,7 +4013,6 @@ function createEntryCard(entry, state) {
     titleEl.textContent = entry.title || '(Untitled lore)';
     addTooltip(titleEl, 'Click the card to expand details. Tags beside this title are editable search tags.');
     titleWrap.appendChild(titleEl);
-    titleWrap.appendChild(createTagsRow(entry));
     headerRow.appendChild(titleWrap);
 
     const actions = document.createElement('div');
@@ -3993,6 +4068,8 @@ function createEntryCard(entry, state) {
     if (entry.isPinned) metaRow.appendChild(createBadge('pinned', 'Pinned entries are prioritized for injection.'));
     if (entry.isSuppressed) metaRow.appendChild(createBadge('muted', 'Muted entries are excluded from injection.'));
     card.appendChild(metaRow);
+
+    card.appendChild(createTagsRow(entry));
 
     const factEl = document.createElement('div');
     factEl.className = 'wandlight-lore-entry-fact';

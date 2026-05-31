@@ -170,6 +170,35 @@ Direct injection block:
         'continuity.inventory': true,
         'continuity.objectives': true,
         'continuity.flags': true,
+        'continuity.prompt.canonScene': true,
+        'continuity.prompt.canonDivergences': true,
+        'continuity.prompt.characters': true,
+        'continuity.prompt.storyMilestones': true,
+        'continuity.prompt.knowledge': true,
+        'continuity.prompt.secrets': true,
+        'continuity.prompt.relationships': true,
+        'continuity.prompt.threads': true,
+        'continuity.prompt.inventory': true,
+        'continuity.prompt.objectives': true,
+        'continuity.prompt.flags': true,
+    },
+
+
+
+    // Continuity scan prompt overrides. These are appended to the extractor prompt only
+    // when the corresponding section is enabled/tracked for the current chat.
+    continuitySectionPrompts: {
+        canonScene: 'Extract only explicitly established canon/date and scene details: era, in-universe date, canon boundary, location, time of day, weather, ambience, present/nearby characters, and current activity. Do not invent missing fields.',
+        canonDivergences: 'Track AU or changed-canon divergences separately from ordinary scene state. Only add a divergence when the roleplay clearly contradicts or departs from canon.',
+        characters: 'Track character-specific state when clearly supported: role, location, clothing, posture, physical condition, current emotional state, inventory, and immediate goals. Keep emotions current-state, not permanent personality.',
+        storyMilestones: 'Detect story milestone status changes only from roleplay evidence. Do not mark milestones happened merely because a canon date passed.',
+        knowledge: 'Track who knows what. Prefer character-keyed concise facts. Do not give characters knowledge that has not been established in this roleplay.',
+        secrets: 'Track non-public truths, who knows them, who suspects them, and the public version. Preserve reveal boundaries.',
+        relationships: 'Track relationship state changes such as trust, tension, alliance, suspicion, affection, rivalry, or dependence only when the scene supports them.',
+        threads: 'Track active, dormant, or resolved story threads and unresolved consequences that should influence future turns.',
+        inventory: 'Track important carried items, ownership, locations, object status, and temporary possessions only when likely to matter later.',
+        objectives: 'Track current goals, plans, blockers, stakes, and whether objectives are active, blocked, completed, or abandoned.',
+        flags: 'Track contradictions, warnings, uncertainties, and resolved continuity issues. Be conservative; do not flag ambiguity as contradiction.'
     },
 
     // Continuity model provider: used by Scan Continuity State / automatic continuity tracking.

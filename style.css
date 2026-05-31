@@ -2459,3 +2459,105 @@
 .wandlight-lore-entry-details {
     margin-left: 0 !important;
 }
+
+/* ── Live feedback patch: lore vertical sizing + continuity section prompts ── */
+.wandlight-runtime-tab-body-lore {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-generation-collapsible,
+.wandlight-lore-pending-collapsible {
+    flex: 0 0 auto !important;
+}
+
+.wandlight-lore-accepted-collapsible[open] {
+    flex: 1 1 auto !important;
+    min-height: 180px !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.wandlight-lore-accepted-collapsible[open] > .wandlight-collapsible-content {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.wandlight-accepted-lore-section {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.wandlight-accepted-lore-section .wandlight-lore-controls,
+.wandlight-accepted-lore-section .wandlight-accepted-bulk-toolbar {
+    flex: 0 0 auto !important;
+}
+
+.wandlight-accepted-lore-section .wandlight-lore-entry-list {
+    flex: 1 1 auto !important;
+    min-height: 160px !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    padding-right: 4px;
+}
+
+.wandlight-story-lore-generation-panel .wandlight-generation-status-text {
+    margin-top: 4px;
+}
+
+.wandlight-story-lore-settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wandlight-lore-entry-tags {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    justify-content: flex-start !important;
+    width: 100%;
+}
+
+.wandlight-lore-entry-title-wrap .wandlight-lore-entry-tags {
+    width: auto;
+}
+
+.wandlight-section-prompt-editor-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 0 0;
+}
+
+.wandlight-section-prompt-editor {
+    width: 100%;
+    min-height: 88px;
+    resize: vertical;
+    box-sizing: border-box;
+    border: 1px solid rgba(126, 145, 165, 0.32);
+    border-radius: 7px;
+    background: rgba(0, 0, 0, 0.32);
+    color: var(--SmartThemeBodyColor, #e8e1d3);
+    font-family: var(--mainFontFamily, inherit);
+    font-size: 0.78em;
+    line-height: 1.35;
+    padding: 6px 7px;
+}
+
+.wandlight-section-prompt-editor:focus {
+    outline: none;
+    border-color: rgba(180, 160, 140, 0.55);
+    box-shadow: 0 0 0 1px rgba(180, 160, 140, 0.16);
+}
+
+.wandlight-section-prompt-actions {
+    margin-top: 2px !important;
+}

@@ -248,6 +248,35 @@ function inferFallbackContinuityDelta(messages, state = {}) {
     };
 }
 
+
+function getEnabledContinuitySectionPrompts(settings, state) {
+    const prompts = settings?.continuitySectionPrompts || {};
+    const config = state?.continuityConfig || {};
+    const entries = [
+        ['canonScene', 'Canon and Scene', () => config.canon !== false || config.scene !== false],
+        ['canonDivergences', 'Canon Divergences', () => config.canon !== false],
+        ['characters', 'Characters', () => config.characters !== false || config.appearance !== false || config.emotionalState !== false],
+        ['storyMilestones', 'Story Milestones', () => config.storyMilestones !== false],
+        ['knowledge', 'Knowledge', () => config.knowledge !== false],
+        ['secrets', 'Secrets', () => config.secrets !== false],
+        ['relationships', 'Relationships', () => config.relationships !== false],
+        ['threads', 'Story Threads', () => config.threads !== false],
+        ['inventory', 'Inventory / Objects', () => config.inventory !== false],
+        ['objectives', 'Objectives', () => config.objectives !== false],
+        ['flags', 'Continuity Flags', () => config.flags !== false],
+    ];
+
+    const lines = [];
+    for (const [key, label, enabled] of entries) {
+        const text = String(prompts[key] || '').trim();
+        if (!text || !enabled()) continue;
+        lines.push(`- ${label}: ${text}`);
+    }
+
+    if (!lines.length) return '';
+    return `\n\n<section_specific_scan_prompts>\nApply these user-editable section instructions in addition to the global extraction rules. Only update sections that are enabled/tracked for this chat.\n${lines.join('\n')}\n</section_specific_scan_prompts>`;
+}
+
 /**
  * Runs a quiet LLM call to extract continuity state changes.
  * Uses object-style API: generateQuietPrompt({ quietPrompt }) and
@@ -264,9 +293,12 @@ async function runExtractionCall(stateJson, messages) {
         throw new Error(validation.message);
     }
 
+    const currentStateForPrompts = getState();
+    const sectionPrompts = getEnabledContinuitySectionPrompts(settings, currentStateForPrompts);
     const systemPrompt = EXTRACTION_SYSTEM_PROMPT
         .replace('{{stateJson}}', stateJson)
-        .replace('{{messages}}', messages);
+        .replace('{{messages}}', messages)
+        + sectionPrompts;
 
     const userPrompt = EXTRACTION_USER_PROMPT;
 

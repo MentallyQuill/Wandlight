@@ -39,6 +39,10 @@ export function getSettings() {
         ...(DEFAULT_SETTINGS.collapsedSections || {}),
         ...(stored.collapsedSections || {}),
     };
+    merged.continuitySectionPrompts = {
+        ...(DEFAULT_SETTINGS.continuitySectionPrompts || {}),
+        ...(stored.continuitySectionPrompts || {}),
+    };
     // Write back merged defaults so the object is complete going forward
     extensionSettings[MODULE_KEY] = merged;
     return merged;

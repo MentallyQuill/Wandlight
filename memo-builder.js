@@ -32,16 +32,51 @@ export function buildMemo(state, settingsOverride = {}) {
     return '[WANDLIGHT CONTINUITY STATE]\n' + chunks.join('\n\n') + '\n[/WANDLIGHT CONTINUITY STATE]';
 }
 
+function getCompressionLevel(settings, kind) {
+    const raw = kind === 'continuity' ? settings.continuityCompressionLevel : settings.loreCompressionLevel;
+    return Math.max(1, Math.min(5, Number(raw) || 2));
+}
+
+function getCompressionTemplate(settings, kind) {
+    const key = kind === 'continuity' ? 'continuityCompressionPromptTemplate' : 'loreCompressionPromptTemplate';
+    return String(settings?.[key] || '');
+}
+
+export function getCompressionSourceSignature(state, kind = 'lore', directTextOverride = null, settingsOverride = {}) {
+    const settings = { ...getSettings(), ...(settingsOverride || {}) };
+    const normalizedKind = kind === 'continuity' ? 'continuity' : 'lore';
+    const directText = directTextOverride !== null && directTextOverride !== undefined
+        ? String(directTextOverride || '')
+        : (normalizedKind === 'continuity'
+            ? buildContinuityDirectMemo(state, { ...settings, continuityInjectionMode: 'direct' })
+            : buildLoreDirectMemo(state, { ...settings, loreInjectionMode: 'direct' }));
+    return JSON.stringify({
+        signatureVersion: 2,
+        kind: normalizedKind,
+        compressionLevel: getCompressionLevel(settings, normalizedKind),
+        compressionTemplate: getCompressionTemplate(settings, normalizedKind),
+        // Pinned lore is not included in the direct text, but it changes the
+        // compression contract because pinned/protected details must survive
+        // more fully than ordinary lore.
+        pinnedLoreIds: normalizedKind === 'lore' ? (state?.loreSelection?.pinnedIds || []).join('|') : '',
+        directText,
+    });
+}
+
 function getCachedModelCompression(state, settings, kind) {
     if (!state) return '';
     const mode = kind === 'continuity' ? settings.continuityInjectionMode : settings.loreInjectionMode;
     if (mode !== 'compressed') return '';
     const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
     const status = state[statusKey] || {};
-    const currentSignature = getMemoSignature(state, 'compressed', kind);
+    const directText = kind === 'continuity'
+        ? buildContinuityDirectMemo(state, { ...settings, continuityInjectionMode: 'direct' })
+        : buildLoreDirectMemo(state, { ...settings, loreInjectionMode: 'direct' });
+    const currentSignature = getCompressionSourceSignature(state, kind, directText, settings);
     // Compressed mode uses a saved model compression only when it matches the
-    // current source text, level, and mute/pin state. Stale cache is reported in
-    // the Injection tab but not silently injected.
+    // exact direct source text, compression level, and compression template.
+    // It intentionally ignores unrelated Direct/Compressed mode toggles so the
+    // cache survives switching back and forth in the Injection tab.
     return status.lastSignature === currentSignature && typeof status.cachedText === 'string' && status.cachedText.trim()
         ? status.cachedText.trim()
         : '';
@@ -52,12 +87,12 @@ export function buildContinuityMemo(state, settingsOverride = {}) {
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
     const cached = getCachedModelCompression(state, settings, 'continuity');
     if (cached) return cached;
-    // Compressed mode should use model-compressed cached text only. If no cache
-    // exists, fall back to direct preview/injection rather than deterministic
-    // truncation; the Injection tab tells the user to run Compress Continuity Now.
-    if ((settings.continuityInjectionMode || 'direct') === 'compressed') {
-        settings.continuityInjectionMode = 'direct';
-    }
+    return buildContinuityDirectMemo(state, { ...settings, continuityInjectionMode: 'direct' });
+}
+
+function buildContinuityDirectMemo(state, settingsOverride = {}) {
+    if (!state) return '';
+    const settings = { ...getSettings(), ...(settingsOverride || {}), continuityInjectionMode: 'direct' };
     const cfg = state.continuityConfig || {};
     const lines = [];
 
@@ -206,11 +241,12 @@ export function buildLoreMemo(state, settingsOverride = {}) {
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
     const cached = getCachedModelCompression(state, settings, 'lore');
     if (cached) return cached;
-    // Same rule as continuity: compressed mode uses cached model compression only.
-    // Without a cache, use direct injection until the user explicitly compresses.
-    if ((settings.loreInjectionMode || 'direct') === 'compressed') {
-        settings.loreInjectionMode = 'direct';
-    }
+    return buildLoreDirectMemo(state, { ...settings, loreInjectionMode: 'direct' });
+}
+
+function buildLoreDirectMemo(state, settingsOverride = {}) {
+    if (!state) return '';
+    const settings = { ...getSettings(), ...(settingsOverride || {}), loreInjectionMode: 'direct' };
     // Direct lore injection intentionally includes every accepted, unmuted lore entry.
     // Users exclude entries by muting them; compression can then condense the full
     // direct block. Do not pass legacy maxLoreEntriesInMemo here.

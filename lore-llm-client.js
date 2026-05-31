@@ -118,9 +118,31 @@ function extractChatCompletionReasoning(json) {
     return parts.join('').slice(0, 12000);
 }
 
-function makeFinalOnlyRetryPrompts(systemPrompt, userPrompt) {
-    const system = `${systemPrompt}\n\nCRITICAL OUTPUT REQUIREMENT FOR THINKING MODELS:\n- Put the final answer in message.content, not hidden reasoning.\n- Output only the requested JSON object.\n- Do not include analysis, markdown, XML tags, or prose.\n- Keep the JSON compact and omit unchanged/empty optional fields.`;
-    const user = `${userPrompt}\n\nReturn the final JSON now. The first character of your visible answer must be { and the last character must be }. Do not leave message.content empty.`;
+function makeFinalOnlyRetryPrompts(systemPrompt, userPrompt, options = {}) {
+    const expectedOutput = String(options.expectedOutput || options.outputFormat || 'json').toLowerCase();
+    const wantsText = /text|plain|compression|compressed/.test(expectedOutput);
+    const system = wantsText
+        ? `${systemPrompt}
+
+CRITICAL OUTPUT REQUIREMENT FOR THINKING MODELS:
+- Put the final compressed text in message.content, not hidden reasoning.
+- Output only the requested plain-text block.
+- Do not include analysis, markdown fences, XML tags, JSON, or commentary.
+- Keep the visible answer within the requested length limit.`
+        : `${systemPrompt}
+
+CRITICAL OUTPUT REQUIREMENT FOR THINKING MODELS:
+- Put the final answer in message.content, not hidden reasoning.
+- Output only the requested JSON object.
+- Do not include analysis, markdown, XML tags, or prose.
+- Keep the JSON compact and omit unchanged/empty optional fields.`;
+    const user = wantsText
+        ? `${userPrompt}
+
+Return the final compressed text now in visible message.content. Do not leave message.content empty. Do not output JSON or commentary.`
+        : `${userPrompt}
+
+Return the final JSON now. The first character of your visible answer must be { and the last character must be }. Do not leave message.content empty.`;
     return { system, user };
 }
 
@@ -379,7 +401,7 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
     if (!content || !content.trim()) {
         const reasoning = extractChatCompletionReasoning(attempt.json);
         if (reasoning && reasoning.trim()) {
-            const retryPrompts = makeFinalOnlyRetryPrompts(systemPrompt, userPrompt);
+            const retryPrompts = makeFinalOnlyRetryPrompts(systemPrompt, userPrompt, options);
             const retryBody = {
                 ...requestBody,
                 messages: [
@@ -411,7 +433,7 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
                 content = extractChatCompletionText(retry.json);
                 if (content && content.trim()) return content;
             }
-            throw new Error(`${cfg.title} OpenAI-compatible endpoint returned reasoning-only output with empty message.content. Retried with final-only JSON instructions but still received no visible content. Use a non-thinking model, raise max tokens, or lower the model's reasoning effort. Reasoning preview: ${reasoning.slice(0, 300)}`);
+            throw new Error(`${cfg.title} OpenAI-compatible endpoint returned reasoning-only output with empty message.content. Retried with final-only visible-output instructions but still received no visible content. Use a non-thinking model, raise max tokens, or lower the model's reasoning effort. Reasoning preview: ${reasoning.slice(0, 300)}`);
         }
         throw new Error(`${cfg.title} OpenAI-compatible endpoint returned empty content. Raw response: ${attempt.text.slice(0, 300)}`);
     }
@@ -423,24 +445,38 @@ async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}
     const ctx = getSillyTavernContext();
 
     let lastResult = '';
+    let reasoningPreview = '';
+    const responseLength = options.maxTokens || cfg.maxTokens;
 
-    if (typeof ctx?.generateRaw === 'function') {
+    async function tryGenerateRaw(sp, up, lengthMultiplier = 1) {
+        if (typeof ctx?.generateRaw !== 'function') return '';
+        if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
         const result = await ctx.generateRaw({
-            systemPrompt,
-            prompt: userPrompt,
+            systemPrompt: sp,
+            prompt: up,
             prefill: options.prefill || '',
-            responseLength: options.maxTokens || cfg.maxTokens,
+            responseLength: Math.max(128, Math.min(8192, Math.ceil(Number(responseLength || 2048) * lengthMultiplier))),
             bypassAll: true,
         });
-        lastResult = typeof result === 'string' ? result : extractChatCompletionText(result);
+        const content = typeof result === 'string' ? result : extractChatCompletionText(result);
+        if (content && content.trim()) return content;
+        const reasoning = result && typeof result === 'object' ? extractChatCompletionReasoning(result) : '';
+        if (reasoning) reasoningPreview = reasoning;
+        return '';
+    }
+
+    lastResult = await tryGenerateRaw(systemPrompt, userPrompt, 1);
+    if (lastResult && lastResult.trim()) return lastResult;
+
+    if (reasoningPreview) {
+        const retryPrompts = makeFinalOnlyRetryPrompts(systemPrompt, userPrompt, options);
+        lastResult = await tryGenerateRaw(retryPrompts.system, retryPrompts.user, 2);
         if (lastResult && lastResult.trim()) return lastResult;
-        if (result && typeof result === 'object' && extractChatCompletionReasoning(result)) {
-            throw new Error(`${cfg.title} provider returned reasoning-only output with empty visible content. Increase max tokens or use a non-thinking model for extraction.`);
-        }
     }
 
     if (typeof ctx?.generateQuietPrompt === 'function') {
-        const quietPrompt = `${systemPrompt}\n\n${userPrompt}`;
+        const prompts = reasoningPreview ? makeFinalOnlyRetryPrompts(systemPrompt, userPrompt, options) : { system: systemPrompt, user: userPrompt };
+        const quietPrompt = `${prompts.system}\n\n${prompts.user}`;
         let result = await ctx.generateQuietPrompt({ quietPrompt });
         lastResult = typeof result === 'string' ? result : extractChatCompletionText(result);
         if (lastResult && lastResult.trim()) return lastResult;
@@ -449,6 +485,10 @@ async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}
         result = await ctx.generateQuietPrompt(quietPrompt);
         lastResult = typeof result === 'string' ? result : extractChatCompletionText(result);
         if (lastResult && lastResult.trim()) return lastResult;
+    }
+
+    if (reasoningPreview) {
+        throw new Error(`${cfg.title} provider returned reasoning-only output with empty visible content. Retried with final-only visible-output instructions but still received no visible content. Increase max tokens, reduce reasoning effort, or use a non-thinking model. Reasoning preview: ${reasoningPreview.slice(0, 300)}`);
     }
 
     if (typeof ctx?.generateRaw === 'function' || typeof ctx?.generateQuietPrompt === 'function') {
@@ -465,33 +505,46 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
     if (!cfg.profileId) throw new Error(`${cfg.title} profile is not selected.`);
     if (!service || typeof service.sendRequest !== 'function') throw new Error('ConnectionManagerRequestService unavailable.');
 
+    async function send(messages, lengthMultiplier = 1) {
+        return await service.sendRequest(
+            cfg.profileId,
+            messages,
+            Math.max(128, Math.min(8192, Math.ceil(Number(options.maxTokens || cfg.maxTokens || 2048) * lengthMultiplier))),
+            {
+                stream: false,
+                extractData: true,
+                includePreset: !!cfg.completionPresetId,
+                includeInstruct: true,
+                preset: cfg.completionPresetId || undefined,
+                completionPreset: cfg.completionPresetId || undefined,
+                // Do not force reasoning_effort here. Some providers/profiles, especially DeepSeek-compatible
+                // endpoints, reject unsupported values. If a SillyTavern connection profile itself sends
+                // reasoning_effort:'auto', fix that profile/preset or use Wandlight's direct OpenAI-compatible provider.
+            },
+        );
+    }
+
     const messages = [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
     ];
 
-    const raw = await service.sendRequest(
-        cfg.profileId,
-        messages,
-        Number(options.maxTokens || cfg.maxTokens || 2048),
-        {
-            stream: false,
-            extractData: true,
-            includePreset: !!cfg.completionPresetId,
-            includeInstruct: true,
-            preset: cfg.completionPresetId || undefined,
-            completionPreset: cfg.completionPresetId || undefined,
-            // Do not force reasoning_effort here. Some providers/profiles, especially DeepSeek-compatible
-            // endpoints, reject unsupported values. If a SillyTavern connection profile itself sends
-            // reasoning_effort:'auto', fix that profile/preset or use Wandlight's direct OpenAI-compatible provider.
-        },
-    );
-
+    let raw = await send(messages, 1);
     if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
-    const content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
+    let content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
     if (content && content.trim()) return content;
-    if (raw && typeof raw === 'object' && extractChatCompletionReasoning(raw)) {
-        throw new Error(`${cfg.title} connection profile returned reasoning-only output with empty visible content. Increase max tokens, reduce reasoning effort in the profile/preset, or use a non-thinking model for extraction.`);
+
+    const reasoning = raw && typeof raw === 'object' ? extractChatCompletionReasoning(raw) : '';
+    if (reasoning) {
+        const retryPrompts = makeFinalOnlyRetryPrompts(systemPrompt, userPrompt, options);
+        raw = await send([
+            { role: 'system', content: retryPrompts.system },
+            { role: 'user', content: retryPrompts.user },
+        ], 2);
+        if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
+        content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
+        if (content && content.trim()) return content;
+        throw new Error(`${cfg.title} connection profile returned reasoning-only output with empty visible content. Retried with final-only visible-output instructions but still received no visible content. Increase max tokens, reduce reasoning effort in the profile/preset, or use a non-thinking model. Reasoning preview: ${reasoning.slice(0, 300)}`);
     }
     return content;
 }

@@ -115,18 +115,24 @@ export const DEFAULT_SETTINGS = {
     continuityEmotionDecayTurns: 6,
 
     // Advanced compression prompt templates. Variables: {{kind}}, {{compressionLevel}},
-    // {{compressionLabel}}, {{targetTokens}}, {{hardTokenLimit}}, {{storyContext}}, {{directText}}.
+    // {{compressionLabel}}, {{directTokens}}, {{targetTokens}}, {{hardTokenLimit}},
+    // {{directCharacters}}, {{targetCharacters}}, {{hardCharacterLimit}},
+    // {{storyContext}}, {{directText}}.
     continuityCompressionPromptTemplate: `Compress the following Wandlight {{kind}} injection block for a Harry Potter roleplay.
 
 Story context:
 {{storyContext}}
 
 Compression level {{compressionLevel}} — {{compressionLabel}}.
-Target length: about {{targetTokens}} tokens. Do not exceed {{hardTokenLimit}} tokens unless a critical continuity constraint would be lost.
+Source length: about {{directTokens}} tokens / {{directCharacters}} characters.
+Target length: at most {{targetTokens}} tokens / {{targetCharacters}} characters.
+Hard maximum visible output: {{hardTokenLimit}} tokens / {{hardCharacterLimit}} characters.
 
 Rules:
 - Preserve current scene state, character state, knowledge boundaries, secrets, active goals, relationships, and contradictions.
 - Keep emotional state only when it currently affects character behavior.
+- Merge redundant details and rewrite for density; do not simply restate the source.
+- At compression level 3 or higher, prefer compact bullets and phrase fragments over prose.
 - Do not invent facts.
 - Output only the compressed injection text. No markdown fences or commentary.
 
@@ -138,12 +144,15 @@ Story context:
 {{storyContext}}
 
 Compression level {{compressionLevel}} — {{compressionLabel}}.
-Target length: about {{targetTokens}} tokens. Do not exceed {{hardTokenLimit}} tokens unless a critical lore constraint would be lost.
+Source length: about {{directTokens}} tokens / {{directCharacters}} characters.
+Target length: at most {{targetTokens}} tokens / {{targetCharacters}} characters.
+Hard maximum visible output: {{hardTokenLimit}} tokens / {{hardCharacterLimit}} characters.
 
 Rules:
 - Preserve secrets, knowledge boundaries, canon/AU constraints, current-scene relevant facts, and active hazards.
 - Preserve pinned/protected lore more fully than ordinary lore.
-- Merge redundant entries where possible.
+- Merge redundant entries where possible and drop low-value wording.
+- At compression level 3 or higher, prefer compact bullets and phrase fragments over prose.
 - Do not invent facts.
 - Output only the compressed injection text. No markdown fences or commentary.
 
@@ -319,6 +328,14 @@ export function getDefaultState() {
             lastSignature: '',
             lastMode: 'direct',
             lastTokenEstimate: 0,
+            lastCharacterCount: 0,
+            lastDirectTokenEstimate: 0,
+            lastDirectCharacterCount: 0,
+            lastTargetTokenEstimate: 0,
+            lastTargetCharacterCount: 0,
+            lastHardTokenLimit: 0,
+            lastHardCharacterLimit: 0,
+            lastCompressionRatio: 0,
             turnsSinceCompression: 0,
             lastChatLength: 0,
             cachedText: '',
@@ -329,6 +346,14 @@ export function getDefaultState() {
             lastSignature: '',
             lastMode: 'direct',
             lastTokenEstimate: 0,
+            lastCharacterCount: 0,
+            lastDirectTokenEstimate: 0,
+            lastDirectCharacterCount: 0,
+            lastTargetTokenEstimate: 0,
+            lastTargetCharacterCount: 0,
+            lastHardTokenLimit: 0,
+            lastHardCharacterLimit: 0,
+            lastCompressionRatio: 0,
             turnsSinceCompression: 0,
             lastChatLength: 0,
             cachedText: '',

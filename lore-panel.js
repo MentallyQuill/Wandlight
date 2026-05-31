@@ -22,7 +22,7 @@ import {
     undoLastChange,
     setLoreContext,
 } from './state-manager.js';
-import { buildMemo, buildMemoPreview, buildContinuityPreview, buildLorePreview, getMemoSignature } from './memo-builder.js';
+import { buildMemo, buildMemoPreview, buildContinuityPreview, buildLorePreview, getCompressionSourceSignature } from './memo-builder.js';
 import { onExtractionTriggered } from './extractor.js';
 import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
@@ -2253,7 +2253,7 @@ function createCompressionPromptEditorCard() {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Variables: {{kind}}, {{compressionLevel}}, {{compressionLabel}}, {{targetTokens}}, {{hardTokenLimit}}, {{storyContext}}, {{directText}}.';
+    help.textContent = 'Variables: {{kind}}, {{compressionLevel}}, {{compressionLabel}}, {{directTokens}}, {{targetTokens}}, {{hardTokenLimit}}, {{directCharacters}}, {{targetCharacters}}, {{hardCharacterLimit}}, {{storyContext}}, {{directText}}.';
     card.appendChild(help);
 
     card.appendChild(createCompressionPromptTextarea('Continuity Compression Prompt', 'continuityCompressionPromptTemplate', DEFAULT_SETTINGS.continuityCompressionPromptTemplate));
@@ -2327,14 +2327,21 @@ function getCompressionProfile(level) {
 }
 
 function estimateTokenBudgetForCompression(text, level) {
-    const directTokens = estimateTokens(text || '');
+    const source = String(text || '');
+    const directTokens = estimateTokens(source);
+    const directCharacters = source.length;
     const profile = getCompressionProfile(level);
     const targetTokens = Math.max(96, Math.ceil(directTokens * profile.ratio));
     const hardTokenLimit = Math.max(128, Math.ceil(targetTokens * 1.2));
+    const targetCharacters = Math.max(420, Math.ceil(directCharacters * profile.ratio));
+    const hardCharacterLimit = Math.max(560, Math.ceil(targetCharacters * 1.18));
     return {
         directTokens,
+        directCharacters,
         targetTokens,
+        targetCharacters,
         hardTokenLimit,
+        hardCharacterLimit,
         profile,
     };
 }
@@ -2349,7 +2356,7 @@ function getCompressionBudgetSummary(kind, state) {
         : buildLorePreview(state, 'direct');
     if (!directText || !directText.trim()) return 'No source text';
     const budget = estimateTokenBudgetForCompression(directText, level);
-    return `~${budget.targetTokens} target / ${budget.hardTokenLimit} max tokens from ~${budget.directTokens} direct tokens`;
+    return `~${budget.targetTokens} tokens / ${budget.targetCharacters} chars target; max ${budget.hardTokenLimit} tokens / ${budget.hardCharacterLimit} chars from ~${budget.directTokens} tokens / ${budget.directCharacters} chars`;
 }
 
 function getCompressionStatusTextForSummary(state, kind) {
@@ -2627,31 +2634,58 @@ async function runModelCompression(kind = 'lore', btn = null) {
         const budget = estimateTokenBudgetForCompression(directText, level);
         const compressionPrompt = buildCompressionPrompt(kind, level, context, directText, budget);
         const compressed = await sendLoreRequest(
-            'You are Wandlight Compression. Output only the compressed injection block. Do not use markdown fences. Do not add commentary.',
+            'You are Wandlight Compression. Compress the source into a shorter visible plain-text injection block. Output only that block. Do not use markdown fences, JSON, reasoning, or commentary.',
             compressionPrompt,
             {
                 providerKind,
-                maxTokens: Math.max(128, Math.min(4096, budget.hardTokenLimit)),
+                maxTokens: Math.max(512, Math.min(8192, Math.ceil(budget.hardTokenLimit * 3))),
                 prefill: '',
+                expectedOutput: 'text',
+                task: 'compression',
             }
         );
 
-        const cleaned = cleanCompressedText(compressed);
-        if (!cleaned) {
-            throw new Error('Compression returned empty text.');
+        let cleaned = cleanCompressedText(compressed);
+        let validationResult = validateCompressedText(cleaned, directText, budget, level);
+        if (!validationResult.ok && shouldRetryCompression(validationResult, directText, level)) {
+            const retryPrompt = buildCompressionRetryPrompt(kind, level, context, directText, cleaned, budget, validationResult.message);
+            const retry = await sendLoreRequest(
+                'You are Wandlight Compression. Your previous visible output was too long or insufficiently compressed. Output only the corrected shorter plain-text injection block. No markdown, JSON, reasoning, or commentary.',
+                retryPrompt,
+                {
+                    providerKind,
+                    maxTokens: Math.max(512, Math.min(8192, Math.ceil(budget.hardTokenLimit * 3))),
+                    prefill: '',
+                    expectedOutput: 'text',
+                    task: 'compression',
+                }
+            );
+            cleaned = cleanCompressedText(retry);
+            validationResult = validateCompressedText(cleaned, directText, budget, level);
+        }
+
+        if (!validationResult.ok) {
+            throw new Error(validationResult.message);
         }
 
         const freshState = getState();
         const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
         if (!freshState[statusKey]) freshState[statusKey] = {};
+        const compressedTokens = estimateTokens(cleaned);
         freshState[statusKey] = {
             ...freshState[statusKey],
             lastCompressedAt: Date.now(),
-            lastSignature: getMemoSignature(freshState, 'compressed', kind),
+            lastSignature: getCompressionSourceSignature(freshState, kind, directText, settings),
             lastMode: 'compressed',
-            lastTokenEstimate: estimateTokens(cleaned),
+            lastTokenEstimate: compressedTokens,
+            lastCharacterCount: cleaned.length,
+            lastDirectTokenEstimate: budget.directTokens,
+            lastDirectCharacterCount: budget.directCharacters,
             lastTargetTokenEstimate: budget.targetTokens,
+            lastTargetCharacterCount: budget.targetCharacters,
             lastHardTokenLimit: budget.hardTokenLimit,
+            lastHardCharacterLimit: budget.hardCharacterLimit,
+            lastCompressionRatio: budget.directCharacters ? Number((cleaned.length / budget.directCharacters).toFixed(3)) : 0,
             turnsSinceCompression: 0,
             lastChatLength: getChatLength(),
             cachedText: cleaned,
@@ -2659,7 +2693,7 @@ async function runModelCompression(kind = 'lore', btn = null) {
         };
         saveState(freshState);
         refreshPanelBody({ preserveScroll: false });
-        toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression updated.`);
+        toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression updated: ${compressedTokens} tokens / ${cleaned.length} chars from ${budget.directTokens} tokens / ${budget.directCharacters} chars.`);
         return cleaned;
     } catch (e) {
         const freshState = getState();
@@ -2679,6 +2713,57 @@ async function runModelCompression(kind = 'lore', btn = null) {
     }
 }
 
+
+function validateCompressedText(cleaned, directText, budget, level) {
+    const text = String(cleaned || '').trim();
+    if (!text) return { ok: false, message: 'Compression returned empty visible text.' };
+    const source = String(directText || '');
+    const sourceChars = source.length;
+    const outputChars = text.length;
+    const outputTokens = estimateTokens(text);
+    if (sourceChars >= 900 && outputChars > budget.hardCharacterLimit) {
+        return { ok: false, message: `Compressed output is too long: ${outputChars} chars; hard limit is ${budget.hardCharacterLimit} chars.` };
+    }
+    if (budget.directTokens >= 220 && outputTokens > Math.ceil(budget.hardTokenLimit * 1.1)) {
+        return { ok: false, message: `Compressed output is too long: ~${outputTokens} tokens; hard limit is ~${budget.hardTokenLimit} tokens.` };
+    }
+    if (level >= 3 && sourceChars >= 1200 && outputChars > Math.ceil(sourceChars * 0.72)) {
+        return { ok: false, message: `Compression level ${level} did not significantly reduce the source: ${outputChars} chars from ${sourceChars} chars.` };
+    }
+    if (level >= 4 && sourceChars >= 1200 && outputChars > Math.ceil(sourceChars * 0.55)) {
+        return { ok: false, message: `Compression level ${level} did not meet heavy-reduction expectations: ${outputChars} chars from ${sourceChars} chars.` };
+    }
+    return { ok: true, message: '' };
+}
+
+function shouldRetryCompression(result, directText, level) {
+    if (result?.ok) return false;
+    const sourceChars = String(directText || '').length;
+    return sourceChars >= 600 || level >= 3;
+}
+
+function buildCompressionRetryPrompt(kind, level, context, directText, previousOutput, budget, reason) {
+    const kindLabel = kind === 'continuity' ? 'Continuity State' : 'Lore Entries';
+    return `Compress the Wandlight ${kindLabel} injection again. The previous output failed validation: ${reason}
+
+Required visible-output limits:
+- Source: about ${budget.directTokens} tokens / ${budget.directCharacters} characters.
+- Target: <= ${budget.targetTokens} tokens / <= ${budget.targetCharacters} characters.
+- Hard maximum: <= ${budget.hardTokenLimit} tokens / <= ${budget.hardCharacterLimit} characters.
+- Compression level ${level}: ${budget.profile.description}.
+
+Story context:
+${context}
+
+Previous too-long output:
+${previousOutput || '(empty)'}
+
+Direct injection block to compress:
+${directText}
+
+Output only the corrected compressed injection text. No markdown fences, JSON, reasoning, or commentary.`;
+}
+
 function buildCompressionPrompt(kind, level, context, directText, budget = null) {
     const settings = getSettings();
     const kindLabel = kind === 'continuity' ? 'Continuity State' : 'Lore Entries';
@@ -2692,19 +2777,41 @@ function buildCompressionPrompt(kind, level, context, directText, budget = null)
         kind: kindLabel,
         compressionLevel: String(level),
         compressionLabel: computedBudget.profile.description,
+        directTokens: String(computedBudget.directTokens),
         targetTokens: String(computedBudget.targetTokens),
         hardTokenLimit: String(computedBudget.hardTokenLimit),
+        directCharacters: String(computedBudget.directCharacters),
+        targetCharacters: String(computedBudget.targetCharacters),
+        hardCharacterLimit: String(computedBudget.hardCharacterLimit),
         storyContext: context,
         directText,
     };
-    return template.replace(/{{\s*(\w+)\s*}}/g, (_, key) => Object.prototype.hasOwnProperty.call(vars, key) ? vars[key] : '');
+    const rendered = template.replace(/{{\s*(\w+)\s*}}/g, (_, key) => Object.prototype.hasOwnProperty.call(vars, key) ? vars[key] : '');
+    if (/{{\s*(targetCharacters|hardCharacterLimit|directCharacters)\s*}}/i.test(template)) return rendered;
+    // Preserve older/custom advanced templates, but append the dynamic length
+    // contract that prevents level 3+ compression from becoming a same-size rewrite.
+    return `${rendered}
+
+Compression length contract:
+- Source length: about ${vars.directTokens} tokens / ${vars.directCharacters} characters.
+- Target length: <= ${vars.targetTokens} tokens / <= ${vars.targetCharacters} characters.
+- Hard maximum visible output: <= ${vars.hardTokenLimit} tokens / <= ${vars.hardCharacterLimit} characters.
+- If information must be sacrificed, preserve active continuity constraints, secrets, knowledge boundaries, pinned/protected details, and current-scene hazards first.
+- Output only the compressed injection text.`;
 }
 
 
 function cleanCompressedText(text) {
-    return String(text || '')
+    let cleaned = String(text || '')
         .replace(/```(?:text|markdown)?\s*([\s\S]*?)```/i, '$1')
         .trim();
+    if (/^\{[\s\S]*\}$/.test(cleaned)) {
+        try {
+            const parsed = JSON.parse(cleaned);
+            cleaned = String(parsed.compressedText || parsed.compressed || parsed.text || parsed.content || parsed.message || cleaned).trim();
+        } catch (_) {}
+    }
+    return cleaned;
 }
 
 function getCompressionStatusText(state) {
@@ -2713,7 +2820,7 @@ function getCompressionStatusText(state) {
     if ((settings.loreInjectionMode || 'direct') !== 'compressed') {
         return 'Direct mode active; compression not used.';
     }
-    const currentSignature = getMemoSignature(state, 'compressed', 'lore');
+    const currentSignature = getCompressionSourceSignature(state, 'lore', buildLorePreview(state, 'direct'));
     if (status.lastSignature !== currentSignature) {
         return status.lastError ? `cached compression is stale; last error: ${status.lastError}` : 'Cached compression is missing or stale. Click Compress Lore Now.';
     }
@@ -2724,7 +2831,7 @@ function getCompressionStatusText(state) {
         return 'No cached model compression yet. Click Compress Lore Now.';
     }
     const when = new Date(status.lastCompressedAt).toLocaleTimeString();
-    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens${status.lastTargetTokenEstimate ? ` (target ${status.lastTargetTokenEstimate})` : ''}`;
+    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens / ${status.lastCharacterCount || 0} chars${status.lastTargetTokenEstimate ? ` (target ${status.lastTargetTokenEstimate} tokens / ${status.lastTargetCharacterCount || '?'} chars)` : ''}${status.lastCompressionRatio ? `; ratio ${Math.round(status.lastCompressionRatio * 100)}%` : ''}`;
 }
 
 function getContinuityCompressionStatusText(state) {
@@ -2733,7 +2840,7 @@ function getContinuityCompressionStatusText(state) {
     if ((settings.continuityInjectionMode || 'direct') !== 'compressed') {
         return 'Direct mode active; continuity compression not used.';
     }
-    const currentSignature = getMemoSignature(state, 'compressed', 'continuity');
+    const currentSignature = getCompressionSourceSignature(state, 'continuity', buildContinuityPreview(state, 'direct'));
     if (status.lastSignature !== currentSignature) {
         return status.lastError ? `cached compression is stale; last error: ${status.lastError}` : 'Cached compression is missing or stale. Click Compress Continuity Now.';
     }
@@ -2744,7 +2851,7 @@ function getContinuityCompressionStatusText(state) {
         return 'No cached model compression yet. Click Compress Continuity Now.';
     }
     const when = new Date(status.lastCompressedAt).toLocaleTimeString();
-    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens${status.lastTargetTokenEstimate ? ` (target ${status.lastTargetTokenEstimate})` : ''}`;
+    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens / ${status.lastCharacterCount || 0} chars${status.lastTargetTokenEstimate ? ` (target ${status.lastTargetTokenEstimate} tokens / ${status.lastTargetCharacterCount || '?'} chars)` : ''}${status.lastCompressionRatio ? `; ratio ${Math.round(status.lastCompressionRatio * 100)}%` : ''}`;
 }
 
 function getChatLength() {
@@ -2760,7 +2867,7 @@ function hasValidModelCompression(kind = 'lore') {
     const state = getState();
     const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
     const status = state?.[statusKey] || {};
-    const signature = getMemoSignature(state, 'compressed', kind);
+    const signature = getCompressionSourceSignature(state, kind, kind === 'continuity' ? buildContinuityPreview(state, 'direct') : buildLorePreview(state, 'direct'));
     return status.lastSignature === signature && typeof status.cachedText === 'string' && status.cachedText.trim();
 }
 
@@ -2791,10 +2898,12 @@ function createInjectionModeButton(mode, label, tooltip, settings) {
         const next = getSettings();
         next.loreInjectionMode = mode;
         saveSettings(next);
-        if (mode === 'compressed' && !hasAnyModelCompression('lore')) {
+        if (mode === 'compressed' && !hasValidModelCompression('lore')) {
             const directText = buildLorePreview(getState(), 'direct');
             if (!hasCompressibleText(directText)) {
                 toast('Lore compressed mode selected, but there is no accepted lore to compress yet. Generate/accept lore entries first, then use Compress Lore Now.', 'warning');
+            } else if (hasAnyModelCompression('lore')) {
+                toast('Lore compressed mode selected. Existing compressed cache is stale for the current source/settings; using direct preview until you click Compress Lore Now.', 'warning');
             } else {
                 toast('Lore compressed mode selected. No cached compression exists yet; using direct preview until you click Compress Lore Now.', 'warning');
             }
@@ -2817,10 +2926,12 @@ function createContinuityModeButton(mode, label, tooltip, settings) {
         const next = getSettings();
         next.continuityInjectionMode = mode;
         saveSettings(next);
-        if (mode === 'compressed' && !hasAnyModelCompression('continuity')) {
+        if (mode === 'compressed' && !hasValidModelCompression('continuity')) {
             const directText = buildContinuityPreview(getState(), 'direct');
             if (!hasCompressibleText(directText)) {
                 toast('Continuity compressed mode selected, but there is no continuity state to compress yet. Run Scan Continuity State first, then use Compress Continuity Now.', 'warning');
+            } else if (hasAnyModelCompression('continuity')) {
+                toast('Continuity compressed mode selected. Existing compressed cache is stale for the current source/settings; using direct preview until you click Compress Continuity Now.', 'warning');
             } else {
                 toast('Continuity compressed mode selected. No cached compression exists yet; using direct preview until you click Compress Continuity Now.', 'warning');
             }

@@ -722,9 +722,7 @@ export function migrateState(state) {
     } else {
         const defaults = getDefaultState().loreCompressionStatus;
         state.loreCompressionStatus = mergeDefaults(state.loreCompressionStatus, defaults);
-        state.loreCompressionStatus.lastCompressedAt = Number.isFinite(Number(state.loreCompressionStatus.lastCompressedAt)) ? Number(state.loreCompressionStatus.lastCompressedAt) : 0;
-        state.loreCompressionStatus.lastTokenEstimate = Number.isFinite(Number(state.loreCompressionStatus.lastTokenEstimate)) ? Number(state.loreCompressionStatus.lastTokenEstimate) : 0;
-        state.loreCompressionStatus.turnsSinceCompression = Number.isFinite(Number(state.loreCompressionStatus.turnsSinceCompression)) ? Number(state.loreCompressionStatus.turnsSinceCompression) : 0;
+        normalizeCompressionStatusNumbers(state.loreCompressionStatus);
     }
 
     // Normalize lorePanel
@@ -799,6 +797,28 @@ export function migrateState(state) {
 }
 
 
+
+function normalizeCompressionStatusNumbers(status) {
+    if (!status || typeof status !== 'object') return;
+    for (const key of [
+        'lastCompressedAt',
+        'lastTokenEstimate',
+        'lastCharacterCount',
+        'lastDirectTokenEstimate',
+        'lastDirectCharacterCount',
+        'lastTargetTokenEstimate',
+        'lastTargetCharacterCount',
+        'lastHardTokenLimit',
+        'lastHardCharacterLimit',
+        'lastCompressionRatio',
+        'turnsSinceCompression',
+        'lastChatLength',
+    ]) {
+        status[key] = Number.isFinite(Number(status[key])) ? Number(status[key]) : 0;
+    }
+}
+
+
 // ── Continuity structure helpers ───────────────────────────────────────────────
 
 function normalizeContinuityStructure(state) {
@@ -834,9 +854,7 @@ function normalizeContinuityStructure(state) {
     } else {
         const defaults = getDefaultState().continuityCompressionStatus;
         state.continuityCompressionStatus = mergeDefaults(state.continuityCompressionStatus, defaults);
-        state.continuityCompressionStatus.lastCompressedAt = Number.isFinite(Number(state.continuityCompressionStatus.lastCompressedAt)) ? Number(state.continuityCompressionStatus.lastCompressedAt) : 0;
-        state.continuityCompressionStatus.lastTokenEstimate = Number.isFinite(Number(state.continuityCompressionStatus.lastTokenEstimate)) ? Number(state.continuityCompressionStatus.lastTokenEstimate) : 0;
-        state.continuityCompressionStatus.turnsSinceCompression = Number.isFinite(Number(state.continuityCompressionStatus.turnsSinceCompression)) ? Number(state.continuityCompressionStatus.turnsSinceCompression) : 0;
+        normalizeCompressionStatusNumbers(state.continuityCompressionStatus);
     }
 }
 

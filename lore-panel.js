@@ -6,7 +6,7 @@
  * raw previews. This window is the runtime surface used during roleplay.
  */
 
-import { getPanelLoreState, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag } from './lore-matrix.js';
+import { getPanelLoreState, getInjectableLoreEntries, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag } from './lore-matrix.js';
 import { getDefaultState } from './constants.js';
 import {
     getState,
@@ -35,7 +35,7 @@ const MAX_PANEL_MARGIN = 16;
 
 const CATEGORY_LABELS = {
     all: 'All',
-    active: 'Active',
+    active: 'Context Active',
     pinned: 'Pinned',
     suppressed: 'Muted',
     pending: 'Pending',
@@ -74,6 +74,26 @@ const TAB_TOOLTIPS = {
     injection: 'Choose what Wandlight sends to the model: continuity state, lore entries, direct/compressed handling, and live split injection previews.',
 };
 
+
+
+function getSelectedLoreInjectionCount(state, settings = getSettings()) {
+    const maxLore = Number(settings.maxLoreEntriesInMemo) || 6;
+    return getInjectableLoreEntries(state, maxLore).length;
+}
+
+function getInjectionCharacterStats(state, settings = getSettings()) {
+    const continuityEnabled = settings.injectContinuity !== false && settings.injectMemo !== false;
+    const loreEnabled = settings.injectLore !== false;
+    const continuityText = continuityEnabled ? buildContinuityPreview(state, settings.continuityInjectionMode || 'direct') : '';
+    const loreText = loreEnabled ? buildLorePreview(state, settings.loreInjectionMode || 'direct') : '';
+    return {
+        continuityChars: continuityText.length,
+        loreChars: loreText.length,
+        totalChars: continuityText.length + loreText.length,
+        totalTokens: estimateTokens(`${continuityText}
+${loreText}`),
+    };
+}
 
 const LORE_PRIORITY_VALUES = [10, 25, 50, 75, 90, 100];
 
@@ -325,7 +345,8 @@ function refreshHeader() {
     const settings = getSettings();
     const pendingLore = (state?.pendingLoreEntries || []).length;
     const pendingDelta = state?.lastDelta ? 1 : 0;
-    const activeLore = getPanelLoreState(state).counts.active || 0;
+    const counts = getPanelLoreState(state).counts;
+    const selectedLore = getSelectedLoreInjectionCount(state, settings);
 
     status.innerHTML = '';
     status.appendChild(createStatusPill(`Mode: ${getWorkflowLabel(settings)}`, getWorkflowTooltip(settings)));
@@ -334,7 +355,7 @@ function refreshHeader() {
     if (pendingDelta + pendingLore > 0) {
         status.appendChild(createStatusPill(`Pending: ${pendingDelta + pendingLore}`, 'Pending items: generated lore entries in the Lore tab, plus any legacy continuity delta shown in the Continuity tab.'));
     }
-    status.appendChild(createStatusPill(`Active Lore: ${activeLore}`, 'Lore entries currently eligible for prompt injection.'));
+    status.appendChild(createStatusPill(`Lore Selected: ${selectedLore}`, 'Accepted lore entries selected for the next injection after filters, priority, pinning, muting, and the max lore injection setting.'));
 }
 
 function renderPanelBody(container, state) {
@@ -441,13 +462,17 @@ function renderSessionTab(container, state) {
 
     const stats = document.createElement('div');
     stats.className = 'wandlight-runtime-card';
+    const settings = getSettings();
     const counts = getPanelLoreState(state).counts;
-    const memo = buildMemo(state);
+    const selectedLoreCount = getSelectedLoreInjectionCount(state, settings);
+    const injectionStats = getInjectionCharacterStats(state, settings);
     stats.appendChild(createKeyValue('Pending continuity changes', state?.lastDelta ? '1' : '0', 'Legacy extracted state delta waiting in the Continuity tab. New scans apply directly to Continuity sections.'));
     stats.appendChild(createKeyValue('Pending lore entries', String((state?.pendingLoreEntries || []).length), 'Generated lore entries waiting in the Lore tab Pending Lore Review section.'));
     stats.appendChild(createKeyValue('Accepted lore entries', String(counts.all - counts.pending), 'Lore entries currently stored in the accepted lore matrix.'));
-    stats.appendChild(createKeyValue('Active lore entries', String(counts.active), 'Accepted entries currently eligible for injection.'));
-    stats.appendChild(createKeyValue('Memo estimate', memo ? `${estimateTokens(memo)} tokens` : 'empty', 'Approximate size of the injected continuity memo. The raw preview is in the Injection tab.'));
+    stats.appendChild(createKeyValue('Context-active lore entries', String(counts.active), 'Accepted lore entries whose date, branch, character, location, or scope rules match the current Continuity/Context state. This can be 0 even when fallback priority-based lore is still selected for injection.'));
+    stats.appendChild(createKeyValue('Lore selected for injection', String(selectedLoreCount), 'Accepted lore entries that Wandlight is currently selecting for Lore Injection after pin/mute rules, context activation, fallback priority selection, and the max lore injection setting.'));
+    stats.appendChild(createKeyValue('Injection token estimate', injectionStats.totalChars ? `${injectionStats.totalTokens} tokens` : 'empty', 'Approximate token count for the combined Continuity + Lore injection previews.'));
+    stats.appendChild(createKeyValue('Total chars injected', `${injectionStats.totalChars} chars`, 'Combined character count of Continuity Injection Preview plus Lore Injection Preview using current Injection tab toggles and handling modes.'));
     container.appendChild(stats);
 
     container.appendChild(createStateHistoryCard(state));
@@ -1752,46 +1777,49 @@ function createInjectionPlacementCard(settings) {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Recommended: Extension Prompt, System role, In-chat depth 4. This should appear in Prompt Inspector / F12 payload as separate Wandlight prompt blocks.';
+    help.textContent = 'Recommended: Extension Prompt, System role, In-chat depth 4. Depth is relative to the final prompt stack, so the visible payload message index can vary.';
     card.appendChild(help);
 
-    const grid = document.createElement('div');
-    grid.className = 'wandlight-runtime-grid wandlight-prompt-placement-grid';
+    const placement = document.createElement('div');
+    placement.className = 'wandlight-prompt-placement-lines';
 
-    grid.appendChild(createPlacementSelect('Injection method', 'injectionTransport', settings.injectionTransport || 'extension_prompt', [
-        ['extension_prompt', 'Extension Prompt: role/depth'],
-        ['interceptor', 'Legacy: prepend to last user message'],
-    ], 'Extension Prompt uses SillyTavern setExtensionPrompt and supports role/depth. Legacy mode has no true depth and appears as part of the last user message.'));
+    const methodRow = document.createElement('div');
+    methodRow.className = 'wandlight-prompt-placement-line wandlight-prompt-placement-method-line';
+    methodRow.appendChild(createPlacementSelect('Injection method', 'injectionTransport', settings.injectionTransport || 'extension_prompt', [
+        ['extension_prompt', 'Extension Prompt'],
+        ['interceptor', 'Legacy prepend'],
+    ], 'Extension Prompt uses SillyTavern setExtensionPrompt and supports role/depth. Legacy mode has no true depth and appears as part of the last user message.', 'wandlight-placement-method'));
+    placement.appendChild(methodRow);
 
-    grid.appendChild(createPlacementSelect('Continuity position', 'continuityInjectionPosition', String(settings.continuityInjectionPosition ?? 1), [
-        ['1', 'In-chat @ depth'],
-        ['0', 'After main prompt / story string'],
-        ['2', 'Before main prompt'],
-    ], 'Where the Continuity Injection block is inserted. Depth only applies to In-chat.'));
+    placement.appendChild(createPromptPlacementLine('Continuity', [
+        createPlacementSelect('Position', 'continuityInjectionPosition', String(settings.continuityInjectionPosition ?? 1), [
+            ['1', 'In-chat'],
+            ['0', 'After prompt'],
+            ['2', 'Before prompt'],
+        ], 'Where the Continuity Injection block is inserted. Depth only applies to In-chat.', 'wandlight-placement-position'),
+        createPlacementNumber('Depth', 'continuityInjectionDepth', settings.continuityInjectionDepth ?? 4, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.', 'wandlight-placement-depth'),
+        createPlacementSelect('Role', 'continuityInjectionRole', String(settings.continuityInjectionRole ?? 0), [
+            ['0', 'System'],
+            ['1', 'User'],
+            ['2', 'Assistant'],
+        ], 'Role used for the injected Continuity block when using In-chat extension prompt placement.', 'wandlight-placement-role'),
+    ]));
 
-    grid.appendChild(createPlacementNumber('Continuity depth', 'continuityInjectionDepth', settings.continuityInjectionDepth ?? 4, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.'));
+    placement.appendChild(createPromptPlacementLine('Lore', [
+        createPlacementSelect('Position', 'loreInjectionPosition', String(settings.loreInjectionPosition ?? 1), [
+            ['1', 'In-chat'],
+            ['0', 'After prompt'],
+            ['2', 'Before prompt'],
+        ], 'Where the Lore Injection block is inserted. Depth only applies to In-chat.', 'wandlight-placement-position'),
+        createPlacementNumber('Depth', 'loreInjectionDepth', settings.loreInjectionDepth ?? 4, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.', 'wandlight-placement-depth'),
+        createPlacementSelect('Role', 'loreInjectionRole', String(settings.loreInjectionRole ?? 0), [
+            ['0', 'System'],
+            ['1', 'User'],
+            ['2', 'Assistant'],
+        ], 'Role used for the injected Lore block when using In-chat extension prompt placement.', 'wandlight-placement-role'),
+    ]));
 
-    grid.appendChild(createPlacementSelect('Continuity role', 'continuityInjectionRole', String(settings.continuityInjectionRole ?? 0), [
-        ['0', 'System'],
-        ['1', 'User'],
-        ['2', 'Assistant'],
-    ], 'Role used for the injected Continuity block when using In-chat extension prompt placement.'));
-
-    grid.appendChild(createPlacementSelect('Lore position', 'loreInjectionPosition', String(settings.loreInjectionPosition ?? 1), [
-        ['1', 'In-chat @ depth'],
-        ['0', 'After main prompt / story string'],
-        ['2', 'Before main prompt'],
-    ], 'Where the Lore Injection block is inserted. Depth only applies to In-chat.'));
-
-    grid.appendChild(createPlacementNumber('Lore depth', 'loreInjectionDepth', settings.loreInjectionDepth ?? 4, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.'));
-
-    grid.appendChild(createPlacementSelect('Lore role', 'loreInjectionRole', String(settings.loreInjectionRole ?? 0), [
-        ['0', 'System'],
-        ['1', 'User'],
-        ['2', 'Assistant'],
-    ], 'Role used for the injected Lore block when using In-chat extension prompt placement.'));
-
-    card.appendChild(grid);
+    card.appendChild(placement);
 
     const status = typeof globalThis.wandlightGetInjectionStatus === 'function'
         ? globalThis.wandlightGetInjectionStatus()
@@ -1816,9 +1844,29 @@ function createInjectionPlacementCard(settings) {
     return card;
 }
 
-function createPlacementSelect(labelText, settingKey, value, options, tooltip) {
+function createPromptPlacementLine(labelText, controls) {
+    const row = document.createElement('div');
+    row.className = 'wandlight-prompt-placement-line';
+
+    const label = document.createElement('div');
+    label.className = 'wandlight-prompt-placement-line-label';
+    label.textContent = labelText;
+    addTooltip(label, `${labelText} prompt placement settings.`);
+    row.appendChild(label);
+
+    const controlWrap = document.createElement('div');
+    controlWrap.className = 'wandlight-prompt-placement-control-wrap';
+    for (const control of controls) {
+        controlWrap.appendChild(control);
+    }
+    row.appendChild(controlWrap);
+
+    return row;
+}
+
+function createPlacementSelect(labelText, settingKey, value, options, tooltip, extraClass = '') {
     const label = document.createElement('label');
-    label.className = 'wandlight-inline-field';
+    label.className = `wandlight-inline-field ${extraClass}`.trim();
     const span = document.createElement('span');
     span.textContent = labelText;
     addTooltip(span, tooltip);
@@ -1846,9 +1894,9 @@ function createPlacementSelect(labelText, settingKey, value, options, tooltip) {
     return label;
 }
 
-function createPlacementNumber(labelText, settingKey, value, min, max, tooltip) {
+function createPlacementNumber(labelText, settingKey, value, min, max, tooltip, extraClass = '') {
     const label = document.createElement('label');
-    label.className = 'wandlight-inline-field';
+    label.className = `wandlight-inline-field ${extraClass}`.trim();
     const span = document.createElement('span');
     span.textContent = labelText;
     addTooltip(span, tooltip);
@@ -3655,7 +3703,7 @@ function getCategoryTooltip(cat) {
     if (registryMeta?.description) return registryMeta.description;
     const map = {
         all: 'Shows every accepted and pending lore entry.',
-        active: 'Shows lore currently eligible for injection, including pinned entries.',
+        active: 'Shows entries whose date, branch, character, location, or scope rules match the current Continuity/Context state. Lore may still inject fallback high-priority entries when this count is 0.',
         pinned: 'Shows entries manually prioritized for injection.',
         suppressed: 'Shows muted entries excluded from injection.',
         pending: 'Shows generated entries that still need review.',

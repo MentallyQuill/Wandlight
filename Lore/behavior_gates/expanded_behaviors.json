@@ -35,6 +35,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -75,7 +78,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -111,6 +116,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -151,7 +159,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -187,6 +197,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -232,7 +245,9 @@
         "requiresEvents": [
           "draco_mission_revealed"
         ]
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -268,6 +283,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -308,7 +326,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     }
   ]
 }

@@ -67,7 +67,17 @@
           "Half-Blood Prince",
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_marauders_map_known_item",
@@ -152,7 +162,17 @@
           "Half-Blood Prince",
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1993-12-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_invisibility_cloak_known_item",
@@ -232,7 +252,17 @@
           "Half-Blood Prince",
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1991-12-25",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_horcrux_concept_secret",
@@ -305,7 +335,17 @@
           "Half-Blood Prince",
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "knowledge_gate",
+      "gateType": "knowledge_gate",
+      "protected": false,
+      "userEditable": true
     }
   ]
 }

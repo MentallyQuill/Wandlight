@@ -114,6 +114,12 @@
       "color": "#4b5563",
       "textColor": "#f9fafb",
       "description": "General roleplay continuity constraint."
+    },
+    "institution": {
+      "label": "Institution",
+      "color": "#0f766e",
+      "textColor": "#ccfbf1",
+      "description": "Institutional authority or school-state information."
     }
   },
   "canonStatuses": {

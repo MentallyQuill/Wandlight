@@ -28,7 +28,9 @@
         "topics": [
           "Horcruxes",
           "knowledge gate"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {
         "notKnownByBefore": {
@@ -89,7 +91,9 @@
           "horcruxes_revealed_to_trio"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -119,7 +123,9 @@
         "topics": [
           "Deathly Hallows",
           "knowledge gate"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {
         "notKnownByBefore": {
@@ -180,7 +186,9 @@
           "deathly_hallows_revealed_to_trio"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -208,7 +216,9 @@
         "topics": [
           "full prophecy",
           "knowledge gate"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {
         "notKnownByBefore": {
@@ -265,7 +275,9 @@
           "prophecy_revealed_to_harry"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -295,7 +307,9 @@
         "topics": [
           "Half-Blood Prince identity",
           "knowledge gate"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {
         "notKnownByBefore": {
@@ -345,7 +359,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -375,7 +391,9 @@
         "topics": [
           "Sirius Black innocence",
           "knowledge gate"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {
         "notKnownByBefore": {
@@ -436,7 +454,9 @@
           "sirius_truth_revealed"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -466,7 +486,9 @@
         "topics": [
           "Voldemort return",
           "knowledge gate"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {
         "notKnownByBefore": {
@@ -516,7 +538,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -547,7 +571,9 @@
         "topics": [
           "Draco mission",
           "knowledge gate"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {
         "notKnownByBefore": {
@@ -609,7 +635,9 @@
           "dumbledore_death_occurs"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     }
   ]
 }

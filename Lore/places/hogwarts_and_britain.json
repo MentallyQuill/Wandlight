@@ -73,7 +73,17 @@
           "Half-Blood Prince",
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "place_fact",
+      "gateType": "place_fact",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_hogsmeade_student_village",
@@ -136,7 +146,17 @@
           "Half-Blood Prince",
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "place_fact",
+      "gateType": "place_fact",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_ministry_of_magic_public_authority",
@@ -210,7 +230,17 @@
           "Half-Blood Prince",
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "place_fact",
+      "gateType": "place_fact",
+      "protected": false,
+      "userEditable": true
     }
   ]
 }

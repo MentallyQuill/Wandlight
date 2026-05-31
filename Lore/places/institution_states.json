@@ -30,6 +30,12 @@
         ],
         "schoolYears": [
           6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -68,7 +74,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "institution_state",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -100,6 +108,12 @@
         ],
         "schoolYears": [
           5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -138,7 +152,9 @@
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
-      }
+      },
+      "gateType": "institution_state",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -170,6 +186,9 @@
         ],
         "schoolYears": [
           5
+        ],
+        "books": [
+          "Order of the Phoenix"
         ]
       },
       "visibility": {},
@@ -213,7 +232,9 @@
         "requiresEvents": [
           "voldemort_return_publicly_acknowledged"
         ]
-      }
+      },
+      "gateType": "institution_state",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -245,6 +266,9 @@
         ],
         "schoolYears": [
           6
+        ],
+        "books": [
+          "Half-Blood Prince"
         ]
       },
       "visibility": {},
@@ -288,7 +312,9 @@
         "requiresEvents": [
           "voldemort_return_publicly_acknowledged"
         ]
-      }
+      },
+      "gateType": "institution_state",
+      "userEditable": true
     }
   ]
 }

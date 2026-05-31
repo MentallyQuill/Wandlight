@@ -3693,7 +3693,9 @@ function createAcceptedLoreEntriesSection(state) {
     section.appendChild(controls);
 
     const list = document.createElement('div');
-    list.className = 'wandlight-lore-entry-list';
+    list.className = 'wandlight-lore-entry-list wandlight-accepted-lore-scroll-region';
+    list.setAttribute('role', 'region');
+    list.setAttribute('aria-label', 'Accepted lore entries');
     renderEntryList(list, state);
     section.appendChild(list);
     return section;

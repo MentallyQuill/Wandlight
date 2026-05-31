@@ -17,7 +17,7 @@
         "validTo": "1992-08-31",
         "precision": "date",
         "schoolYear": 1,
-        "book": "Philosopher Stone"
+        "book": "Philosopher's Stone"
       },
       "scope": {
         "topics": [
@@ -28,7 +28,10 @@
           1
         ],
         "books": [
-          "Philosopher Stone"
+          "Philosopher's Stone"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -53,7 +56,7 @@
       },
       "source": {
         "work": "Harry Potter",
-        "book": "Philosopher Stone",
+        "book": "Philosopher's Stone",
         "chapter": "",
         "confidence": 0.85,
         "notes": "Curated date constraint seed entry."
@@ -65,8 +68,10 @@
         "hardValidTo": "1992-08-31",
         "precision": "date",
         "schoolYear": 1,
-        "book": "Philosopher Stone"
-      }
+        "book": "Philosopher's Stone"
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -85,7 +90,7 @@
         "validTo": "1998-08-31",
         "precision": "date",
         "schoolYear": 1,
-        "book": "Philosopher Stone"
+        "book": "Philosopher's Stone"
       },
       "scope": {
         "topics": [
@@ -96,13 +101,16 @@
           1
         ],
         "books": [
-          "Philosopher Stone"
+          "Philosopher's Stone"
+        ],
+        "phases": [
+          "climax"
         ]
       },
       "visibility": {},
       "content": {
-        "fact": "The Philosopher Stone plot is resolved and Quirrell is dead.",
-        "injection": "The Philosopher Stone plot is resolved and Quirrell is dead.",
+        "fact": "The Philosopher's Stone plot is resolved and Quirrell is dead.",
+        "injection": "The Philosopher's Stone plot is resolved and Quirrell is dead.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -121,7 +129,7 @@
       },
       "source": {
         "work": "Harry Potter",
-        "book": "Philosopher Stone",
+        "book": "Philosopher's Stone",
         "chapter": "",
         "confidence": 0.85,
         "notes": "Curated date constraint seed entry."
@@ -133,8 +141,10 @@
         "hardValidTo": "1998-08-31",
         "precision": "date",
         "schoolYear": 1,
-        "book": "Philosopher Stone"
-      }
+        "book": "Philosopher's Stone"
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -165,6 +175,9 @@
         ],
         "books": [
           "Chamber of Secrets"
+        ],
+        "phases": [
+          "autumn"
         ]
       },
       "visibility": {},
@@ -207,7 +220,9 @@
         "requiresEvents": [
           "chamber_of_secrets_resolved"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -238,6 +253,9 @@
         ],
         "books": [
           "Chamber of Secrets"
+        ],
+        "phases": [
+          "climax"
         ]
       },
       "visibility": {},
@@ -280,7 +298,9 @@
         "requiresEvents": [
           "chamber_of_secrets_resolved"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -311,6 +331,9 @@
         ],
         "books": [
           "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "summer"
         ]
       },
       "visibility": {},
@@ -348,7 +371,9 @@
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -379,6 +404,9 @@
         ],
         "books": [
           "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "climax"
         ]
       },
       "visibility": {},
@@ -421,7 +449,9 @@
         "requiresEvents": [
           "sirius_truth_revealed"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -452,6 +482,9 @@
         ],
         "books": [
           "Goblet of Fire"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -489,7 +522,9 @@
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -520,6 +555,9 @@
         ],
         "books": [
           "Goblet of Fire"
+        ],
+        "phases": [
+          "climax"
         ]
       },
       "visibility": {},
@@ -562,7 +600,9 @@
         "requiresEvents": [
           "voldemort_return_publicly_acknowledged"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -635,7 +675,9 @@
         "requiresEvents": [
           "voldemort_return_publicly_acknowledged"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -666,6 +708,9 @@
         ],
         "books": [
           "Order of the Phoenix"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -703,7 +748,9 @@
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -734,6 +781,9 @@
         ],
         "books": [
           "Order of the Phoenix"
+        ],
+        "phases": [
+          "climax"
         ]
       },
       "visibility": {},
@@ -771,7 +821,9 @@
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -802,6 +854,9 @@
         ],
         "books": [
           "Order of the Phoenix"
+        ],
+        "phases": [
+          "climax"
         ]
       },
       "visibility": {},
@@ -844,7 +899,9 @@
         "requiresEvents": [
           "voldemort_return_publicly_acknowledged"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -875,6 +932,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -912,7 +972,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -943,6 +1005,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -985,7 +1050,9 @@
         "requiresEvents": [
           "horcruxes_revealed_to_trio"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -1016,6 +1083,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -1064,7 +1134,9 @@
           "dumbledore_death_occurs"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -1095,6 +1167,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "climax"
         ]
       },
       "visibility": {},
@@ -1137,7 +1212,9 @@
         "requiresEvents": [
           "dumbledore_death_occurs"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -1168,6 +1245,9 @@
         ],
         "books": [
           "Deathly Hallows"
+        ],
+        "phases": [
+          "summer"
         ]
       },
       "visibility": {},
@@ -1210,7 +1290,9 @@
         "requiresEvents": [
           "ministry_falls"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -1241,6 +1323,9 @@
         ],
         "books": [
           "Deathly Hallows"
+        ],
+        "phases": [
+          "summer"
         ]
       },
       "visibility": {},
@@ -1283,7 +1368,9 @@
         "requiresEvents": [
           "horcruxes_revealed_to_trio"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -1314,6 +1401,9 @@
         ],
         "books": [
           "Deathly Hallows"
+        ],
+        "phases": [
+          "battle"
         ]
       },
       "visibility": {},
@@ -1351,7 +1441,9 @@
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     }
   ]
 }

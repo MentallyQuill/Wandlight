@@ -26,6 +26,10 @@
         "topics": [
           "school skill",
           "magic ability"
+        ],
+        "books": [],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -65,7 +69,9 @@
         "precision": "date",
         "schoolYear": 1,
         "book": ""
-      }
+      },
+      "gateType": "skill_band",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -93,6 +99,10 @@
         "topics": [
           "school skill",
           "magic ability"
+        ],
+        "books": [],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -132,7 +142,9 @@
         "precision": "date",
         "schoolYear": 2,
         "book": ""
-      }
+      },
+      "gateType": "skill_band",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -160,6 +172,10 @@
         "topics": [
           "school skill",
           "magic ability"
+        ],
+        "books": [],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -199,7 +215,9 @@
         "precision": "date",
         "schoolYear": 3,
         "book": ""
-      }
+      },
+      "gateType": "skill_band",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -227,6 +245,10 @@
         "topics": [
           "school skill",
           "magic ability"
+        ],
+        "books": [],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -266,7 +288,9 @@
         "precision": "date",
         "schoolYear": 4,
         "book": ""
-      }
+      },
+      "gateType": "skill_band",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -294,6 +318,10 @@
         "topics": [
           "school skill",
           "magic ability"
+        ],
+        "books": [],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -333,7 +361,9 @@
         "precision": "date",
         "schoolYear": 5,
         "book": ""
-      }
+      },
+      "gateType": "skill_band",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -361,6 +391,10 @@
         "topics": [
           "school skill",
           "magic ability"
+        ],
+        "books": [],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -400,7 +434,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": ""
-      }
+      },
+      "gateType": "skill_band",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -428,6 +464,10 @@
         "topics": [
           "school skill",
           "magic ability"
+        ],
+        "books": [],
+        "phases": [
+          "road_trip"
         ]
       },
       "visibility": {},
@@ -472,7 +512,9 @@
         "requiresEvents": [
           "horcruxes_revealed_to_trio"
         ]
-      }
+      },
+      "gateType": "skill_band",
+      "userEditable": true
     }
   ]
 }

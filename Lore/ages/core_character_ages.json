@@ -26,7 +26,9 @@
         "topics": [
           "age",
           "school year"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {},
       "content": {
@@ -65,7 +67,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -93,7 +97,9 @@
         "topics": [
           "age",
           "school year"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {},
       "content": {
@@ -132,7 +138,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -160,7 +168,9 @@
         "topics": [
           "age",
           "school year"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {},
       "content": {
@@ -199,7 +209,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -227,7 +239,9 @@
         "topics": [
           "age",
           "school year"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {},
       "content": {
@@ -266,7 +280,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -294,7 +310,9 @@
         "topics": [
           "age",
           "school year"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {},
       "content": {
@@ -333,7 +351,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -361,7 +381,9 @@
         "topics": [
           "age",
           "school year"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {},
       "content": {
@@ -400,7 +422,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -428,7 +452,9 @@
         "topics": [
           "age",
           "school year"
-        ]
+        ],
+        "books": [],
+        "schoolYears": []
       },
       "visibility": {},
       "content": {
@@ -467,7 +493,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     }
   ]
 }

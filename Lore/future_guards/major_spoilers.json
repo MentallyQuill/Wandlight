@@ -83,7 +83,9 @@
           "horcruxes_revealed_to_trio"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -117,6 +119,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -167,7 +172,9 @@
           "dumbledore_death_occurs"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -252,7 +259,9 @@
           "deathly_hallows_revealed_to_trio"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -325,7 +334,9 @@
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -409,7 +420,9 @@
           "voldemort_return_publicly_acknowledged"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -494,7 +507,9 @@
           "horcruxes_revealed_to_trio"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     }
   ]
 }

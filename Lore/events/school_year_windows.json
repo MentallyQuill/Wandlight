@@ -6,7 +6,7 @@
       "tags": [
         "Year 1",
         "1991",
-        "Philosopher Stone",
+        "Philosopher's Stone",
         "Hogwarts"
       ],
       "category": "event",
@@ -57,7 +57,17 @@
         "books": [
           "Philosopher's Stone"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1992-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_year_2_cos_window",
@@ -115,7 +125,17 @@
         "books": [
           "Chamber of Secrets"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1992-09-01",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_year_3_poa_window",
@@ -173,7 +193,17 @@
         "books": [
           "Prisoner of Azkaban"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1993-09-01",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_year_4_gof_window",
@@ -233,7 +263,17 @@
         "books": [
           "Goblet of Fire"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_year_5_ootp_window",
@@ -295,7 +335,17 @@
         "books": [
           "Order of the Phoenix"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1995-09-01",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_year_6_hbp_window",
@@ -356,7 +406,17 @@
         "books": [
           "Half-Blood Prince"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_year_7_dh_window",
@@ -415,7 +475,17 @@
         "books": [
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1997-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "protected": false,
+      "userEditable": true
     }
   ]
 }

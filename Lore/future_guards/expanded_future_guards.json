@@ -33,6 +33,9 @@
         ],
         "books": [
           "Goblet of Fire"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -84,7 +87,9 @@
           "cedric_dies"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -120,6 +125,9 @@
         ],
         "books": [
           "Order of the Phoenix"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -160,7 +168,9 @@
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -193,6 +203,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -244,7 +257,9 @@
           "ministry_falls"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -262,7 +277,7 @@
         "validFrom": "1991-09-01",
         "validTo": "1997-07-30",
         "precision": "date",
-        "schoolYear": 1,
+        "schoolYear": 7,
         "book": "Deathly Hallows"
       },
       "scope": {
@@ -283,7 +298,8 @@
           3,
           4,
           5,
-          6
+          6,
+          7
         ],
         "books": [
           "Deathly Hallows"
@@ -337,7 +353,9 @@
           "deathly_hallows_revealed_to_trio"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -355,7 +373,7 @@
         "validFrom": "1991-09-01",
         "validTo": "1998-05-01",
         "precision": "date",
-        "schoolYear": 1,
+        "schoolYear": 7,
         "book": "Deathly Hallows"
       },
       "scope": {
@@ -415,7 +433,9 @@
         "precision": "date",
         "schoolYear": 1,
         "book": "Deathly Hallows"
-      }
+      },
+      "gateType": "future_guard",
+      "userEditable": true
     }
   ]
 }

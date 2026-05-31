@@ -71,7 +71,17 @@
           "Order of the Phoenix",
           "Half-Blood Prince"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "character_state",
+      "gateType": "character_state",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_snape_potions_defense_role",
@@ -150,7 +160,17 @@
           "Order of the Phoenix",
           "Half-Blood Prince"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "character_state",
+      "gateType": "character_state",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_order_of_the_phoenix_faction",
@@ -224,7 +244,17 @@
           "Half-Blood Prince",
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1995-06-24",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "faction_state",
+      "gateType": "faction_state",
+      "protected": false,
+      "userEditable": true
     },
     {
       "id": "canon_death_eaters_faction",
@@ -296,7 +326,17 @@
           "Half-Blood Prince",
           "Deathly Hallows"
         ]
-      }
+      },
+      "date": {
+        "validFrom": "1995-06-24",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null
+      },
+      "kind": "faction_state",
+      "gateType": "faction_state",
+      "protected": false,
+      "userEditable": true
     }
   ]
 }

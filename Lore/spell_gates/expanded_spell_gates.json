@@ -34,6 +34,9 @@
         ],
         "books": [
           "Philosopher's Stone"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -74,7 +77,9 @@
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -113,6 +118,9 @@
         ],
         "books": [
           "Philosopher's Stone"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -153,84 +161,9 @@
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
-      }
-    },
-    {
-      "schemaVersion": 2,
-      "id": "spell_gate_expelliarmus",
-      "title": "Disarming Charm learning gate",
-      "kind": "spell_gate",
-      "category": "spell",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "private",
-      "priority": 70,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1992-09-01",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": 2,
-        "book": "Chamber of Secrets"
       },
-      "scope": {
-        "characters": [
-          "Harry Potter"
-        ],
-        "topics": [
-          "defense",
-          "dueling"
-        ],
-        "spells": [
-          "Expelliarmus"
-        ],
-        "schoolYears": [
-          2
-        ],
-        "books": [
-          "Chamber of Secrets"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Expelliarmus becomes strongly associated with Harry after early dueling exposure.",
-        "injection": "Expelliarmus is plausible for Harry onward and becomes one of his signature defensive spells.",
-        "constraints": [
-          "Do not make it a universal first-year combat reflex."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "spell-gate",
-          "dueling",
-          "year-2"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Chamber of Secrets",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1992-09-01",
-        "canonExpectedUntil": "1998-08-31",
-        "precision": "date",
-        "schoolYear": 2,
-        "book": "Chamber of Secrets"
-      }
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -269,6 +202,9 @@
         ],
         "books": [
           "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -309,7 +245,9 @@
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -345,6 +283,9 @@
         ],
         "books": [
           "Goblet of Fire"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -385,7 +326,9 @@
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -421,6 +364,9 @@
         ],
         "books": [
           "Order of the Phoenix"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -461,80 +407,9 @@
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
-      }
-    },
-    {
-      "schemaVersion": 2,
-      "id": "spell_gate_nonverbal_magic",
-      "title": "Nonverbal magic skill gate",
-      "kind": "spell_gate",
-      "category": "skill",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "private",
-      "priority": 85,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1996-09-01",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": 6,
-        "book": "Half-Blood Prince"
       },
-      "scope": {
-        "characters": [],
-        "topics": [
-          "nonverbal magic",
-          "advanced magic"
-        ],
-        "spells": [],
-        "schoolYears": [
-          6
-        ],
-        "books": [
-          "Half-Blood Prince"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Nonverbal magic is emphasized as advanced sixth-year work.",
-        "injection": "Nonverbal magic is advanced sixth-year-level work; do not have younger students use it routinely unless exceptional or AU-trained.",
-        "constraints": [
-          "Block casual nonverbal casting ."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "skill-band",
-          "nonverbal",
-          "year-6"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Half-Blood Prince",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "hardValidFrom": "1996-09-01",
-        "hardValidTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": 6,
-        "book": "Half-Blood Prince"
-      }
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -571,6 +446,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -611,7 +489,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     }
   ]
 }

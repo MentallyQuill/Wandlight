@@ -17,24 +17,27 @@
         "validTo": "1992-08-31",
         "precision": "date",
         "schoolYear": 1,
-        "book": "Philosopher Stone"
+        "book": "Philosopher's Stone"
       },
       "scope": {
         "schoolYears": [
           1
         ],
         "books": [
-          "Philosopher Stone"
+          "Philosopher's Stone"
         ],
         "topics": [
           "school year",
           "canon date"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
       "content": {
-        "fact": "Year 1 aligns with Philosopher Stone chronology for Harry’s cohort.",
-        "injection": "Year 1 aligns with Philosopher Stone chronology for Harry’s cohort.",
+        "fact": "Year 1 aligns with Philosopher's Stone chronology for Harry’s cohort.",
+        "injection": "Year 1 aligns with Philosopher's Stone chronology for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -42,7 +45,7 @@
       "effects": {
         "addsTags": [
           "Year 1",
-          "Philosopher Stone",
+          "Philosopher's Stone",
           "school-year"
         ],
         "blocksTermsBeforeDate": [],
@@ -54,7 +57,7 @@
       },
       "source": {
         "work": "Harry Potter",
-        "book": "Philosopher Stone",
+        "book": "Philosopher's Stone",
         "chapter": "",
         "confidence": 0.85,
         "notes": "Curated date constraint seed entry."
@@ -66,8 +69,10 @@
         "hardValidTo": "1992-08-31",
         "precision": "date",
         "schoolYear": 1,
-        "book": "Philosopher Stone"
-      }
+        "book": "Philosopher's Stone"
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -98,6 +103,9 @@
         "topics": [
           "school year",
           "canon date"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -141,7 +149,9 @@
         "requiresEvents": [
           "chamber_of_secrets_resolved"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -172,6 +182,9 @@
         "topics": [
           "school year",
           "canon date"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -210,7 +223,9 @@
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -241,6 +256,9 @@
         "topics": [
           "school year",
           "canon date"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -279,7 +297,9 @@
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -310,6 +330,9 @@
         "topics": [
           "school year",
           "canon date"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -348,7 +371,9 @@
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -379,6 +404,9 @@
         "topics": [
           "school year",
           "canon date"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -417,7 +445,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -448,6 +478,9 @@
         "topics": [
           "school year",
           "canon date"
+        ],
+        "phases": [
+          "road_trip"
         ]
       },
       "visibility": {},
@@ -491,7 +524,9 @@
         "requiresEvents": [
           "deathly_hallows_revealed_to_trio"
         ]
-      }
+      },
+      "gateType": "event_anchor",
+      "userEditable": true
     }
   ]
 }

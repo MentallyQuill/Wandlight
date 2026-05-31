@@ -2771,3 +2771,71 @@
 .wandlight-accepted-lore-section .wandlight-lore-entry-list > * {
     flex: 0 0 auto !important;
 }
+
+/* Live feedback fix: restore a visible, functional scrollbar for Accepted Lore Entries.
+   The accepted list is the only vertical scroll owner; controls remain fixed above it. */
+.wandlight-lore-panel .wandlight-runtime-tab-body-lore {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-panel .wandlight-lore-accepted-collapsible[open] {
+    display: flex !important;
+    flex: 1 1 240px !important;
+    flex-direction: column !important;
+    min-height: 180px !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-panel .wandlight-lore-accepted-collapsible[open] > .wandlight-collapsible-content,
+.wandlight-lore-panel .wandlight-accepted-lore-section {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-lore-controls,
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-lore-bulk-toolbar,
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-lore-list-summary,
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-lore-show-more {
+    flex: 0 0 auto !important;
+}
+
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-accepted-lore-scroll-region {
+    display: flex !important;
+    flex: 1 1 220px !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    min-height: 160px !important;
+    max-height: clamp(180px, 44vh, 460px) !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-gutter: stable both-edges !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(120, 138, 156, 0.78) rgba(10, 12, 16, 0.38) !important;
+    padding-right: 6px !important;
+    touch-action: pan-y !important;
+}
+
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-accepted-lore-scroll-region::-webkit-scrollbar {
+    width: 8px !important;
+}
+
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-accepted-lore-scroll-region::-webkit-scrollbar-track {
+    background: rgba(10, 12, 16, 0.38) !important;
+    border-radius: 8px !important;
+}
+
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-accepted-lore-scroll-region::-webkit-scrollbar-thumb {
+    background: rgba(120, 138, 156, 0.78) !important;
+    border-radius: 8px !important;
+}
+
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-accepted-lore-scroll-region > * {
+    flex: 0 0 auto !important;
+}

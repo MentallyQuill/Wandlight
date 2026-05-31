@@ -36,6 +36,9 @@
         ],
         "books": [
           "Philosopher's Stone"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -87,7 +90,9 @@
           "chamber_of_secrets_resolved"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -176,7 +181,9 @@
           "sirius_truth_revealed"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -214,6 +221,9 @@
         ],
         "books": [
           "Goblet of Fire"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -265,7 +275,9 @@
           "barty_crouch_jr_revealed"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -349,7 +361,9 @@
           "voldemort_return_publicly_acknowledged"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -386,6 +400,9 @@
         ],
         "books": [
           "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -437,7 +454,9 @@
           "draco_mission_revealed"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -455,7 +474,7 @@
         "validFrom": "1991-09-01",
         "validTo": "1998-05-01",
         "precision": "date",
-        "schoolYear": 1,
+        "schoolYear": 7,
         "book": "Deathly Hallows"
       },
       "scope": {
@@ -531,7 +550,9 @@
           "snape_loyalty_truth_revealed"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "knowledge_gate",
+      "userEditable": true
     }
   ]
 }

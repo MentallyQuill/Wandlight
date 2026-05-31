@@ -31,6 +31,12 @@
           "Harry Potter",
           "most Hogwarts students",
           "Dumbledore’s Army"
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "schoolYears": [
+          3
         ]
       },
       "visibility": {
@@ -80,7 +86,9 @@
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -113,6 +121,15 @@
           "Harry Potter",
           "Hermione Granger",
           "younger students"
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {
@@ -162,7 +179,9 @@
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -194,6 +213,15 @@
         "characters": [
           "Harry Potter",
           "Hogwarts students"
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "schoolYears": [
+          2
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {
@@ -241,7 +269,9 @@
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -276,6 +306,15 @@
           "Harry Potter",
           "Severus Snape",
           "Ron Weasley"
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {
@@ -339,7 +378,9 @@
           "sectumsempra_discovered"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -371,6 +412,15 @@
         "characters": [
           "fourth-year students",
           "ordinary students casting casually"
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {
@@ -419,7 +469,9 @@
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -451,6 +503,15 @@
         "characters": [
           "younger students",
           "sixth-year students"
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {
@@ -499,7 +560,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "spell_gate",
+      "userEditable": true
     }
   ]
 }

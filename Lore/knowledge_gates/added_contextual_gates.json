@@ -38,6 +38,12 @@
         5,
         6,
         7
+      ],
+      "books": [
+        "Chamber of Secrets"
+      ],
+      "phases": [
+        "term_start"
       ]
     },
     "visibility": {
@@ -70,7 +76,11 @@
       "schoolYear": 2,
       "book": "Chamber of Secrets",
       "label": "Polyjuice is advanced and dangerous."
-    }
+    },
+    "gateType": "knowledge_gate",
+    "protected": false,
+    "locked": true,
+    "userEditable": true
   },
   {
     "schemaVersion": 2,
@@ -87,7 +97,8 @@
       "validFrom": "1991-09-01",
       "validTo": "1997-07-30",
       "precision": "date",
-      "label": "Before the Hallows become plot-relevant."
+      "label": "Before the Hallows become plot-relevant.",
+      "schoolYear": null
     },
     "scope": {
       "characters": [
@@ -108,7 +119,8 @@
         4,
         5,
         6
-      ]
+      ],
+      "books": []
     },
     "content": {
       "fact": "The trio should not understand the Deathly Hallows framework.",
@@ -141,7 +153,10 @@
         "deathly_hallows_revealed_to_trio"
       ],
       "autoMuteOnExpire": true
-    }
+    },
+    "gateType": "future_guard",
+    "locked": true,
+    "userEditable": true
   },
   {
     "schemaVersion": 2,
@@ -172,6 +187,12 @@
       ],
       "schoolYears": [
         6
+      ],
+      "books": [
+        "Half-Blood Prince"
+      ],
+      "phases": [
+        "term_start"
       ]
     },
     "content": {
@@ -192,7 +213,11 @@
       "precision": "school_year",
       "schoolYear": 6,
       "book": "Half-Blood Prince"
-    }
+    },
+    "gateType": "behavior_gate",
+    "protected": false,
+    "locked": true,
+    "userEditable": true
   },
   {
     "schemaVersion": 2,
@@ -207,7 +232,8 @@
     "date": {
       "validFrom": "1991-09-01",
       "validTo": "1998-05-02",
-      "precision": "era"
+      "precision": "era",
+      "schoolYear": null
     },
     "scope": {
       "topics": [
@@ -226,7 +252,8 @@
         5,
         6,
         7
-      ]
+      ],
+      "books": []
     },
     "content": {
       "fact": "Memory modification is delicate magic and should not be casual student spellwork.",
@@ -246,7 +273,11 @@
       "canonExpectedFrom": "1991-09-01",
       "canonExpectedUntil": "1998-05-02",
       "precision": "era"
-    }
+    },
+    "gateType": "spell_gate",
+    "protected": false,
+    "locked": true,
+    "userEditable": true
   },
   {
     "schemaVersion": 2,
@@ -276,6 +307,12 @@
       ],
       "schoolYears": [
         6
+      ],
+      "books": [
+        "Half-Blood Prince"
+      ],
+      "phases": [
+        "term_start"
       ]
     },
     "content": {
@@ -301,6 +338,10 @@
       "requiresEvents": [
         "dumbledore_death_occurs"
       ]
-    }
+    },
+    "gateType": "institution_state",
+    "protected": false,
+    "locked": true,
+    "userEditable": true
   }
 ]

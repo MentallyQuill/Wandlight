@@ -27,6 +27,15 @@
           "behavior",
           "personality",
           "year 4"
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -67,7 +76,9 @@
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -96,6 +107,15 @@
           "behavior",
           "personality",
           "year 5"
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "schoolYears": [
+          5
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -136,7 +156,9 @@
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -165,6 +187,15 @@
           "behavior",
           "personality",
           "year 6"
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -216,7 +247,9 @@
           "dumbledore_death_occurs"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -245,6 +278,15 @@
           "behavior",
           "personality",
           "year 4"
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -296,7 +338,9 @@
           "horcruxes_revealed_to_trio"
         ],
         "autoMuteOnExpire": true
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -325,6 +369,15 @@
           "behavior",
           "personality",
           "year 6"
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -365,7 +418,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -394,6 +449,15 @@
           "behavior",
           "personality",
           "year 4"
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -434,7 +498,9 @@
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -463,6 +529,15 @@
           "behavior",
           "personality",
           "year 6"
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -503,7 +578,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -532,6 +609,15 @@
           "behavior",
           "personality",
           "year 6"
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "phases": [
+          "term_start"
         ]
       },
       "visibility": {},
@@ -572,7 +658,9 @@
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
-      }
+      },
+      "gateType": "behavior_gate",
+      "userEditable": true
     }
   ]
 }

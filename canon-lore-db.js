@@ -344,6 +344,83 @@ function scoreCanonEntry(entry, state, context, sceneIso, scoring = DEFAULT_SCOR
     return score;
 }
 
+function canonPriorityBand(priority = 50) {
+    const p = Number(priority) || 50;
+    if (p >= 95) return 5;
+    if (p >= 85) return 4;
+    if (p >= 70) return 3;
+    if (p >= 50) return 2;
+    return 1;
+}
+
+function canonScopeSpecificity(entry = {}) {
+    const scope = entry.scope || {};
+    const keys = ['characters', 'locations', 'factions', 'topics', 'objects', 'spells', 'schoolYears', 'books', 'phases'];
+    return keys.reduce((total, key) => {
+        const value = scope[key];
+        return total + (Array.isArray(value) ? value.length : (value ? 1 : 0));
+    }, 0);
+}
+
+function canonKindQuotaKey(entry = {}) {
+    const kind = entry.kind || entry.gateType || '';
+    const category = entry.category || '';
+    if (kind === 'future_guard' || category === 'future_guard') return 'guard';
+    if (kind === 'knowledge_gate' || category === 'knowledge') return 'knowledge';
+    if (kind === 'event_anchor' || category === 'event' || category === 'timeline') return 'event';
+    if (kind === 'behavior_gate' || kind === 'character_state' || category === 'behavior' || category === 'character') return 'character';
+    if (kind === 'spell_gate' || kind === 'skill_band' || category === 'spell' || category === 'skill') return 'ability';
+    if (kind === 'age_gate' || category === 'age') return 'age';
+    return 'support';
+}
+
+function sortCanonCandidates(a, b) {
+    const ap = Number(a.entry.priority) || 50;
+    const bp = Number(b.entry.priority) || 50;
+    return canonPriorityBand(bp) - canonPriorityBand(ap)
+        || b.score - a.score
+        || bp - ap
+        || canonScopeSpecificity(b.entry) - canonScopeSpecificity(a.entry)
+        || a.entry.title.localeCompare(b.entry.title);
+}
+
+function selectPriorityAwareCanonCandidates(candidates = [], max = 10) {
+    const sorted = candidates.slice().sort(sortCanonCandidates);
+    const selected = [];
+    const bucketCounts = { guard: 0, knowledge: 0, event: 0, character: 0, ability: 0, age: 0, support: 0 };
+    const quota = {
+        guard: Math.max(1, Math.min(3, Math.ceil(max * 0.30))),
+        knowledge: Math.max(1, Math.min(3, Math.ceil(max * 0.30))),
+        event: Math.max(1, Math.min(3, Math.ceil(max * 0.30))),
+        character: Math.max(1, Math.min(3, Math.ceil(max * 0.30))),
+        ability: Math.max(1, Math.min(2, Math.ceil(max * 0.20))),
+        age: Math.max(0, Math.min(1, Math.floor(max * 0.10))),
+        support: Math.max(1, Math.min(3, Math.ceil(max * 0.30))),
+    };
+
+    for (const item of sorted) {
+        if (selected.length >= max) break;
+        const key = canonKindQuotaKey(item.entry);
+        const priority = Number(item.entry.priority) || 50;
+        const hardGuard = priority >= 95 && (key === 'guard' || key === 'knowledge');
+        if (!hardGuard && bucketCounts[key] >= quota[key]) continue;
+        selected.push(item);
+        bucketCounts[key] += 1;
+    }
+
+    if (selected.length < max) {
+        const selectedIds = new Set(selected.map(item => item.entry.id));
+        for (const item of sorted) {
+            if (selected.length >= max) break;
+            if (selectedIds.has(item.entry.id)) continue;
+            selected.push(item);
+            selectedIds.add(item.entry.id);
+        }
+    }
+
+    return selected;
+}
+
 function compactCanonLoreEntryForPending(entry) {
     const normalized = normalizeLoreMatrix([entry])[0] || entry;
     return {
@@ -553,12 +630,12 @@ export async function queryCanonLoreDatabase(context = null, options = {}) {
     const candidates = db.entries
         .filter(entry => dateInRange(sceneIso, entry))
         .map(entry => ({ entry, score: scoreCanonEntry(entry, state, effectiveContext, sceneIso, db.scoring) }))
-        .filter(item => item.score > 0)
-        .sort((a, b) => b.score - a.score || (b.entry.priority || 50) - (a.entry.priority || 50) || a.entry.title.localeCompare(b.entry.title));
+        .filter(item => item.score > 0);
+    const selectedCandidates = selectPriorityAwareCanonCandidates(candidates, max);
 
     return {
         status: candidates.length ? 'matched' : 'empty',
-        entries: candidates.slice(0, max).map(item => compactPendingCanonEntryForStorage({
+        entries: selectedCandidates.map(item => compactPendingCanonEntryForStorage({
             ...item.entry,
             source: item.entry.source || CANON_DB_SOURCE,
         })),

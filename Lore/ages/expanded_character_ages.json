@@ -2,286 +2,6 @@
   "entries": [
     {
       "schemaVersion": 2,
-      "id": "age_ginny_weasley",
-      "title": "Ginny Weasley age constraint",
-      "kind": "age_gate",
-      "category": "age",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 60,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1981-08-11",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "scope": {
-        "characters": [
-          "Ginny Weasley"
-        ],
-        "topics": [
-          "age",
-          "school year"
-        ],
-        "spells": [],
-        "schoolYears": [],
-        "books": []
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Ginny Weasley has a canon/approximate birthdate 1981-08-11; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Ginny Weasley age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
-        "constraints": [
-          "Use 1981-08-11 as the date basis unless user AU overrides it."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Ginny",
-          "age"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "hardValidFrom": "1981-08-11",
-        "hardValidTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      }
-    },
-    {
-      "schemaVersion": 2,
-      "id": "age_neville_longbottom",
-      "title": "Neville Longbottom age constraint",
-      "kind": "age_gate",
-      "category": "age",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 60,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1980-07-30",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "scope": {
-        "characters": [
-          "Neville Longbottom"
-        ],
-        "topics": [
-          "age",
-          "school year"
-        ],
-        "spells": [],
-        "schoolYears": [],
-        "books": []
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Neville Longbottom has a canon/approximate birthdate 1980-07-30; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Neville Longbottom age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
-        "constraints": [
-          "Use 1980-07-30 as the date basis unless user AU overrides it."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Neville",
-          "age"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "hardValidFrom": "1980-07-30",
-        "hardValidTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      }
-    },
-    {
-      "schemaVersion": 2,
-      "id": "age_luna_lovegood",
-      "title": "Luna Lovegood age constraint",
-      "kind": "age_gate",
-      "category": "age",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 60,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1981-02-13",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "scope": {
-        "characters": [
-          "Luna Lovegood"
-        ],
-        "topics": [
-          "age",
-          "school year"
-        ],
-        "spells": [],
-        "schoolYears": [],
-        "books": []
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Luna Lovegood has a canon/approximate birthdate 1981-02-13; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Luna Lovegood age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
-        "constraints": [
-          "Use 1981-02-13 as the date basis unless user AU overrides it."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Luna",
-          "age"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "hardValidFrom": "1981-02-13",
-        "hardValidTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      }
-    },
-    {
-      "schemaVersion": 2,
-      "id": "age_draco_malfoy",
-      "title": "Draco Malfoy age constraint",
-      "kind": "age_gate",
-      "category": "age",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 60,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1980-06-05",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "scope": {
-        "characters": [
-          "Draco Malfoy"
-        ],
-        "topics": [
-          "age",
-          "school year"
-        ],
-        "spells": [],
-        "schoolYears": [],
-        "books": []
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Draco Malfoy has a canon/approximate birthdate 1980-06-05; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Draco Malfoy age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
-        "constraints": [
-          "Use 1980-06-05 as the date basis unless user AU overrides it."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Draco",
-          "age"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "hardValidFrom": "1980-06-05",
-        "hardValidTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      }
-    },
-    {
-      "schemaVersion": 2,
       "id": "age_fred_weasley",
       "title": "Fred Weasley age constraint",
       "kind": "age_gate",
@@ -348,7 +68,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -418,7 +140,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -493,7 +217,9 @@
         "requiresEvents": [
           "cedric_dies"
         ]
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     },
     {
       "schemaVersion": 2,
@@ -563,7 +289,9 @@
         "precision": "date",
         "schoolYear": null,
         "book": ""
-      }
+      },
+      "gateType": "age_gate",
+      "userEditable": true
     }
   ]
 }

@@ -78,6 +78,48 @@
       "description": "Controls whether lore is active, future, blocked, expired, or canon-overdue.",
       "defaultPriority": 75,
       "injectionRole": "state_control"
+    },
+    "character_state": {
+      "label": "Character State",
+      "description": "Date-sensitive character role, status, or established state.",
+      "defaultPriority": 70,
+      "injectionRole": "character_constraint"
+    },
+    "place_fact": {
+      "label": "Place Fact",
+      "description": "Date-sensitive location or setting fact.",
+      "defaultPriority": 65,
+      "injectionRole": "setting_constraint"
+    },
+    "artifact_state": {
+      "label": "Artifact State",
+      "description": "Date-sensitive ownership, condition, or meaning of an important object.",
+      "defaultPriority": 75,
+      "injectionRole": "object_constraint"
+    },
+    "public_belief": {
+      "label": "Public Belief",
+      "description": "What a group believes, including false or incomplete public narratives.",
+      "defaultPriority": 70,
+      "injectionRole": "belief_constraint"
+    },
+    "faction_state": {
+      "label": "Faction State",
+      "description": "Date-sensitive status of a group, institution, house, or faction.",
+      "defaultPriority": 70,
+      "injectionRole": "faction_constraint"
+    },
+    "continuity_rule": {
+      "label": "Continuity Rule",
+      "description": "General rule that prevents broad continuity mistakes.",
+      "defaultPriority": 80,
+      "injectionRole": "negative_constraint"
+    },
+    "data_cleanup": {
+      "label": "Data Cleanup",
+      "description": "Internal maintenance marker, not intended for injection.",
+      "defaultPriority": 10,
+      "injectionRole": "metadata"
     }
   }
 }

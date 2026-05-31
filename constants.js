@@ -66,6 +66,7 @@ export const DEFAULT_SETTINGS = {
     loreGenerationMode: 'manual', // 'manual' | 'automatic'
     loreGenerationAutoInterval: 10,
     contextSourceMessageCount: 20,
+    continuitySourceMessageCount: 10,
 
     // Lore matrix
     injectLore: true,
@@ -75,7 +76,7 @@ export const DEFAULT_SETTINGS = {
     workflowMode: 'manual', // legacy UI preset; explicit tab modes are authoritative
 
     // Lore generation behavior
-    loreSourceMessageCount: 20,
+    loreSourceMessageCount: 10,
     loreGenerationChunkSize: 10,
     loreReplacementGuard: true,
     loreDuplicateGuard: true,
@@ -219,6 +220,12 @@ export function getDefaultState() {
             reviewSelectedIds: [],
             generationStatus: 'Idle.',
             generationProgress: 0,
+            contextStatus: 'Idle.',
+            contextProgress: 0,
+            continuityStatus: 'Idle.',
+            continuityProgress: 0,
+            loreStatus: 'Idle.',
+            loreProgress: 0,
             showOnlyActive: false,
             width: 420,
             height: 520,

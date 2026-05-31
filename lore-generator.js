@@ -53,7 +53,7 @@ async function quietPrompt(systemPrompt, userMessage) {
         const settings = getSettings();
         return await sendLoreRequest(systemPrompt, userMessage, {
             maxTokens: settings.loreMaxTokens || 2048,
-            prefill: '{',
+            prefill: '',
         });
     } catch (e) {
         console.error(`${LOG_PREFIX} Lore generation prompt failed:`, e);
@@ -498,7 +498,7 @@ function buildLoreGenerationSystemPrompt(settings = getSettings()) {
         ? 'Do not generate tags. Set tags to an empty array for every entry.'
         : `Generate exactly ${count} tags for each entry unless impossible. Tags must be short searchable labels, not full sentences.`;
 
-    return `${LORE_GENERATION_SYSTEM_PROMPT}\n\nRuntime generation settings:\n- Source window: last ${Math.max(1, Math.min(200, Number(settings.loreSourceMessageCount) || 20))} messages.\n- Tag count: ${count}.\n- ${tagInstruction}`;
+    return `${LORE_GENERATION_SYSTEM_PROMPT}\n\nRuntime generation settings:\n- Source window: last ${Math.max(1, Math.min(200, Number(settings.loreSourceMessageCount) || 10))} messages.\n- Tag count: ${count}.\n- ${tagInstruction}`;
 }
 
 function normalizeGeneratedEntry(entry, settings = getSettings()) {
@@ -707,7 +707,7 @@ export async function runLoreGeneration(options = {}) {
             loreMatrix: (state.loreMatrix || []).slice(0, 6),
         }, null, 0);
 
-        const sourceCount = Math.max(1, Math.min(200, Number(settings.loreSourceMessageCount) || 20));
+        const sourceCount = Math.max(1, Math.min(200, Number(settings.loreSourceMessageCount) || 10));
         const chunkSize = Math.max(1, Math.min(50, Number(settings.loreGenerationChunkSize) || 10));
         const messageObjects = getRecentMessageObjects(sourceCount);
         const chunks = chunkMessages(messageObjects, chunkSize);

@@ -51,8 +51,8 @@ const CATEGORY_LABELS = {
 
 const TAB_LABELS = {
     session: 'Session',
-    continuity: 'Continuity',
     context: 'Context',
+    continuity: 'Continuity',
     lore: 'Lore',
     injection: 'Injection',
 };
@@ -300,10 +300,10 @@ function renderPanelBody(container, state) {
 
     if (activeTab === 'session') {
         renderSessionTab(tabBody, state);
-    } else if (activeTab === 'continuity') {
-        renderContinuityTab(tabBody, state);
     } else if (activeTab === 'context') {
         renderContextTab(tabBody, state);
+    } else if (activeTab === 'continuity') {
+        renderContinuityTab(tabBody, state);
     } else if (activeTab === 'lore') {
         renderLoreTab(tabBody, state);
     } else {
@@ -565,22 +565,22 @@ function createDangerZoneCard(state) {
     return card;
 }
 
-function ensureProviderReadyForAction(kind = 'lore', actionLabel = 'this action') {
+function ensureProviderReadyForAction(kind = 'lore', actionLabel = 'this action', statusKind = kind) {
     const validation = validateLoreProviderConfiguration(kind);
     if (validation.ok) return true;
 
     const message = `API/model settings incomplete for ${actionLabel}: ${validation.message}`;
-    setGenerateProgress(message, 100);
+    setFeatureProgress(statusKind, message, 100);
     toast(message, 'error');
     return false;
 }
 
-function ensureLoreProviderReadyForAction(actionLabel = 'this action') {
-    return ensureProviderReadyForAction('lore', actionLabel);
+function ensureLoreProviderReadyForAction(actionLabel = 'this action', statusKind = 'lore') {
+    return ensureProviderReadyForAction('lore', actionLabel, statusKind);
 }
 
 function ensureContinuityProviderReadyForAction(actionLabel = 'this action') {
-    return ensureProviderReadyForAction('continuity', actionLabel);
+    return ensureProviderReadyForAction('continuity', actionLabel, 'continuity');
 }
 
 
@@ -644,7 +644,7 @@ function createContextDetectionCard(state) {
     }, 'wandlight-primary-button'));
     card.appendChild(actions);
 
-    appendGenerationStatus(card, state);
+    appendGenerationStatus(card, state, 'context');
     return card;
 }
 
@@ -674,32 +674,37 @@ function createLoreGenerationCard(state) {
     }, 'wandlight-primary-button'));
     card.appendChild(actions);
 
-    appendGenerationStatus(card, state);
+    appendGenerationStatus(card, state, 'lore');
     return card;
 }
 
-function appendGenerationStatus(card, state) {
+function appendGenerationStatus(card, state, kind = 'lore') {
+    const statusKey = `${kind}Status`;
+    const progressKey = `${kind}Progress`;
+
     const status = document.createElement('div');
     status.className = 'wandlight-generation-status-text';
-    status.textContent = state?.lorePanel?.generationStatus || 'Idle.';
+    status.dataset.wandlightStatus = kind;
+    status.textContent = state?.lorePanel?.[statusKey] || 'Idle.';
     card.appendChild(status);
 
     const bar = document.createElement('div');
     bar.className = 'wandlight-progress-bar';
     const fill = document.createElement('div');
     fill.className = 'wandlight-progress-fill';
-    fill.style.width = `${Math.max(0, Math.min(100, Number(state?.lorePanel?.generationProgress) || 0))}%`;
+    fill.dataset.wandlightProgress = kind;
+    fill.style.width = `${Math.max(0, Math.min(100, Number(state?.lorePanel?.[progressKey]) || 0))}%`;
     bar.appendChild(fill);
     card.appendChild(bar);
 }
 
 async function handleDetectStoryContext(btn) {
-    if (!ensureLoreProviderReadyForAction('Detect Story Context')) return;
+    if (!ensureLoreProviderReadyForAction('Detect Story Context', 'context')) return;
     await runBusyAction(btn, 'Detecting...', async () => {
-        setGenerateProgress('Reading chat and detecting story context...', 8);
+        setFeatureProgress('context', 'Reading chat and detecting story context...', 8);
         const current = getState();
         pushStateSnapshot(current, 'Detect lore context', getSettings().maxSnapshots);
-        const detected = await runLoreContextDetection({ progress: setGenerateProgress });
+        const detected = await runLoreContextDetection({ progress: (message, percent) => setFeatureProgress('context', message, percent) });
         const after = getState();
         refreshHeader();
         refreshPanelBody({ preserveScroll: false });
@@ -719,7 +724,7 @@ async function handleDetectStoryContext(btn) {
 }
 
 async function handleGeneratePendingLore(btn) {
-    if (!ensureLoreProviderReadyForAction('Generate Pending Lore')) return;
+    if (!ensureLoreProviderReadyForAction('Generate Pending Lore', 'lore')) return;
     await runBusyAction(btn, 'Generating...', async () => {
         const settings = getSettings();
         const current = getState();
@@ -732,17 +737,17 @@ async function handleGeneratePendingLore(btn) {
                 `There are already ${pendingCount} pending lore entries. Generating again will replace that pending batch. Accepted lore entries are not deleted. Continue?`
             );
             if (!proceed) {
-                setGenerateProgress('Generation cancelled by user.', 0);
+                setFeatureProgress('lore', 'Generation cancelled by user.', 0);
                 return;
             }
             allowReplacePending = true;
         }
 
-        setGenerateProgress('Starting chunked lore generation...', 5);
+        setFeatureProgress('lore', 'Starting chunked lore generation...', 5);
         const result = await runLoreGeneration({
             force: true,
             allowReplacePending,
-            progress: setGenerateProgress,
+            progress: (message, percent) => setFeatureProgress('lore', message, percent),
         });
         refreshHeader();
 
@@ -807,17 +812,17 @@ function createGenerationSettingsCard() {
     const sourceRow = document.createElement('label');
     sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
     const sourceText = document.createElement('span');
-    sourceText.textContent = `Lore source messages: ${settings.loreSourceMessageCount || 20}`;
+    sourceText.textContent = `Lore source messages: ${settings.loreSourceMessageCount || 10}`;
     addTooltip(sourceText, 'How many recent chat messages are sent to lore generation. Lower values are faster; higher values provide more context.');
     const sourceInput = document.createElement('input');
     sourceInput.type = 'range';
     sourceInput.min = '4';
     sourceInput.max = '200';
     sourceInput.step = '1';
-    sourceInput.value = String(settings.loreSourceMessageCount || 20);
+    sourceInput.value = String(settings.loreSourceMessageCount || 10);
     sourceInput.addEventListener('input', () => {
         const next = getSettings();
-        next.loreSourceMessageCount = Math.max(4, Math.min(200, parseInt(sourceInput.value, 10) || 20));
+        next.loreSourceMessageCount = Math.max(4, Math.min(200, parseInt(sourceInput.value, 10) || 10));
         saveSettings(next);
         sourceText.textContent = `Lore source messages: ${next.loreSourceMessageCount}`;
     });
@@ -969,19 +974,29 @@ function createGenerationProgressCard(state) {
     return createLoreGenerationCard(state);
 }
 
-function setGenerateProgress(message, percent = 0) {
+function setFeatureProgress(kind = 'lore', message, percent = 0) {
+    const statusKind = ['context', 'continuity', 'lore'].includes(kind) ? kind : 'lore';
+    const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
     const state = getState();
     if (state?.lorePanel) {
-        state.lorePanel.generationStatus = message;
-        state.lorePanel.generationProgress = Math.max(0, Math.min(100, Number(percent) || 0));
+        state.lorePanel[`${statusKind}Status`] = message;
+        state.lorePanel[`${statusKind}Progress`] = safePercent;
+        if (statusKind === 'lore') {
+            state.lorePanel.generationStatus = message;
+            state.lorePanel.generationProgress = safePercent;
+        }
         saveState(state);
     }
 
     if (!panelRoot) return;
-    const text = panelRoot.querySelector('.wandlight-generation-status-text');
-    const fill = panelRoot.querySelector('.wandlight-progress-fill');
+    const text = panelRoot.querySelector(`[data-wandlight-status="${statusKind}"]`);
+    const fill = panelRoot.querySelector(`[data-wandlight-progress="${statusKind}"]`);
     if (text) text.textContent = message;
-    if (fill) fill.style.width = `${Math.max(0, Math.min(100, Number(percent) || 0))}%`;
+    if (fill) fill.style.width = `${safePercent}%`;
+}
+
+function setGenerateProgress(message, percent = 0) {
+    setFeatureProgress('lore', message, percent);
 }
 
 function updateLoreContextField(key, value) {
@@ -1042,13 +1057,19 @@ const CONTINUITY_SECTION_LABELS = {
     flags: 'Continuity Flags',
 };
 
-function renderContinuityTab(container, state) {
-    container.appendChild(createSectionHeader(
-        'Continuity State',
-        'Edit the structured roleplay state Wandlight tracks and injects separately from Lore entries. Each section can be enabled or disabled for this chat.'
-    ));
 
-    container.appendChild(createAutomationModeCard(
+function createContinuityScanCard(state) {
+    const settings = getSettings();
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-generation-progress-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Continuity Scan';
+    addTooltip(title, 'Scans recent chat and applies structured state updates directly into the editable Continuity sections below.');
+    card.appendChild(title);
+
+    card.appendChild(createAutomationModeCard(
         'Continuity Tracking',
         'continuityTrackingMode',
         'continuityAutoInterval',
@@ -1057,31 +1078,64 @@ function renderContinuityTab(container, state) {
         'Automatic continuity scan interval in completed model turns.'
     ));
 
+    const sourceRow = document.createElement('label');
+    sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const sourceText = document.createElement('span');
+    sourceText.textContent = `Continuity source messages: ${settings.continuitySourceMessageCount || 10}`;
+    addTooltip(sourceText, 'How many recent chat messages are sent to Scan Continuity State. This is separate from Context and Lore source windows.');
+    const sourceInput = document.createElement('input');
+    sourceInput.type = 'range';
+    sourceInput.min = '1';
+    sourceInput.max = '200';
+    sourceInput.step = '1';
+    sourceInput.value = String(settings.continuitySourceMessageCount || 10);
+    sourceInput.addEventListener('input', () => {
+        const next = getSettings();
+        next.continuitySourceMessageCount = Math.max(1, Math.min(200, parseInt(sourceInput.value, 10) || 10));
+        saveSettings(next);
+        sourceText.textContent = `Continuity source messages: ${next.continuitySourceMessageCount}`;
+    });
+    sourceRow.appendChild(sourceText);
+    sourceRow.appendChild(sourceInput);
+    card.appendChild(sourceRow);
+
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
     actions.appendChild(createButton('Scan Continuity State', 'Scans recent chat and applies structured state updates directly into the editable Continuity sections below. Use State History to undo the scan if needed.', async (btn) => {
         if (!ensureContinuityProviderReadyForAction('Scan Continuity State')) return;
         await runBusyAction(btn, 'Scanning...', async () => {
-            setGenerateProgress('Scanning continuity state...', 10);
+            setFeatureProgress('continuity', 'Scanning continuity state...', 10);
             const result = await onExtractionTriggered({ force: true, applyImmediately: true });
             refreshHeader();
             refreshPanelBody({ preserveScroll: false });
 
             if (result?.status === 'applied') {
                 const keys = result.changeKeys?.length ? ` Updated: ${result.changeKeys.join(', ')}.` : '';
-                setGenerateProgress(`Continuity scan applied.${keys}`, 100);
+                setFeatureProgress('continuity', `Continuity scan applied.${keys}`, 100);
                 toast(`Continuity state updated.${keys}`);
             } else if (result?.status === 'no_changes') {
-                setGenerateProgress('Continuity scan complete. No state changes detected.', 100);
+                setFeatureProgress('continuity', 'Continuity scan complete. No state changes detected.', 100);
                 toast('Scan complete. No continuity changes detected.', 'info');
             } else {
                 const status = result?.error || result?.status || 'unknown result';
-                setGenerateProgress(`Continuity scan did not update state: ${status}`, 100);
+                setFeatureProgress('continuity', `Continuity scan did not update state: ${status}`, 100);
                 toast(`Continuity scan did not update state: ${status}`, 'warning');
             }
         });
     }, 'wandlight-primary-button'));
-    container.appendChild(actions);
+    card.appendChild(actions);
+
+    appendGenerationStatus(card, state, 'continuity');
+    return card;
+}
+
+function renderContinuityTab(container, state) {
+    container.appendChild(createSectionHeader(
+        'Continuity State',
+        'Edit the structured roleplay state Wandlight tracks and injects separately from Lore entries. Each section can be enabled or disabled for this chat.'
+    ));
+
+    container.appendChild(createContinuityScanCard(state));
 
     if (state?.lastDelta) {
         const pendingDelta = document.createElement('div');

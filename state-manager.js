@@ -392,6 +392,16 @@ export function migrateState(state) {
         state.lorePanel.reviewSelectedIds = Array.isArray(state.lorePanel.reviewSelectedIds) ? state.lorePanel.reviewSelectedIds : [];
         state.lorePanel.generationStatus = typeof state.lorePanel.generationStatus === 'string' ? state.lorePanel.generationStatus : 'Idle.';
         state.lorePanel.generationProgress = Number.isFinite(Number(state.lorePanel.generationProgress)) ? Number(state.lorePanel.generationProgress) : 0;
+        for (const key of ['context', 'continuity', 'lore']) {
+            const statusKey = `${key}Status`;
+            const progressKey = `${key}Progress`;
+            state.lorePanel[statusKey] = typeof state.lorePanel[statusKey] === 'string'
+                ? state.lorePanel[statusKey]
+                : (key === 'lore' ? state.lorePanel.generationStatus : 'Idle.');
+            state.lorePanel[progressKey] = Number.isFinite(Number(state.lorePanel[progressKey]))
+                ? Number(state.lorePanel[progressKey])
+                : (key === 'lore' ? Number(state.lorePanel.generationProgress || 0) : 0);
+        }
         state.lorePanel.showOnlyActive = false;
         state.lorePanel.width = Number.isFinite(Number(state.lorePanel.width)) && Number(state.lorePanel.width) >= 320 ? Number(state.lorePanel.width) : 420;
         state.lorePanel.height = Number.isFinite(Number(state.lorePanel.height)) && Number(state.lorePanel.height) >= 260 ? Number(state.lorePanel.height) : 520;

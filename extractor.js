@@ -33,18 +33,11 @@ let _extractionRunning = false;
  * @param {Array} chat - The chat array from SillyTavern.getContext()
  * @returns {string} Formatted recent messages string
  */
-function collectRecentMessages(chat) {
+function collectRecentMessages(chat, count = 10) {
     if (!chat || chat.length === 0) return '';
 
-    // Walk backward to find the last user message, then collect everything after it
-    let startIdx = -1;
-    for (let i = chat.length - 1; i >= 0; i--) {
-        if (chat[i]?.is_user) {
-            startIdx = i;
-            break;
-        }
-    }
-    if (startIdx === -1) startIdx = 0;
+    const limit = Math.max(1, Math.min(200, Number(count) || 10));
+    const startIdx = Math.max(0, chat.length - limit);
 
     const messages = [];
     for (let i = startIdx; i < chat.length; i++) {
@@ -52,10 +45,10 @@ function collectRecentMessages(chat) {
         if (!msg) continue;
         const role = msg.is_user ? 'User' : (msg.is_system ? 'System' : 'Assistant');
         let content = msg.mes || msg.content || '';
-        if (!content.trim()) continue;
+        if (!String(content).trim()) continue;
 
         // Strip thinking/reasoning tags so the extraction prompt is clean
-        content = content.replace(/<think\b[^>]*>([\s\S]*?)<\/think>/gi, '');
+        content = String(content).replace(/<think\b[^>]*>([\s\S]*?)<\/think>/gi, '');
         content = content.replace(/<thinking\b[^>]*>([\s\S]*?)<\/thinking>/gi, '');
         content = content.replace(/<reasoning\b[^>]*>([\s\S]*?)<\/reasoning>/gi, '');
         content = content.trim();
@@ -67,7 +60,6 @@ function collectRecentMessages(chat) {
 
     return messages.join('\n\n');
 }
-
 /**
  * Parses a JSON delta string from the LLM extraction response.
  * Handles markdown fences, leading/trailing non-JSON text, and bad escapes.
@@ -106,7 +98,7 @@ function parseDeltaResponse(response) {
     // Ensure parsed has changes key — LLMs sometimes return bare objects
     if (parsed && typeof parsed === 'object' && !parsed.changes) {
         // If the object has known change keys at top level, wrap them
-        const knownKeys = ['canon', 'scene', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags'];
+        const knownKeys = ['canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags'];
         const hasChangesKey = knownKeys.some(k => k in parsed);
         if (hasChangesKey) {
             parsed = { summary: parsed.summary || '', changes: parsed };
@@ -235,7 +227,7 @@ export async function onExtractionTriggered(options = {}) {
         }
 
         // Collect recent messages
-        const messages = collectRecentMessages(chat);
+        const messages = collectRecentMessages(chat, settings.continuitySourceMessageCount || 10);
         if (!messages) {
             if (settings.debugMode) {
                 console.log(`${LOG_PREFIX} No recent messages to extract from`);

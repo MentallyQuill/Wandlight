@@ -407,6 +407,7 @@ function setupProviderControls(container, kind, label) {
     const openaiKeyClearBtn = container.querySelector(`#wandlight_${prefix}_openai_key_clear`);
     const openaiKeyStatus = container.querySelector(`#wandlight_${prefix}_openai_key_status`);
     const openaiJsonMode = container.querySelector(`#wandlight_${prefix}_openai_json_mode`);
+    const openaiSTProxy = container.querySelector(`#wandlight_${prefix}_openai_st_proxy`);
     const fetchModelsBtn = container.querySelector(`#wandlight_${prefix}_fetch_models`);
     const testConnectionBtn = container.querySelector(`#wandlight_${prefix}_test_connection`);
     const connectionStatus = container.querySelector(`#wandlight_${prefix}_connection_status`);
@@ -417,12 +418,14 @@ function setupProviderControls(container, kind, label) {
     const baseUrlKey = `${prefix}OpenAIBaseUrl`;
     const modelKey = `${prefix}OpenAIModel`;
     const jsonModeKey = `${prefix}OpenAIUseJsonMode`;
+    const proxyKey = `${prefix}OpenAIUseSTProxy`;
 
     if (providerSelect) providerSelect.value = settings[providerKey] || 'st';
     if (openaiBaseUrl) openaiBaseUrl.value = settings[baseUrlKey] || '';
     if (openaiModelSearch) openaiModelSearch.value = settings[modelKey] || '';
     if (openaiModel) openaiModel.value = settings[modelKey] || '';
     if (openaiJsonMode) openaiJsonMode.checked = settings[jsonModeKey] !== false;
+    if (openaiSTProxy) openaiSTProxy.checked = !!settings[proxyKey];
 
     function refreshProviderRows() {
         const provider = providerSelect?.value || 'st';
@@ -452,11 +455,11 @@ function setupProviderControls(container, kind, label) {
                 profileIdSelect.appendChild(opt);
             }
             for (const p of profiles) {
-                const id = p.id || p.name || p.profileId || p.uuid || '';
+                const id = p.id || p.name || p.profileId || p.uuid || p.profile_id || p.label || '';
                 if (!id) continue;
                 const opt = document.createElement('option');
                 opt.value = id;
-                opt.textContent = p.name || p.id || p.profileId || id;
+                opt.textContent = p.name || p.label || p.id || p.profileId || p.profile_id || id;
                 profileIdSelect.appendChild(opt);
             }
             profileIdSelect.value = current;
@@ -473,11 +476,11 @@ function setupProviderControls(container, kind, label) {
                 completionPresetSelect.appendChild(opt);
             }
             for (const pr of presets) {
-                const id = pr.name || pr.id || pr.presetId || '';
+                const id = pr.name || pr.id || pr.presetId || pr.preset_id || pr.filename || pr.label || '';
                 if (!id) continue;
                 const opt = document.createElement('option');
                 opt.value = id;
-                opt.textContent = pr.name || pr.id || pr.presetId || id;
+                opt.textContent = pr.name || pr.label || pr.id || pr.presetId || pr.preset_id || pr.filename || id;
                 completionPresetSelect.appendChild(opt);
             }
             completionPresetSelect.value = current;
@@ -571,6 +574,14 @@ function setupProviderControls(container, kind, label) {
         openaiJsonMode.addEventListener('change', () => {
             const next = getSettings();
             next[jsonModeKey] = openaiJsonMode.checked;
+            saveLoreProviderSettings(next);
+        });
+    }
+
+    if (openaiSTProxy) {
+        openaiSTProxy.addEventListener('change', () => {
+            const next = getSettings();
+            next[proxyKey] = openaiSTProxy.checked;
             saveLoreProviderSettings(next);
         });
     }

@@ -63,12 +63,34 @@ function normalizeOpenAIBaseUrl(baseUrl) {
     return `${base}/v1`;
 }
 
+function extractTextFromContent(value) {
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) {
+        return value.map(part => {
+            if (typeof part === 'string') return part;
+            if (part?.type === 'text' && typeof part.text === 'string') return part.text;
+            if (typeof part?.text === 'string') return part.text;
+            if (typeof part?.content === 'string') return part.content;
+            return '';
+        }).filter(Boolean).join('');
+    }
+    if (value && typeof value === 'object') {
+        if (typeof value.text === 'string') return value.text;
+        if (typeof value.content === 'string') return value.content;
+        if (typeof value.value === 'string') return value.value;
+    }
+    return '';
+}
+
 function extractChatCompletionText(json) {
-    return json?.choices?.[0]?.message?.content
-        ?? json?.choices?.[0]?.text
-        ?? json?.message?.content
-        ?? json?.content
-        ?? '';
+    return extractTextFromContent(json?.choices?.[0]?.message?.content)
+        || extractTextFromContent(json?.choices?.[0]?.delta?.content)
+        || extractTextFromContent(json?.choices?.[0]?.text)
+        || extractTextFromContent(json?.message?.content)
+        || extractTextFromContent(json?.content)
+        || extractTextFromContent(json?.response)
+        || extractTextFromContent(json?.text)
+        || '';
 }
 
 function getSillyTavernContext() {
@@ -77,16 +99,33 @@ function getSillyTavernContext() {
 
 function collectPossibleArrays(root, keys) {
     const seen = new Set();
+    const visited = new Set();
     const arrays = [];
+    const keySet = new Set(keys.map(k => String(k).toLowerCase()));
+
     function add(value) {
         if (Array.isArray(value) && !seen.has(value)) {
             seen.add(value);
             arrays.push(value);
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+            const values = Object.values(value);
+            if (values.length && values.every(v => v && typeof v === 'object')) {
+                if (!seen.has(value)) {
+                    seen.add(value);
+                    arrays.push(values);
+                }
+            }
         }
     }
+
     function visit(obj, depth = 0) {
-        if (!obj || typeof obj !== 'object' || depth > 3) return;
+        if (!obj || typeof obj !== 'object' || depth > 6 || visited.has(obj)) return;
+        visited.add(obj);
         for (const key of keys) add(obj[key]);
+        for (const [key, value] of Object.entries(obj)) {
+            const lower = key.toLowerCase();
+            if (keySet.has(lower) || keys.some(k => lower.includes(String(k).toLowerCase()))) add(value);
+        }
         for (const value of Object.values(obj)) {
             if (value && typeof value === 'object') visit(value, depth + 1);
         }
@@ -94,15 +133,21 @@ function collectPossibleArrays(root, keys) {
     visit(root);
     return arrays;
 }
-
 function getConnectionProfiles(ctx = getSillyTavernContext()) {
-    const arrays = collectPossibleArrays(ctx, ['connectionProfiles', 'profiles', 'profileList']);
+    const roots = [
+        ctx,
+        typeof globalThis !== 'undefined' ? globalThis.connectionManager : null,
+        typeof globalThis !== 'undefined' ? globalThis.ConnectionManager : null,
+        typeof globalThis !== 'undefined' ? globalThis.extension_settings : null,
+        typeof globalThis !== 'undefined' ? globalThis.power_user : null,
+    ];
+    const arrays = roots.flatMap(root => collectPossibleArrays(root, ['connectionProfiles', 'connection_profiles', 'profileList', 'profiles', 'connectionManagerProfiles']));
     const out = [];
     const seen = new Set();
     for (const arr of arrays) {
         for (const item of arr) {
             if (!item || typeof item !== 'object') continue;
-            const id = String(item.id || item.name || item.profileId || item.uuid || '').trim();
+            const id = String(item.id || item.name || item.profileId || item.uuid || item.profile_id || item.label || '').trim();
             if (!id || seen.has(id)) continue;
             seen.add(id);
             out.push(item);
@@ -112,13 +157,20 @@ function getConnectionProfiles(ctx = getSillyTavernContext()) {
 }
 
 function getCompletionPresets(ctx = getSillyTavernContext()) {
-    const arrays = collectPossibleArrays(ctx, ['completionPresets', 'presets', 'presetList']);
+    const roots = [
+        ctx,
+        typeof globalThis !== 'undefined' ? globalThis.extension_settings : null,
+        typeof globalThis !== 'undefined' ? globalThis.power_user : null,
+        typeof globalThis !== 'undefined' ? globalThis.kai_settings : null,
+        typeof globalThis !== 'undefined' ? globalThis.textgenerationwebui_settings : null,
+    ];
+    const arrays = roots.flatMap(root => collectPossibleArrays(root, ['completionPresets', 'completion_presets', 'presetList', 'presets', 'kai_settings', 'textgenerationwebui_presets']));
     const out = [];
     const seen = new Set();
     for (const arr of arrays) {
         for (const item of arr) {
             if (!item || typeof item !== 'object') continue;
-            const id = String(item.name || item.id || item.presetId || '').trim();
+            const id = String(item.name || item.id || item.presetId || item.preset_id || item.filename || item.label || '').trim();
             if (!id || seen.has(id)) continue;
             seen.add(id);
             out.push(item);
@@ -253,42 +305,54 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
 
     if (cfg.openAIUseJsonMode) requestBody.response_format = { type: 'json_object' };
 
-    let response = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(requestBody),
-        credentials: 'omit',
-    });
-
-    if (!response.ok && cfg.openAIUseJsonMode) {
+    async function post(body) {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body),
+            credentials: 'omit',
+        });
         const text = await response.text().catch(() => '');
-        if (/response_format|json_object/i.test(text)) {
-            delete requestBody.response_format;
-            response = await fetch(endpoint, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(requestBody),
-                credentials: 'omit',
-            });
-        } else {
-            throw new Error(`${cfg.title} OpenAI request failed (${response.status}): ${text.slice(0, 300)}`);
-        }
+        let json = null;
+        try { json = text ? JSON.parse(text) : null; } catch (_) {}
+        return { response, text, json };
     }
 
-    if (!response.ok) {
-        const text = await response.text().catch(() => '');
-        if (response.status === 401) throw new Error(`${cfg.title} OpenAI-compatible endpoint returned 401. Check API key.`);
-        throw new Error(`${cfg.title} OpenAI request failed (${response.status}): ${text.slice(0, 300)}`);
+    let attempt = await post(requestBody);
+
+    if (!attempt.response.ok && requestBody.response_format && /response_format|json_object/i.test(attempt.text)) {
+        delete requestBody.response_format;
+        attempt = await post(requestBody);
     }
 
-    const json = await response.json();
-    const content = extractChatCompletionText(json);
-    if (!content || !content.trim()) throw new Error(`${cfg.title} OpenAI-compatible endpoint returned empty content.`);
+    if (!attempt.response.ok && /max_tokens/i.test(attempt.text)) {
+        requestBody.max_completion_tokens = requestBody.max_tokens;
+        delete requestBody.max_tokens;
+        attempt = await post(requestBody);
+    }
+
+    if (!attempt.response.ok && /temperature|top_p/i.test(attempt.text)) {
+        delete requestBody.temperature;
+        delete requestBody.top_p;
+        attempt = await post(requestBody);
+    }
+
+    if (!attempt.response.ok) {
+        if (attempt.response.status === 401) throw new Error(`${cfg.title} OpenAI-compatible endpoint returned 401. Check API key.`);
+        throw new Error(`${cfg.title} OpenAI request failed (${attempt.response.status}): ${attempt.text.slice(0, 500)}`);
+    }
+
+    const content = extractChatCompletionText(attempt.json);
+    if (!content || !content.trim()) {
+        throw new Error(`${cfg.title} OpenAI-compatible endpoint returned empty content. Raw response: ${attempt.text.slice(0, 300)}`);
+    }
     return content;
 }
 
 async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}) {
     const ctx = getSillyTavernContext();
+
+    let lastResult = '';
 
     if (typeof ctx?.generateRaw === 'function') {
         const result = await ctx.generateRaw({
@@ -298,12 +362,24 @@ async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}
             responseLength: options.maxTokens || cfg.maxTokens,
             bypassAll: true,
         });
-        return typeof result === 'string' ? result : '';
+        lastResult = typeof result === 'string' ? result : extractChatCompletionText(result);
+        if (lastResult && lastResult.trim()) return lastResult;
     }
 
     if (typeof ctx?.generateQuietPrompt === 'function') {
-        const result = await ctx.generateQuietPrompt({ quietPrompt: `${systemPrompt}\n\n${userPrompt}` });
-        return typeof result === 'string' ? result : '';
+        const quietPrompt = `${systemPrompt}\n\n${userPrompt}`;
+        let result = await ctx.generateQuietPrompt({ quietPrompt });
+        lastResult = typeof result === 'string' ? result : extractChatCompletionText(result);
+        if (lastResult && lastResult.trim()) return lastResult;
+
+        // Older SillyTavern builds accept a raw string instead of an object.
+        result = await ctx.generateQuietPrompt(quietPrompt);
+        lastResult = typeof result === 'string' ? result : extractChatCompletionText(result);
+        if (lastResult && lastResult.trim()) return lastResult;
+    }
+
+    if (typeof ctx?.generateRaw === 'function' || typeof ctx?.generateQuietPrompt === 'function') {
+        return '';
     }
 
     throw new Error('No SillyTavern raw generation API available.');
@@ -327,20 +403,16 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
         {
             stream: false,
             extractData: true,
-            includePreset: true,
+            includePreset: !!cfg.completionPresetId,
             includeInstruct: true,
             preset: cfg.completionPresetId || undefined,
             completionPreset: cfg.completionPresetId || undefined,
+            reasoning_effort: 'medium',
+            reasoningEffort: 'medium',
         },
     );
 
-    return typeof raw === 'string'
-        ? raw
-        : raw?.content
-            ?? raw?.message?.content
-            ?? raw?.choices?.[0]?.message?.content
-            ?? raw?.choices?.[0]?.text
-            ?? '';
+    return typeof raw === 'string' ? raw : extractChatCompletionText(raw);
 }
 
 export async function fetchLoreModels(kind = 'lore') {

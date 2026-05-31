@@ -337,11 +337,13 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
     if (cfg.openAIUseJsonMode) requestBody.response_format = { type: 'json_object' };
 
     async function post(body) {
+        if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
         const response = await fetch(endpoint, {
             method: 'POST',
             headers,
             body: JSON.stringify(body),
             credentials: 'omit',
+            signal: options.signal,
         });
         const text = await response.text().catch(() => '');
         let json = null;
@@ -386,6 +388,10 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
                 ],
                 temperature: Math.min(Number(requestBody.temperature ?? 0.2), 0.2),
                 top_p: Math.min(Number(requestBody.top_p ?? 0.9), 0.9),
+                // Thinking/reasoning models can consume the entire response budget in hidden reasoning.
+                // On the final-only retry, ask compatible providers to minimize reasoning. If rejected,
+                // the request is retried again without this field below.
+                reasoning_effort: 'low',
             };
             const originalMax = Number(requestBody.max_tokens || requestBody.max_completion_tokens || options.maxTokens || cfg.maxTokens || 2048);
             const expandedMax = Math.max(originalMax * 2, cfg.kind === 'continuity' ? 4096 : 2048);
@@ -393,6 +399,10 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
             else retryBody.max_tokens = Math.min(8192, expandedMax);
 
             let retry = await post(retryBody);
+            if (!retry.response.ok && /reasoning_effort/i.test(retry.text)) {
+                delete retryBody.reasoning_effort;
+                retry = await post(retryBody);
+            }
             if (!retry.response.ok && retryBody.response_format && /response_format|json_object/i.test(retry.text)) {
                 delete retryBody.response_format;
                 retry = await post(retryBody);
@@ -409,6 +419,7 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
 }
 
 async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}) {
+    if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
     const ctx = getSillyTavernContext();
 
     let lastResult = '';
@@ -448,6 +459,7 @@ async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}
 }
 
 async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options = {}) {
+    if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
     const ctx = getSillyTavernContext();
     const service = ctx?.ConnectionManagerRequestService;
     if (!cfg.profileId) throw new Error(`${cfg.title} profile is not selected.`);
@@ -475,6 +487,7 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
         },
     );
 
+    if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
     const content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
     if (content && content.trim()) return content;
     if (raw && typeof raw === 'object' && extractChatCompletionReasoning(raw)) {

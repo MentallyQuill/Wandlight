@@ -77,6 +77,9 @@ const TAB_TOOLTIPS = {
 
 const LORE_PRIORITY_VALUES = [10, 25, 50, 75, 90, 100];
 
+let activeLoreGenerationController = null;
+let loreGenerationUiRunning = false;
+
 function getLoreRegistry(registryName) {
     const taxonomy = getLoreTaxonomySync();
     return taxonomy?.[registryName] || {};
@@ -724,9 +727,22 @@ function createLoreGenerationCard(state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
-    actions.appendChild(createButton('Generate Pending Lore', 'Generates searchable lore entries in message chunks and places them in Pending Lore Review.', async (btn) => {
+    const generateBtn = createButton('Generate Pending Lore', 'Generates searchable lore entries in message chunks and places them in Pending Lore Review.', async (btn) => {
         await handleGeneratePendingLore(btn);
-    }, 'wandlight-primary-button'));
+    }, 'wandlight-primary-button');
+    if (loreGenerationUiRunning || activeLoreGenerationController) {
+        generateBtn.disabled = true;
+        generateBtn.textContent = 'Generation Running...';
+    }
+    actions.appendChild(generateBtn);
+    const cancelBtn = createButton('Cancel Generation', 'Cancels the current chunked lore generation after the active provider request returns or aborts. OpenAI-compatible endpoints abort immediately; some SillyTavern/profile calls may stop after the current request.', () => {
+        if (activeLoreGenerationController) {
+            activeLoreGenerationController.abort();
+            setFeatureProgress('lore', 'Cancelling lore generation...', Math.max(1, Number(getState()?.lorePanel?.loreProgress) || 1));
+        }
+    }, 'wandlight-danger-button');
+    cancelBtn.disabled = !activeLoreGenerationController;
+    actions.appendChild(cancelBtn);
     card.appendChild(actions);
 
     appendGenerationStatus(card, state, 'lore');
@@ -781,7 +797,14 @@ async function handleDetectStoryContext(btn) {
 }
 
 async function handleGeneratePendingLore(btn) {
+    if (loreGenerationUiRunning || activeLoreGenerationController) {
+        toast('Lore generation is already running. Use Cancel Generation to stop it.', 'warning');
+        return;
+    }
     if (!ensureLoreProviderReadyForAction('Generate Pending Lore', 'lore')) return;
+    activeLoreGenerationController = new AbortController();
+    loreGenerationUiRunning = true;
+    refreshPanelBody({ preserveScroll: true });
     await runBusyAction(btn, 'Generating...', async () => {
         const settings = getSettings();
         const current = getState();
@@ -804,11 +827,16 @@ async function handleGeneratePendingLore(btn) {
         const result = await runLoreGeneration({
             force: true,
             allowReplacePending,
+            signal: activeLoreGenerationController?.signal,
             progress: (message, percent) => setFeatureProgress('lore', message, percent),
         });
         refreshHeader();
 
-        if (result?.status === 'proposed') {
+        if (result?.status === 'cancelled') {
+            refreshPanelBody({ preserveScroll: true });
+            setFeatureProgress('lore', 'Lore generation cancelled.', 0);
+            toast('Lore generation cancelled.', 'warning');
+        } else if (result?.status === 'proposed') {
             setPanelState({ activeTab: 'lore' });
             refreshPanelBody({ preserveScroll: false });
             const duplicateText = result.droppedDuplicateCount ? ` ${result.droppedDuplicateCount} duplicate/similar entries were filtered.` : '';
@@ -822,6 +850,9 @@ async function handleGeneratePendingLore(btn) {
             toast(details, 'warning');
         }
     });
+    activeLoreGenerationController = null;
+    loreGenerationUiRunning = false;
+    refreshPanelBody({ preserveScroll: true });
 }
 
 // Legacy Generate tab fallback -------------------------------------------------
@@ -1938,6 +1969,25 @@ function hasValidModelCompression(kind = 'lore') {
     return status.lastSignature === signature && typeof status.cachedText === 'string' && status.cachedText.trim();
 }
 
+function hasAnyModelCompression(kind = 'lore') {
+    const state = getState();
+    const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
+    const status = state?.[statusKey] || {};
+    return typeof status.cachedText === 'string' && status.cachedText.trim() && status.lastCompressedAt;
+}
+
+function hasCompressibleText(text) {
+    const clean = String(text || '')
+        .replace(/Direct mode active;[^
+]*/gi, '')
+        .replace(/No accepted active lore entries[^
+]*/gi, '')
+        .replace(/No continuity state[^
+]*/gi, '')
+        .trim();
+    return clean.length > 80;
+}
+
 function createInjectionModeButton(mode, label, tooltip, settings) {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -1949,11 +1999,15 @@ function createInjectionModeButton(mode, label, tooltip, settings) {
         const next = getSettings();
         next.loreInjectionMode = mode;
         saveSettings(next);
-        if (mode === 'compressed' && !hasValidModelCompression('lore')) {
-            await runModelCompression('lore', btn);
-        } else {
-            refreshPanelBody({ preserveScroll: false });
+        if (mode === 'compressed' && !hasAnyModelCompression('lore')) {
+            const directText = buildLorePreview(getState(), 'direct');
+            if (!hasCompressibleText(directText)) {
+                toast('Lore compressed mode selected, but there is no accepted lore to compress yet. Generate/accept lore entries first, then use Compress Lore Now.', 'warning');
+            } else {
+                toast('Lore compressed mode selected. No cached compression exists yet; using direct preview until you click Compress Lore Now.', 'warning');
+            }
         }
+        refreshPanelBody({ preserveScroll: false });
         refreshHeader();
         toast(`Lore injection mode set to ${label}.`);
     });
@@ -1971,11 +2025,15 @@ function createContinuityModeButton(mode, label, tooltip, settings) {
         const next = getSettings();
         next.continuityInjectionMode = mode;
         saveSettings(next);
-        if (mode === 'compressed' && !hasValidModelCompression('continuity')) {
-            await runModelCompression('continuity', btn);
-        } else {
-            refreshPanelBody({ preserveScroll: false });
+        if (mode === 'compressed' && !hasAnyModelCompression('continuity')) {
+            const directText = buildContinuityPreview(getState(), 'direct');
+            if (!hasCompressibleText(directText)) {
+                toast('Continuity compressed mode selected, but there is no continuity state to compress yet. Run Scan Continuity State first, then use Compress Continuity Now.', 'warning');
+            } else {
+                toast('Continuity compressed mode selected. No cached compression exists yet; using direct preview until you click Compress Continuity Now.', 'warning');
+            }
         }
+        refreshPanelBody({ preserveScroll: false });
         refreshHeader();
         toast(`Continuity injection mode set to ${label}.`);
     });

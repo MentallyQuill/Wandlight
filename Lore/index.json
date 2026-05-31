@@ -23,6 +23,7 @@
     "knowledge_gates/expanded_knowledge_gates.json",
     "future_guards/expanded_future_guards.json",
     "behavior_gates/expanded_behaviors.json",
-    "ages/expanded_character_ages.json"
+    "ages/expanded_character_ages.json",
+    "knowledge_gates/added_contextual_gates.json"
   ]
 }

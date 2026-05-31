@@ -49,17 +49,31 @@ let _generationRunning = false;
  * @param {string} userMessage - User message text
  * @returns {Promise<string>} LLM response text (may be empty on failure)
  */
-async function quietPrompt(systemPrompt, userMessage) {
+async function quietPrompt(systemPrompt, userMessage, options = {}) {
     try {
         const settings = getSettings();
+        if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
         return await sendLoreRequest(systemPrompt, userMessage, {
-            maxTokens: settings.loreMaxTokens || 2048,
+            maxTokens: options.maxTokens || settings.loreMaxTokens || 2048,
             prefill: '',
+            signal: options.signal,
+            providerKind: options.providerKind || 'lore',
         });
     } catch (e) {
+        if (e?.name === 'AbortError' || /aborted|cancelled|canceled/i.test(e?.message || '')) {
+            throw e;
+        }
         console.error(`${LOG_PREFIX} Lore generation prompt failed:`, e);
         return '';
     }
+}
+
+function isAbortError(e) {
+    return e?.name === 'AbortError' || /aborted|cancelled|canceled/i.test(String(e?.message || e || ''));
+}
+
+function throwIfAborted(signal) {
+    if (signal?.aborted) throw new DOMException('Lore generation cancelled', 'AbortError');
 }
 
 // ── Robust JSON response parsing ─────────────────────────────────────────────────
@@ -523,6 +537,8 @@ export async function runLoreContextDetection(options = {}) {
 
     _detectionRunning = true;
     try {
+        const signal = options.signal || null;
+        throwIfAborted(signal);
         const state = getState();
         const settings = getSettings();
         const progress = typeof options.progress === 'function' ? options.progress : null;
@@ -547,7 +563,7 @@ export async function runLoreContextDetection(options = {}) {
         progress?.('Sending context detection request...', 35);
         const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nDetect the current lore context. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
 
-        const response = await quietPrompt(LORE_CONTEXT_DETECTION_SYSTEM_PROMPT, userMessage);
+        const response = await quietPrompt(LORE_CONTEXT_DETECTION_SYSTEM_PROMPT, userMessage, { signal });
         if (!response) {
             const fallback = inferContextLocallyFromMessages(messages, state);
             if (fallback) {
@@ -668,7 +684,7 @@ const FAILED_STATUSES = ['failed_parse', 'failed_no_response', 'failed_exception
  * @returns {Promise<Object>} Structured result with status, contextKey, and optional entries/error
  */
 export async function runLoreGeneration(options = {}) {
-    const { force = false, allowReplacePending = false } = options;
+    const { force = false, allowReplacePending = false, signal = null } = options;
     const progress = typeof options.progress === 'function' ? options.progress : null;
     const source = force ? 'manual' : 'auto';
 
@@ -679,6 +695,7 @@ export async function runLoreGeneration(options = {}) {
 
     _generationRunning = true;
     try {
+        throwIfAborted(signal);
         const state = getState();
         const settings = getSettings();
         const validation = validateLoreProviderConfiguration();
@@ -693,7 +710,7 @@ export async function runLoreGeneration(options = {}) {
         if (!state.loreContext?.lastDetectedAt) {
             if (force) {
                 console.debug(`${LOG_PREFIX} Auto-detecting lore context before generation…`);
-                const detected = await runLoreContextDetection({ progress });
+                const detected = await runLoreContextDetection({ progress, signal });
                 if (!detected) {
                     progress?.('No story context could be detected. Set context manually or increase Source Messages.', 100);
                     _generationRunning = false;
@@ -823,21 +840,35 @@ export async function runLoreGeneration(options = {}) {
         let failedChunkCount = 0;
         let emptyChunkCount = 0;
         const chunkSummaries = [];
+        const totalSteps = Math.max(1, chunks.length * 2 + 3); // generate + parse per chunk, then normalize/filter/save
+        let completedSteps = 0;
+        const stepProgress = (message) => {
+            const percent = Math.min(94, 6 + Math.round((completedSteps / totalSteps) * 88));
+            progress?.(`${message} (${completedSteps}/${totalSteps} steps)`, percent);
+        };
 
         for (let i = 0; i < chunks.length; i++) {
+            throwIfAborted(signal);
             const chunkText = formatMessageObjects(chunks[i]);
-            const startProgress = 25 + Math.round((i / Math.max(1, chunks.length)) * 50);
-            progress?.(`Generating lore chunk ${i + 1}/${chunks.length} (${chunks[i].length} messages)...`, startProgress);
+            stepProgress(`Generating lore chunk ${i + 1}/${chunks.length} (${chunks[i].length} messages)...`);
 
-            const userMessage = `Current state: ${stateSummary}\n\nRecent message chunk ${i + 1} of ${chunks.length}:\n${chunkText || '(No message text)'}\n\nGenerate relevant lore entries from this chunk only. Do not repeat accepted lore. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
-            const response = await quietPrompt(systemPrompt, userMessage);
+            const userMessage = `Current state: ${stateSummary}
+
+Recent message chunk ${i + 1} of ${chunks.length}:
+${chunkText || '(No message text)'}
+
+Generate relevant lore entries from this chunk only. Do not repeat accepted lore. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
+            const response = await quietPrompt(systemPrompt, userMessage, { signal });
+            completedSteps++;
+            throwIfAborted(signal);
 
             if (!response) {
                 failedChunkCount++;
+                completedSteps++;
                 continue;
             }
 
-            progress?.(`Parsing lore chunk ${i + 1}/${chunks.length}...`, Math.min(82, startProgress + 8));
+            stepProgress(`Parsing lore chunk ${i + 1}/${chunks.length}...`);
             let parsed = parseJsonResponse(response);
 
             if (!parsed || !Array.isArray(parsed?.entries)) {
@@ -845,9 +876,12 @@ export async function runLoreGeneration(options = {}) {
                     if (settings.debugMode) {
                         console.debug(`${LOG_PREFIX} Initial lore parse failed for chunk ${i + 1}, attempting repair pass`);
                     }
+                    progress?.(`Repairing malformed JSON for chunk ${i + 1}/${chunks.length}... (${completedSteps}/${totalSteps} steps)`, Math.min(94, 6 + Math.round((completedSteps / totalSteps) * 88)));
                     parsed = await repairLoreJsonResponse(response);
                 }
             }
+            completedSteps++;
+            throwIfAborted(signal);
 
             if (!parsed || !Array.isArray(parsed.entries)) {
                 failedChunkCount++;
@@ -872,7 +906,8 @@ export async function runLoreGeneration(options = {}) {
             return { status: 'failed_no_response', contextKey, failedChunkCount, chunkCount: chunks.length };
         }
 
-        progress?.('Normalizing and filtering generated lore entries...', 86);
+        completedSteps++;
+        progress?.(`Normalizing and filtering generated lore entries... (${completedSteps}/${totalSteps} steps)`, Math.min(96, 6 + Math.round((completedSteps / totalSteps) * 88)));
         let entries = normalizeLoreMatrix(allRawEntries).map(entry => normalizeGeneratedEntry(entry, settings));
         let duplicateDrops = [];
         if (settings.loreDuplicateGuard !== false) {
@@ -907,7 +942,8 @@ export async function runLoreGeneration(options = {}) {
 
         // ── Create proposal (only path that marks context as proposed) ─
         const summary = chunkSummaries.filter(Boolean).join(' | ');
-        progress?.('Saving pending lore proposal...', 94);
+        completedSteps++;
+        progress?.(`Saving pending lore proposal... (${completedSteps}/${totalSteps} steps)`, 96);
         const result = setPendingLoreProposal(entries, {
             contextKey,
             source,
@@ -938,8 +974,16 @@ export async function runLoreGeneration(options = {}) {
             chunkCount: chunks.length,
         };
     } catch (e) {
-        console.error(`${LOG_PREFIX} Lore generation failed:`, e);
         const currentKey = buildLoreGenerationKey(getState());
+        if (isAbortError(e)) {
+            recordLoreAttempt(currentKey, {
+                status: 'cancelled',
+                lastError: 'Cancelled by user',
+            }, { increment: false });
+            progress?.('Lore generation cancelled by user.', 0);
+            return { status: 'cancelled', contextKey: currentKey, error: 'Cancelled by user' };
+        }
+        console.error(`${LOG_PREFIX} Lore generation failed:`, e);
         recordLoreAttempt(currentKey, {
             status: 'failed_exception',
             lastError: e.message,

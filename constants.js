@@ -284,6 +284,8 @@ export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State 
 10. Emotional state should be current-state, not permanent personality. Avoid feedback loops: reduce or omit heightened emotion unless the latest messages reinforce it.
 11. Numeric emotional values use -5 to +5 where 0 is neutral. Do not jump more than 2 points from the current state unless the scene explicitly justifies it.
 12. Respect optional continuity sections. If a section is disabled in the current state, omit changes for that section.
+13. If the current state is sparse or empty, perform an initial-state extraction: populate every active section that is clearly supported by the messages. Do not return only 1-2 categories when scene, characters, knowledge, objectives, inventory, or relationships are evident.
+14. For thinking/reasoning models: put the final JSON in visible message.content. Do not leave the visible answer empty. Do not put the JSON only in hidden reasoning.
 </rules>
 
 <delta_schema>
@@ -343,7 +345,7 @@ Recent roleplay messages:
 `;
 
 // ── Extraction prompt (user message) ────────────────────────────────────────────
-export const EXTRACTION_USER_PROMPT = `Analyze the messages above and extract any changes to the continuity state. Remember: only output fields that actually changed, in valid JSON format.`;
+export const EXTRACTION_USER_PROMPT = `Analyze the messages above and extract continuity-state changes. If this is a first or sparse scan, populate every active tracked section that is clearly supported: canon, scene, characters, appearance/clothing, emotional state, knowledge, secrets, relationships, threads, inventory, objectives, and flags. Return ONLY visible valid JSON in the WandlightDelta shape. Do not leave message.content empty.`;
 
 // ── Lore Context Detection prompt ───────────────────────────────────────────────
 export const LORE_CONTEXT_DETECTION_SYSTEM_PROMPT = `You are the Wandlight Lore Context Detector for a Harry Potter / Hogwarts roleplay.

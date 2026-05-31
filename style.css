@@ -1640,3 +1640,57 @@
 .wandlight-review-lore-title {
     font-size: 1.05em;
 }
+
+
+/* ── Live feedback patch: compact metadata chips, stronger titles, title/tag margin ── */
+.wandlight-lore-meta-select-wrap {
+    min-height: 0 !important;
+    height: 16px !important;
+    padding: 0 2px 0 4px !important;
+    gap: 2px !important;
+    align-items: center !important;
+    line-height: 1 !important;
+    font-size: 0.62em !important;
+}
+
+.wandlight-lore-meta-select-prefix {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 14px !important;
+    line-height: 1 !important;
+}
+
+.wandlight-lore-meta-select {
+    height: 14px !important;
+    min-height: 14px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+.wandlight-lore-entry-title-wrap {
+    margin-left: 8px !important;
+}
+
+.wandlight-review-lore-title {
+    margin-left: 8px !important;
+}
+
+.wandlight-lore-entry-title {
+    font-size: 1.12em !important;
+}
+
+.wandlight-review-lore-title {
+    font-size: 1.13em !important;
+}
+
+.wandlight-danger-button {
+    border-color: rgba(190, 80, 80, 0.45) !important;
+    background: rgba(120, 30, 38, 0.22) !important;
+}
+
+.wandlight-danger-button:hover:not(:disabled) {
+    background: rgba(160, 45, 55, 0.34) !important;
+}

@@ -1,0 +1,257 @@
+[
+  {
+    "schemaVersion": 2,
+    "id": "gate_polyjuice_potion_early_years",
+    "title": "Polyjuice Potion Knowledge and Difficulty Gate",
+    "kind": "knowledge_gate",
+    "category": "knowledge",
+    "canonStatus": "canon",
+    "truthStatus": "true",
+    "revealPolicy": "public",
+    "priority": 78,
+    "date": {
+      "validFrom": "1992-09-01",
+      "validTo": "1998-05-02",
+      "precision": "school_year",
+      "schoolYear": 2,
+      "book": "Chamber of Secrets",
+      "label": "Polyjuice is advanced and dangerous."
+    },
+    "scope": {
+      "characters": [
+        "Hermione Granger",
+        "Harry Potter",
+        "Ron Weasley"
+      ],
+      "topics": [
+        "polyjuice",
+        "potions",
+        "disguise"
+      ],
+      "objects": [
+        "Polyjuice Potion"
+      ],
+      "schoolYears": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "visibility": {
+      "knownBy": {
+        "Hermione Granger": "1992-12-01",
+        "Harry Potter": "1992-12-01",
+        "Ron Weasley": "1992-12-01"
+      }
+    },
+    "content": {
+      "fact": "Polyjuice Potion is a complex potion the trio first uses during second year.",
+      "injection": "Treat Polyjuice Potion as advanced and risky; younger students should not casually brew or understand it unless canon/AU events establish special access.",
+      "constraints": [
+        "Hermione is unusually capable for attempting it in Year 2.",
+        "Most students should not treat Polyjuice as routine."
+      ],
+      "antiLore": [
+        "Do not make Polyjuice a casual first-year trick."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "book": "Chamber of Secrets",
+      "confidence": 0.9
+    }
+  },
+  {
+    "schemaVersion": 2,
+    "id": "future_guard_deathly_hallows_before_year7",
+    "title": "Future Guard: Deathly Hallows Before Year 7",
+    "kind": "future_guard",
+    "category": "future_guard",
+    "canonStatus": "canon",
+    "truthStatus": "hidden",
+    "revealPolicy": "do_not_reveal",
+    "priority": 98,
+    "protected": true,
+    "date": {
+      "validFrom": "1991-09-01",
+      "validTo": "1997-07-30",
+      "precision": "date",
+      "label": "Before the Hallows become plot-relevant."
+    },
+    "scope": {
+      "characters": [
+        "Harry Potter",
+        "Hermione Granger",
+        "Ron Weasley"
+      ],
+      "topics": [
+        "Deathly Hallows",
+        "Elder Wand",
+        "Resurrection Stone",
+        "Invisibility Cloak"
+      ],
+      "schoolYears": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "content": {
+      "fact": "Before Year 7, the trio should not understand the Deathly Hallows framework.",
+      "injection": "Do not have Harry, Hermione, or Ron discuss the Deathly Hallows as a known framework before the Year 7 arc introduces it.",
+      "constraints": [
+        "The Elder Wand's larger significance should not be casually understood before Year 7."
+      ],
+      "antiLore": [
+        "Hermione should not explain the Hallows in Year 6 or earlier."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "book": "Deathly Hallows",
+      "confidence": 0.95
+    }
+  },
+  {
+    "schemaVersion": 2,
+    "id": "behavior_hermione_year6_research_mode",
+    "title": "Hermione Behavior: Year 6 Research Mode",
+    "kind": "behavior_gate",
+    "category": "behavior",
+    "canonStatus": "canon",
+    "truthStatus": "true",
+    "revealPolicy": "public",
+    "priority": 72,
+    "date": {
+      "validFrom": "1996-09-01",
+      "validTo": "1997-06-30",
+      "precision": "school_year",
+      "schoolYear": 6,
+      "book": "Half-Blood Prince"
+    },
+    "scope": {
+      "characters": [
+        "Hermione Granger"
+      ],
+      "topics": [
+        "research",
+        "suspicion",
+        "library",
+        "rules"
+      ],
+      "schoolYears": [
+        6
+      ]
+    },
+    "content": {
+      "fact": "In Year 6, Hermione is intellectually aggressive, skeptical of unsupported claims, and prone to intense research when confronted with anomalous magic.",
+      "injection": "Write Year 6 Hermione as precise, skeptical, rule-aware, and intensely research-driven; she should ask for evidence and look for library/professor routes before accepting extraordinary claims.",
+      "constraints": [
+        "She may bend rules for a serious enough problem, but she usually rationalizes why it is necessary."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "book": "Half-Blood Prince",
+      "confidence": 0.85
+    }
+  },
+  {
+    "schemaVersion": 2,
+    "id": "spell_gate_memory_charms_students",
+    "title": "Memory Charm Student Plausibility Gate",
+    "kind": "spell_gate",
+    "category": "spell",
+    "canonStatus": "canon",
+    "truthStatus": "true",
+    "revealPolicy": "public",
+    "priority": 82,
+    "date": {
+      "validFrom": "1991-09-01",
+      "validTo": "1998-05-02",
+      "precision": "era"
+    },
+    "scope": {
+      "topics": [
+        "memory charms",
+        "Obliviate",
+        "mind magic"
+      ],
+      "spells": [
+        "Obliviate"
+      ],
+      "schoolYears": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "content": {
+      "fact": "Memory modification is delicate magic and should not be casual student spellwork.",
+      "injection": "Treat Memory Charms as delicate and ethically serious; ordinary students should not casually use reliable memory modification without special training or an AU justification.",
+      "constraints": [
+        "Hermione can perform difficult magic, but memory alteration should still be treated as grave and risky."
+      ],
+      "antiLore": [
+        "Do not have random Hogwarts students casually Obliviate each other."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "confidence": 0.82
+    }
+  },
+  {
+    "schemaVersion": 2,
+    "id": "institution_hogwarts_year6_security",
+    "title": "Hogwarts Security State - Year 6",
+    "kind": "institution_state",
+    "category": "place",
+    "canonStatus": "canon",
+    "truthStatus": "true",
+    "revealPolicy": "public",
+    "priority": 76,
+    "date": {
+      "validFrom": "1996-09-01",
+      "validTo": "1997-06-30",
+      "precision": "school_year",
+      "schoolYear": 6,
+      "book": "Half-Blood Prince"
+    },
+    "scope": {
+      "locations": [
+        "Hogwarts"
+      ],
+      "topics": [
+        "security",
+        "Death Eaters",
+        "Dumbledore"
+      ],
+      "schoolYears": [
+        6
+      ]
+    },
+    "content": {
+      "fact": "During Year 6, Hogwarts operates under heightened wartime anxiety and security concerns while Dumbledore remains Headmaster until the Astronomy Tower event.",
+      "injection": "In Year 6 Hogwarts, unusual magical events should raise suspicion; security, secrecy, and Dumbledore's authority matter.",
+      "constraints": [
+        "Do not treat Hogwarts as carefree peacetime Year 1-3 if the date is Year 6."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "book": "Half-Blood Prince",
+      "confidence": 0.88
+    }
+  }
+]

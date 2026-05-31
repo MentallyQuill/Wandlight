@@ -29,7 +29,6 @@ export function renderSettingsPanel(container) {
 
     // Wire range-input live value displays
     wireRangeDisplay('wandlight_extraction_interval', 'wandlight_extraction_interval_value');
-    wireRangeDisplay('wandlight_max_snapshots', 'wandlight_max_snapshots_value');
     wireRangeDisplay('wandlight_max_lore_entries_in_memo', 'wandlight_max_lore_entries_in_memo_value');
     wireRangeDisplay('wandlight_max_lore_entries_in_matrix', 'wandlight_max_lore_entries_in_matrix_value');
 
@@ -38,14 +37,6 @@ export function renderSettingsPanel(container) {
 
     // Wire the lore model provider panel
     setupLoreProviderPanel(container);
-
-    // Refresh memo preview on button
-    const refreshMemoBtn = container.querySelector('#wandlight_refresh_memo');
-    if (refreshMemoBtn) {
-        refreshMemoBtn.addEventListener('click', () => {
-            refreshMemoPreview();
-        });
-    }
 
     // State viewer: double-click to edit raw JSON
     const stateDisplay = container.querySelector('#wandlight_state_display');
@@ -106,8 +97,6 @@ export function renderSettingsPanel(container) {
         });
     }
 
-    // Initial memo refresh
-    setTimeout(() => refreshMemoPreview(), 50);
 }
 
 /**

@@ -28,6 +28,7 @@ import {
     normalizeLoreContext,
     normalizeLoreMatrix,
     buildLoreGenerationKey,
+    filterDuplicateLoreEntries,
 } from './lore-matrix.js';
 
 import { sendLoreRequest } from './lore-llm-client.js';
@@ -160,12 +161,54 @@ function findBalancedJsonObject(text) {
     return start >= 0 ? s.slice(start) : '';
 }
 
+function findBalancedJsonArray(text) {
+    const s = String(text || '');
+    let start = -1;
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = 0; i < s.length; i++) {
+        const ch = s[i];
+
+        if (start === -1) {
+            if (ch === '[') {
+                start = i;
+                depth = 1;
+            }
+            continue;
+        }
+
+        if (escaped) {
+            escaped = false;
+            continue;
+        }
+        if (ch === '\\') {
+            escaped = true;
+            continue;
+        }
+        if (ch === '"') {
+            inString = !inString;
+            continue;
+        }
+        if (inString) continue;
+        if (ch === '[') depth++;
+        if (ch === ']') depth--;
+        if (depth === 0) return s.slice(start, i + 1);
+    }
+
+    return start >= 0 ? s.slice(start) : '';
+}
+
 /**
  * Coerces various shapes the model may return into the expected { summary, entries } structure.
  * @param {*} parsed - Already-parsed (but possibly wrong-shaped) JSON
  * @returns {Object|null} Normalized shape or null
  */
 function coerceLoreShape(parsed) {
+    if (Array.isArray(parsed)) {
+        return { summary: '', entries: parsed };
+    }
     if (!parsed || typeof parsed !== 'object') return null;
 
     // Already correct.
@@ -220,6 +263,8 @@ function parseJsonResponse(text) {
     candidates.push(stripJsonFences(noReasoning));
     candidates.push(findBalancedJsonObject(noReasoning));
     candidates.push(findBalancedJsonObject(stripJsonFences(noReasoning)));
+    candidates.push(findBalancedJsonArray(noReasoning));
+    candidates.push(findBalancedJsonArray(stripJsonFences(noReasoning)));
 
     for (const candidate of candidates) {
         if (!candidate || !candidate.trim()) continue;
@@ -303,7 +348,7 @@ function getRecentMessages(count = 8) {
  * The result is written to state via setLoreContext().
  * @returns {Promise<Object|null>} Detected context or null on failure
  */
-export async function runLoreContextDetection() {
+export async function runLoreContextDetection(options = {}) {
     if (_detectionRunning) {
         console.debug(`${LOG_PREFIX} Lore context detection already running, skipping`);
         return null;
@@ -313,6 +358,8 @@ export async function runLoreContextDetection() {
     try {
         const state = getState();
         const settings = getSettings();
+        const progress = typeof options.progress === 'function' ? options.progress : null;
+        progress?.('Reading recent messages...', 10);
 
         if (!settings.debugMode) {
             // In non-debug, only run if not already detected recently
@@ -324,20 +371,23 @@ export async function runLoreContextDetection() {
             loreContext: state.loreContext,
         }, null, 0);
 
-        const messages = getRecentMessages();
+        const messages = getRecentMessages(settings.loreSourceMessageCount || 20);
+        progress?.('Sending context detection request...', 35);
         const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nDetect the current lore context. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
 
         const response = await quietPrompt(LORE_CONTEXT_DETECTION_SYSTEM_PROMPT, userMessage);
         if (!response) return null;
 
+        progress?.('Parsing detected context...', 75);
         const parsed = parseJsonResponse(response);
         if (!parsed || typeof parsed !== 'object') {
             console.warn(`${LOG_PREFIX} Could not parse lore context detection response`);
             return null;
         }
 
-        const normalized = normalizeLoreContext(parsed);
+        const normalized = normalizeLoreContext({ ...parsed, lastDetectedAt: Date.now() });
         setLoreContext(normalized);
+        progress?.('Context detection complete.', 100);
 
         if (settings.debugMode) {
             console.log(`${LOG_PREFIX} Lore context detected:`, normalized);
@@ -350,6 +400,25 @@ export async function runLoreContextDetection() {
     } finally {
         _detectionRunning = false;
     }
+}
+
+
+function buildLoreGenerationSystemPrompt(settings = getSettings()) {
+    const count = Math.max(0, Math.min(10, Number(settings.loreTagCount ?? 4)));
+    const tagInstruction = count === 0
+        ? 'Do not generate tags. Set tags to an empty array for every entry.'
+        : `Generate exactly ${count} tags for each entry unless impossible. Tags must be short searchable labels, not full sentences.`;
+
+    return `${LORE_GENERATION_SYSTEM_PROMPT}\n\nRuntime generation settings:\n- Source window: last ${Math.max(1, Math.min(200, Number(settings.loreSourceMessageCount) || 20))} messages.\n- Tag count: ${count}.\n- ${tagInstruction}`;
+}
+
+function normalizeGeneratedEntry(entry, settings = getSettings()) {
+    const normalized = { ...entry };
+    const tagCount = Math.max(0, Math.min(10, Number(settings.loreTagCount ?? 4)));
+    normalized.tags = tagCount === 0
+        ? []
+        : (Array.isArray(normalized.tags) ? normalized.tags.slice(0, tagCount) : []);
+    return normalized;
 }
 
 // ── Lore Generation ─────────────────────────────────────────────────────────────
@@ -405,6 +474,7 @@ const FAILED_STATUSES = ['failed_parse', 'failed_no_response', 'failed_exception
  */
 export async function runLoreGeneration(options = {}) {
     const { force = false, allowReplacePending = false } = options;
+    const progress = typeof options.progress === 'function' ? options.progress : null;
     const source = force ? 'manual' : 'auto';
 
     if (_generationRunning) {
@@ -416,13 +486,14 @@ export async function runLoreGeneration(options = {}) {
     try {
         const state = getState();
         const settings = getSettings();
+        progress?.('Preparing lore generation...', 5);
         const contextKey = buildLoreGenerationKey(state);
 
         // Auto-detect context if none exists (only for manual/forced generation)
         if (!state.loreContext?.lastDetectedAt) {
             if (force) {
                 console.debug(`${LOG_PREFIX} Auto-detecting lore context before generation…`);
-                const detected = await runLoreContextDetection();
+                const detected = await runLoreContextDetection({ progress });
                 if (!detected) {
                     _generationRunning = false;
                     return { status: 'no_context_detected', contextKey };
@@ -433,7 +504,7 @@ export async function runLoreGeneration(options = {}) {
                 // Restart the generation with fresh state, release guard first
                 // so the recursive call doesn't conflict with _generationRunning
                 _generationRunning = false;
-                return await runLoreGeneration({ force, allowReplacePending });
+                return await runLoreGeneration({ force, allowReplacePending, progress });
             }
             if (settings.debugMode) {
                 console.debug(`${LOG_PREFIX} Skipping lore generation — no lore context detected yet`);
@@ -541,10 +612,12 @@ export async function runLoreGeneration(options = {}) {
             loreMatrix: (state.loreMatrix || []).slice(0, 3),
         }, null, 0);
 
-        const messages = getRecentMessages();
+        const messages = getRecentMessages(settings.loreSourceMessageCount || 20);
+        progress?.(`Sending lore generation request (${settings.loreSourceMessageCount || 20} messages)...`, 30);
+        const systemPrompt = buildLoreGenerationSystemPrompt(settings);
         const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nGenerate relevant lore entries. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
 
-        const response = await quietPrompt(LORE_GENERATION_SYSTEM_PROMPT, userMessage);
+        const response = await quietPrompt(systemPrompt, userMessage);
         if (!response) {
             recordLoreAttempt(contextKey, {
                 status: 'failed_no_response',
@@ -554,6 +627,7 @@ export async function runLoreGeneration(options = {}) {
         }
 
         // ── Parse & validate ──────────────────────────────────────────
+        progress?.('Parsing lore response...', 70);
         let parsed = parseJsonResponse(response);
 
         // Repair pass when initial parsing fails
@@ -562,6 +636,7 @@ export async function runLoreGeneration(options = {}) {
                 if (settings.debugMode) {
                     console.debug(`${LOG_PREFIX} Initial lore parse failed, attempting repair pass`);
                 }
+                progress?.('Repairing malformed JSON response...', 78);
                 parsed = await repairLoreJsonResponse(response);
             }
         }
@@ -578,14 +653,21 @@ export async function runLoreGeneration(options = {}) {
         }
 
         const rawEntryCount = parsed.entries.length;
-        const entries = normalizeLoreMatrix(parsed.entries);
+        progress?.('Normalizing and filtering lore entries...', 86);
+        let entries = normalizeLoreMatrix(parsed.entries).map(entry => normalizeGeneratedEntry(entry, settings));
+        let duplicateDrops = [];
+        if (settings.loreDuplicateGuard !== false) {
+            const filtered = filterDuplicateLoreEntries(entries, state.loreMatrix || []);
+            entries = filtered.entries;
+            duplicateDrops = filtered.dropped;
+        }
 
         if (entries.length === 0) {
             recordLoreAttempt(contextKey, {
                 status: 'empty',
                 rawEntryCount,
                 validEntryCount: 0,
-                lastError: 'No valid lore entries after normalization',
+                lastError: duplicateDrops.length ? `All valid lore entries were duplicate/similar to existing entries (${duplicateDrops.length} dropped)` : 'No valid lore entries after normalization',
             }, { increment: false });
             if (settings.debugMode) {
                 console.debug(`${LOG_PREFIX} Lore generation returned no valid entries after normalization`);
@@ -595,11 +677,14 @@ export async function runLoreGeneration(options = {}) {
                 contextKey,
                 rawEntryCount,
                 validEntryCount: 0,
+                droppedDuplicateCount: duplicateDrops.length,
+                duplicateDropReasons: duplicateDrops.map(d => d.reason),
             };
         }
 
         // ── Create proposal (only path that marks context as proposed) ─
         const summary = parsed.summary || '';
+        progress?.('Saving pending lore proposal...', 94);
         const result = setPendingLoreProposal(entries, {
             contextKey,
             source,
@@ -614,6 +699,8 @@ export async function runLoreGeneration(options = {}) {
             console.log(`${LOG_PREFIX} Lore generated: ${entries.length} entries pending review`, entries);
         }
 
+        progress?.('Pending lore ready for review.', 100);
+
         return {
             status: 'proposed',
             contextKey,
@@ -621,6 +708,8 @@ export async function runLoreGeneration(options = {}) {
             rawEntryCount,
             validEntryCount: entries.length,
             droppedEntryCount: rawEntryCount - entries.length,
+            droppedDuplicateCount: duplicateDrops.length,
+            duplicateDropReasons: duplicateDrops.map(d => d.reason),
         };
     } catch (e) {
         console.error(`${LOG_PREFIX} Lore generation failed:`, e);

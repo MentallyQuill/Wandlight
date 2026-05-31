@@ -64,6 +64,12 @@ export const DEFAULT_SETTINGS = {
     autoGenerateLore: false,
     workflowMode: 'assisted', // 'manual' | 'assisted' | 'automatic'
 
+    // Lore generation behavior
+    loreSourceMessageCount: 20,
+    loreReplacementGuard: true,
+    loreDuplicateGuard: true,
+    loreTagCount: 4,
+
     // Lore injection / compression
     loreInjectionMode: 'direct', // 'direct' | 'compressed'
     loreCompressionLevel: 2, // 1=minimal, 5=aggressive
@@ -136,6 +142,16 @@ export function getDefaultState() {
 
         pendingLoreMeta: null,
 
+        // Prompt injection/compression preview status
+        loreCompressionStatus: {
+            lastCompressedAt: 0,
+            lastSignature: '',
+            lastMode: 'direct',
+            lastTokenEstimate: 0,
+            turnsSinceCompression: 0,
+            lastChatLength: 0,
+        },
+
         // Lore panel UI state (schema v4)
         lorePanel: {
             isOpen: true,
@@ -145,6 +161,8 @@ export function getDefaultState() {
             selectedEntryId: '',
             activeTab: 'session',
             reviewSelectedIds: [],
+            generationStatus: 'Idle.',
+            generationProgress: 0,
             showOnlyActive: false,
             width: 420,
             height: 520,
@@ -273,7 +291,7 @@ Output ONLY valid JSON:
     {
       "id": "stable_snake_case_id",
       "title": "short title",
-      "tags": ["3-5 short editable search tags, e.g. character, location, era, plot-thread"],
+      "tags": ["short searchable category tags"],
       "category": "canon|au|secret|rumor|lie|relationship|location|rule|timeline",
       "fact": "what is actually true or believed",
       "canonStatus": "canon|divergent|au|fanon|unknown",
@@ -303,8 +321,10 @@ Output ONLY valid JSON:
 }
 
 Rules:
-- Give every entry 3-5 concise tags useful for search and filtering.
-- Generate 4-10 entries only.
+- Give every entry the requested number of concise tags. Tags must be searchable labels, not full sentences.
+- Tag schema: 1-3 words each; prefer character names, groups, locations, era/year, plot thread, secret type, relationship pair, magic system, faction, object/artifact, event, or villain/ally role.
+- Good tags: "Harry", "Voldemort", "villains", "Hogwarts", "Slytherin", "1996", "secret", "relationship", "prophecy". Bad tags: full sentences or conclusions.
+- Generate 4-10 entries only unless the source context is sparse.
 - Prefer constraints over trivia.
 - If a fact is secret in this era, include publicVersion and revealPolicy.
 - Do not overwrite user-edited lore. This pass only proposes entries.

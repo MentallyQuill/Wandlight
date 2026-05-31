@@ -16,7 +16,7 @@
                 <div class="inline-drawer-content">
                     <div class="flex-container flexFlowColumn gap-1">
                         <p style="font-size: 0.85em; opacity: 0.72; margin-bottom: 4px;">
-                            During roleplay, use the Wandlight Continuity window for mode, injection toggles, scanning, generation, review, and lore editing. This settings panel is reserved for API setup, debug previews, and data tools.
+                            During roleplay, use the Wandlight Continuity window for mode, injection toggles, scanning, generation, review, and lore editing. This settings panel is reserved for API setup, developer diagnostics, and data tools.
                         </p>
                         <button id="wandlight_open_window" class="menu_button interactable"
                             title="Open the Wandlight Continuity runtime window.">
@@ -137,31 +137,6 @@
                 </div>
             </div>
 
-            <!-- Prompt Injection Debug -->
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <i class="fa-solid fa-scroll" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>Prompt Injection Debug</b>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <div class="flex-container flexFlowColumn gap-1">
-                        <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
-                            Raw preview of the continuity memo that can be injected into generation prompts. Runtime injection toggles live in the Wandlight window.
-                        </p>
-                        <pre id="wandlight_memo_preview" class="wandlight-memo-preview"
-                            style="white-space: pre-wrap; font-family: monospace; font-size: 0.82em;
-                            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;
-                            max-height: 300px; overflow-y: auto; margin: 0;">(Loading continuity state...)</pre>
-                        <button id="wandlight_refresh_memo" class="menu_button interactable"
-                            style="align-self: flex-start; margin-top: 4px;"
-                            title="Refresh the raw memo preview from current state.">
-                            <i class="fa-solid fa-rotate"></i> Refresh Preview
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Data and Developer Debug -->
             <div class="inline-drawer">
                 <div class="inline-drawer-toggle inline-drawer-header">
@@ -177,13 +152,6 @@
                             <i class="fa-solid fa-circle-question interactable"
                                 title="Enables verbose console logging for Wandlight troubleshooting."></i>
                         </label>
-
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px;">
-                            <span style="flex-shrink: 0;">State History Limit:</span>
-                            <input id="wandlight_max_snapshots" type="range" data-setting="maxSnapshots" min="5" max="100" value="20" style="flex: 1;" />
-                            <span id="wandlight_max_snapshots_value" style="min-width: 24px; text-align: right;">20</span>
-                        </div>
-                        <small style="opacity: 0.6; margin-top: -4px;">Maximum undo history points kept for Wandlight state-history recovery.</small>
 
                         <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
                             Current continuity state. Double-click the summary to edit raw JSON.

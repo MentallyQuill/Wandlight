@@ -354,6 +354,16 @@ export function migrateState(state) {
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []);
     state.pendingLoreEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
 
+    if (!state.loreCompressionStatus || typeof state.loreCompressionStatus !== 'object') {
+        state.loreCompressionStatus = getDefaultState().loreCompressionStatus;
+    } else {
+        const defaults = getDefaultState().loreCompressionStatus;
+        state.loreCompressionStatus = mergeDefaults(state.loreCompressionStatus, defaults);
+        state.loreCompressionStatus.lastCompressedAt = Number.isFinite(Number(state.loreCompressionStatus.lastCompressedAt)) ? Number(state.loreCompressionStatus.lastCompressedAt) : 0;
+        state.loreCompressionStatus.lastTokenEstimate = Number.isFinite(Number(state.loreCompressionStatus.lastTokenEstimate)) ? Number(state.loreCompressionStatus.lastTokenEstimate) : 0;
+        state.loreCompressionStatus.turnsSinceCompression = Number.isFinite(Number(state.loreCompressionStatus.turnsSinceCompression)) ? Number(state.loreCompressionStatus.turnsSinceCompression) : 0;
+    }
+
     // Normalize lorePanel
     if (!state.lorePanel || typeof state.lorePanel !== 'object') {
         state.lorePanel = getDefaultState().lorePanel;
@@ -367,6 +377,8 @@ export function migrateState(state) {
             ? state.lorePanel.activeTab
             : 'session';
         state.lorePanel.reviewSelectedIds = Array.isArray(state.lorePanel.reviewSelectedIds) ? state.lorePanel.reviewSelectedIds : [];
+        state.lorePanel.generationStatus = typeof state.lorePanel.generationStatus === 'string' ? state.lorePanel.generationStatus : 'Idle.';
+        state.lorePanel.generationProgress = Number.isFinite(Number(state.lorePanel.generationProgress)) ? Number(state.lorePanel.generationProgress) : 0;
         state.lorePanel.showOnlyActive = false;
         state.lorePanel.width = Number.isFinite(Number(state.lorePanel.width)) && Number(state.lorePanel.width) >= 320 ? Number(state.lorePanel.width) : 420;
         state.lorePanel.height = Number.isFinite(Number(state.lorePanel.height)) && Number(state.lorePanel.height) >= 260 ? Number(state.lorePanel.height) : 520;

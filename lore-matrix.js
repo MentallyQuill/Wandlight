@@ -40,6 +40,45 @@ function asStringArray(value) {
         : [];
 }
 
+function asFirstString(...values) {
+    for (const value of values) {
+        const text = asString(value);
+        if (text) return text;
+    }
+    return '';
+}
+
+export function normalizeLoreTag(value) {
+    const cleaned = String(value || '')
+        .trim()
+        .replace(/[\r\n]+/g, ' ')
+        .replace(/[^\p{L}\p{N} _-]+/gu, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    if (!cleaned) return '';
+
+    const words = cleaned.split(' ').filter(Boolean);
+    const compact = words.length > 3 ? words.slice(0, 3).join(' ') : cleaned;
+    return compact.slice(0, 32).trim();
+}
+
+function normalizeLoreTags(value, limit = 10) {
+    const seen = new Set();
+    const output = [];
+
+    for (const raw of asStringArray(value)) {
+        const tag = normalizeLoreTag(raw);
+        const key = tag.toLowerCase();
+        if (!tag || seen.has(key)) continue;
+        seen.add(key);
+        output.push(tag);
+        if (output.length >= limit) break;
+    }
+
+    return output;
+}
+
 function asBoolean(value, fallback = false) {
     return typeof value === 'boolean' ? value : fallback;
 }
@@ -90,7 +129,8 @@ export function normalizeLoreContext(input = {}) {
  */
 export function normalizeLoreEntry(input = {}) {
     if (!input || typeof input !== 'object') input = {};
-    const title = asString(input.title) || asString(input.fact) || 'Lore Entry';
+    const fact = asFirstString(input.fact, input.content, input.description, input.detail, input.text, input.summary);
+    const title = asFirstString(input.title, input.name, fact) || 'Lore Entry';
     const category = asString(input.category);
     const canonStatus = asString(input.canonStatus);
     const truthStatus = asString(input.truthStatus);
@@ -104,9 +144,9 @@ export function normalizeLoreEntry(input = {}) {
     return {
         id: asString(input.id) || stableIdFromTitle(title),
         title,
-        tags: asStringArray(input.tags),
+        tags: normalizeLoreTags(input.tags),
         category: VALID_CATEGORIES.has(category) ? category : 'canon',
-        fact: asString(input.fact),
+        fact,
         canonStatus: VALID_CANON_STATUS.has(canonStatus) ? canonStatus : 'unknown',
         truthStatus: VALID_TRUTH_STATUS.has(truthStatus) ? truthStatus : 'true',
 
@@ -267,6 +307,74 @@ export function getActiveLoreEntries(state, limit = 6) {
         .filter(entry => isLoreEntryActive(entry, state))
         .sort((a, b) => b.priority - a.priority || a.title.localeCompare(b.title))
         .slice(0, limit);
+}
+
+
+// ── Duplicate detection ────────────────────────────────────────────────────────
+
+function tokenizeForSimilarity(value) {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]+/g, ' ')
+        .split(/\s+/)
+        .map(w => w.trim())
+        .filter(w => w.length > 2);
+}
+
+function jaccardSimilarity(a, b) {
+    const aa = new Set(tokenizeForSimilarity(a));
+    const bb = new Set(tokenizeForSimilarity(b));
+    if (!aa.size || !bb.size) return 0;
+    let intersection = 0;
+    for (const token of aa) {
+        if (bb.has(token)) intersection++;
+    }
+    const union = aa.size + bb.size - intersection;
+    return union > 0 ? intersection / union : 0;
+}
+
+export function getLoreDuplicateReason(entry, existingEntries = []) {
+    const candidate = normalizeLoreEntry(entry);
+    const existing = normalizeLoreMatrix(existingEntries);
+    const candidateId = candidate.id.toLowerCase();
+    const candidateTitle = candidate.title.toLowerCase();
+
+    for (const current of existing) {
+        if (current.id.toLowerCase() === candidateId) {
+            return `duplicate id: ${current.id}`;
+        }
+        if (current.title.toLowerCase() === candidateTitle) {
+            return `duplicate title: ${current.title}`;
+        }
+        const titleScore = jaccardSimilarity(candidate.title, current.title);
+        const factScore = jaccardSimilarity(candidate.fact, current.fact);
+        if (titleScore >= 0.82) {
+            return `similar title: ${current.title}`;
+        }
+        if (factScore >= 0.72) {
+            return `similar fact: ${current.title}`;
+        }
+    }
+
+    return '';
+}
+
+export function filterDuplicateLoreEntries(entries = [], existingEntries = []) {
+    const accepted = [];
+    const dropped = [];
+    const comparison = normalizeLoreMatrix(existingEntries);
+
+    for (const raw of entries) {
+        const entry = normalizeLoreEntry(raw);
+        const reason = getLoreDuplicateReason(entry, comparison.concat(accepted));
+        if (reason) {
+            dropped.push({ entry, reason });
+        } else if (entry.id && entry.title && entry.fact) {
+            accepted.push(entry);
+        }
+    }
+
+    return { entries: accepted, dropped };
 }
 
 // ── Merging ─────────────────────────────────────────────────────────────────────

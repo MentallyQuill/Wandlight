@@ -26,7 +26,7 @@ import { getInjectableLoreEntries } from './lore-matrix.js';
  * @param {Object} state - WandlightState
  * @returns {string} Memo string for ephemeral injection
  */
-export function buildMemo(state) {
+export function buildMemo(state, settingsOverride = {}) {
     if (!state) return '';
 
     const lines = [];
@@ -195,7 +195,7 @@ export function buildMemo(state) {
     }
 
     // ── Lore Matrix (inject active lore entries when enabled) ──
-    const settings = getSettings();
+    const settings = { ...getSettings(), ...(settingsOverride || {}) };
     if (settings.injectLore) {
         const maxLore = Number(settings.maxLoreEntriesInMemo) || MAX_LORE_ENTRIES_IN_MEMO;
         const activeLore = getInjectableLoreEntries(state, maxLore);
@@ -259,6 +259,26 @@ function truncateForInjection(text, maxLen) {
     const value = String(text || '').replace(/\s+/g, ' ').trim();
     if (value.length <= maxLen) return value;
     return value.slice(0, maxLen).replace(/\s+\S*$/, '') + '...';
+}
+
+
+export function buildMemoPreview(state, mode = null) {
+    const override = mode ? { loreInjectionMode: mode } : {};
+    return buildMemo(state, override);
+}
+
+export function getMemoSignature(state, mode = null) {
+    const settings = { ...getSettings(), ...(mode ? { loreInjectionMode: mode } : {}) };
+    const payload = {
+        mode: settings.loreInjectionMode || 'direct',
+        level: settings.loreCompressionLevel || 2,
+        injectLore: !!settings.injectLore,
+        maxLore: Number(settings.maxLoreEntriesInMemo) || MAX_LORE_ENTRIES_IN_MEMO,
+        loreIds: (state?.loreMatrix || []).map(e => `${e?.id || ''}:${e?.updatedAt || ''}:${e?.userEdited ? 1 : 0}`).join('|'),
+        pinned: (state?.loreSelection?.pinnedIds || []).join('|'),
+        muted: (state?.loreSelection?.suppressedIds || []).join('|'),
+    };
+    return JSON.stringify(payload);
 }
 
 // ── Expose on globalThis for dynamic access from state-manager (saveStateWithSnapshot) ──

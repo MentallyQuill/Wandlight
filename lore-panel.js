@@ -6,7 +6,7 @@
  * raw previews. This window is the runtime surface used during roleplay.
  */
 
-import { getPanelLoreState, normalizeLoreMatrix, normalizeLoreEntry } from './lore-matrix.js';
+import { getPanelLoreState, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag } from './lore-matrix.js';
 import { getDefaultState } from './constants.js';
 import {
     getState,
@@ -20,8 +20,9 @@ import {
     acceptPendingLoreEntry,
     rejectPendingLoreEntry,
     undoLastChange,
+    setLoreContext,
 } from './state-manager.js';
-import { buildMemo } from './memo-builder.js';
+import { buildMemo, buildMemoPreview, getMemoSignature } from './memo-builder.js';
 import { onExtractionTriggered } from './extractor.js';
 import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
 
@@ -51,16 +52,16 @@ const TAB_LABELS = {
     session: 'Session',
     generate: 'Generate',
     review: 'Review',
-    injection: 'Injection',
     lore: 'Lore',
+    injection: 'Injection',
 };
 
 const TAB_TOOLTIPS = {
-    session: 'Runtime controls for the current roleplay session: mode, continuity, prompt injection, and quick scan.',
-    generate: 'Run context detection and create pending lore entries from recent roleplay.',
-    review: 'Approve or dismiss extracted continuity changes and pending lore entries before they affect play.',
-    injection: 'Choose how active lore is inserted into the prompt: direct verbatim insertion or deterministic compression.',
+    session: 'Runtime controls for the current roleplay session: mode, active/paused state, memo injection, and continuity scanning.',
+    generate: 'Set story context and create pending lore entries from a configurable recent-message source window.',
+    review: 'Approve or dismiss extracted continuity changes and generated lore entries before they affect play.',
     lore: 'Search, filter, pin, mute, tag, and inspect accepted or pending lore entries.',
+    injection: 'Choose what Wandlight sends to the model: direct lore, compressed lore, and the live prompt injection preview.',
 };
 
 const WORKFLOW_MODES = {
@@ -253,8 +254,8 @@ function refreshHeader() {
 
     status.innerHTML = '';
     status.appendChild(createStatusPill(`Mode: ${getWorkflowLabel(settings)}`, getWorkflowTooltip(settings)));
-    status.appendChild(createStatusPill(settings.enabled ? 'Continuity On' : 'Continuity Off', 'Master runtime toggle. When off, Wandlight does not inject, scan, or generate.'));
-    status.appendChild(createStatusPill(settings.injectMemo ? 'Injection On' : 'Injection Off', 'Whether the continuity memo is injected into roleplay generation prompts.'));
+    status.appendChild(createStatusPill(settings.enabled ? 'Wandlight Active' : 'Wandlight Paused', 'Master runtime toggle. When paused, Wandlight does not inject, scan, or generate.'));
+    status.appendChild(createStatusPill(settings.injectMemo ? 'Memo Injected' : 'Memo Not Injected', 'Whether Wandlight prepends its continuity memo to roleplay generation prompts.'));
     if (pendingDelta + pendingLore > 0) {
         status.appendChild(createStatusPill(`Pending: ${pendingDelta + pendingLore}`, 'Items waiting in Review: extracted continuity changes plus generated lore entries.'));
     }
@@ -293,10 +294,10 @@ function renderPanelBody(container, state) {
         renderGenerateTab(tabBody, state);
     } else if (activeTab === 'review') {
         renderReviewTab(tabBody, state);
-    } else if (activeTab === 'injection') {
-        renderInjectionTab(tabBody, state);
-    } else {
+    } else if (activeTab === 'lore') {
         renderLoreTab(tabBody, state);
+    } else {
+        renderInjectionTab(tabBody, state);
     }
 }
 
@@ -348,9 +349,9 @@ function renderSessionTab(container, state) {
     const toggles = document.createElement('div');
     toggles.className = 'wandlight-runtime-grid';
     toggles.appendChild(createToggleCard(
-        'Continuity',
+        'Wandlight Active',
         settings.enabled,
-        'Master runtime toggle. Off disables prompt injection, automatic extraction, and generation actions until turned back on.',
+        'Master switch for Wandlight runtime behavior. Pausing disables prompt injection, automatic extraction, and generation actions.',
         (checked) => {
             const next = getSettings();
             next.enabled = checked;
@@ -360,9 +361,9 @@ function renderSessionTab(container, state) {
         }
     ));
     toggles.appendChild(createToggleCard(
-        'Prompt Injection',
+        'Inject Continuity Memo',
         settings.injectMemo,
-        'Injects the compact continuity memo into roleplay generation prompts. This is ephemeral and does not write into chat history.',
+        "Prepends Wandlight\'s compact continuity memo to roleplay generation prompts. This is ephemeral and does not write into chat history.",
         (checked) => {
             const next = getSettings();
             next.injectMemo = checked;
@@ -372,9 +373,9 @@ function renderSessionTab(container, state) {
         }
     ));
     toggles.appendChild(createToggleCard(
-        'Lore Injection',
+        'Include Lore Entries',
         settings.injectLore,
-        'Allows active lore matrix entries to be included inside the injected continuity memo.',
+        'Includes accepted active lore entries inside the continuity memo. Turn this off to keep scanning/generation active while preventing lore entries from being injected.',
         (checked) => {
             const next = getSettings();
             next.injectLore = checked;
@@ -385,6 +386,18 @@ function renderSessionTab(container, state) {
     ));
     container.appendChild(toggles);
 
+    const concepts = document.createElement('div');
+    concepts.className = 'wandlight-runtime-card';
+    const conceptTitle = document.createElement('div');
+    conceptTitle.className = 'wandlight-runtime-card-title';
+    conceptTitle.textContent = 'What Wandlight Tracks';
+    addTooltip(conceptTitle, 'Continuity state and lore entries are related but separate. This card explains the workflow without requiring tooltip discovery.');
+    concepts.appendChild(conceptTitle);
+    concepts.appendChild(createKeyValue('Continuity state', 'scene, date, knowledge, secrets, relationships, threads', 'Scanned from chat by the continuity extractor. These are structured state changes reviewed as Pending Continuity Changes.'));
+    concepts.appendChild(createKeyValue('Lore entries', 'searchable facts used for future injection', 'Generated from the current context and accepted into the Lore tab after review.'));
+    concepts.appendChild(createKeyValue('Injection', 'what gets sent to the model', 'The Injection tab controls whether accepted lore is inserted directly or compressed before roleplay generation.'));
+    container.appendChild(concepts);
+
     const stats = document.createElement('div');
     stats.className = 'wandlight-runtime-card';
     const counts = getPanelLoreState(state).counts;
@@ -393,12 +406,12 @@ function renderSessionTab(container, state) {
     stats.appendChild(createKeyValue('Pending lore entries', String((state?.pendingLoreEntries || []).length), 'Generated lore entries waiting in Review.'));
     stats.appendChild(createKeyValue('Accepted lore entries', String(counts.all - counts.pending), 'Lore entries currently stored in the accepted lore matrix.'));
     stats.appendChild(createKeyValue('Active lore entries', String(counts.active), 'Accepted entries currently eligible for injection.'));
-    stats.appendChild(createKeyValue('Memo estimate', memo ? `${estimateTokens(memo)} tokens` : 'empty', 'Approximate size of the injected continuity memo. Raw preview remains in extension settings.'));
+    stats.appendChild(createKeyValue('Memo estimate', memo ? `${estimateTokens(memo)} tokens` : 'empty', 'Approximate size of the injected continuity memo. The raw preview is in the Injection tab.'));
     container.appendChild(stats);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Scan Current Chat', 'Runs continuity extraction now. In Manual or Assisted mode, changes are sent to Review instead of silently applying.', async (btn) => {
+    actions.appendChild(createButton('Scan Continuity State', 'Scans recent chat for structured state changes: scene, date, knowledge, secrets, relationships, threads, and continuity flags. It does not create Lore entries.', async (btn) => {
         await runBusyAction(btn, 'Scanning...', async () => {
             await onExtractionTriggered({ force: true });
             refreshPanelBody({ preserveScroll: false });
@@ -442,7 +455,28 @@ function createStateHistoryCard(state) {
     const latest = historyCount ? state.stateHistory[historyCount - 1] : null;
     card.appendChild(createKeyValue('Undo points', String(historyCount), 'Number of saved state-history points currently available.'));
     card.appendChild(createKeyValue('Latest undo point', latest ? (latest.summary || 'Unnamed change') : 'none', 'Most recent state-history entry.'));
-    card.appendChild(createKeyValue('History limit', String(getSettings().maxSnapshots || 20), 'Maximum number of undo points retained. Configure this in API/settings.'));
+
+    const settings = getSettings();
+    const limitRow = document.createElement('label');
+    limitRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const limitText = document.createElement('span');
+    limitText.textContent = `History limit: ${settings.maxSnapshots || 20}`;
+    addTooltip(limitText, 'Maximum number of undo points Wandlight keeps for this chat. Higher values use more chat metadata storage.');
+    const limitInput = document.createElement('input');
+    limitInput.type = 'range';
+    limitInput.min = '5';
+    limitInput.max = '100';
+    limitInput.step = '1';
+    limitInput.value = String(settings.maxSnapshots || 20);
+    limitInput.addEventListener('input', () => {
+        const next = getSettings();
+        next.maxSnapshots = Math.max(5, Math.min(100, parseInt(limitInput.value, 10) || 20));
+        saveSettings(next);
+        limitText.textContent = `History limit: ${next.maxSnapshots}`;
+    });
+    limitRow.appendChild(limitText);
+    limitRow.appendChild(limitInput);
+    card.appendChild(limitRow);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
@@ -492,7 +526,7 @@ function createDangerZoneCard(state) {
     actions.className = 'wandlight-primary-actions';
 
     actions.appendChild(createButton('Delete All Lore', 'Deletes accepted lore, pending lore, and pin/mute selections. Canon/scene/relationship continuity state is left intact.', async () => {
-        const proceed = await confirmAction('Delete all Wandlight lore?', 'This removes accepted lore entries, pending lore entries, and pin/mute selections for this chat. Other continuity state is not deleted. Continue?');
+        const proceed = await confirmAction('Are you sure? Delete all Wandlight lore?', 'You are about to delete every accepted lore entry, every pending lore entry, and all pin/mute selections for this chat. Scene, character knowledge, secrets, relationships, threads, and other continuity state will remain. A state-history snapshot will be saved first. This cannot be reversed except by Undo Last Change. Continue?');
         if (!proceed) return;
         const current = getState();
         pushStateSnapshot(current, 'Delete all lore', getSettings().maxSnapshots);
@@ -511,7 +545,7 @@ function createDangerZoneCard(state) {
     }, 'wandlight-danger-button'));
 
     actions.appendChild(createButton('Reset Generation State', 'Clears detected lore context, pending generated lore, pending deltas, and generation ledger. Accepted lore remains intact.', async () => {
-        const proceed = await confirmAction('Reset Wandlight generation state?', 'This clears context-detection and generation bookkeeping, pending lore, and pending continuity changes. Accepted lore remains. Continue?');
+        const proceed = await confirmAction('Are you sure? Reset generation state?', 'You are about to clear detected context, pending generated lore, pending continuity changes, and the lore-generation ledger. Accepted lore entries will remain. A state-history snapshot will be saved first. Continue?');
         if (!proceed) return;
         const current = getState();
         const defaults = getDefaultState();
@@ -529,7 +563,7 @@ function createDangerZoneCard(state) {
     }, 'wandlight-danger-button'));
 
     actions.appendChild(createButton('Total Reset', 'Resets Wandlight continuity state for this chat to defaults. Panel size and position are preserved.', async () => {
-        const proceed = await confirmAction('Totally reset Wandlight state?', 'This resets all Wandlight continuity data for the current chat. A state-history snapshot is taken first. Continue?');
+        const proceed = await confirmAction('Are you sure? Total reset?', 'You are about to reset all Wandlight continuity data for this chat: canon/scene state, knowledge, secrets, relationships, threads, flags, accepted lore, pending lore, and generation state. Window position and size are preserved. A state-history snapshot will be saved first. Continue?');
         if (!proceed) return;
         const current = getState();
         pushStateSnapshot(current, 'Total Wandlight reset', getSettings().maxSnapshots);
@@ -561,69 +595,260 @@ function createDangerZoneCard(state) {
 function renderGenerateTab(container, state) {
     container.appendChild(createSectionHeader(
         'Generate Pending Lore',
-        'Generation creates reviewable pending lore entries. It does not directly mutate accepted lore.'
+        'This tab creates reviewable Lore entries. Use Scan Continuity State on the Session tab for structured continuity changes; use this tab for searchable lore facts.'
     ));
 
-    const contextCard = document.createElement('div');
-    contextCard.className = 'wandlight-runtime-card';
-    contextCard.appendChild(createKeyValue('Scene date', state?.loreContext?.sceneDate || 'not detected', 'The in-universe date used to select date-sensitive lore.'));
-    contextCard.appendChild(createKeyValue('Canon boundary', state?.loreContext?.canonBoundary || 'not detected', 'The canon cutoff or reference point the detector inferred from the roleplay.'));
-    contextCard.appendChild(createKeyValue('Branch', state?.loreContext?.branchId || 'main', 'Story branch or AU identifier used when generating and filtering lore.'));
-    contextCard.appendChild(createKeyValue('Last detected', state?.loreContext?.lastDetectedAt ? new Date(state.loreContext.lastDetectedAt).toLocaleString() : 'never', 'When Wandlight last detected lore context.'));
-    container.appendChild(contextCard);
-
-    const options = document.createElement('div');
-    options.className = 'wandlight-runtime-card';
-    const optionsTitle = document.createElement('div');
-    optionsTitle.className = 'wandlight-runtime-card-title';
-    optionsTitle.textContent = 'Current Generation Behavior';
-    addTooltip(optionsTitle, 'These are active implemented behaviors in the current generation pipeline.');
-    options.appendChild(optionsTitle);
-    options.appendChild(createKeyValue('Source', 'recent roleplay messages', 'Uses the recent chat window collected by the lore generator.'));
-    options.appendChild(createKeyValue('Output', 'pending lore entries', 'Generated entries are stored in pendingLoreEntries and must be accepted in Review.'));
-    options.appendChild(createKeyValue('Replacement guard', 'enabled', 'If pending entries already exist, the Generate button asks before replacing them.'));
-    options.appendChild(createKeyValue('Tags', '3-5 generated per entry', 'The lore prompt asks the model to create editable tags for search.'));
-    container.appendChild(options);
+    container.appendChild(createContextEditorCard(state));
+    container.appendChild(createGenerationSettingsCard());
+    container.appendChild(createGenerationProgressCard(state));
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Detect Context', 'Analyzes current roleplay to infer scene date, canon boundary, branch, and time-travel mode.', async (btn) => {
+    actions.appendChild(createButton('Detect Story Context', 'Analyzes recent messages and updates scene date, canon reference point, branch, and time-travel mode. This does not generate lore entries.', async (btn) => {
         await runBusyAction(btn, 'Detecting...', async () => {
+            setGenerateProgress('Reading chat and detecting story context...', 8);
             const current = getState();
             pushStateSnapshot(current, 'Detect lore context', getSettings().maxSnapshots);
-            const detected = await runLoreContextDetection();
+            const detected = await runLoreContextDetection({ progress: setGenerateProgress });
             refreshPanelBody({ preserveScroll: false });
             refreshHeader();
-            toast(detected ? 'Lore context detected.' : 'Lore context detection returned no result.', detected ? 'success' : 'warning');
+            toast(detected ? 'Story context detected.' : 'Story context detection returned no usable result.', detected ? 'success' : 'warning');
         });
     }, 'wandlight-primary-button'));
 
-    actions.appendChild(createButton('Generate Pending Lore', 'Generates lore entries from recent roleplay and the detected context. Results go to Review.', async (btn) => {
+    actions.appendChild(createButton('Generate Pending Lore', 'Generates searchable lore entries from the configured source message window and sends them to Review.', async (btn) => {
         await runBusyAction(btn, 'Generating...', async () => {
+            const settings = getSettings();
             const current = getState();
             const pendingCount = (current.pendingLoreEntries || []).length;
-            if (pendingCount > 0) {
+            let allowReplacePending = true;
+
+            if (pendingCount > 0 && settings.loreReplacementGuard !== false) {
                 const proceed = await confirmAction(
                     'Replace pending lore?',
-                    `There are already ${pendingCount} pending lore entries. Generating again will replace them. Continue?`
+                    `There are already ${pendingCount} pending lore entries. Generating again will replace that pending batch. Accepted lore entries are not deleted. Continue?`
                 );
-                if (!proceed) return;
+                if (!proceed) {
+                    setGenerateProgress('Generation cancelled by user.', 0);
+                    return;
+                }
+                allowReplacePending = true;
             }
 
-            const result = await runLoreGeneration({ force: true, allowReplacePending: true });
+            setGenerateProgress('Starting lore generation...', 5);
+            const result = await runLoreGeneration({
+                force: true,
+                allowReplacePending,
+                progress: setGenerateProgress,
+            });
             refreshHeader();
+
             if (result?.status === 'proposed') {
                 setPanelState({ activeTab: 'review' });
                 refreshPanelBody({ preserveScroll: false });
-                toast(`${result.validEntryCount || 0} pending lore entries generated. Review tab opened.`);
+                const duplicateText = result.droppedDuplicateCount ? ` ${result.droppedDuplicateCount} duplicate/similar entries were filtered.` : '';
+                toast(`${result.validEntryCount || 0} pending lore entries generated.${duplicateText} Review tab opened.`);
             } else {
                 refreshPanelBody({ preserveScroll: false });
-                toast(`Lore generation ended with status: ${result?.status || 'unknown'}`, 'warning');
+                const details = formatGenerationStatus(result);
+                toast(details, 'warning');
             }
         });
     }, 'wandlight-primary-button'));
 
     container.appendChild(actions);
+}
+
+function createContextEditorCard(state) {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Story Context';
+    addTooltip(title, 'Date and canon reference data used by lore generation. Detection can infer these, but you can also set them manually when the story has not stated them clearly.');
+    card.appendChild(title);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Canon reference point means the latest canon knowledge the roleplay should treat as established, such as “through Prisoner of Azkaban” or “before the Triwizard Tournament.” If it stays “not detected,” set it manually or leave it blank for AU/original scenes.';
+    card.appendChild(help);
+
+    const grid = document.createElement('div');
+    grid.className = 'wandlight-runtime-grid wandlight-context-grid';
+    grid.appendChild(createTextSettingField('Scene date', state?.loreContext?.sceneDate || '', 'Example: September 1, 1996. Used for date-sensitive lore.', (value) => updateLoreContextField('sceneDate', value)));
+    grid.appendChild(createTextSettingField('Canon reference point', state?.loreContext?.canonBoundary || '', 'Example: Through Chapter 14 of Half-Blood Prince. Used to avoid using future canon prematurely.', (value) => updateLoreContextField('canonBoundary', value)));
+    grid.appendChild(createTextSettingField('Branch', state?.loreContext?.branchId || 'main', 'Use “main” for the primary timeline, or a custom branch name for AU/time-travel branches.', (value) => updateLoreContextField('branchId', value || 'main')));
+    card.appendChild(grid);
+
+    card.appendChild(createKeyValue('Last detected', state?.loreContext?.lastDetectedAt ? new Date(state.loreContext.lastDetectedAt).toLocaleString() : 'never', 'When Story Context was last detected automatically. Manual edits also affect generation immediately.'));
+    return card;
+}
+
+function createGenerationSettingsCard() {
+    const settings = getSettings();
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Generation Settings';
+    addTooltip(title, 'These controls are wired to the actual generation request and validation pipeline.');
+    card.appendChild(title);
+
+    const sourceRow = document.createElement('label');
+    sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const sourceText = document.createElement('span');
+    sourceText.textContent = `Source messages: ${settings.loreSourceMessageCount || 20}`;
+    addTooltip(sourceText, 'How many recent chat messages are sent to context detection and lore generation. Lower values are faster; higher values provide more context.');
+    const sourceInput = document.createElement('input');
+    sourceInput.type = 'range';
+    sourceInput.min = '4';
+    sourceInput.max = '80';
+    sourceInput.step = '1';
+    sourceInput.value = String(settings.loreSourceMessageCount || 20);
+    sourceInput.addEventListener('input', () => {
+        const next = getSettings();
+        next.loreSourceMessageCount = Math.max(4, Math.min(80, parseInt(sourceInput.value, 10) || 20));
+        saveSettings(next);
+        sourceText.textContent = `Source messages: ${next.loreSourceMessageCount}`;
+    });
+    sourceRow.appendChild(sourceText);
+    sourceRow.appendChild(sourceInput);
+    card.appendChild(sourceRow);
+
+    const tagRow = document.createElement('label');
+    tagRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const tagText = document.createElement('span');
+    tagText.textContent = `Generated tags: ${settings.loreTagCount ?? 4}`;
+    addTooltip(tagText, 'Number of short searchable tags requested per generated lore entry. Set to 0 to disable generated tags.');
+    const tagInput = document.createElement('input');
+    tagInput.type = 'range';
+    tagInput.min = '0';
+    tagInput.max = '10';
+    tagInput.step = '1';
+    tagInput.value = String(settings.loreTagCount ?? 4);
+    tagInput.addEventListener('input', () => {
+        const next = getSettings();
+        next.loreTagCount = Math.max(0, Math.min(10, parseInt(tagInput.value, 10) || 0));
+        saveSettings(next);
+        tagText.textContent = `Generated tags: ${next.loreTagCount}`;
+    });
+    tagRow.appendChild(tagText);
+    tagRow.appendChild(tagInput);
+    card.appendChild(tagRow);
+
+    const guardGrid = document.createElement('div');
+    guardGrid.className = 'wandlight-runtime-grid';
+    guardGrid.appendChild(createToggleCard(
+        'Replacement Guard',
+        settings.loreReplacementGuard !== false,
+        'When enabled, Wandlight asks before replacing an unresolved pending lore batch.',
+        (checked) => {
+            const next = getSettings();
+            next.loreReplacementGuard = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+        }
+    ));
+    guardGrid.appendChild(createToggleCard(
+        'Duplicate Guard',
+        settings.loreDuplicateGuard !== false,
+        'When enabled, generated entries that have duplicate IDs, duplicate titles, or very similar facts to accepted lore are filtered before Review.',
+        (checked) => {
+            const next = getSettings();
+            next.loreDuplicateGuard = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+        }
+    ));
+    card.appendChild(guardGrid);
+
+    const tagHelp = document.createElement('div');
+    tagHelp.className = 'wandlight-runtime-help';
+    tagHelp.textContent = 'Tag schema: short labels only. Prefer character names, factions/groups, locations, era/year, plot thread, secret type, relationship pair, magic system, object/artifact, event, or villain/ally role. Full-sentence tags are trimmed and normalized.';
+    card.appendChild(tagHelp);
+
+    return card;
+}
+
+function createGenerationProgressCard(state) {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-generation-progress-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Generation Status';
+    addTooltip(title, 'Shows the current phase of long-running context detection or lore generation calls.');
+    card.appendChild(title);
+
+    const status = document.createElement('div');
+    status.className = 'wandlight-generation-status-text';
+    status.textContent = state?.lorePanel?.generationStatus || 'Idle.';
+    card.appendChild(status);
+
+    const bar = document.createElement('div');
+    bar.className = 'wandlight-progress-bar';
+    const fill = document.createElement('div');
+    fill.className = 'wandlight-progress-fill';
+    fill.style.width = `${Math.max(0, Math.min(100, Number(state?.lorePanel?.generationProgress) || 0))}%`;
+    bar.appendChild(fill);
+    card.appendChild(bar);
+
+    return card;
+}
+
+function setGenerateProgress(message, percent = 0) {
+    const state = getState();
+    if (state?.lorePanel) {
+        state.lorePanel.generationStatus = message;
+        state.lorePanel.generationProgress = Math.max(0, Math.min(100, Number(percent) || 0));
+        saveState(state);
+    }
+
+    if (!panelRoot) return;
+    const text = panelRoot.querySelector('.wandlight-generation-status-text');
+    const fill = panelRoot.querySelector('.wandlight-progress-fill');
+    if (text) text.textContent = message;
+    if (fill) fill.style.width = `${Math.max(0, Math.min(100, Number(percent) || 0))}%`;
+}
+
+function updateLoreContextField(key, value) {
+    const current = getState();
+    pushStateSnapshot(current, `Edit story context: ${key}`, getSettings().maxSnapshots);
+    setLoreContext({ [key]: value, lastDetectedAt: Date.now() });
+    refreshHeader();
+}
+
+function createTextSettingField(label, value, tooltip, onChange) {
+    const wrap = document.createElement('label');
+    wrap.className = 'wandlight-inline-field wandlight-context-field';
+    addTooltip(wrap, tooltip);
+
+    const span = document.createElement('span');
+    span.textContent = label;
+    wrap.appendChild(span);
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = value || '';
+    input.addEventListener('change', () => onChange?.(input.value.trim()));
+    wrap.appendChild(input);
+    return wrap;
+}
+
+function formatGenerationStatus(result) {
+    if (!result) return 'Lore generation ended without a result.';
+    if (result.status === 'empty_valid_entries') {
+        if (result.droppedDuplicateCount) {
+            return `Generation produced only duplicate/similar entries (${result.droppedDuplicateCount} filtered). Try disabling Duplicate Guard or broadening Source Messages.`;
+        }
+        return `Generation returned ${result.rawEntryCount || 0} raw entries, but none matched the Wandlight lore schema. The parser now accepts common aliases, but the model may still have returned unusable fields.`;
+    }
+    if (result.status === 'failed_parse') return 'Lore generation returned malformed JSON that could not be repaired.';
+    if (result.status === 'failed_no_response') return 'Lore generation returned an empty response from the selected model/provider.';
+    if (result.status === 'no_context_detected') return 'No story context could be detected. Set Story Context manually or increase Source Messages.';
+    return `Lore generation ended with status: ${result.status || 'unknown'}`;
 }
 
 
@@ -632,29 +857,30 @@ function renderGenerateTab(container, state) {
 function renderInjectionTab(container, state) {
     const settings = getSettings();
     const activeLore = getPanelLoreState(state).counts.active || 0;
-    const memo = buildMemo(state);
+    const memo = buildMemoPreview(state, settings.loreInjectionMode || 'direct');
+    recordCompressionPreview(state, settings.loreInjectionMode || 'direct', memo);
 
     container.appendChild(createSectionHeader(
-        'Injection Controls',
-        'Controls how accepted active lore is packed into prompt injection. This changes injection format only; it does not rewrite stored lore entries.'
+        'Injection',
+        'This is the final step in the workflow: choose what Wandlight sends to the model after entries have been stored and edited in Lore.'
     ));
 
     const modeCard = document.createElement('div');
     modeCard.className = 'wandlight-runtime-card';
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
-    title.textContent = 'Lore Injection Mode';
-    addTooltip(title, 'Direct inserts selected active lore mostly verbatim. Compressed shortens unpinned entries before injection; pinned entries remain protected and detailed.');
+    title.textContent = 'Lore Handling Mode';
+    addTooltip(title, 'Direct sends selected active lore with full facts. Compressed shortens unpinned facts before injection; pinned entries remain more detailed.');
     modeCard.appendChild(title);
 
     const buttons = document.createElement('div');
     buttons.className = 'wandlight-mode-buttons';
-    buttons.appendChild(createInjectionModeButton('direct', 'Direct', 'Insert active lore entries verbatim, subject to the active-lore cap.', settings));
+    buttons.appendChild(createInjectionModeButton('direct', 'Direct', 'Insert active lore entries mostly verbatim, subject to the active-lore cap.', settings));
     buttons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Shorten unpinned lore facts during injection so more entries fit into context. Stored lore is not changed.', settings));
     modeCard.appendChild(buttons);
 
     modeCard.appendChild(createKeyValue('Active lore available', String(activeLore), 'Entries eligible for prompt injection after filters, pinning, and muting.'));
-    modeCard.appendChild(createKeyValue('Injected memo estimate', memo ? `${estimateTokens(memo)} tokens` : 'empty', 'Approximate size after current injection mode and compression settings.'));
+    modeCard.appendChild(createKeyValue('Prompt preview estimate', memo ? `${estimateTokens(memo)} tokens` : 'empty', 'Approximate size after current injection mode and compression settings.'));
     modeCard.appendChild(createKeyValue('Pinned protection', 'enabled', 'Pinned entries are prioritized and kept less compressed than ordinary entries.'));
     container.appendChild(modeCard);
 
@@ -681,6 +907,7 @@ function renderInjectionTab(container, state) {
         next.loreCompressionLevel = Number(level.value) || 2;
         saveSettings(next);
         levelText.textContent = `Level: ${next.loreCompressionLevel}`;
+        refreshInjectionPreviewOnly();
     });
     level.addEventListener('change', () => {
         refreshPanelBody({ preserveScroll: false });
@@ -693,8 +920,8 @@ function renderInjectionTab(container, state) {
     const intervalLabel = document.createElement('label');
     intervalLabel.className = 'wandlight-inline-field';
     const intervalText = document.createElement('span');
-    intervalText.textContent = 'Refresh interval';
-    addTooltip(intervalText, 'Reserved interval for future model-based compression cache refresh. Current deterministic compression updates immediately when lore or settings change.');
+    intervalText.textContent = 'Auto-compress interval';
+    addTooltip(intervalText, 'For future model-based compression caching. Current deterministic compression updates immediately when lore or settings change.');
     const interval = document.createElement('input');
     interval.type = 'number';
     interval.min = '1';
@@ -711,12 +938,101 @@ function renderInjectionTab(container, state) {
     intervalLabel.appendChild(interval);
     compressionCard.appendChild(intervalLabel);
 
+    const compressionStatus = getCompressionStatusText(getState());
+    compressionCard.appendChild(createKeyValue('Compression status', compressionStatus, 'Shows when the compressed preview was last calculated and how many chat turns have elapsed since then.'));
+
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Vector/lorebook retrieval is intentionally not exposed here yet because this extension does not currently own a reliable SillyTavern vector-store integration path. No inert vector button has been added.';
+    help.textContent = 'Vector/lorebook retrieval is not exposed yet because this extension does not currently own a reliable SillyTavern vector-store integration path. No inert vector button has been added.';
     compressionCard.appendChild(help);
 
     container.appendChild(compressionCard);
+
+    const previewCard = document.createElement('div');
+    previewCard.className = 'wandlight-runtime-card wandlight-injection-preview-card';
+    const previewTitle = document.createElement('div');
+    previewTitle.className = 'wandlight-runtime-card-title';
+    previewTitle.textContent = 'Prompt Injection Preview';
+    addTooltip(previewTitle, 'Live preview of the exact continuity memo Wandlight would inject with the current Direct/Compressed mode.');
+    previewCard.appendChild(previewTitle);
+
+    const previewHelp = document.createElement('div');
+    previewHelp.className = 'wandlight-runtime-help';
+    previewHelp.textContent = settings.injectMemo
+        ? 'This preview is ephemeral context. It is sent to the model during generation, but it is not written into chat history.'
+        : 'Continuity memo injection is currently off. The preview shows what would be injected if you enable it on the Session tab.';
+    previewCard.appendChild(previewHelp);
+
+    const pre = document.createElement('pre');
+    pre.className = 'wandlight-injection-preview';
+    pre.textContent = memo && memo.trim() ? memo : '(Injection preview is empty. Add continuity state or accepted lore entries first.)';
+    addTooltip(pre, 'Scrollable preview of the memo block inserted before the latest user message during generation.');
+    previewCard.appendChild(pre);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Refresh Preview', 'Rebuilds this preview from current state and current injection mode.', () => {
+        refreshInjectionPreviewOnly();
+        toast('Injection preview refreshed.', 'info');
+    }));
+    previewCard.appendChild(actions);
+    container.appendChild(previewCard);
+}
+
+function refreshInjectionPreviewOnly() {
+    const state = getState();
+    const settings = getSettings();
+    const memo = buildMemoPreview(state, settings.loreInjectionMode || 'direct');
+    recordCompressionPreview(state, settings.loreInjectionMode || 'direct', memo);
+    const pre = panelRoot?.querySelector('.wandlight-injection-preview');
+    if (pre) {
+        pre.textContent = memo && memo.trim() ? memo : '(Injection preview is empty. Add continuity state or accepted lore entries first.)';
+    }
+}
+
+function recordCompressionPreview(state, mode, memo) {
+    if (!state || !state.loreCompressionStatus) return;
+    const signature = getMemoSignature(state, mode);
+    const chatLength = getChatLength();
+    const status = state.loreCompressionStatus;
+
+    if (mode === 'compressed' && status.lastSignature !== signature) {
+        status.lastCompressedAt = Date.now();
+        status.lastSignature = signature;
+        status.lastMode = mode;
+        status.lastTokenEstimate = estimateTokens(memo || '');
+        status.lastChatLength = chatLength;
+        status.turnsSinceCompression = 0;
+        saveState(state);
+        return;
+    }
+
+    if (mode === 'compressed') {
+        status.turnsSinceCompression = Math.max(0, chatLength - Number(status.lastChatLength || chatLength));
+        saveState(state);
+    }
+}
+
+function getCompressionStatusText(state) {
+    const settings = getSettings();
+    const status = state?.loreCompressionStatus || {};
+    if ((settings.loreInjectionMode || 'direct') !== 'compressed') {
+        return 'Direct mode active; compression not used.';
+    }
+    if (!status.lastCompressedAt) {
+        return 'Compressed preview not calculated yet.';
+    }
+    const when = new Date(status.lastCompressedAt).toLocaleTimeString();
+    return `last calculated ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens`;
+}
+
+function getChatLength() {
+    try {
+        const ctx = SillyTavern.getContext();
+        return Array.isArray(ctx?.chat) ? ctx.chat.length : 0;
+    } catch (_) {
+        return 0;
+    }
 }
 
 function createInjectionModeButton(mode, label, tooltip, settings) {
@@ -1445,7 +1761,7 @@ function commitInlineTagInput(entryId, rawTag) {
 }
 
 function normalizeTag(value) {
-    return String(value || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+    return normalizeLoreTag(value);
 }
 
 function updateLoreEntryById(entryId, updater) {

@@ -32,6 +32,7 @@ import {
 } from './lore-matrix.js';
 
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
+import { proposeCanonLoreForContext } from './canon-lore-db.js';
 
 // ── Guard flags ─────────────────────────────────────────────────────────────────
 
@@ -474,6 +475,38 @@ function inferContextLocallyFromMessages(messages, state = getState()) {
     return corrected.sceneDate || corrected.canonBoundary || corrected.branchId !== 'main' ? corrected : null;
 }
 
+
+async function maybeProposeCanonLoreFromContext(context, progress = null) {
+    const settings = getSettings();
+    if (settings.canonLoreDatabaseEnabled === false || settings.canonLoreAutoPropose === false) {
+        return null;
+    }
+
+    try {
+        progress?.('Checking local canon lore database...', 88);
+        return await proposeCanonLoreForContext(context, {
+            progress,
+            maxEntries: settings.canonLoreMaxEntries || 12,
+            snapshot: false,
+        });
+    } catch (e) {
+        console.warn(`${LOG_PREFIX} Local canon lore database query failed:`, e);
+        progress?.(`Canon lore database query failed: ${e.message || e}`, 100);
+        return { status: 'failed', error: e.message || String(e) };
+    }
+}
+
+function formatCanonProposalSuffix(result) {
+    if (!result) return '';
+    if (result.status === 'proposed') return ` Local canon database proposed ${result.proposedCount || 0} pending lore entries.`;
+    if (result.status === 'duplicates_only') return ' Local canon database found matches, but they were already present or similar.';
+    if (result.status === 'no_date') return ' Local canon database skipped: no parseable canon date.';
+    if (result.status === 'empty') return ' Local canon database found no entries for this date/context.';
+    if (result.status === 'disabled') return '';
+    if (result.status === 'failed') return ` Local canon database failed: ${result.error || 'unknown error'}.`;
+    return '';
+}
+
 // ── Lore Context Detection ──────────────────────────────────────────────────────
 
 /**
@@ -518,9 +551,11 @@ export async function runLoreContextDetection(options = {}) {
         if (!response) {
             const fallback = inferContextLocallyFromMessages(messages, state);
             if (fallback) {
-                setLoreContext({ ...fallback, lastDetectedAt: Date.now() });
-                progress?.('Context inferred locally from message headings.', 100);
-                return fallback;
+                const savedFallback = { ...fallback, lastDetectedAt: Date.now() };
+                setLoreContext(savedFallback);
+                const canonResult = await maybeProposeCanonLoreFromContext(savedFallback, progress);
+                progress?.(`Context inferred locally from message headings.${formatCanonProposalSuffix(canonResult)}`, 100);
+                return savedFallback;
             }
             progress?.('Context detection returned no response.', 100);
             return null;
@@ -532,9 +567,11 @@ export async function runLoreContextDetection(options = {}) {
             console.warn(`${LOG_PREFIX} Could not parse lore context detection response`);
             const fallback = inferContextLocallyFromMessages(messages, state);
             if (fallback) {
-                setLoreContext({ ...fallback, lastDetectedAt: Date.now() });
-                progress?.('Context inferred locally from message headings.', 100);
-                return fallback;
+                const savedFallback = { ...fallback, lastDetectedAt: Date.now() };
+                setLoreContext(savedFallback);
+                const canonResult = await maybeProposeCanonLoreFromContext(savedFallback, progress);
+                progress?.(`Context inferred locally from message headings.${formatCanonProposalSuffix(canonResult)}`, 100);
+                return savedFallback;
             }
             progress?.('Context detection returned no usable result.', 100);
             return null;
@@ -542,7 +579,8 @@ export async function runLoreContextDetection(options = {}) {
 
         const normalized = correctHarryPotterCanonContext({ ...parsed, lastDetectedAt: Date.now() });
         setLoreContext(normalized);
-        progress?.('Context detection complete.', 100);
+        const canonResult = await maybeProposeCanonLoreFromContext(normalized, progress);
+        progress?.(`Context detection complete.${formatCanonProposalSuffix(canonResult)}`, 100);
 
         if (settings.debugMode) {
             console.log(`${LOG_PREFIX} Lore context detected:`, normalized);

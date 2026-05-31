@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-31",
+  "description": "Wandlight local canon lore database. Entries are date-windowed and proposed into Pending Lore Review after Story Context detection; they are not automatically accepted.",
+  "files": [
+    "characters/core_students.json",
+    "characters/adults_and_factions.json",
+    "events/school_year_windows.json",
+    "items/artifacts_and_objects.json",
+    "knowledge/secret_knowledge.json",
+    "places/hogwarts_and_britain.json"
+  ]
+}

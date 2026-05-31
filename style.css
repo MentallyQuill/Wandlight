@@ -1504,3 +1504,44 @@
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     margin-bottom: 8px;
 }
+
+/* ── Canon lore database and editable metadata chips ───────────────────────── */
+.wandlight-canon-db-card {
+    border-color: rgba(190, 145, 75, 0.28);
+}
+
+.wandlight-lore-badge-clickable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+}
+
+.wandlight-lore-badge-clickable:hover {
+    border-color: rgba(235, 203, 125, 0.65);
+    background: rgba(235, 203, 125, 0.18);
+    transform: translateY(-1px);
+}
+
+.wandlight-lore-badge-character { color: #e8c58a; background: rgba(150, 100, 30, 0.22); }
+.wandlight-lore-badge-event { color: #c8d8ff; background: rgba(65, 85, 150, 0.22); }
+.wandlight-lore-badge-item { color: #d8d0b0; background: rgba(135, 115, 60, 0.22); }
+.wandlight-lore-badge-knowledge { color: #b8d8e8; background: rgba(55, 105, 135, 0.22); }
+.wandlight-lore-badge-place { color: #a8d8b8; background: rgba(55, 130, 75, 0.22); }
+.wandlight-lore-badge-faction { color: #e0b8e8; background: rgba(120, 65, 140, 0.22); }
+.wandlight-lore-badge-spell { color: #b8c8ff; background: rgba(75, 85, 155, 0.22); }
+.wandlight-lore-badge-artifact { color: #f0d090; background: rgba(160, 115, 40, 0.25); }
+.wandlight-lore-badge-divergent { color: #e8b070; background: rgba(170, 95, 30, 0.20); }
+.wandlight-lore-badge-fanon { color: #c0a0d8; background: rgba(100, 65, 135, 0.20); }
+.wandlight-lore-badge-unknown { color: #b8b8b8; background: rgba(100, 100, 100, 0.18); }
+.wandlight-lore-badge-true { color: #a8d8a8; background: rgba(70, 135, 70, 0.18); }
+.wandlight-lore-badge-false { color: #e8a0a0; background: rgba(145, 55, 55, 0.20); }
+.wandlight-lore-badge-public-belief { color: #e8d8a0; background: rgba(140, 120, 55, 0.22); }
+.wandlight-lore-badge-contested { color: #f0c078; background: rgba(180, 115, 35, 0.24); }
+.wandlight-lore-badge-hidden { color: #b0b8d8; background: rgba(70, 75, 130, 0.24); }
+.wandlight-lore-badge-public { color: #a8d8b0; background: rgba(55, 130, 70, 0.18); }
+.wandlight-lore-badge-private { color: #d8c098; background: rgba(130, 100, 45, 0.20); }
+.wandlight-lore-badge-do-not-reveal { color: #f0a0a0; background: rgba(160, 45, 45, 0.24); }
+.wandlight-lore-badge-only-if-knower-present,
+.wandlight-lore-badge-only-if-user-reveals { color: #d8b8f0; background: rgba(100, 65, 150, 0.22); }
+.wandlight-lore-badge-muted { color: #a8a8a8; background: rgba(80, 80, 80, 0.2); }
+.wandlight-lore-badge-pinned { color: #f0d080; background: rgba(170, 120, 35, 0.25); }

@@ -8,6 +8,7 @@
 
 const VALID_CATEGORIES = new Set([
     'canon', 'au', 'secret', 'rumor', 'lie', 'relationship', 'location', 'rule', 'timeline',
+    'character', 'event', 'item', 'knowledge', 'place', 'faction', 'spell', 'artifact',
 ]);
 
 const VALID_CANON_STATUS = new Set([

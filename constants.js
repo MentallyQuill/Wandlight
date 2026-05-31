@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -81,6 +81,11 @@ export const DEFAULT_SETTINGS = {
     loreReplacementGuard: true,
     loreDuplicateGuard: true,
     loreTagCount: 4,
+
+    // Local canon lore database
+    canonLoreDatabaseEnabled: true,
+    canonLoreAutoPropose: true,
+    canonLoreMaxEntries: 12,
 
     // Lore injection / compression
     loreInjectionMode: 'direct', // 'direct' | 'compressed'
@@ -179,6 +184,15 @@ export function getDefaultState() {
         pendingLoreEntries: [],
 
         // Lore generation lifecycle ledger (schema v3)
+        canonLoreDatabase: {
+            lastQueriedAt: 0,
+            lastSceneDate: '',
+            lastCanonBoundary: '',
+            lastMatchedCount: 0,
+            lastProposedCount: 0,
+            lastStatus: 'Not queried.',
+        },
+
         loreGeneration: {
             lastAttemptedFor: '',
             lastProposedFor: '',
@@ -372,7 +386,7 @@ Output ONLY valid JSON:
       "id": "stable_snake_case_id",
       "title": "short title",
       "tags": ["short searchable category tags"],
-      "category": "canon|au|secret|rumor|lie|relationship|location|rule|timeline",
+      "category": "canon|au|secret|rumor|lie|relationship|location|rule|timeline|character|event|item|knowledge|place|faction|spell|artifact",
       "fact": "what is actually true or believed",
       "canonStatus": "canon|divergent|au|fanon|unknown",
       "truthStatus": "true|false|public-belief|rumor|contested|hidden",

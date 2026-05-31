@@ -26,6 +26,7 @@ import { buildMemo, buildMemoPreview, buildContinuityPreview, buildLorePreview, 
 import { onExtractionTriggered } from './extractor.js';
 import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
+import { proposeCanonLoreForContext } from './canon-lore-db.js';
 
 const PANEL_ID = 'wandlight-lore-panel';
 const MIN_PANEL_WIDTH = 420;
@@ -47,6 +48,14 @@ const CATEGORY_LABELS = {
     location: 'Location',
     rule: 'Rule',
     timeline: 'Timeline',
+    character: 'Character',
+    event: 'Event',
+    item: 'Item',
+    knowledge: 'Knowledge',
+    place: 'Place',
+    faction: 'Faction',
+    spell: 'Spell',
+    artifact: 'Artifact',
 };
 
 const TAB_LABELS = {
@@ -64,6 +73,13 @@ const TAB_TOOLTIPS = {
     lore: 'Generate pending lore, review generated entries, and manage accepted lore with search, filters, tags, pinning, and muting.',
     injection: 'Choose what Wandlight sends to the model: continuity state, lore entries, direct/compressed handling, and live split injection previews.',
 };
+
+
+const LORE_CATEGORY_VALUES = ['canon', 'au', 'secret', 'rumor', 'lie', 'relationship', 'location', 'rule', 'timeline', 'character', 'event', 'item', 'knowledge', 'place', 'faction', 'spell', 'artifact'];
+const LORE_CANON_STATUS_VALUES = ['canon', 'divergent', 'au', 'fanon', 'unknown'];
+const LORE_TRUTH_STATUS_VALUES = ['true', 'false', 'public-belief', 'rumor', 'contested', 'hidden'];
+const LORE_REVEAL_POLICY_VALUES = ['public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals'];
+const LORE_PRIORITY_VALUES = [10, 25, 50, 75, 90];
 
 const WORKFLOW_MODES = {
     manual: {
@@ -593,6 +609,7 @@ function renderContextTab(container, state) {
     ));
 
     container.appendChild(createContextDetectionCard(state));
+    container.appendChild(createCanonLoreDatabaseCard(state));
     container.appendChild(createContextEditorCard(state));
 }
 
@@ -770,6 +787,102 @@ async function handleGeneratePendingLore(btn) {
 function renderGenerateTab(container, state) {
     // Legacy fallback for older saved panel states. The Generate tab was split into Context and Lore.
     renderContextTab(container, state);
+}
+
+
+function createCanonLoreDatabaseCard(state) {
+    const settings = getSettings();
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-canon-db-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Local Canon Lore Database';
+    addTooltip(title, 'After Story Context detection finds a parseable canon date, Wandlight locally queries files under the extension Lore folder and proposes relevant canon entries into Pending Lore Review. This does not call the model.');
+    card.appendChild(title);
+
+    const db = state?.canonLoreDatabase || {};
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Canon database entries are proposed for review, not automatically accepted. The database is organized under Lore/characters, Lore/events, Lore/items, Lore/knowledge, and Lore/places.';
+    card.appendChild(help);
+
+    const grid = document.createElement('div');
+    grid.className = 'wandlight-runtime-grid';
+    grid.appendChild(createToggleCard(
+        'Enable Canon Database',
+        settings.canonLoreDatabaseEnabled !== false,
+        'Allows Wandlight to query local pre-generated canon lore files when Story Context has a parseable date.',
+        (checked) => {
+            const next = getSettings();
+            next.canonLoreDatabaseEnabled = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+        }
+    ));
+    grid.appendChild(createToggleCard(
+        'Auto-Propose After Detection',
+        settings.canonLoreAutoPropose !== false,
+        'When enabled, Detect Story Context automatically proposes matching local canon entries into Pending Lore Review.',
+        (checked) => {
+            const next = getSettings();
+            next.canonLoreAutoPropose = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+        }
+    ));
+    card.appendChild(grid);
+
+    const maxRow = document.createElement('label');
+    maxRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const maxText = document.createElement('span');
+    maxText.textContent = `Max canon proposals: ${settings.canonLoreMaxEntries || 12}`;
+    addTooltip(maxText, 'Maximum local canon database entries proposed after context detection or manual database query.');
+    const maxInput = document.createElement('input');
+    maxInput.type = 'range';
+    maxInput.min = '1';
+    maxInput.max = '50';
+    maxInput.step = '1';
+    maxInput.value = String(settings.canonLoreMaxEntries || 12);
+    maxInput.addEventListener('input', () => {
+        const next = getSettings();
+        next.canonLoreMaxEntries = Math.max(1, Math.min(50, parseInt(maxInput.value, 10) || 12));
+        saveSettings(next);
+        maxText.textContent = `Max canon proposals: ${next.canonLoreMaxEntries}`;
+    });
+    maxRow.appendChild(maxText);
+    maxRow.appendChild(maxInput);
+    card.appendChild(maxRow);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Query Canon Database', 'Uses the current Story Context fields to query local canon lore and propose matching entries into Pending Lore Review.', async (btn) => {
+        await runBusyAction(btn, 'Querying...', async () => {
+            setFeatureProgress('context', 'Querying local canon lore database...', 80);
+            const result = await proposeCanonLoreForContext(getState()?.loreContext || {}, {
+                maxEntries: getSettings().canonLoreMaxEntries || 12,
+                progress: (message, percent) => setFeatureProgress('context', message, percent),
+            });
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+            if (result?.status === 'proposed') {
+                toast(`Canon database proposed ${result.proposedCount || 0} pending lore entries.`);
+            } else if (result?.status === 'duplicates_only') {
+                toast('Canon database matches were already present or similar.', 'info');
+            } else if (result?.status === 'no_date') {
+                toast('Canon database needs a parseable Scene date first.', 'warning');
+            } else if (result?.status === 'disabled') {
+                toast('Canon database is disabled.', 'warning');
+            } else {
+                toast('Canon database found no matching entries for this context.', 'info');
+            }
+        });
+    }, 'wandlight-primary-button'));
+    card.appendChild(actions);
+
+    card.appendChild(createKeyValue('Last query', db.lastQueriedAt ? new Date(db.lastQueriedAt).toLocaleString() : 'never', 'When the local canon database was last queried.'));
+    card.appendChild(createKeyValue('Last result', db.lastStatus || 'Not queried.', 'Summary of the last local canon lore query.'));
+    return card;
 }
 
 function createContextEditorCard(state) {
@@ -2081,8 +2194,11 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
 
     const meta = document.createElement('div');
     meta.className = 'wandlight-lore-entry-meta';
-    meta.appendChild(createBadge(entry.category || 'canon', `Category: ${entry.category || 'canon'}`));
-    meta.appendChild(createBadge(`P${entry.priority || 50}`, 'Priority used when selecting active lore for injection.'));
+    meta.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', LORE_CATEGORY_VALUES, `Category: ${entry.category || 'canon'}. Click to cycle category.`));
+    meta.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', LORE_CANON_STATUS_VALUES, `Canon status: ${entry.canonStatus || 'unknown'}. Click to cycle.`));
+    meta.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', LORE_TRUTH_STATUS_VALUES, `Truth/reveal status: ${entry.truthStatus || 'true'}. Click to cycle.`));
+    meta.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', LORE_REVEAL_POLICY_VALUES, `Reveal policy: ${entry.revealPolicy || 'private'}. Click to cycle.`));
+    meta.appendChild(createEditablePriorityBadge(entry));
     if (entry.confidence !== undefined) meta.appendChild(createBadge(`confidence ${entry.confidence}`, 'Model-provided confidence for this entry.'));
     card.appendChild(meta);
 
@@ -2229,6 +2345,8 @@ function getFilteredLoreEntries(state) {
         filtered = filtered.filter(e => e.category === panelState.selectedCategory);
     }
 
+    filtered = [...filtered].sort(sortLoreEntriesForPanel);
+
     const query = String(panelState.search || '').trim().toLowerCase();
     if (!query) return filtered;
 
@@ -2241,6 +2359,64 @@ function getFilteredLoreEntries(state) {
             || String(a.entry.title || '').localeCompare(String(b.entry.title || ''))
         )
         .map(item => item.entry);
+}
+
+
+function sortLoreEntriesForPanel(a, b) {
+    const pinScore = Number(!!b.isPinned) - Number(!!a.isPinned);
+    if (pinScore) return pinScore;
+    const pendingScore = Number(!!b.isPending) - Number(!!a.isPending);
+    if (pendingScore) return pendingScore;
+    const categoryScore = getLoreCategoryRank(a.category) - getLoreCategoryRank(b.category);
+    if (categoryScore) return categoryScore;
+    const priorityScore = Number(b.priority || 50) - Number(a.priority || 50);
+    if (priorityScore) return priorityScore;
+    return String(a.title || '').localeCompare(String(b.title || ''));
+}
+
+function getLoreCategoryRank(category) {
+    const order = ['event', 'timeline', 'character', 'relationship', 'place', 'location', 'faction', 'knowledge', 'secret', 'item', 'artifact', 'spell', 'rule', 'canon', 'au', 'rumor', 'lie'];
+    const idx = order.indexOf(category || '');
+    return idx >= 0 ? idx : 99;
+}
+
+function createEditableLoreMetaBadge(entry, field, value, values, tooltip) {
+    const label = field === 'category'
+        ? (CATEGORY_LABELS[value] || value)
+        : value;
+    const badge = createBadge(label, tooltip);
+    badge.classList.add('wandlight-lore-badge-clickable');
+    badge.type = 'button';
+    badge.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const currentValue = String(value || values[0]);
+        const currentIndex = values.indexOf(currentValue);
+        const nextValue = values[(currentIndex + 1) % values.length];
+        updateLoreEntryById(entry.id, raw => ({ ...raw, [field]: nextValue }));
+        refreshPanelBody({ preserveScroll: true });
+        refreshHeader();
+        toast(`${entry.title || 'Lore entry'} ${field} set to ${nextValue}.`, 'info');
+    });
+    return badge;
+}
+
+function createEditablePriorityBadge(entry) {
+    const current = Number(entry.priority || 50);
+    const badge = createBadge(`P${current}`, 'Priority controls sorting and injection preference. Click to cycle through P10, P25, P50, P75, and P90.');
+    badge.classList.add('wandlight-lore-badge-clickable', 'wandlight-lore-badge-priority');
+    badge.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const nearest = LORE_PRIORITY_VALUES.reduce((best, value) => Math.abs(value - current) < Math.abs(best - current) ? value : best, LORE_PRIORITY_VALUES[0]);
+        const idx = LORE_PRIORITY_VALUES.indexOf(nearest);
+        const nextValue = LORE_PRIORITY_VALUES[(idx + 1) % LORE_PRIORITY_VALUES.length];
+        updateLoreEntryById(entry.id, raw => ({ ...raw, priority: nextValue }));
+        refreshPanelBody({ preserveScroll: true });
+        refreshHeader();
+        toast(`${entry.title || 'Lore entry'} priority set to P${nextValue}.`, 'info');
+    });
+    return badge;
 }
 
 function scoreSearchEntry(entry, query) {
@@ -2321,10 +2497,12 @@ function createEntryCard(entry, state) {
 
     const metaRow = document.createElement('div');
     metaRow.className = 'wandlight-lore-entry-meta';
-    metaRow.appendChild(createBadge(entry.category || 'canon', `Category: ${entry.category || 'canon'}`));
-    if (entry.truthStatus && entry.truthStatus !== 'true') metaRow.appendChild(createBadge(entry.truthStatus, 'Truth/reveal status for this entry.'));
+    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', LORE_CATEGORY_VALUES, `Category: ${entry.category || 'canon'}. Click to cycle category.`));
+    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', LORE_CANON_STATUS_VALUES, `Canon status: ${entry.canonStatus || 'unknown'}. Click to cycle.`));
+    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', LORE_TRUTH_STATUS_VALUES, `Truth/reveal status: ${entry.truthStatus || 'true'}. Click to cycle.`));
+    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', LORE_REVEAL_POLICY_VALUES, `Reveal policy: ${entry.revealPolicy || 'private'}. Click to cycle.`));
+    metaRow.appendChild(createEditablePriorityBadge(entry));
     if (entry.isPending) metaRow.appendChild(createBadge('pending', 'This entry is pending review.'));
-    if (entry.priority) metaRow.appendChild(createBadge(`P${entry.priority}`, 'Priority used when selecting active lore for injection.'));
     if (entry.isPinned) metaRow.appendChild(createBadge('pinned', 'Pinned entries are prioritized for injection.'));
     if (entry.isSuppressed) metaRow.appendChild(createBadge('muted', 'Muted entries are excluded from injection.'));
     card.appendChild(metaRow);
@@ -2826,9 +3004,19 @@ function createIconButton(label, tooltip, className, handler) {
     return btn;
 }
 
+
+function getLoreBadgeClass(text) {
+    const normalized = String(text || '')
+        .trim()
+        .toLowerCase()
+        .replace(/^p\d+$/, 'priority')
+        .replace(/[^a-z0-9]+/g, '-');
+    return normalized ? `wandlight-lore-badge-${normalized}` : '';
+}
+
 function createBadge(text, tooltip) {
     const badge = document.createElement('span');
-    badge.className = 'wandlight-lore-badge';
+    badge.className = `wandlight-lore-badge ${getLoreBadgeClass(text)}`.trim();
     badge.textContent = text;
     addTooltip(badge, tooltip);
     return badge;
@@ -2973,6 +3161,14 @@ function getCategoryTooltip(cat) {
         location: 'Shows place-specific lore.',
         rule: 'Shows rule, magic, or system constraints.',
         timeline: 'Shows date-sensitive events and timeline facts.',
+        character: 'Shows character-specific canon or story facts.',
+        event: 'Shows dated events and historical/context milestones.',
+        item: 'Shows object and item lore.',
+        knowledge: 'Shows knowledge-state and information-control lore.',
+        place: 'Shows place and setting lore.',
+        faction: 'Shows group, house, institution, and faction lore.',
+        spell: 'Shows spell and magic-mechanics lore.',
+        artifact: 'Shows important magical object lore.',
     };
     return map[cat] || `Shows lore entries in category: ${cat}.`;
 }

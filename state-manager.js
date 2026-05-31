@@ -359,6 +359,13 @@ export function migrateState(state) {
         state._version = 5;
     }
 
+    // ── Schema v7: local canon lore database status ─────────────────────────
+    if (state._version < 7) {
+        const defaults = getDefaultState();
+        state.canonLoreDatabase = mergeDefaults(state.canonLoreDatabase, defaults.canonLoreDatabase);
+        state._version = 7;
+    }
+
     // ── Always normalize lore fields post-migration ────────────────────────
     // Even v4 states can become malformed through manual editing or old imports.
     state.loreContext = normalizeLoreContext(state.loreContext || {});
@@ -419,6 +426,15 @@ export function migrateState(state) {
     } else {
         state.loreSelection.pinnedIds = Array.isArray(state.loreSelection.pinnedIds) ? state.loreSelection.pinnedIds : [];
         state.loreSelection.suppressedIds = Array.isArray(state.loreSelection.suppressedIds) ? state.loreSelection.suppressedIds : [];
+    }
+
+    if (!state.canonLoreDatabase || typeof state.canonLoreDatabase !== 'object' || Array.isArray(state.canonLoreDatabase)) {
+        state.canonLoreDatabase = getDefaultState().canonLoreDatabase;
+    } else {
+        state.canonLoreDatabase = mergeDefaults(state.canonLoreDatabase, getDefaultState().canonLoreDatabase);
+        state.canonLoreDatabase.lastQueriedAt = Number.isFinite(Number(state.canonLoreDatabase.lastQueriedAt)) ? Number(state.canonLoreDatabase.lastQueriedAt) : 0;
+        state.canonLoreDatabase.lastMatchedCount = Number.isFinite(Number(state.canonLoreDatabase.lastMatchedCount)) ? Number(state.canonLoreDatabase.lastMatchedCount) : 0;
+        state.canonLoreDatabase.lastProposedCount = Number.isFinite(Number(state.canonLoreDatabase.lastProposedCount)) ? Number(state.canonLoreDatabase.lastProposedCount) : 0;
     }
 
     // Ensure ledger always has a valid structure

@@ -780,23 +780,24 @@ export function getPanelLoreState(state) {
  * @param {number} limit - Max entries to return
  * @returns {Object[]} Injectable lore entries
  */
-export function getInjectableLoreEntries(state, limit) {
+export function getInjectableLoreEntries(state, limit = 0) {
     const allEntries = normalizeLoreMatrix(state?.loreMatrix || []);
     const pinnedIds = new Set(state?.loreSelection?.pinnedIds || []);
     const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
-    const max = limit || 6;
-    const settingsCap = Number(state?._settings?.maxLoreEntriesInMemo) || max;
-    const effectiveLimit = Math.min(max, settingsCap);
+    const explicitLimit = Number(limit);
+    const settingsCap = Number(state?._settings?.maxLoreEntriesInMemo);
+    const caps = [explicitLimit, settingsCap]
+        .filter(v => Number.isFinite(v) && v > 0);
+    const effectiveLimit = caps.length ? Math.min(...caps) : Infinity;
 
     if (allEntries.length === 0) return [];
 
-    // Partition: pinned entries (always included), active non-suppressed, the rest
     const pinnedEntries = [];
     const activeCandidateEntries = [];
     const inactiveEntries = [];
 
     for (const entry of allEntries) {
-        if (suppressedIds.has(entry.id)) continue;  // user-suppressed: nope
+        if (suppressedIds.has(entry.id)) continue;
 
         const isActive = isLoreEntryActive(entry, state);
 
@@ -809,26 +810,29 @@ export function getInjectableLoreEntries(state, limit) {
         }
     }
 
-    // Sort active candidates by priority descending
-    activeCandidateEntries.sort((a, b) => b.priority - a.priority || a.title.localeCompare(b.title));
+    const sortLoreForInjection = (a, b) =>
+        Number(b.priority || 50) - Number(a.priority || 50)
+        || String(a.title || '').localeCompare(String(b.title || ''));
 
-    // If pinned entries exceed the limit, they still all go through (user intent)
-    let result = [...pinnedEntries];
-    let remaining = effectiveLimit - result.length;
+    pinnedEntries.sort(sortLoreForInjection);
+    activeCandidateEntries.sort(sortLoreForInjection);
+    inactiveEntries.sort(sortLoreForInjection);
 
-    if (remaining > 0) {
-        result = result.concat(activeCandidateEntries.slice(0, remaining));
-        remaining = effectiveLimit - result.length;
+    let result = [...pinnedEntries, ...activeCandidateEntries];
+
+    // If strict context activation selects nothing, fall back to all unmuted lore
+    // so users can still control injection with mute/pin rather than a hidden cap.
+    if (result.length === 0) {
+        result = [...inactiveEntries];
     }
 
-    // Only fill with inactive if pinned < limit and no active candidates remain
-    if (remaining > 0 && activeCandidateEntries.length === 0) {
-        inactiveEntries.sort((a, b) => b.priority - a.priority || a.title.localeCompare(b.title));
-        result = result.concat(inactiveEntries.slice(0, remaining));
+    if (Number.isFinite(effectiveLimit)) {
+        return result.slice(0, effectiveLimit);
     }
 
     return result;
 }
+
 
 /**
  * Builds a fingerprint string representing the current context.

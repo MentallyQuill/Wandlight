@@ -77,7 +77,7 @@ const TAB_TOOLTIPS = {
 
 
 function getSelectedLoreInjectionCount(state, settings = getSettings()) {
-    const maxLore = Number(settings.maxLoreEntriesInMemo) || 6;
+    const maxLore = Number(settings.maxLoreEntriesInMemo) || 0;
     return getInjectableLoreEntries(state, maxLore).length;
 }
 
@@ -355,7 +355,7 @@ function refreshHeader() {
     if (pendingDelta + pendingLore > 0) {
         status.appendChild(createStatusPill(`Pending: ${pendingDelta + pendingLore}`, 'Pending items: generated lore entries in the Lore tab, plus any legacy continuity delta shown in the Continuity tab.'));
     }
-    status.appendChild(createStatusPill(`Lore Selected: ${selectedLore}`, 'Accepted lore entries selected for the next injection after filters, priority, pinning, muting, and the max lore injection setting.'));
+    status.appendChild(createStatusPill(`Lore Selected: ${selectedLore}`, 'Accepted lore entries selected for the next injection after context activation, priority, pinning, and muting. There is no hidden entry cap; mute entries to exclude them.'));
 }
 
 function renderPanelBody(container, state) {
@@ -462,7 +462,6 @@ function renderSessionTab(container, state) {
 
     const stats = document.createElement('div');
     stats.className = 'wandlight-runtime-card';
-    const settings = getSettings();
     const counts = getPanelLoreState(state).counts;
     const selectedLoreCount = getSelectedLoreInjectionCount(state, settings);
     const injectionStats = getInjectionCharacterStats(state, settings);
@@ -470,7 +469,7 @@ function renderSessionTab(container, state) {
     stats.appendChild(createKeyValue('Pending lore entries', String((state?.pendingLoreEntries || []).length), 'Generated lore entries waiting in the Lore tab Pending Lore Review section.'));
     stats.appendChild(createKeyValue('Accepted lore entries', String(counts.all - counts.pending), 'Lore entries currently stored in the accepted lore matrix.'));
     stats.appendChild(createKeyValue('Context-active lore entries', String(counts.active), 'Accepted lore entries whose date, branch, character, location, or scope rules match the current Continuity/Context state. This can be 0 even when fallback priority-based lore is still selected for injection.'));
-    stats.appendChild(createKeyValue('Lore selected for injection', String(selectedLoreCount), 'Accepted lore entries that Wandlight is currently selecting for Lore Injection after pin/mute rules, context activation, fallback priority selection, and the max lore injection setting.'));
+    stats.appendChild(createKeyValue('Lore selected for injection', String(selectedLoreCount), 'Accepted lore entries that Wandlight is currently selecting for Lore Injection after pin/mute rules, context activation, and fallback priority selection. There is no hidden entry cap; mute entries to exclude them.'));
     stats.appendChild(createKeyValue('Injection token estimate', injectionStats.totalChars ? `${injectionStats.totalTokens} tokens` : 'empty', 'Approximate token count for the combined Continuity + Lore injection previews.'));
     stats.appendChild(createKeyValue('Total chars injected', `${injectionStats.totalChars} chars`, 'Combined character count of Continuity Injection Preview plus Lore Injection Preview using current Injection tab toggles and handling modes.'));
     container.appendChild(stats);

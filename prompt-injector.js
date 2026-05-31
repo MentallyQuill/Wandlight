@@ -12,11 +12,50 @@
 import { LOG_PREFIX, MEMO_MAX_TOKENS } from './constants.js';
 import { getSettings, getState } from './state-manager.js';
 import { buildMemo, buildContinuityMemo, buildLoreMemo } from './memo-builder.js';
-import { setExtensionPrompt, extension_prompt_types, extension_prompt_roles } from '../../../../script.js';
 
 const COMBINED_MARKER = '[WANDLIGHT CONTINUITY STATE]';
 const CONTINUITY_PROMPT_KEY = 'wandlight_continuity_state';
 const LORE_PROMPT_KEY = 'wandlight_lore_entries';
+
+
+// Do not statically import SillyTavern's root script.js here. Some ST builds do
+// not export the exact names we need, and a missing named export prevents this
+// entire extension module from loading. Resolve the API lazily at runtime.
+const FALLBACK_EXTENSION_PROMPT_TYPES = Object.freeze({
+    IN_PROMPT: 0,
+    IN_CHAT: 1,
+    BEFORE_PROMPT: 2,
+});
+
+const FALLBACK_EXTENSION_PROMPT_ROLES = Object.freeze({
+    SYSTEM: 0,
+    USER: 1,
+    ASSISTANT: 2,
+});
+
+function getExtensionPromptApi() {
+    const ctx = getSillyTavernContextSafe();
+    const promptTypes = globalThis.extension_prompt_types || ctx?.extension_prompt_types || FALLBACK_EXTENSION_PROMPT_TYPES;
+    const promptRoles = globalThis.extension_prompt_roles || ctx?.extension_prompt_roles || FALLBACK_EXTENSION_PROMPT_ROLES;
+    const setter = ctx?.setExtensionPrompt || globalThis.setExtensionPrompt || globalThis.SillyTavern?.setExtensionPrompt;
+
+    return {
+        setExtensionPrompt: typeof setter === 'function' ? setter : null,
+        extension_prompt_types: promptTypes,
+        extension_prompt_roles: promptRoles,
+    };
+}
+
+function getSillyTavernContextSafe() {
+    try {
+        if (typeof globalThis.SillyTavern?.getContext === 'function') {
+            return globalThis.SillyTavern.getContext();
+        }
+    } catch (_) {
+        // Ignore context lookup failures during early extension load.
+    }
+    return null;
+}
 
 let lastSyncInfo = {
     transport: 'unknown',
@@ -125,15 +164,24 @@ export function syncPromptInjection() {
 
 export function clearExtensionPrompts() {
     try {
-        setExtensionPrompt(CONTINUITY_PROMPT_KEY, '', extension_prompt_types.IN_CHAT, 4, false, extension_prompt_roles.SYSTEM);
-        setExtensionPrompt(LORE_PROMPT_KEY, '', extension_prompt_types.IN_CHAT, 4, false, extension_prompt_roles.SYSTEM);
+        const api = getExtensionPromptApi();
+        if (!api.setExtensionPrompt) return;
+        api.setExtensionPrompt(CONTINUITY_PROMPT_KEY, '', api.extension_prompt_types.IN_CHAT, 4, false, api.extension_prompt_roles.SYSTEM);
+        api.setExtensionPrompt(LORE_PROMPT_KEY, '', api.extension_prompt_types.IN_CHAT, 4, false, api.extension_prompt_roles.SYSTEM);
     } catch (e) {
         console.warn(`${LOG_PREFIX} Failed to clear extension prompts`, e);
     }
 }
 
 function setWandlightExtensionPrompt(key, value, position, depth, role, scan = false) {
-    setExtensionPrompt(
+    const api = getExtensionPromptApi();
+    if (!api.setExtensionPrompt) {
+        if (getSettings().debugMode) {
+            console.warn(`${LOG_PREFIX} setExtensionPrompt API unavailable; extension prompt injection not synced`);
+        }
+        return;
+    }
+    api.setExtensionPrompt(
         key,
         value || '',
         normalizePosition(position),
@@ -144,20 +192,29 @@ function setWandlightExtensionPrompt(key, value, position, depth, role, scan = f
 }
 
 function normalizePosition(value) {
+    const { extension_prompt_types } = getExtensionPromptApi();
     const numeric = Number(value);
-    if ([extension_prompt_types.IN_PROMPT, extension_prompt_types.IN_CHAT, extension_prompt_types.BEFORE_PROMPT].includes(numeric)) {
-        return numeric;
-    }
-    if (String(value) === 'before') return extension_prompt_types.BEFORE_PROMPT;
-    if (String(value) === 'after') return extension_prompt_types.IN_PROMPT;
+    const valid = [
+        extension_prompt_types.IN_PROMPT,
+        extension_prompt_types.IN_CHAT,
+        extension_prompt_types.BEFORE_PROMPT,
+    ].filter(v => Number.isFinite(Number(v)));
+    if (valid.includes(numeric)) return numeric;
+    const text = String(value || '').toLowerCase();
+    if (text === 'before' || text === 'before_prompt') return extension_prompt_types.BEFORE_PROMPT;
+    if (text === 'after' || text === 'in_prompt') return extension_prompt_types.IN_PROMPT;
     return extension_prompt_types.IN_CHAT;
 }
 
 function normalizeRole(value) {
+    const { extension_prompt_roles } = getExtensionPromptApi();
     const numeric = Number(value);
-    if ([extension_prompt_roles.SYSTEM, extension_prompt_roles.USER, extension_prompt_roles.ASSISTANT].includes(numeric)) {
-        return numeric;
-    }
+    const valid = [
+        extension_prompt_roles.SYSTEM,
+        extension_prompt_roles.USER,
+        extension_prompt_roles.ASSISTANT,
+    ].filter(v => Number.isFinite(Number(v)));
+    if (valid.includes(numeric)) return numeric;
     switch (String(value || '').toLowerCase()) {
         case 'user': return extension_prompt_roles.USER;
         case 'assistant': return extension_prompt_roles.ASSISTANT;

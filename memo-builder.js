@@ -210,7 +210,7 @@ export function buildLoreMemo(state, settingsOverride = {}) {
     if ((settings.loreInjectionMode || 'direct') === 'compressed') {
         settings.loreInjectionMode = 'direct';
     }
-    const maxLore = Number(settings.maxLoreEntriesInMemo) || MAX_LORE_ENTRIES_IN_MEMO;
+    const maxLore = Number(settings.maxLoreEntriesInMemo) || 0;
     const activeLore = getInjectableLoreEntries(state, maxLore);
     if (!activeLore.length) return '';
 

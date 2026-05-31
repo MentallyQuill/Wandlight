@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS = {
 
     // Lore matrix
     injectLore: true,
-    maxLoreEntriesInMemo: 6,
+    maxLoreEntriesInMemo: 0, // 0 = unlimited; users control injection by muting entries
     // Accepted Lore Matrix is intentionally uncapped. UI uses paging so hundreds of entries remain usable.
     maxLoreEntriesInMatrix: 0,
     autoGenerateLore: false,

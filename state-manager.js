@@ -32,8 +32,13 @@ export function getSettings() {
         extensionSettings[MODULE_KEY] = {};
     }
     const stored = extensionSettings[MODULE_KEY];
-    // Deep-merge defaults into stored, preserving any existing keys
+    // Merge defaults into stored, preserving existing user values. Nested setting
+    // registries currently only need a one-level merge.
     const merged = { ...DEFAULT_SETTINGS, ...stored };
+    merged.collapsedSections = {
+        ...(DEFAULT_SETTINGS.collapsedSections || {}),
+        ...(stored.collapsedSections || {}),
+    };
     // Write back merged defaults so the object is complete going forward
     extensionSettings[MODULE_KEY] = merged;
     return merged;

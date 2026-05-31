@@ -114,6 +114,64 @@ export const DEFAULT_SETTINGS = {
     continuityCompressionLevel: 2,
     continuityEmotionDecayTurns: 6,
 
+    // Advanced compression prompt templates. Variables: {{kind}}, {{compressionLevel}},
+    // {{compressionLabel}}, {{targetTokens}}, {{hardTokenLimit}}, {{storyContext}}, {{directText}}.
+    continuityCompressionPromptTemplate: `Compress the following Wandlight {{kind}} injection block for a Harry Potter roleplay.
+
+Story context:
+{{storyContext}}
+
+Compression level {{compressionLevel}} — {{compressionLabel}}.
+Target length: about {{targetTokens}} tokens. Do not exceed {{hardTokenLimit}} tokens unless a critical continuity constraint would be lost.
+
+Rules:
+- Preserve current scene state, character state, knowledge boundaries, secrets, active goals, relationships, and contradictions.
+- Keep emotional state only when it currently affects character behavior.
+- Do not invent facts.
+- Output only the compressed injection text. No markdown fences or commentary.
+
+Direct injection block:
+{{directText}}`,
+    loreCompressionPromptTemplate: `Compress the following Wandlight {{kind}} injection block for a Harry Potter roleplay.
+
+Story context:
+{{storyContext}}
+
+Compression level {{compressionLevel}} — {{compressionLabel}}.
+Target length: about {{targetTokens}} tokens. Do not exceed {{hardTokenLimit}} tokens unless a critical lore constraint would be lost.
+
+Rules:
+- Preserve secrets, knowledge boundaries, canon/AU constraints, current-scene relevant facts, and active hazards.
+- Preserve pinned/protected lore more fully than ordinary lore.
+- Merge redundant entries where possible.
+- Do not invent facts.
+- Output only the compressed injection text. No markdown fences or commentary.
+
+Direct injection block:
+{{directText}}`,
+
+    // Runtime-window collapsible sections. true = collapsed.
+    collapsedSections: {
+        'session.instructions': true,
+        'session.stateHistory': true,
+        'session.dangerZone': true,
+        'context.canonDatabase': true,
+        'context.automation': true,
+        'lore.generationSettings': true,
+        'injection.promptPlacement': true,
+        'injection.continuityHandling': true,
+        'injection.loreHandling': true,
+        'injection.compressionPrompts': true,
+        'continuity.trackedSections': true,
+        'continuity.knowledge': true,
+        'continuity.secrets': true,
+        'continuity.relationships': true,
+        'continuity.threads': true,
+        'continuity.inventory': true,
+        'continuity.objectives': true,
+        'continuity.flags': true,
+    },
+
     // Continuity model provider: used by Scan Continuity State / automatic continuity tracking.
     continuityProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
     continuityProfileId: '',
@@ -257,6 +315,7 @@ export function getDefaultState() {
             selectedEntryId: '',
             activeTab: 'session',
             reviewSelectedIds: [],
+            acceptedSelectedIds: [],
             pendingReviewVisibleLimit: 10,
             generationStatus: 'Idle.',
             generationProgress: 0,

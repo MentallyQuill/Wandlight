@@ -701,9 +701,9 @@ export function evaluateLoreEntryLifecycle(entry, state = {}) {
         return { status: 'divergent', shouldInject: false, reason: 'Branch does not match current story branch.', entry: e };
     }
 
-    if (e.canonStatus === 'divergent' && (state?.loreContext?.branchId || 'main') === 'main') {
-        return { status: 'divergent', shouldInject: false, reason: 'Marked divergent from current canon branch.', entry: e };
-    }
+    // canonStatus is descriptive metadata, not an activation switch.
+    // A user-approved divergent/AU lore entry may still be the correct active fact
+    // for this chat. Branch-specific exclusion is handled by branchId checks above.
 
     const hardFromCmp = e.canonTiming?.hardValidFrom ? compareStateDate(state, e.canonTiming.hardValidFrom) : 0;
     if (hardFromCmp < 0) return { status: 'future', shouldInject: false, reason: 'Current story date is before hard valid-from date.', entry: e };

@@ -1963,3 +1963,218 @@
 .wandlight-lore-entry-tags {
     margin-left: 0 !important;
 }
+
+/* ── Collapsible runtime sections ───────────────────────────────────────────── */
+.wandlight-collapsible-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.wandlight-collapsible-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+    padding: 6px 8px;
+    cursor: pointer;
+    color: #d4c8a8;
+    list-style: none;
+    user-select: none;
+}
+
+.wandlight-collapsible-summary::-webkit-details-marker {
+    display: none;
+}
+
+.wandlight-collapsible-summary::before {
+    content: '▸';
+    font-size: 0.8em;
+    opacity: 0.75;
+    width: 10px;
+    flex: 0 0 10px;
+}
+
+.wandlight-collapsible-card[open] > .wandlight-collapsible-summary::before {
+    content: '▾';
+}
+
+.wandlight-collapsible-title {
+    font-weight: 650;
+    font-size: 0.88em;
+    white-space: nowrap;
+}
+
+.wandlight-collapsible-subtitle {
+    margin-left: auto;
+    min-width: 0;
+    max-width: 58%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.72em;
+    opacity: 0.68;
+    color: #9fb0bf;
+    text-align: right;
+}
+
+.wandlight-collapsible-content {
+    padding: 0 8px 8px;
+}
+
+.wandlight-collapsible-content > .wandlight-runtime-card,
+.wandlight-collapsible-content > details.wandlight-runtime-card {
+    margin: 0;
+    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.wandlight-collapsible-content > .wandlight-runtime-card > .wandlight-runtime-card-title:first-child,
+.wandlight-collapsible-content > details.wandlight-runtime-card > summary.wandlight-runtime-card-title:first-child {
+    display: none;
+}
+
+/* ── Compression prompt editor ─────────────────────────────────────────────── */
+.wandlight-compression-template-wrap {
+    margin-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 8px;
+}
+
+.wandlight-compression-template-title {
+    font-size: 0.82em;
+    margin-bottom: 4px;
+}
+
+.wandlight-compression-template-editor {
+    width: 100%;
+    min-height: 130px;
+    max-height: 260px;
+    resize: vertical;
+    box-sizing: border-box;
+    border: 1px solid rgba(180, 160, 140, 0.25);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.32);
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    font-family: 'Courier New', monospace;
+    font-size: 0.74em;
+    line-height: 1.35;
+    padding: 7px 8px;
+}
+
+.wandlight-compression-template-editor:focus {
+    outline: none;
+    border-color: rgba(120, 150, 180, 0.65);
+    box-shadow: 0 0 4px rgba(80, 120, 160, 0.25);
+}
+
+.wandlight-compression-handling-card .wandlight-slider-row span {
+    min-width: 180px;
+}
+
+/* ── Accepted Lore bulk actions and inline editor ─────────────────────────── */
+.wandlight-lore-bulk-toolbar {
+    margin-top: 8px;
+}
+
+.wandlight-lore-bulk-controls-card {
+    border: 1px solid rgba(120, 150, 170, 0.22);
+    border-radius: 8px;
+    background: rgba(10, 14, 20, 0.42);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.wandlight-lore-bulk-summary {
+    font-size: 0.76em;
+    color: #b9c6cf;
+}
+
+.wandlight-lore-bulk-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+}
+
+.wandlight-lore-bulk-edit-row,
+.wandlight-lore-bulk-tag-row {
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wandlight-lore-bulk-select,
+.wandlight-lore-bulk-tag-input {
+    min-height: 22px;
+    max-height: 24px;
+    border: 1px solid rgba(150, 170, 185, 0.28);
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.36);
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    font-size: 0.72em;
+    padding: 1px 5px;
+}
+
+.wandlight-lore-bulk-select {
+    max-width: 120px;
+}
+
+.wandlight-lore-bulk-tag-input {
+    flex: 1 1 140px;
+    min-width: 110px;
+}
+
+.wandlight-lore-entry-select {
+    width: 14px;
+    height: 14px;
+    margin: 0 2px 0 0;
+    accent-color: #6f879a;
+    flex: 0 0 auto;
+}
+
+.wandlight-lore-entry-selected {
+    border-color: rgba(120, 155, 190, 0.75) !important;
+    box-shadow: 0 0 0 1px rgba(120, 155, 190, 0.25), 0 0 10px rgba(80, 120, 160, 0.12);
+}
+
+.wandlight-lore-entry-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border: 1px solid rgba(120, 150, 170, 0.18);
+    border-radius: 8px;
+    padding: 7px;
+    background: rgba(0, 0, 0, 0.2);
+    margin-bottom: 8px;
+}
+
+.wandlight-lore-editor-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.76em;
+    color: #c8d1d8;
+}
+
+.wandlight-lore-editor-input,
+.wandlight-lore-editor-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(180, 160, 140, 0.25);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.34);
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    font: inherit;
+    padding: 5px 6px;
+}
+
+.wandlight-lore-editor-textarea {
+    min-height: 54px;
+    resize: vertical;
+}
+
+.wandlight-danger-button {
+    border-color: rgba(170, 80, 80, 0.45) !important;
+    color: #f0b8b8 !important;
+}

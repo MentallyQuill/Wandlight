@@ -38,10 +38,11 @@ function getCachedModelCompression(state, settings, kind) {
     if (mode !== 'compressed') return '';
     const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
     const status = state[statusKey] || {};
-    // If the user selects compressed mode, prefer the last saved model compression.
-    // It may be stale relative to the latest state; the Injection tab status reports that.
-    // Do not silently trigger recompression from preview/injection construction.
-    return typeof status.cachedText === 'string' && status.cachedText.trim()
+    const currentSignature = getMemoSignature(state, 'compressed', kind);
+    // Compressed mode uses a saved model compression only when it matches the
+    // current source text, level, and mute/pin state. Stale cache is reported in
+    // the Injection tab but not silently injected.
+    return status.lastSignature === currentSignature && typeof status.cachedText === 'string' && status.cachedText.trim()
         ? status.cachedText.trim()
         : '';
 }

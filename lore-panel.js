@@ -7,7 +7,7 @@
  */
 
 import { getPanelLoreState, getInjectableLoreEntries, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag, LORE_LIFECYCLE_STATUSES } from './lore-matrix.js';
-import { getDefaultState } from './constants.js';
+import { getDefaultState, DEFAULT_SETTINGS } from './constants.js';
 import {
     getState,
     getSettings,
@@ -136,6 +136,69 @@ function getLoreFieldRegistry(field) {
 function getLoreRegistryMeta(registryName, value) {
     const registry = getLoreRegistry(registryName);
     return registry?.[value] || null;
+}
+
+
+function isSectionCollapsed(sectionId, defaultOpen = true) {
+    const settings = getSettings();
+    const collapsed = settings.collapsedSections || {};
+    if (Object.prototype.hasOwnProperty.call(collapsed, sectionId)) {
+        return !!collapsed[sectionId];
+    }
+    return !defaultOpen;
+}
+
+function setSectionCollapsed(sectionId, collapsed) {
+    const next = getSettings();
+    next.collapsedSections = {
+        ...(DEFAULT_SETTINGS.collapsedSections || {}),
+        ...(next.collapsedSections || {}),
+        [sectionId]: !!collapsed,
+    };
+    saveSettings(next);
+}
+
+function createCollapsibleSection(sectionId, titleText, subtitleText, defaultOpen, content, options = {}) {
+    const details = document.createElement('details');
+    details.className = `wandlight-runtime-card wandlight-collapsible-card ${options.className || ''}`.trim();
+    details.open = !isSectionCollapsed(sectionId, defaultOpen);
+
+    const summary = document.createElement('summary');
+    summary.className = 'wandlight-collapsible-summary';
+    const title = document.createElement('span');
+    title.className = 'wandlight-collapsible-title';
+    title.textContent = titleText;
+    addTooltip(title, options.tooltip || subtitleText || titleText);
+    summary.appendChild(title);
+
+    if (subtitleText) {
+        const subtitle = document.createElement('span');
+        subtitle.className = 'wandlight-collapsible-subtitle';
+        subtitle.textContent = subtitleText;
+        summary.appendChild(subtitle);
+    }
+    details.appendChild(summary);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-collapsible-content';
+    const built = typeof content === 'function' ? content() : content;
+    if (Array.isArray(built)) {
+        for (const item of built) if (item) wrap.appendChild(item);
+    } else if (built) {
+        wrap.appendChild(built);
+    }
+    details.appendChild(wrap);
+
+    details.addEventListener('toggle', () => {
+        setSectionCollapsed(sectionId, !details.open);
+    });
+
+    return details;
+}
+
+function getCountLabel(value, label) {
+    const count = Array.isArray(value) ? value.length : (value && typeof value === 'object' ? Object.keys(value).length : 0);
+    return `${count} ${label}${count === 1 ? '' : 's'}`;
 }
 
 function getLoreDisplayLabel(field, value) {
@@ -479,8 +542,8 @@ function renderSessionTab(container, state) {
     stats.appendChild(createKeyValue('Total chars injected', `${injectionStats.totalChars} chars`, 'Combined character count of Continuity Injection Preview plus Lore Injection Preview using current Injection tab toggles and handling modes.'));
     container.appendChild(stats);
 
-    container.appendChild(createStateHistoryCard(state));
-    container.appendChild(createDangerZoneCard(state));
+    container.appendChild(createCollapsibleSection('session.stateHistory', 'State History', getCountLabel(state?.stateHistory || [], 'undo point'), false, createStateHistoryCard(state), { tooltip: 'Undo history for Wandlight state.' }));
+    container.appendChild(createCollapsibleSection('session.dangerZone', 'Danger Zone', 'Destructive cleanup actions', false, createDangerZoneCard(state), { tooltip: 'Destructive cleanup actions for this chat.' }));
 }
 
 function createInstructionsCard() {
@@ -688,8 +751,10 @@ function renderContextTab(container, state) {
     ));
 
     container.appendChild(createContextDetectionCard(state));
-    container.appendChild(createCanonLoreDatabaseCard(state));
     container.appendChild(createContextEditorCard(state));
+    const db = state?.canonLoreDatabase || {};
+    const dbSubtitle = db.lastStatus ? String(db.lastStatus).slice(0, 80) : 'Local canon proposal tools';
+    container.appendChild(createCollapsibleSection('context.canonDatabase', 'Local Canon Lore Database', dbSubtitle, false, createCanonLoreDatabaseCard(state), { tooltip: 'Local date-aware canon database proposal controls.' }));
 }
 
 function createContextDetectionCard(state) {
@@ -1423,17 +1488,17 @@ function renderContinuityTab(container, state) {
         container.appendChild(pendingDelta);
     }
 
-    container.appendChild(createContinuitySectionToggleCard(state));
+    container.appendChild(createCollapsibleSection('continuity.trackedSections', 'Tracked Sections', 'Enable/disable scan and injection sections', false, createContinuitySectionToggleCard(state), { tooltip: 'Optional continuity sections for this chat.' }));
     container.appendChild(createCanonSceneEditorCard(state));
     container.appendChild(createCharacterStateEditorCard(state));
     container.appendChild(createStoryMilestonesEditorCard(state));
-    container.appendChild(createJsonEditorCard('Knowledge', 'Character-keyed facts. Example: { "Harry": ["knows X"] }', 'knowledge', state.knowledge || {}));
-    container.appendChild(createJsonEditorCard('Secrets', 'Non-public facts, who knows them, suspicions, and public versions.', 'secrets', state.secrets || []));
-    container.appendChild(createJsonEditorCard('Relationships', 'Relationship state such as trust, tension, and notes.', 'relationships', state.relationships || []));
-    container.appendChild(createJsonEditorCard('Threads', 'Active, dormant, or resolved story threads and unresolved consequences.', 'threads', state.threads || []));
-    container.appendChild(createJsonEditorCard('Inventory / Objects', 'Tracked items, owners, locations, and object status.', 'inventory', state.inventory || []));
-    container.appendChild(createJsonEditorCard('Objectives', 'Character or story goals, status, and stakes.', 'objectives', state.objectives || []));
-    container.appendChild(createJsonEditorCard('Continuity Flags', 'Contradictions, warnings, uncertainties, and resolved flags.', 'continuityFlags', state.continuityFlags || []));
+    container.appendChild(createCollapsibleSection('continuity.knowledge', 'Knowledge', getCountLabel(state.knowledge || {}, 'character'), false, createJsonEditorCard('Knowledge', 'Character-keyed facts. Example: { "Harry": ["knows X"] }', 'knowledge', state.knowledge || {}), { tooltip: 'Character-keyed knowledge facts.' }));
+    container.appendChild(createCollapsibleSection('continuity.secrets', 'Secrets', getCountLabel(state.secrets || [], 'secret'), false, createJsonEditorCard('Secrets', 'Non-public facts, who knows them, suspicions, and public versions.', 'secrets', state.secrets || []), { tooltip: 'Secret facts and reveal state.' }));
+    container.appendChild(createCollapsibleSection('continuity.relationships', 'Relationships', getCountLabel(state.relationships || [], 'relationship'), false, createJsonEditorCard('Relationships', 'Relationship state such as trust, tension, and notes.', 'relationships', state.relationships || []), { tooltip: 'Relationship state such as trust, tension, and notes.' }));
+    container.appendChild(createCollapsibleSection('continuity.threads', 'Threads', getCountLabel(state.threads || [], 'thread'), false, createJsonEditorCard('Threads', 'Active, dormant, or resolved story threads and unresolved consequences.', 'threads', state.threads || []), { tooltip: 'Story threads and unresolved consequences.' }));
+    container.appendChild(createCollapsibleSection('continuity.inventory', 'Inventory / Objects', getCountLabel(state.inventory || [], 'item'), false, createJsonEditorCard('Inventory / Objects', 'Tracked items, owners, locations, and object status.', 'inventory', state.inventory || []), { tooltip: 'Tracked items, owners, locations, and object status.' }));
+    container.appendChild(createCollapsibleSection('continuity.objectives', 'Objectives', getCountLabel(state.objectives || [], 'objective'), false, createJsonEditorCard('Objectives', 'Character or story goals, status, and stakes.', 'objectives', state.objectives || []), { tooltip: 'Character or story goals, status, and stakes.' }));
+    container.appendChild(createCollapsibleSection('continuity.flags', 'Continuity Flags', getCountLabel(state.continuityFlags || [], 'flag'), false, createJsonEditorCard('Continuity Flags', 'Contradictions, warnings, uncertainties, and resolved flags.', 'continuityFlags', state.continuityFlags || []), { tooltip: 'Contradictions, warnings, uncertainties, and resolved flags.' }));
 }
 
 function createContinuitySectionToggleCard(state) {
@@ -1613,7 +1678,7 @@ function setStatePath(state, path, value) {
 
 function renderInjectionTab(container, state) {
     const settings = getSettings();
-    const activeLore = getPanelLoreState(state).counts.active || 0;
+    const activeLore = getInjectableLoreEntries(state, 0).length;
     const continuityPreview = buildContinuityPreview(state, settings.continuityInjectionMode || 'direct');
     const lorePreview = buildLorePreview(state, settings.loreInjectionMode || 'direct');
     updateCompressionTurnStatus(state, 'lore');
@@ -1621,7 +1686,7 @@ function renderInjectionTab(container, state) {
 
     container.appendChild(createSectionHeader(
         'Injection',
-        'Final workflow step. Decide whether to inject structured Continuity state, Lore entries, or both, and whether each is direct or compressed.'
+        'Final workflow step. Decide whether to inject structured Continuity state, Lore entries, or both, and whether each is direct or model-compressed.'
     ));
 
     const toggles = document.createElement('div');
@@ -1652,41 +1717,59 @@ function renderInjectionTab(container, state) {
         }
     ));
     container.appendChild(toggles);
-    container.appendChild(createInjectionPlacementCard(settings));
 
-    const continuityCard = document.createElement('div');
-    continuityCard.className = 'wandlight-runtime-card';
-    const continuityTitle = document.createElement('div');
-    continuityTitle.className = 'wandlight-runtime-card-title';
-    continuityTitle.textContent = 'Continuity Handling Mode';
-    addTooltip(continuityTitle, 'Direct sends the structured continuity state with detail. Compressed uses the Continuity provider to produce a concise cached version from the direct continuity block.');
-    continuityCard.appendChild(continuityTitle);
-    const continuityButtons = document.createElement('div');
-    continuityButtons.className = 'wandlight-mode-buttons';
-    continuityButtons.appendChild(createContinuityModeButton('direct', 'Direct', 'Insert editable continuity state with full section detail.', settings));
-    continuityButtons.appendChild(createContinuityModeButton('compressed', 'Compressed', 'Use the last saved model-compressed continuity block. If no cached compression exists, Direct text is shown until you click Compress Continuity Now.', settings));
-    continuityCard.appendChild(continuityButtons);
+    const placementStatus = `${settings.injectionTransport === 'interceptor' ? 'Legacy prepend' : 'Extension Prompt'} · C ${formatPlacementSummary(settings, 'continuity')} · L ${formatPlacementSummary(settings, 'lore')}`;
+    container.appendChild(createCollapsibleSection('injection.promptPlacement', 'Prompt Placement', placementStatus, false, createInjectionPlacementCard(settings), { tooltip: 'Role, position, and depth used for prompt injection.' }));
 
-    const continuityLevel = document.createElement('label');
-    continuityLevel.className = 'wandlight-slider-row';
-    const continuityLevelText = document.createElement('span');
-    continuityLevelText.textContent = `Compression level: ${settings.continuityCompressionLevel || 2}`;
-    addTooltip(continuityLevelText, 'Higher levels ask the Continuity provider for a shorter compressed continuity block. This does not edit stored state.');
-    const continuityRange = document.createElement('input');
-    continuityRange.type = 'range';
-    continuityRange.min = '1';
-    continuityRange.max = '5';
-    continuityRange.value = String(settings.continuityCompressionLevel || 2);
-    continuityRange.addEventListener('input', () => {
-        const next = getSettings();
-        next.continuityCompressionLevel = Number(continuityRange.value) || 2;
-        saveSettings(next);
-        continuityLevelText.textContent = `Compression level: ${next.continuityCompressionLevel}`;
-        refreshInjectionPreviewOnly();
-    });
-    continuityLevel.appendChild(continuityLevelText);
-    continuityLevel.appendChild(continuityRange);
-    continuityCard.appendChild(continuityLevel);
+    container.appendChild(createCollapsibleSection(
+        'injection.continuityHandling',
+        'Continuity Handling',
+        `${settings.continuityInjectionMode || 'direct'} · ${getCompressionStatusTextForSummary(state, 'continuity')}`,
+        (settings.continuityInjectionMode || 'direct') === 'compressed',
+        createContinuityHandlingCard(state, settings),
+        { tooltip: 'Direct or model-compressed handling for Continuity injection.' }
+    ));
+
+    container.appendChild(createCollapsibleSection(
+        'injection.loreHandling',
+        'Lore Handling',
+        `${settings.loreInjectionMode || 'direct'} · ${activeLore} entries · ${getCompressionStatusTextForSummary(state, 'lore')}`,
+        (settings.loreInjectionMode || 'direct') === 'compressed',
+        createLoreHandlingCard(state, settings, activeLore),
+        { tooltip: 'Direct or model-compressed handling for Lore injection.' }
+    ));
+
+    container.appendChild(createCollapsibleSection(
+        'injection.compressionPrompts',
+        'Advanced Compression Prompts',
+        'Editable templates for model compression',
+        false,
+        createCompressionPromptEditorCard(),
+        { tooltip: 'Advanced editable prompt templates used by Compress Continuity Now and Compress Lore Now.' }
+    ));
+
+    container.appendChild(createInjectionPreviewCard('Continuity Injection Preview', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This preview shows only Continuity tab state. It can be placed at a different depth because it is separated from Lore.'));
+    container.appendChild(createInjectionPreviewCard('Lore Injection Preview', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'This preview shows only accepted Lore entries, using Direct or cached model-compressed handling.'));
+}
+
+function createContinuityHandlingCard(state, settings) {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-compression-handling-card';
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Continuity Handling Mode';
+    addTooltip(title, 'Direct sends structured continuity state. Compressed uses a cached model compression generated from the direct continuity preview.');
+    card.appendChild(title);
+
+    const buttons = document.createElement('div');
+    buttons.className = 'wandlight-mode-buttons';
+    buttons.appendChild(createContinuityModeButton('direct', 'Direct', 'Insert editable continuity state with full section detail.', settings));
+    buttons.appendChild(createContinuityModeButton('compressed', 'Compressed', 'Use a saved model-compressed continuity block. If the cache is stale or missing, direct text is used until you click Compress Continuity Now.', settings));
+    card.appendChild(buttons);
+
+    card.appendChild(createCompressionLevelControl('continuity', settings));
+    card.appendChild(createKeyValue('Target budget', getCompressionBudgetSummary('continuity', state), 'Compression levels set an explicit target token budget for the model request.'));
+    card.appendChild(createKeyValue('Continuity status', getContinuityCompressionStatusText(getState()), 'Shows whether cached model-compressed continuity is current, stale, missing, or failed.'));
 
     const decay = document.createElement('label');
     decay.className = 'wandlight-inline-field';
@@ -1706,51 +1789,36 @@ function renderInjectionTab(container, state) {
     });
     decay.appendChild(decayText);
     decay.appendChild(decayInput);
-    continuityCard.appendChild(decay);
-    continuityCard.appendChild(createKeyValue('Continuity status', getContinuityCompressionStatusText(getState()), 'Shows when model-compressed continuity was last calculated.'));
-    const continuityCompressActions = document.createElement('div');
-    continuityCompressActions.className = 'wandlight-primary-actions';
-    continuityCompressActions.appendChild(createButton('Compress Continuity Now', 'Uses the Continuity provider to compress the direct Continuity Injection Preview and cache it for compressed injection.', async (btn) => {
+    card.appendChild(decay);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Compress Continuity Now', 'Uses the Continuity provider to compress the direct Continuity Injection Preview and cache it for compressed injection.', async (btn) => {
         await runModelCompression('continuity', btn);
     }, 'wandlight-primary-button'));
-    continuityCard.appendChild(continuityCompressActions);
-    container.appendChild(continuityCard);
+    card.appendChild(actions);
+    return card;
+}
 
-    const loreCard = document.createElement('div');
-    loreCard.className = 'wandlight-runtime-card';
-    const loreTitle = document.createElement('div');
-    loreTitle.className = 'wandlight-runtime-card-title';
-    loreTitle.textContent = 'Lore Handling Mode';
-    addTooltip(loreTitle, 'Direct sends selected active lore with full facts. Compressed uses the Lore provider to produce a concise cached version of the direct lore block. Pinned entries are emphasized as protected details.');
-    loreCard.appendChild(loreTitle);
-    const loreButtons = document.createElement('div');
-    loreButtons.className = 'wandlight-mode-buttons';
-    loreButtons.appendChild(createInjectionModeButton('direct', 'Direct', 'Insert active lore entries mostly verbatim, subject to the active-lore cap.', settings));
-    loreButtons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Use the last saved model-compressed lore block. If no cached compression exists, Direct text is shown until you click Compress Lore Now. Stored lore is not changed.', settings));
-    loreCard.appendChild(loreButtons);
-    loreCard.appendChild(createKeyValue('Active lore available', String(activeLore), 'Entries eligible for prompt injection after filters, pinning, and muting.'));
-    loreCard.appendChild(createKeyValue('Pinned protection', 'enabled', 'Pinned entries are prioritized and kept less compressed than ordinary entries.'));
+function createLoreHandlingCard(state, settings, activeLore) {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-compression-handling-card';
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Lore Handling Mode';
+    addTooltip(title, 'Direct sends resolved accepted lore text. Compressed uses a cached model compression generated from the direct lore preview.');
+    card.appendChild(title);
 
-    const levelLabel = document.createElement('label');
-    levelLabel.className = 'wandlight-slider-row';
-    const levelText = document.createElement('span');
-    levelText.textContent = `Compression level: ${settings.loreCompressionLevel || 2}`;
-    addTooltip(levelText, 'Higher levels ask the Lore provider for a shorter compressed lore block. Pinned entries are identified as protected details.');
-    const level = document.createElement('input');
-    level.type = 'range';
-    level.min = '1';
-    level.max = '5';
-    level.value = String(settings.loreCompressionLevel || 2);
-    level.addEventListener('input', () => {
-        const next = getSettings();
-        next.loreCompressionLevel = Number(level.value) || 2;
-        saveSettings(next);
-        levelText.textContent = `Compression level: ${next.loreCompressionLevel}`;
-        refreshInjectionPreviewOnly();
-    });
-    levelLabel.appendChild(levelText);
-    levelLabel.appendChild(level);
-    loreCard.appendChild(levelLabel);
+    const buttons = document.createElement('div');
+    buttons.className = 'wandlight-mode-buttons';
+    buttons.appendChild(createInjectionModeButton('direct', 'Direct', 'Insert all accepted, unmuted lore entries as resolved text. There is no hidden entry cap.', settings));
+    buttons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Use a saved model-compressed lore block. If the cache is stale or missing, direct text is used until you click Compress Lore Now.', settings));
+    card.appendChild(buttons);
+
+    card.appendChild(createKeyValue('Lore available', String(activeLore), 'Accepted, unmuted lore entries eligible for prompt injection. Muting controls exclusion.'));
+    card.appendChild(createKeyValue('Pinned protection', 'enabled', 'Pinned entries are identified as protected details in the compression prompt.'));
+    card.appendChild(createCompressionLevelControl('lore', settings));
+    card.appendChild(createKeyValue('Target budget', getCompressionBudgetSummary('lore', state), 'Compression levels set an explicit target token budget for the model request.'));
 
     const intervalLabel = document.createElement('label');
     intervalLabel.className = 'wandlight-inline-field';
@@ -1771,18 +1839,159 @@ function renderInjectionTab(container, state) {
     });
     intervalLabel.appendChild(intervalText);
     intervalLabel.appendChild(interval);
-    loreCard.appendChild(intervalLabel);
-    loreCard.appendChild(createKeyValue('Lore compression status', getCompressionStatusText(getState()), 'Shows when model-compressed lore was last calculated and how many chat turns have elapsed since then.'));
-    const loreCompressActions = document.createElement('div');
-    loreCompressActions.className = 'wandlight-primary-actions';
-    loreCompressActions.appendChild(createButton('Compress Lore Now', 'Uses the Lore provider to compress the direct Lore Injection Preview and cache it for compressed injection.', async (btn) => {
+    card.appendChild(intervalLabel);
+    card.appendChild(createKeyValue('Lore compression status', getCompressionStatusText(getState()), 'Shows whether cached model-compressed lore is current, stale, missing, or failed.'));
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Compress Lore Now', 'Uses the Lore provider to compress the direct Lore Injection Preview and cache it for compressed injection.', async (btn) => {
         await runModelCompression('lore', btn);
     }, 'wandlight-primary-button'));
-    loreCard.appendChild(loreCompressActions);
-    container.appendChild(loreCard);
+    card.appendChild(actions);
+    return card;
+}
 
-    container.appendChild(createInjectionPreviewCard('Continuity Injection Preview', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This preview shows only Continuity tab state. It can be placed at a different depth later because it is now separated from Lore.'));
-    container.appendChild(createInjectionPreviewCard('Lore Injection Preview', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'This preview shows only accepted Lore entries, using Direct or Compressed lore handling.'));
+function createCompressionLevelControl(kind, settings) {
+    const levelKey = kind === 'continuity' ? 'continuityCompressionLevel' : 'loreCompressionLevel';
+    const levelValue = Math.max(1, Math.min(5, Number(settings[levelKey]) || 2));
+    const label = document.createElement('label');
+    label.className = 'wandlight-slider-row';
+    const text = document.createElement('span');
+    text.textContent = `Compression level: ${levelValue} (${getCompressionProfile(levelValue).label})`;
+    addTooltip(text, 'Compression level changes both the wording and the target token budget for the model compression request.');
+    const range = document.createElement('input');
+    range.type = 'range';
+    range.min = '1';
+    range.max = '5';
+    range.value = String(levelValue);
+    range.addEventListener('input', () => {
+        const next = getSettings();
+        next[levelKey] = Number(range.value) || 2;
+        saveSettings(next);
+        text.textContent = `Compression level: ${next[levelKey]} (${getCompressionProfile(next[levelKey]).label})`;
+        refreshInjectionPreviewOnly();
+    });
+    label.appendChild(text);
+    label.appendChild(range);
+    return label;
+}
+
+function createCompressionPromptEditorCard() {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-compression-prompt-card';
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Compression Prompt Templates';
+    card.appendChild(title);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Variables: {{kind}}, {{compressionLevel}}, {{compressionLabel}}, {{targetTokens}}, {{hardTokenLimit}}, {{storyContext}}, {{directText}}.';
+    card.appendChild(help);
+
+    card.appendChild(createCompressionPromptTextarea('Continuity Compression Prompt', 'continuityCompressionPromptTemplate', DEFAULT_SETTINGS.continuityCompressionPromptTemplate));
+    card.appendChild(createCompressionPromptTextarea('Lore Compression Prompt', 'loreCompressionPromptTemplate', DEFAULT_SETTINGS.loreCompressionPromptTemplate));
+    return card;
+}
+
+function createCompressionPromptTextarea(labelText, settingKey, defaultValue) {
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-compression-template-wrap';
+    const label = document.createElement('div');
+    label.className = 'wandlight-runtime-card-title wandlight-compression-template-title';
+    label.textContent = labelText;
+    addTooltip(label, `Editable template used for ${labelText}.`);
+    wrap.appendChild(label);
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'wandlight-compression-template-editor';
+    textarea.spellcheck = false;
+    textarea.value = String(getSettings()[settingKey] || defaultValue || '');
+    wrap.appendChild(textarea);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Save Template', `Save ${labelText}.`, () => {
+        const next = getSettings();
+        next[settingKey] = textarea.value;
+        saveSettings(next);
+        toast(`${labelText} saved.`);
+    }, 'wandlight-primary-button'));
+    actions.appendChild(createButton('Reset Default', `Restore Wandlight's default ${labelText}.`, () => {
+        const next = getSettings();
+        next[settingKey] = defaultValue;
+        saveSettings(next);
+        textarea.value = defaultValue;
+        toast(`${labelText} reset to default.`, 'info');
+    }));
+    actions.appendChild(createButton('Copy Prompt', `Copy ${labelText} to clipboard.`, async () => {
+        try {
+            await navigator.clipboard?.writeText(textarea.value);
+            toast(`${labelText} copied.`, 'info');
+        } catch (_) {
+            toast('Clipboard copy unavailable in this browser context.', 'warning');
+        }
+    }));
+    wrap.appendChild(actions);
+    return wrap;
+}
+
+
+
+function formatPlacementSummary(settings, kind) {
+    const prefix = kind === 'continuity' ? 'continuity' : 'lore';
+    const position = Number(settings[`${prefix}InjectionPosition`] ?? 1);
+    const role = Number(settings[`${prefix}InjectionRole`] ?? 0);
+    const depth = Number(settings[`${prefix}InjectionDepth`] ?? 4);
+    const positionLabel = position === 1 ? 'in-chat' : (position === 2 ? 'before' : 'after');
+    const roleLabel = role === 1 ? 'user' : (role === 2 ? 'assistant' : 'system');
+    return `${positionLabel}@${depth}/${roleLabel}`;
+}
+
+function getCompressionProfile(level) {
+    const profiles = {
+        1: { label: 'Light', ratio: 0.8, description: 'preserve most details; remove redundancy only' },
+        2: { label: 'Moderate', ratio: 0.6, description: 'concise but still descriptive' },
+        3: { label: 'Balanced', ratio: 0.4, description: 'keep roleplay-relevant facts and current-scene implications' },
+        4: { label: 'Heavy', ratio: 0.25, description: 'short bullets; preserve critical secrets, constraints, and protected details' },
+        5: { label: 'Minimal', ratio: 0.15, description: 'minimum viable context; only essential facts, constraints, secrets, and hazards' },
+    };
+    return profiles[Math.max(1, Math.min(5, Number(level) || 2))] || profiles[2];
+}
+
+function estimateTokenBudgetForCompression(text, level) {
+    const directTokens = estimateTokens(text || '');
+    const profile = getCompressionProfile(level);
+    const targetTokens = Math.max(96, Math.ceil(directTokens * profile.ratio));
+    const hardTokenLimit = Math.max(128, Math.ceil(targetTokens * 1.2));
+    return {
+        directTokens,
+        targetTokens,
+        hardTokenLimit,
+        profile,
+    };
+}
+
+function getCompressionBudgetSummary(kind, state) {
+    const settings = getSettings();
+    const level = kind === 'continuity'
+        ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 2))
+        : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 2));
+    const directText = kind === 'continuity'
+        ? buildContinuityPreview(state, 'direct')
+        : buildLorePreview(state, 'direct');
+    if (!directText || !directText.trim()) return 'No source text';
+    const budget = estimateTokenBudgetForCompression(directText, level);
+    return `~${budget.targetTokens} target / ${budget.hardTokenLimit} max tokens from ~${budget.directTokens} direct tokens`;
+}
+
+function getCompressionStatusTextForSummary(state, kind) {
+    const status = kind === 'continuity' ? getContinuityCompressionStatusText(state) : getCompressionStatusText(state);
+    if (/Direct mode active/i.test(status)) return 'direct';
+    if (/current/i.test(status) || /model-compressed/i.test(status)) return 'current cache';
+    if (/stale/i.test(status)) return 'stale cache';
+    if (/missing|No cached/i.test(status)) return 'no cache';
+    return status.slice(0, 40);
 }
 
 
@@ -2037,13 +2246,14 @@ async function runModelCompression(kind = 'lore', btn = null) {
             scene: state?.scene || {},
         }, null, 2);
 
-        const compressionPrompt = buildCompressionPrompt(kind, level, context, directText);
+        const budget = estimateTokenBudgetForCompression(directText, level);
+        const compressionPrompt = buildCompressionPrompt(kind, level, context, directText, budget);
         const compressed = await sendLoreRequest(
             'You are Wandlight Compression. Output only the compressed injection block. Do not use markdown fences. Do not add commentary.',
             compressionPrompt,
             {
                 providerKind,
-                maxTokens: Math.max(256, Math.min(2048, Math.ceil(directText.length / 3))),
+                maxTokens: Math.max(128, Math.min(4096, budget.hardTokenLimit)),
                 prefill: '',
             }
         );
@@ -2062,6 +2272,8 @@ async function runModelCompression(kind = 'lore', btn = null) {
             lastSignature: getMemoSignature(freshState, 'compressed', kind),
             lastMode: 'compressed',
             lastTokenEstimate: estimateTokens(cleaned),
+            lastTargetTokenEstimate: budget.targetTokens,
+            lastHardTokenLimit: budget.hardTokenLimit,
             turnsSinceCompression: 0,
             lastChatLength: getChatLength(),
             cachedText: cleaned,
@@ -2089,34 +2301,27 @@ async function runModelCompression(kind = 'lore', btn = null) {
     }
 }
 
-function buildCompressionPrompt(kind, level, context, directText) {
+function buildCompressionPrompt(kind, level, context, directText, budget = null) {
+    const settings = getSettings();
     const kindLabel = kind === 'continuity' ? 'Continuity State' : 'Lore Entries';
-    const compressionTargets = {
-        1: 'light compression: preserve most details; remove redundancy only',
-        2: 'moderate compression: concise but still descriptive',
-        3: 'firm compression: keep only roleplay-relevant facts and current-scene implications',
-        4: 'heavy compression: short bullets; preserve critical secrets, constraints, and pinned/protected details',
-        5: 'aggressive compression: minimum viable context; only essential facts, constraints, secrets, and active hazards',
+    const computedBudget = budget || estimateTokenBudgetForCompression(directText, level);
+    const templateKey = kind === 'continuity' ? 'continuityCompressionPromptTemplate' : 'loreCompressionPromptTemplate';
+    const fallbackTemplate = kind === 'continuity'
+        ? DEFAULT_SETTINGS.continuityCompressionPromptTemplate
+        : DEFAULT_SETTINGS.loreCompressionPromptTemplate;
+    const template = String(settings[templateKey] || fallbackTemplate || '');
+    const vars = {
+        kind: kindLabel,
+        compressionLevel: String(level),
+        compressionLabel: computedBudget.profile.description,
+        targetTokens: String(computedBudget.targetTokens),
+        hardTokenLimit: String(computedBudget.hardTokenLimit),
+        storyContext: context,
+        directText,
     };
-
-    return `Compress the following Wandlight ${kindLabel} injection block for a Harry Potter roleplay.
-
-Story context:
-${context}
-
-Compression level ${level}: ${compressionTargets[level] || compressionTargets[2]}.
-
-Rules:
-- Preserve facts that affect current character behavior, secrets, continuity constraints, locations, relationships, active goals, and contradictions.
-- Do not invent new facts.
-- Do not remove do-not-reveal / only-reveal constraints.
-- For lore, preserve pinned/protected entries more fully than ordinary entries.
-- For continuity, keep current scene, character state, knowledge boundaries, and active emotional state if relevant.
-- Output only the compressed injection text, with the same general heading style if useful.
-
-Direct injection block:
-${directText}`;
+    return template.replace(/{{\s*(\w+)\s*}}/g, (_, key) => Object.prototype.hasOwnProperty.call(vars, key) ? vars[key] : '');
 }
+
 
 function cleanCompressedText(text) {
     return String(text || '')
@@ -2141,7 +2346,7 @@ function getCompressionStatusText(state) {
         return 'No cached model compression yet. Click Compress Lore Now.';
     }
     const when = new Date(status.lastCompressedAt).toLocaleTimeString();
-    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens`;
+    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens${status.lastTargetTokenEstimate ? ` (target ${status.lastTargetTokenEstimate})` : ''}`;
 }
 
 function getContinuityCompressionStatusText(state) {
@@ -2161,7 +2366,7 @@ function getContinuityCompressionStatusText(state) {
         return 'No cached model compression yet. Click Compress Continuity Now.';
     }
     const when = new Date(status.lastCompressedAt).toLocaleTimeString();
-    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens`;
+    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens${status.lastTargetTokenEstimate ? ` (target ${status.lastTargetTokenEstimate})` : ''}`;
 }
 
 function getChatLength() {
@@ -2607,6 +2812,352 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     return card;
 }
 
+
+// Accepted lore bulk selection and editing --------------------------------------
+
+function getAcceptedSelectionSet(state = getState()) {
+    const ids = Array.isArray(state?.lorePanel?.acceptedSelectedIds) ? state.lorePanel.acceptedSelectedIds : [];
+    const acceptedIds = new Set(normalizeLoreMatrix(state?.loreMatrix || []).map(entry => entry.id));
+    return new Set(ids.filter(id => acceptedIds.has(id)));
+}
+
+function setAcceptedLoreSelection(ids = [], options = {}) {
+    const state = getState();
+    if (!state.lorePanel) state.lorePanel = getDefaultState().lorePanel;
+    const acceptedIds = new Set(normalizeLoreMatrix(state.loreMatrix || []).map(entry => entry.id));
+    state.lorePanel.acceptedSelectedIds = Array.from(new Set((ids || []).filter(id => acceptedIds.has(id))));
+    if (options.deferSave) scheduleStateSave(state);
+    else saveState(state);
+}
+
+function toggleAcceptedLoreSelection(entryId, selected) {
+    const state = getState();
+    const selection = getAcceptedSelectionSet(state);
+    if (selected) selection.add(entryId);
+    else selection.delete(entryId);
+    state.lorePanel.acceptedSelectedIds = Array.from(selection);
+    scheduleStateSave(state);
+}
+
+function getFilteredAcceptedLoreIds(state = getState()) {
+    return getFilteredLoreEntries(state).map(entry => entry.id);
+}
+
+function refreshAcceptedLoreBulkToolbar() {
+    if (!panelRoot) return;
+    const mount = panelRoot.querySelector('.wandlight-lore-bulk-toolbar');
+    if (!mount) return;
+    mount.replaceChildren(createAcceptedLoreBulkControls(getState()));
+}
+
+function createAcceptedLoreBulkControls(state) {
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-lore-bulk-controls-card';
+
+    const selected = getAcceptedSelectionSet(state);
+    const filteredIds = getFilteredAcceptedLoreIds(state);
+    const selectedCount = selected.size;
+    const disabled = selectedCount === 0;
+
+    const summary = document.createElement('div');
+    summary.className = 'wandlight-lore-bulk-summary';
+    summary.textContent = `${selectedCount} selected · ${filteredIds.length} matching current filters`;
+    addTooltip(summary, 'Bulk actions apply to selected accepted lore entries. Use Select Filtered to select every accepted entry matching the current search and filters, not just the rendered page.');
+    wrap.appendChild(summary);
+
+    const selectRow = document.createElement('div');
+    selectRow.className = 'wandlight-lore-bulk-row';
+    const selectFiltered = createButton('Select Filtered', 'Selects every accepted lore entry matching the current search and filters, including entries not currently rendered by paging.', () => {
+        setAcceptedLoreSelection(filteredIds, { deferSave: true });
+        refreshAcceptedLoreList({ preserveScroll: true });
+        refreshAcceptedLoreBulkToolbar();
+    }, 'wandlight-small-button');
+    selectRow.appendChild(selectFiltered);
+
+    const clearSelection = createButton('Clear Selection', 'Clears the accepted-lore selection.', () => {
+        setAcceptedLoreSelection([], { deferSave: true });
+        refreshAcceptedLoreList({ preserveScroll: true });
+        refreshAcceptedLoreBulkToolbar();
+    }, 'wandlight-small-button');
+    clearSelection.disabled = disabled;
+    selectRow.appendChild(clearSelection);
+    wrap.appendChild(selectRow);
+
+    const actionRow = document.createElement('div');
+    actionRow.className = 'wandlight-lore-bulk-row';
+
+    const addAction = (label, tooltip, fn, className = 'wandlight-small-button') => {
+        const btn = createButton(label, tooltip, () => {
+            const ids = Array.from(getAcceptedSelectionSet(getState()));
+            if (!ids.length) {
+                toast('Select one or more accepted lore entries first.', 'warning');
+                return;
+            }
+            fn(ids);
+        }, className);
+        btn.disabled = disabled;
+        actionRow.appendChild(btn);
+        return btn;
+    };
+
+    addAction('Pin', 'Pins selected accepted lore entries so they are prioritized for injection.', ids => bulkSetAcceptedPinned(ids, true));
+    addAction('Unpin', 'Removes selected accepted lore entries from pinned lore.', ids => bulkSetAcceptedPinned(ids, false));
+    addAction('Mute', 'Mutes selected accepted lore entries so they are excluded from injection.', ids => bulkSetAcceptedMuted(ids, true));
+    addAction('Unmute', 'Unmutes selected accepted lore entries.', ids => bulkSetAcceptedMuted(ids, false));
+    addAction('Delete', 'Deletes selected accepted lore entries from this chat after confirmation.', async ids => {
+        const proceed = await confirmAction('Delete selected accepted lore?', `This permanently removes ${ids.length} accepted lore entr${ids.length === 1 ? 'y' : 'ies'} from this chat. This cannot be undone unless you use State History. Continue?`);
+        if (!proceed) return;
+        bulkDeleteAcceptedLore(ids);
+    }, 'wandlight-small-button wandlight-danger-button');
+    wrap.appendChild(actionRow);
+
+    const editRow = document.createElement('div');
+    editRow.className = 'wandlight-lore-bulk-row wandlight-lore-bulk-edit-row';
+    const selectedIdsNow = () => Array.from(getAcceptedSelectionSet(getState()));
+    editRow.appendChild(createBulkSelect('State', LORE_LIFECYCLE_STATUSES, 'Set lifecycle state for selected entries.', value => {
+        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({
+            ...raw,
+            lifecycle: {
+                ...(raw.lifecycle || {}),
+                status: value,
+                manualOverride: true,
+                reason: 'Bulk lifecycle override.',
+            },
+        }));
+    }, disabled));
+    editRow.appendChild(createBulkSelect('Category', getLoreRegistryValues('categories', Object.keys(CATEGORY_LABELS)), 'Set category for selected entries.', value => {
+        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, category: value }));
+    }, disabled));
+    editRow.appendChild(createBulkSelect('Canon', getLoreRegistryValues('canonStatuses', ['canon', 'divergent', 'au', 'fanon', 'contested', 'unknown']), 'Set canon status for selected entries.', value => {
+        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, canonStatus: value }));
+    }, disabled));
+    editRow.appendChild(createBulkSelect('Truth', getLoreRegistryValues('truthStatuses', ['true', 'false', 'public_belief', 'rumor', 'contested', 'hidden']), 'Set truth status for selected entries.', value => {
+        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, truthStatus: value }));
+    }, disabled));
+    editRow.appendChild(createBulkSelect('Reveal', getLoreRegistryValues('revealPolicies', ['public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals']), 'Set reveal policy for selected entries.', value => {
+        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, revealPolicy: value }));
+    }, disabled));
+    editRow.appendChild(createBulkSelect('Priority', LORE_PRIORITY_VALUES.map(String), 'Set priority for selected entries.', value => {
+        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, priority: Number(value) || 50 }));
+    }, disabled, value => `P${value}`));
+    wrap.appendChild(editRow);
+
+    const tagRow = document.createElement('div');
+    tagRow.className = 'wandlight-lore-bulk-row wandlight-lore-bulk-tag-row';
+    const tagInput = document.createElement('input');
+    tagInput.type = 'text';
+    tagInput.className = 'wandlight-lore-bulk-tag-input';
+    tagInput.placeholder = 'Add tag to selected...';
+    tagInput.disabled = disabled;
+    addTooltip(tagInput, 'Adds one searchable tag to all selected accepted lore entries.');
+    tagInput.addEventListener('click', e => e.stopPropagation());
+    tagRow.appendChild(tagInput);
+    const addTagBtn = createButton('Add Tag', 'Adds the typed tag to selected entries.', () => {
+        const ids = Array.from(getAcceptedSelectionSet(getState()));
+        const tag = normalizeTag(tagInput.value);
+        if (!ids.length || !tag) {
+            toast(ids.length ? 'Enter a tag first.' : 'Select entries first.', 'warning');
+            return;
+        }
+        bulkAddTagToAcceptedLore(ids, tag);
+        tagInput.value = '';
+    }, 'wandlight-small-button');
+    addTagBtn.disabled = disabled;
+    tagRow.appendChild(addTagBtn);
+    wrap.appendChild(tagRow);
+
+    return wrap;
+}
+
+function createBulkSelect(label, values, tooltip, onChange, disabled = false, display = null) {
+    const select = document.createElement('select');
+    select.className = 'wandlight-lore-bulk-select';
+    select.disabled = disabled;
+    addTooltip(select, tooltip);
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = `Set ${label}...`;
+    placeholder.selected = true;
+    select.appendChild(placeholder);
+    for (const value of values) {
+        const option = document.createElement('option');
+        option.value = String(value);
+        option.textContent = display ? display(value) : getLoreDisplayLabel(labelToField(label), value);
+        select.appendChild(option);
+    }
+    select.addEventListener('click', e => e.stopPropagation());
+    select.addEventListener('change', () => {
+        if (!select.value) return;
+        onChange(select.value);
+        select.value = '';
+    });
+    return select;
+}
+
+function labelToField(label) {
+    if (label === 'Category') return 'category';
+    if (label === 'Canon') return 'canonStatus';
+    if (label === 'Truth') return 'truthStatus';
+    if (label === 'Reveal') return 'revealPolicy';
+    return 'category';
+}
+
+function bulkUpdateAcceptedLore(ids, updater) {
+    if (!ids?.length || typeof updater !== 'function') return false;
+    const state = getState();
+    const idSet = new Set(ids);
+    let count = 0;
+    state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []).map(entry => {
+        if (!idSet.has(entry.id)) return entry;
+        count += 1;
+        return normalizeLoreEntry({ ...updater(entry), userEdited: true });
+    });
+    saveState(state);
+    refreshAcceptedLoreList({ preserveScroll: true });
+    refreshAcceptedLoreBulkToolbar();
+    refreshHeader();
+    if (count) toast(`Updated ${count} accepted lore entr${count === 1 ? 'y' : 'ies'}.`, 'success');
+    return count > 0;
+}
+
+function bulkSetAcceptedPinned(ids, pinned) {
+    const state = getState();
+    if (!state.loreSelection) state.loreSelection = { pinnedIds: [], suppressedIds: [] };
+    const idSet = new Set(ids);
+    const acceptedIds = new Set(normalizeLoreMatrix(state.loreMatrix || []).map(entry => entry.id));
+    const pinSet = new Set((state.loreSelection.pinnedIds || []).filter(id => acceptedIds.has(id)));
+    const suppressedSet = new Set((state.loreSelection.suppressedIds || []).filter(id => acceptedIds.has(id)));
+    for (const id of idSet) {
+        if (!acceptedIds.has(id)) continue;
+        if (pinned) {
+            pinSet.add(id);
+            suppressedSet.delete(id);
+        } else {
+            pinSet.delete(id);
+        }
+    }
+    state.loreSelection.pinnedIds = Array.from(pinSet);
+    state.loreSelection.suppressedIds = Array.from(suppressedSet);
+    saveState(state);
+    refreshAcceptedLoreList({ preserveScroll: true });
+    refreshAcceptedLoreBulkToolbar();
+    refreshHeader();
+    toast(`${pinned ? 'Pinned' : 'Unpinned'} ${idSet.size} accepted lore entr${idSet.size === 1 ? 'y' : 'ies'}.`, 'success');
+}
+
+function bulkSetAcceptedMuted(ids, muted) {
+    const state = getState();
+    if (!state.loreSelection) state.loreSelection = { pinnedIds: [], suppressedIds: [] };
+    const idSet = new Set(ids);
+    const acceptedIds = new Set(normalizeLoreMatrix(state.loreMatrix || []).map(entry => entry.id));
+    const pinSet = new Set((state.loreSelection.pinnedIds || []).filter(id => acceptedIds.has(id)));
+    const suppressedSet = new Set((state.loreSelection.suppressedIds || []).filter(id => acceptedIds.has(id)));
+    for (const id of idSet) {
+        if (!acceptedIds.has(id)) continue;
+        if (muted) {
+            suppressedSet.add(id);
+            pinSet.delete(id);
+        } else {
+            suppressedSet.delete(id);
+        }
+    }
+    state.loreSelection.pinnedIds = Array.from(pinSet);
+    state.loreSelection.suppressedIds = Array.from(suppressedSet);
+    saveState(state);
+    refreshAcceptedLoreList({ preserveScroll: true });
+    refreshAcceptedLoreBulkToolbar();
+    refreshHeader();
+    toast(`${muted ? 'Muted' : 'Unmuted'} ${idSet.size} accepted lore entr${idSet.size === 1 ? 'y' : 'ies'}.`, 'success');
+}
+
+function bulkAddTagToAcceptedLore(ids, tag) {
+    const clean = normalizeTag(tag);
+    if (!clean) return false;
+    return bulkUpdateAcceptedLore(ids, entry => {
+        const tags = Array.isArray(entry.tags) ? entry.tags.map(normalizeTag).filter(Boolean) : [];
+        const exists = tags.some(t => t.toLowerCase() === clean.toLowerCase());
+        return { ...entry, tags: exists ? tags : [...tags, clean] };
+    });
+}
+
+function bulkDeleteAcceptedLore(ids) {
+    const state = getState();
+    const idSet = new Set(ids);
+    const before = Array.isArray(state.loreMatrix) ? state.loreMatrix.length : 0;
+    state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []).filter(entry => !idSet.has(entry.id));
+    const acceptedIds = new Set(state.loreMatrix.map(entry => entry.id));
+    if (state.loreSelection) {
+        state.loreSelection.pinnedIds = (state.loreSelection.pinnedIds || []).filter(id => acceptedIds.has(id));
+        state.loreSelection.suppressedIds = (state.loreSelection.suppressedIds || []).filter(id => acceptedIds.has(id));
+    }
+    if (state.lorePanel) {
+        state.lorePanel.acceptedSelectedIds = (state.lorePanel.acceptedSelectedIds || []).filter(id => acceptedIds.has(id));
+        if (idSet.has(state.lorePanel.selectedEntryId)) state.lorePanel.selectedEntryId = '';
+    }
+    saveState(state);
+    refreshAcceptedLoreList({ preserveScroll: true });
+    refreshAcceptedLoreBulkToolbar();
+    refreshHeader();
+    toast(`Deleted ${before - state.loreMatrix.length} accepted lore entr${before - state.loreMatrix.length === 1 ? 'y' : 'ies'}.`, 'success');
+}
+
+function createEditableLoreEntryEditor(entry) {
+    const editor = document.createElement('div');
+    editor.className = 'wandlight-lore-entry-editor';
+    addTooltip(editor, 'Edit accepted lore directly. Changes are saved only when you click Save Entry.');
+
+    const makeField = (labelText, value, multiline = false) => {
+        const label = document.createElement('label');
+        label.className = 'wandlight-lore-editor-field';
+        const span = document.createElement('span');
+        span.textContent = labelText;
+        label.appendChild(span);
+        const input = multiline ? document.createElement('textarea') : document.createElement('input');
+        input.className = multiline ? 'wandlight-lore-editor-textarea' : 'wandlight-lore-editor-input';
+        if (!multiline) input.type = 'text';
+        input.value = value || '';
+        input.addEventListener('click', e => e.stopPropagation());
+        input.addEventListener('mousedown', e => e.stopPropagation());
+        label.appendChild(input);
+        editor.appendChild(label);
+        return input;
+    };
+
+    const titleInput = makeField('Title', entry.title || '', false);
+    const factInput = makeField('Lore text / fact', entry.fact || entry.content?.fact || '', true);
+    const injectionInput = makeField('Injection override', entry.content?.injection || '', true);
+    const notesInput = makeField('Notes', entry.notes || entry.content?.notes || '', true);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    const saveBtn = createButton('Save Entry', 'Saves the edited title, lore text, injection override, and notes for this accepted lore entry.', (btn, e) => {
+        e?.stopPropagation?.();
+        const title = titleInput.value.trim() || entry.title || '(Untitled lore)';
+        const fact = factInput.value.trim();
+        const injection = injectionInput.value.trim();
+        const notes = notesInput.value.trim();
+        updateLoreEntryById(entry.id, raw => ({
+            ...raw,
+            title,
+            fact,
+            notes,
+            content: {
+                ...(raw.content || {}),
+                fact,
+                injection,
+                notes,
+            },
+            userEdited: true,
+        }), { deferSave: false });
+        if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
+        refreshHeader();
+        toast('Lore entry saved.', 'success');
+    }, 'wandlight-primary-button');
+    actions.appendChild(saveBtn);
+    editor.appendChild(actions);
+    return editor;
+}
+
 // Lore tab --------------------------------------------------------------------
 
 function renderLoreTab(container, state) {
@@ -2615,8 +3166,9 @@ function renderLoreTab(container, state) {
         'Generate durable lore entries, review pending entries, then manage accepted lore with search, filters, tags, pinning, and muting.'
     ));
     container.appendChild(createLoreGenerationCard(state));
-    container.appendChild(createGenerationSettingsCard());
-    container.appendChild(createPendingLoreReviewSection(state));
+    container.appendChild(createCollapsibleSection('lore.generationSettings', 'Lore Generation Settings', 'Source, chunking, tags, and guards', false, createGenerationSettingsCard(), { tooltip: 'Advanced pending-lore generation controls.' }));
+    const pendingCount = (state?.pendingLoreEntries || []).length;
+    container.appendChild(createCollapsibleSection('lore.pendingReview', 'Pending Lore Review', pendingCount ? `${pendingCount} pending` : 'none', pendingCount > 0, createPendingLoreReviewSection(state), { tooltip: 'Review generated lore entries before accepting them.' }));
 
     const controls = document.createElement('div');
     controls.className = 'wandlight-lore-controls';
@@ -2671,6 +3223,11 @@ function renderLoreTab(container, state) {
     addTooltip(pinHelp, 'Pin important facts you always want kept prominent. Mute facts that should stay stored but not be sent to the model.');
     controls.appendChild(pinHelp);
 
+    const bulkMount = document.createElement('div');
+    bulkMount.className = 'wandlight-lore-bulk-toolbar';
+    bulkMount.appendChild(createAcceptedLoreBulkControls(state));
+    controls.appendChild(bulkMount);
+
     container.appendChild(controls);
 
     const list = document.createElement('div');
@@ -2720,6 +3277,7 @@ function renderEntryList(list, state) {
             e.stopPropagation();
             setPanelState({ acceptedLoreVisibleLimit: visible.length + ACCEPTED_LORE_PAGE_INCREMENT }, { deferSave: true });
             refreshAcceptedLoreList({ preserveScroll: true });
+            refreshAcceptedLoreBulkToolbar();
         });
         fragment.appendChild(more);
     }
@@ -2733,6 +3291,7 @@ function scheduleAcceptedLoreListRender(container) {
         const root = container || panelRoot;
         const list = root?.querySelector?.('.wandlight-lore-entry-list');
         if (list) renderEntryList(list, getState());
+        refreshAcceptedLoreBulkToolbar();
     }, SEARCH_RENDER_DEBOUNCE_MS);
 }
 
@@ -2878,6 +3437,7 @@ function createEditableLifecycleBadge(entry) {
             },
         }), { deferSave: true });
         if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
+        refreshAcceptedLoreBulkToolbar();
         refreshHeader();
         toast(`${entry.title || 'Lore entry'} status set to ${LIFECYCLE_META[nextStatus]?.label || nextStatus}.`, 'info');
     });
@@ -3050,6 +3610,7 @@ function createEntryCard(entry, state) {
     if (entry.isActive) card.classList.add('wandlight-lore-entry-active');
     if (entry.isPinned) card.classList.add('wandlight-lore-entry-pinned');
     if (entry.isSuppressed) card.classList.add('wandlight-lore-entry-suppressed');
+    if (getAcceptedSelectionSet(state).has(entry.id)) card.classList.add('wandlight-lore-entry-selected');
 
     const panelState = state?.lorePanel || {};
     const isExpanded = panelState.selectedEntryId === entry.id;
@@ -3071,6 +3632,20 @@ function createEntryCard(entry, state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-lore-entry-actions';
+
+    const selectBox = document.createElement('input');
+    selectBox.type = 'checkbox';
+    selectBox.className = 'wandlight-lore-entry-select';
+    selectBox.checked = getAcceptedSelectionSet(state).has(entry.id);
+    selectBox.setAttribute('aria-label', 'Select accepted lore entry for bulk actions');
+    addTooltip(selectBox, selectBox.checked ? 'Remove this accepted lore entry from the bulk selection.' : 'Select this accepted lore entry for bulk actions.');
+    selectBox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleAcceptedLoreSelection(entry.id, selectBox.checked);
+        if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
+        refreshAcceptedLoreBulkToolbar();
+    });
+    actions.appendChild(selectBox);
     actions.appendChild(createEditableLifecycleBadge(entry));
 
     const pinBtn = createIconButton(
@@ -3081,6 +3656,7 @@ function createEntryCard(entry, state) {
             e.stopPropagation();
             togglePinEntry(entry.id, { deferSave: true });
             if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
+            refreshAcceptedLoreBulkToolbar();
             refreshHeader();
         }
     );
@@ -3094,6 +3670,7 @@ function createEntryCard(entry, state) {
             e.stopPropagation();
             toggleSuppressEntry(entry.id, { deferSave: true });
             if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
+            refreshAcceptedLoreBulkToolbar();
             refreshHeader();
         }
     );
@@ -3137,6 +3714,8 @@ function createEntryCard(entry, state) {
     if (isExpanded) {
         const details = document.createElement('div');
         details.className = 'wandlight-lore-entry-details';
+
+        details.appendChild(createEditableLoreEntryEditor(entry));
 
         if (entry.fact && entry.fact.length > 140) {
             const fullFact = document.createElement('div');

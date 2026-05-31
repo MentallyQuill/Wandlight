@@ -2839,3 +2839,128 @@
 .wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-accepted-lore-scroll-region > * {
     flex: 0 0 auto !important;
 }
+
+
+/* Live feedback fix 2026-05-31: Accepted Lore must fill available panel height.
+   Earlier scroll patches capped the list with viewport clamps, which left only a
+   couple of cards visible in resized panels. This final cascade makes the Lore
+   tab a true column layout and lets the accepted lore list consume the remaining
+   vertical space down to the bottom of the Wandlight Continuity window. */
+.wandlight-lore-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-panel:not(.wandlight-lore-panel-collapsed) {
+    max-height: calc(100vh - 16px) !important;
+}
+
+.wandlight-lore-panel .wandlight-lore-panel-body {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-panel .wandlight-runtime-tabs {
+    flex: 0 0 auto !important;
+}
+
+.wandlight-lore-panel .wandlight-runtime-tab-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+}
+
+.wandlight-lore-panel .wandlight-runtime-tab-body-lore {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-panel .wandlight-runtime-tab-body-lore > .wandlight-section-header,
+.wandlight-lore-panel .wandlight-runtime-tab-body-lore > .wandlight-lore-generation-collapsible,
+.wandlight-lore-panel .wandlight-runtime-tab-body-lore > .wandlight-lore-pending-collapsible,
+.wandlight-lore-panel .wandlight-runtime-tab-body-lore > .wandlight-danger-zone-collapsible {
+    flex: 0 0 auto !important;
+}
+
+.wandlight-lore-panel .wandlight-lore-accepted-collapsible[open] {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-panel .wandlight-lore-accepted-collapsible[open] > .wandlight-collapsible-content,
+.wandlight-lore-panel .wandlight-accepted-lore-section {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-lore-controls,
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-lore-bulk-toolbar,
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-lore-list-summary,
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-lore-show-more {
+    flex: 0 0 auto !important;
+}
+
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-accepted-lore-scroll-region {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-gutter: stable both-edges !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(120, 138, 156, 0.78) rgba(10, 12, 16, 0.38) !important;
+    padding-right: 6px !important;
+    touch-action: pan-y !important;
+}
+
+.wandlight-lore-panel .wandlight-accepted-lore-section .wandlight-accepted-lore-scroll-region > * {
+    flex: 0 0 auto !important;
+}
+
+/* Live feedback fix 2026-05-31: Pending Lore Review cards use the same compact
+   accepted-lore card layout. The review state badge stays in the right-side
+   action slot; metadata chips do not introduce a separate state chip on the left. */
+.wandlight-pending-review-entry-card {
+    background: var(--wandlight-surface-2) !important;
+    border-color: var(--wandlight-border-soft) !important;
+}
+
+.wandlight-pending-review-entry-card .wandlight-lore-entry-actions {
+    margin-left: auto !important;
+    align-self: flex-start !important;
+}
+
+.wandlight-pending-review-entry-card .wandlight-lore-entry-meta {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 4px !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.wandlight-pending-review-entry-card .wandlight-pending-entry-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+}

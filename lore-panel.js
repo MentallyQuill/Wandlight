@@ -202,6 +202,7 @@ function createCollapsibleSection(sectionId, titleText, subtitleText, defaultOpe
 
     details.addEventListener('toggle', () => {
         setSectionCollapsed(sectionId, !details.open);
+        if (String(sectionId || '').startsWith('lore.')) scheduleAcceptedLoreLayoutUpdate();
     });
 
     return details;
@@ -474,6 +475,8 @@ function renderPanelBody(container, state) {
     } else {
         renderInjectionTab(tabBody, state);
     }
+
+    if (activeTab === 'lore') scheduleAcceptedLoreLayoutUpdate();
 }
 
 // Session tab -----------------------------------------------------------------
@@ -3142,12 +3145,9 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
 
     const meta = document.createElement('div');
     meta.className = 'wandlight-lore-entry-meta';
-    meta.appendChild(createEditableLifecycleBadge(entry));
-    meta.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', null, `Category: ${entry.category || 'canon'}. Use dropdown to change.`));
-    meta.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', null, `Canon status: ${entry.canonStatus || 'unknown'}. Use dropdown to change.`));
-    meta.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', null, `Truth/reveal status: ${entry.truthStatus || 'true'}. Use dropdown to change.`));
-    meta.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', null, `Reveal policy: ${entry.revealPolicy || 'private'}. Use dropdown to change.`));
-    meta.appendChild(createEditablePriorityBadge(entry));
+    meta.appendChild(createRegistryBadge('category', entry.category || 'canon', `Category: ${entry.category || 'canon'}. Pending cards use the same compact metadata style as accepted cards.`));
+    meta.appendChild(createRegistryBadge('canonStatus', entry.canonStatus || 'unknown', `Canon status: ${entry.canonStatus || 'unknown'}.`));
+    meta.appendChild(createBadge(`P${Number(entry.priority || 50)}`, 'Priority used for sorting, injection preference, and canon-lore suggestion limits.'));
     meta.appendChild(createSpellMetadataBadges(entry));
     if (entry.confidence !== undefined) meta.appendChild(createBadge(`confidence ${entry.confidence}`, 'Model-provided confidence for this entry.'));
     card.appendChild(meta);
@@ -3757,6 +3757,7 @@ function scheduleAcceptedLoreListRender(container) {
         const list = root?.querySelector?.('.wandlight-lore-entry-list');
         if (list) renderEntryList(list, getState());
         refreshAcceptedLoreBulkToolbar();
+        scheduleAcceptedLoreLayoutUpdate();
     }, SEARCH_RENDER_DEBOUNCE_MS);
 }
 
@@ -3766,6 +3767,7 @@ function refreshAcceptedLoreList(options = {}) {
     if (!list) return;
     const scrollTop = options.preserveScroll ? list.scrollTop : 0;
     renderEntryList(list, getState());
+    scheduleAcceptedLoreLayoutUpdate();
     if (options.preserveScroll) list.scrollTop = scrollTop;
 }
 
@@ -3781,7 +3783,65 @@ function refreshAcceptedLoreRow(entryId) {
         return true;
     }
     existing.replaceWith(createEntryCard(entry, state));
+    scheduleAcceptedLoreLayoutUpdate();
     return true;
+}
+
+let acceptedLoreLayoutFrame = 0;
+
+function scheduleAcceptedLoreLayoutUpdate() {
+    if (acceptedLoreLayoutFrame) cancelAnimationFrame(acceptedLoreLayoutFrame);
+    acceptedLoreLayoutFrame = requestAnimationFrame(() => {
+        acceptedLoreLayoutFrame = requestAnimationFrame(() => {
+            acceptedLoreLayoutFrame = 0;
+            updateAcceptedLoreScrollRegionHeight();
+        });
+    });
+}
+
+function updateAcceptedLoreScrollRegionHeight() {
+    if (!panelRoot || panelRoot.classList.contains('wandlight-lore-panel-collapsed')) return;
+    const list = panelRoot.querySelector('.wandlight-accepted-lore-scroll-region');
+    if (!list) return;
+
+    const acceptedSection = list.closest('.wandlight-accepted-lore-section');
+    const acceptedDetails = list.closest('.wandlight-lore-accepted-collapsible');
+    const content = acceptedDetails?.querySelector(':scope > .wandlight-collapsible-content');
+    const summary = acceptedDetails?.querySelector(':scope > .wandlight-collapsible-summary');
+    if (!acceptedSection || !acceptedDetails?.open || !content) return;
+
+    const panelRect = panelRoot.getBoundingClientRect();
+    const bodyRect = panelRoot.querySelector('.wandlight-lore-panel-body')?.getBoundingClientRect?.() || panelRect;
+    const tabRect = panelRoot.querySelector('.wandlight-runtime-tab-body-lore')?.getBoundingClientRect?.() || bodyRect;
+    const detailsRect = acceptedDetails.getBoundingClientRect();
+    const bottomBoundary = Math.min(panelRect.bottom, bodyRect.bottom, tabRect.bottom) - 8;
+
+    const detailsHeight = Math.max(160, Math.floor(bottomBoundary - detailsRect.top));
+    const summaryHeight = Math.ceil(summary?.getBoundingClientRect?.().height || 30);
+    const contentHeight = Math.max(120, detailsHeight - summaryHeight);
+
+    acceptedDetails.style.setProperty('height', `${detailsHeight}px`, 'important');
+    acceptedDetails.style.setProperty('flex', `0 0 ${detailsHeight}px`, 'important');
+    acceptedDetails.style.setProperty('max-height', 'none', 'important');
+    content.style.setProperty('height', `${contentHeight}px`, 'important');
+    content.style.setProperty('flex', `0 0 ${contentHeight}px`, 'important');
+    content.style.setProperty('max-height', 'none', 'important');
+    acceptedSection.style.setProperty('height', `${Math.max(100, contentHeight)}px`, 'important');
+    acceptedSection.style.setProperty('flex', `1 1 ${Math.max(100, contentHeight)}px`, 'important');
+    acceptedSection.style.setProperty('max-height', 'none', 'important');
+
+    const refreshedListRect = list.getBoundingClientRect();
+    const availableHeight = Math.floor(bottomBoundary - refreshedListRect.top);
+    const safeHeight = Math.max(120, availableHeight);
+
+    list.style.setProperty('height', `${safeHeight}px`, 'important');
+    list.style.setProperty('flex', `0 0 ${safeHeight}px`, 'important');
+    list.style.setProperty('max-height', 'none', 'important');
+    list.style.setProperty('overflow-y', 'scroll', 'important');
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('resize', scheduleAcceptedLoreLayoutUpdate);
 }
 
 function cssEscape(value) {
@@ -4602,6 +4662,7 @@ function onResizeMove(e) {
     const height = Math.max(MIN_PANEL_HEIGHT, Math.min(maxHeight, resizeStartHeight + (e.clientY - resizeStartY)));
     panelRoot.style.width = `${width}px`;
     panelRoot.style.height = `${height}px`;
+    updateAcceptedLoreScrollRegionHeight();
 }
 
 function onResizeEnd() {

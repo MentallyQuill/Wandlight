@@ -216,19 +216,19 @@ async function runExtractionCall(stateJson, messages) {
  * @param {boolean} [options.force] - If true, bypasses throttle and autoExtract check
  */
 export async function onExtractionTriggered(options = {}) {
-    const { force = false } = options;
+    const { force = false, applyImmediately = false } = options;
 
     if (_extractionRunning) {
         const settings = getSettings();
         if (settings.debugMode) {
             console.log(`${LOG_PREFIX} Extraction already running, skipping`);
         }
-        return;
+        return { status: 'skipped_running' };
     }
 
     const settings = getSettings();
-    if (!settings.enabled) return;
-    if (!force && !settings.autoExtract) return;
+    if (!settings.enabled) return { status: 'disabled' };
+    if (!force && !settings.autoExtract) return { status: 'skipped_auto_extract_off' };
 
     // Throttle: only run every N generations (skip if forced)
     if (!force) {
@@ -237,7 +237,7 @@ export async function onExtractionTriggered(options = {}) {
         }
         onExtractionTriggered._counter++;
         const interval = settings.extractionInterval || 1;
-        if (onExtractionTriggered._counter < interval) return;
+        if (onExtractionTriggered._counter < interval) return { status: 'skipped_interval' };
         onExtractionTriggered._counter = 0;
     }
 
@@ -248,9 +248,9 @@ export async function onExtractionTriggered(options = {}) {
         const chat = ctx && ctx.chat ? ctx.chat : null;
         if (!chat || !Array.isArray(chat) || chat.length === 0) {
             if (settings.debugMode) {
-                console.log(`${LOG_PREFIX} No chat messages \u2014 cannot run extraction`);
+                console.log(`${LOG_PREFIX} No chat messages — cannot run extraction`);
             }
-            return;
+            return { status: 'no_chat' };
         }
 
         // Collect recent messages
@@ -259,7 +259,7 @@ export async function onExtractionTriggered(options = {}) {
             if (settings.debugMode) {
                 console.log(`${LOG_PREFIX} No recent messages to extract from`);
             }
-            return;
+            return { status: 'no_messages' };
         }
 
         // Get current state (reacquired from ST context)
@@ -270,7 +270,7 @@ export async function onExtractionTriggered(options = {}) {
             stateJson = JSON.stringify(state);
         } catch (e) {
             console.error(`${LOG_PREFIX} Failed to serialize state:`, e);
-            return;
+            return { status: 'state_serialize_failed', error: e?.message || String(e) };
         }
 
         if (settings.debugMode) {
@@ -280,6 +280,7 @@ export async function onExtractionTriggered(options = {}) {
 
         // Run the extraction LLM call
         const delta = await runExtractionCall(stateJson, messages);
+        let result = { status: 'no_valid_delta' };
 
         if (delta) {
             // Check for no-op delta (empty changes)
@@ -291,21 +292,27 @@ export async function onExtractionTriggered(options = {}) {
                     console.debug(`${LOG_PREFIX} Change keys:`, Object.keys(delta.changes));
                 }
 
-                // \u2500\u2500 Manual vs auto-apply branching \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+                // ── Manual vs auto-apply branching ───────────────────────────────────
                 const currentState = getState();
 
-                if (settings.autoApplyDelta) {
+                if (settings.autoApplyDelta || applyImmediately) {
                     // Push a snapshot BEFORE applying for undo support,
-                    // then apply the delta and save
-                    pushStateSnapshot(currentState, 'Auto-extract: ' + (delta.summary || 'unnamed change'), settings.maxSnapshots);
+                    // then apply the delta and save.
+                    pushStateSnapshot(
+                        currentState,
+                        (applyImmediately ? 'Manual continuity scan: ' : 'Auto-extract: ') + (delta.summary || 'unnamed change'),
+                        settings.maxSnapshots,
+                    );
 
                     const newState = applyDelta(currentState, delta);
                     newState.lastDelta = null; // critical: do not leave applied delta pending
                     saveState(newState);
 
                     if (settings.debugMode) {
-                        console.log(`${LOG_PREFIX} Delta auto-applied and state saved`);
+                        console.log(`${LOG_PREFIX} Delta applied and state saved`);
                     }
+
+                    result = { status: 'applied', delta, summary: delta.summary || '', changeKeys: Object.keys(delta.changes || {}) };
                 } else {
                     // Manual mode: store delta as lastDelta but don't apply
                     currentState.lastDelta = delta;
@@ -314,15 +321,20 @@ export async function onExtractionTriggered(options = {}) {
                     if (settings.debugMode) {
                         console.log(`${LOG_PREFIX} Delta stored as lastDelta (manual review mode)`);
                     }
+
+                    result = { status: 'pending_review', delta, summary: delta.summary || '', changeKeys: Object.keys(delta.changes || {}) };
                 }
-            } else if (settings.debugMode) {
-                console.log(`${LOG_PREFIX} Extraction delta has no changes \u2014 skipping`);
+            } else {
+                if (settings.debugMode) {
+                    console.log(`${LOG_PREFIX} Extraction delta has no changes — skipping`);
+                }
+                result = { status: 'no_changes' };
             }
         } else if (settings.debugMode) {
             console.log(`${LOG_PREFIX} Extraction returned no valid delta`);
         }
 
-        // \u2500\u2500 Auto-run lore context detection + generation after extraction \u2500\u2500
+        // ── Auto-run lore context detection + generation after extraction ──
         // Runs independently of whether the continuity delta produced changes.
         if (settings.autoGenerateLore) {
             try {
@@ -341,8 +353,11 @@ export async function onExtractionTriggered(options = {}) {
         if (typeof globalThis._wandlightRefreshUI === 'function') {
             globalThis._wandlightRefreshUI();
         }
+
+        return result;
     } catch (e) {
         console.error(`${LOG_PREFIX} Extraction failed:`, e);
+        return { status: 'failed_exception', error: e?.message || String(e) };
     } finally {
         _extractionRunning = false;
     }

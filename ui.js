@@ -14,7 +14,7 @@ import {
     getActiveLoreEntries,
 } from './lore-matrix.js';
 import { storeApiKey, deleteApiKey } from './secure-keyring.js';
-import { loadApiKey, fetchLoreModels } from './lore-llm-client.js';
+import { loadApiKey, fetchLoreModels, testLoreConnection, validateLoreProviderConfiguration } from './lore-llm-client.js';
 
 /**
  * Renders the settings panel HTML into the container.
@@ -366,6 +366,8 @@ function setupLoreProviderPanel(container) {
     const tempInput = container.querySelector('#wandlight_lore_temperature');
     const topPInput = container.querySelector('#wandlight_lore_top_p');
     const maxTokensInput = container.querySelector('#wandlight_lore_max_tokens');
+    const testConnectionBtn = container.querySelector('#wandlight_lore_test_connection');
+    const connectionStatus = container.querySelector('#wandlight_lore_connection_status');
 
     // ── Set initial values ────────────────────────────────────────────
     if (providerSelect) providerSelect.value = settings.loreProvider || 'st';
@@ -389,6 +391,7 @@ function setupLoreProviderPanel(container) {
             const val = providerSelect.value;
             settings.loreProvider = val;
             saveLoreProviderSettings(settings);
+            if (connectionStatus) connectionStatus.textContent = '';
             refreshProviderRows();
         });
     }
@@ -615,6 +618,37 @@ function setupLoreProviderPanel(container) {
             } finally {
                 fetchModelsBtn.disabled = false;
                 fetchModelsBtn.textContent = origText;
+            }
+        });
+    }
+
+    if (testConnectionBtn) {
+        testConnectionBtn.addEventListener('click', async () => {
+            const original = testConnectionBtn.textContent;
+            testConnectionBtn.disabled = true;
+            testConnectionBtn.textContent = 'Testing...';
+            if (connectionStatus) {
+                connectionStatus.textContent = 'Testing selected provider...';
+                connectionStatus.style.color = '';
+            }
+            try {
+                const validation = validateLoreProviderConfiguration();
+                if (!validation.ok) throw new Error(validation.message);
+                const result = await testLoreConnection();
+                if (connectionStatus) {
+                    connectionStatus.textContent = `Connected via ${result.provider}.`;
+                    connectionStatus.style.color = '#88cc88';
+                }
+                if (typeof toastr !== 'undefined') toastr.success('Wandlight lore provider connection succeeded.');
+            } catch (e) {
+                if (connectionStatus) {
+                    connectionStatus.textContent = e?.message || String(e);
+                    connectionStatus.style.color = '#cc8888';
+                }
+                if (typeof toastr !== 'undefined') toastr.error('Connection test failed: ' + (e?.message || e));
+            } finally {
+                testConnectionBtn.disabled = false;
+                testConnectionBtn.textContent = original;
             }
         });
     }

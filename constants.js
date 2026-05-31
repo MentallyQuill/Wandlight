@@ -67,6 +67,7 @@ export const DEFAULT_SETTINGS = {
 
     // Lore generation behavior
     loreSourceMessageCount: 20,
+    loreGenerationChunkSize: 10,
     loreReplacementGuard: true,
     loreDuplicateGuard: true,
     loreTagCount: 4,

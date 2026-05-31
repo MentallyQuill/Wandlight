@@ -31,7 +31,7 @@ import {
     filterDuplicateLoreEntries,
 } from './lore-matrix.js';
 
-import { sendLoreRequest } from './lore-llm-client.js';
+import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
 
 // ── Guard flags ─────────────────────────────────────────────────────────────────
 
@@ -326,22 +326,40 @@ ${String(rawResponse || '').slice(0, 12000)}
  * @param {number} [count=20] - Max messages to include
  * @returns {string} Formatted messages text
  */
-function getRecentMessages(count = 8) {
+function getRecentMessageObjects(count = 8) {
     try {
         const ctx = SillyTavern.getContext();
         const chat = ctx?.chat || [];
-        const recent = chat.slice(-count);
-        return recent
-            .map(m => {
-                const name = m?.name || 'Unknown';
-                const role = m?.is_user ? 'User' : m?.is_system ? 'System' : name;
-                const text = m?.mes || '';
-                return `${role}: ${text}`;
-            })
-            .join('\n\n');
+        return chat.slice(-Math.max(1, Number(count) || 8));
     } catch (_) {
-        return '(No messages available)';
+        return [];
     }
+}
+
+function formatMessageObjects(messages = []) {
+    return messages
+        .map((m, index) => {
+            const name = m?.name || 'Unknown';
+            const role = m?.is_user ? 'User' : m?.is_system ? 'System' : name;
+            const text = String(m?.mes || m?.content || '').trim();
+            return text ? `[${index + 1}] ${role}: ${text}` : '';
+        })
+        .filter(Boolean)
+        .join('\n\n');
+}
+
+function getRecentMessages(count = 8) {
+    const formatted = formatMessageObjects(getRecentMessageObjects(count));
+    return formatted || '(No messages available)';
+}
+
+function chunkMessages(messages = [], chunkSize = 10) {
+    const size = Math.max(1, Math.min(50, Number(chunkSize) || 10));
+    const chunks = [];
+    for (let i = 0; i < messages.length; i += size) {
+        chunks.push(messages.slice(i, i + size));
+    }
+    return chunks.length ? chunks : [[]];
 }
 
 
@@ -407,6 +425,11 @@ export async function runLoreContextDetection(options = {}) {
         const state = getState();
         const settings = getSettings();
         const progress = typeof options.progress === 'function' ? options.progress : null;
+        const validation = validateLoreProviderConfiguration();
+        if (!validation.ok) {
+            progress?.(`API/model settings incomplete: ${validation.message}`, 100);
+            return null;
+        }
         progress?.('Reading recent messages...', 10);
 
         if (!settings.debugMode) {
@@ -552,6 +575,11 @@ export async function runLoreGeneration(options = {}) {
     try {
         const state = getState();
         const settings = getSettings();
+        const validation = validateLoreProviderConfiguration();
+        if (!validation.ok) {
+            progress?.(`API/model settings incomplete: ${validation.message}`, 100);
+            return { status: 'api_not_configured', error: validation.message };
+        }
         progress?.('Preparing lore generation...', 5);
         const contextKey = buildLoreGenerationKey(state);
 
@@ -671,59 +699,75 @@ export async function runLoreGeneration(options = {}) {
             lastError: '',
         });
 
-        // ── Call the LLM ──────────────────────────────────────────────
+        // ── Call the LLM in message chunks ────────────────────────────
         const stateSummary = JSON.stringify({
             canon: state.canon,
             scene: state.scene,
             loreContext: state.loreContext,
-            loreMatrix: (state.loreMatrix || []).slice(0, 3),
+            loreMatrix: (state.loreMatrix || []).slice(0, 6),
         }, null, 0);
 
-        const messages = getRecentMessages(settings.loreSourceMessageCount || 20);
-        progress?.(`Sending lore generation request (${settings.loreSourceMessageCount || 20} messages)...`, 30);
+        const sourceCount = Math.max(1, Math.min(200, Number(settings.loreSourceMessageCount) || 20));
+        const chunkSize = Math.max(1, Math.min(50, Number(settings.loreGenerationChunkSize) || 10));
+        const messageObjects = getRecentMessageObjects(sourceCount);
+        const chunks = chunkMessages(messageObjects, chunkSize);
         const systemPrompt = buildLoreGenerationSystemPrompt(settings);
-        const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nGenerate relevant lore entries. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
+        const allRawEntries = [];
+        let rawEntryCount = 0;
+        let failedChunkCount = 0;
+        let emptyChunkCount = 0;
+        const chunkSummaries = [];
 
-        const response = await quietPrompt(systemPrompt, userMessage);
-        if (!response) {
+        for (let i = 0; i < chunks.length; i++) {
+            const chunkText = formatMessageObjects(chunks[i]);
+            const startProgress = 25 + Math.round((i / Math.max(1, chunks.length)) * 50);
+            progress?.(`Generating lore chunk ${i + 1}/${chunks.length} (${chunks[i].length} messages)...`, startProgress);
+
+            const userMessage = `Current state: ${stateSummary}\n\nRecent message chunk ${i + 1} of ${chunks.length}:\n${chunkText || '(No message text)'}\n\nGenerate relevant lore entries from this chunk only. Do not repeat accepted lore. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
+            const response = await quietPrompt(systemPrompt, userMessage);
+
+            if (!response) {
+                failedChunkCount++;
+                continue;
+            }
+
+            progress?.(`Parsing lore chunk ${i + 1}/${chunks.length}...`, Math.min(82, startProgress + 8));
+            let parsed = parseJsonResponse(response);
+
+            if (!parsed || !Array.isArray(parsed?.entries)) {
+                if (settings.loreRepairOnParseFail) {
+                    if (settings.debugMode) {
+                        console.debug(`${LOG_PREFIX} Initial lore parse failed for chunk ${i + 1}, attempting repair pass`);
+                    }
+                    parsed = await repairLoreJsonResponse(response);
+                }
+            }
+
+            if (!parsed || !Array.isArray(parsed.entries)) {
+                failedChunkCount++;
+                continue;
+            }
+
+            rawEntryCount += parsed.entries.length;
+            if (parsed.summary) chunkSummaries.push(String(parsed.summary));
+            if (!parsed.entries.length) emptyChunkCount++;
+            allRawEntries.push(...parsed.entries.map(entry => ({
+                ...entry,
+                source: entry?.source || `Generated from message chunk ${i + 1}/${chunks.length}`,
+            })));
+        }
+
+        if (rawEntryCount === 0 && failedChunkCount >= chunks.length) {
             recordLoreAttempt(contextKey, {
                 status: 'failed_no_response',
-                lastError: 'Quiet prompt returned empty response',
+                lastError: `All ${chunks.length} lore generation chunks returned empty or unparseable responses`,
             }, { increment: false });
-            progress?.('Lore generation returned an empty response.', 100);
-            return { status: 'failed_no_response', contextKey };
+            progress?.('Lore generation returned no usable responses from any chunk.', 100);
+            return { status: 'failed_no_response', contextKey, failedChunkCount, chunkCount: chunks.length };
         }
 
-        // ── Parse & validate ──────────────────────────────────────────
-        progress?.('Parsing lore response...', 70);
-        let parsed = parseJsonResponse(response);
-
-        // Repair pass when initial parsing fails
-        if (!parsed || !Array.isArray(parsed?.entries)) {
-            if (settings.loreRepairOnParseFail) {
-                if (settings.debugMode) {
-                    console.debug(`${LOG_PREFIX} Initial lore parse failed, attempting repair pass`);
-                }
-                progress?.('Repairing malformed JSON response...', 78);
-                parsed = await repairLoreJsonResponse(response);
-            }
-        }
-
-        if (!parsed || !Array.isArray(parsed.entries)) {
-            recordLoreAttempt(contextKey, {
-                status: 'failed_parse',
-                lastError: 'No valid entries array in lore response',
-            }, { increment: false });
-            if (settings.debugMode) {
-                console.debug(`${LOG_PREFIX} Lore generation response had no valid entries array`);
-            }
-            progress?.('Lore response could not be parsed.', 100);
-            return { status: 'failed_parse', contextKey };
-        }
-
-        const rawEntryCount = parsed.entries.length;
-        progress?.('Normalizing and filtering lore entries...', 86);
-        let entries = normalizeLoreMatrix(parsed.entries).map(entry => normalizeGeneratedEntry(entry, settings));
+        progress?.('Normalizing and filtering generated lore entries...', 86);
+        let entries = normalizeLoreMatrix(allRawEntries).map(entry => normalizeGeneratedEntry(entry, settings));
         let duplicateDrops = [];
         if (settings.loreDuplicateGuard !== false) {
             const filtered = filterDuplicateLoreEntries(entries, state.loreMatrix || []);
@@ -749,11 +793,14 @@ export async function runLoreGeneration(options = {}) {
                 validEntryCount: 0,
                 droppedDuplicateCount: duplicateDrops.length,
                 duplicateDropReasons: duplicateDrops.map(d => d.reason),
+                failedChunkCount,
+                emptyChunkCount,
+                chunkCount: chunks.length,
             };
         }
 
         // ── Create proposal (only path that marks context as proposed) ─
-        const summary = parsed.summary || '';
+        const summary = chunkSummaries.filter(Boolean).join(' | ');
         progress?.('Saving pending lore proposal...', 94);
         const result = setPendingLoreProposal(entries, {
             contextKey,
@@ -780,6 +827,9 @@ export async function runLoreGeneration(options = {}) {
             droppedEntryCount: rawEntryCount - entries.length,
             droppedDuplicateCount: duplicateDrops.length,
             duplicateDropReasons: duplicateDrops.map(d => d.reason),
+            failedChunkCount,
+            emptyChunkCount,
+            chunkCount: chunks.length,
         };
     } catch (e) {
         console.error(`${LOG_PREFIX} Lore generation failed:`, e);

@@ -49,6 +49,69 @@ function extractChatCompletionText(json) {
         ?? '';
 }
 
+
+// ── Provider validation / connection testing ───────────────────────────────────
+
+export function validateLoreProviderConfiguration() {
+    const settings = getSettings();
+    const provider = settings.loreProvider || 'st';
+
+    try {
+        if (provider === 'openai_compatible') {
+            if (!String(settings.loreOpenAIBaseUrl || '').trim()) {
+                return { ok: false, message: 'OpenAI-compatible Base URL is missing.' };
+            }
+            if (!String(settings.loreOpenAIModel || '').trim()) {
+                return { ok: false, message: 'OpenAI-compatible model is missing. Type or select a model ID.' };
+            }
+            if (!settings.loreOpenAIUseSTProxy && !getCachedApiKey() && !settings.loreOpenAIKeySet) {
+                return { ok: false, message: 'OpenAI-compatible API key is missing. Store an API key or enable an ST proxy.' };
+            }
+            return { ok: true, provider };
+        }
+
+        if (provider === 'profile') {
+            if (!String(settings.loreProfileId || '').trim()) {
+                return { ok: false, message: 'No SillyTavern connection profile is selected.' };
+            }
+            const ctx = typeof SillyTavern !== 'undefined' ? SillyTavern.getContext?.() : null;
+            if (!ctx?.ConnectionManagerRequestService?.sendRequest) {
+                return { ok: false, message: 'ConnectionManagerRequestService is unavailable in this SillyTavern session.' };
+            }
+            return { ok: true, provider };
+        }
+
+        const ctx = typeof SillyTavern !== 'undefined' ? SillyTavern.getContext?.() : null;
+        if (!ctx || (typeof ctx.generateRaw !== 'function' && typeof ctx.generateQuietPrompt !== 'function')) {
+            return { ok: false, message: 'Current SillyTavern model generation API is unavailable. Use a connection profile or OpenAI-compatible endpoint.' };
+        }
+
+        return { ok: true, provider: 'st' };
+    } catch (e) {
+        return { ok: false, message: e?.message || String(e) };
+    }
+}
+
+export async function testLoreConnection() {
+    const validation = validateLoreProviderConfiguration();
+    if (!validation.ok) {
+        throw new Error(validation.message);
+    }
+
+    const response = await sendLoreRequest(
+        'You are a connection test endpoint. Output only valid JSON.',
+        'Return exactly: {"ok":true}',
+        { maxTokens: 32, prefill: '' },
+    );
+
+    const text = String(response || '').trim();
+    if (!text) {
+        throw new Error('Connection test returned an empty response.');
+    }
+
+    return { ok: true, provider: validation.provider, response: text.slice(0, 300) };
+}
+
 // ── API Key helpers ─────────────────────────────────────────────────────────────
 
 /**

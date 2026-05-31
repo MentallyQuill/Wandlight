@@ -32,9 +32,23 @@ export function buildMemo(state, settingsOverride = {}) {
     return '[WANDLIGHT CONTINUITY STATE]\n' + chunks.join('\n\n') + '\n[/WANDLIGHT CONTINUITY STATE]';
 }
 
+function getCachedModelCompression(state, settings, kind) {
+    if (!state) return '';
+    const mode = kind === 'continuity' ? settings.continuityInjectionMode : settings.loreInjectionMode;
+    if (mode !== 'compressed') return '';
+    const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
+    const status = state[statusKey] || {};
+    const signature = getMemoSignature(state, 'compressed', kind);
+    return status.lastSignature === signature && typeof status.cachedText === 'string' && status.cachedText.trim()
+        ? status.cachedText.trim()
+        : '';
+}
+
 export function buildContinuityMemo(state, settingsOverride = {}) {
     if (!state) return '';
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
+    const cached = getCachedModelCompression(state, settings, 'continuity');
+    if (cached) return cached;
     const cfg = state.continuityConfig || {};
     const lines = [];
 
@@ -181,6 +195,8 @@ export function buildContinuityMemo(state, settingsOverride = {}) {
 export function buildLoreMemo(state, settingsOverride = {}) {
     if (!state) return '';
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
+    const cached = getCachedModelCompression(state, settings, 'lore');
+    if (cached) return cached;
     const maxLore = Number(settings.maxLoreEntriesInMemo) || MAX_LORE_ENTRIES_IN_MEMO;
     const activeLore = getInjectableLoreEntries(state, maxLore);
     if (!activeLore.length) return '';

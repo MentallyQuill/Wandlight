@@ -100,7 +100,7 @@ export const DEFAULT_SETTINGS = {
     continuityOpenAIKeySalt: '',
     continuityOpenAIKeyIv: '',
     continuityOpenAIKeySet: false,
-    continuityOpenAIUseJsonMode: true,
+    continuityOpenAIUseJsonMode: false,
     continuityOpenAIUseSTProxy: false,
     continuityTemperature: 0.7,
     continuityTopP: 0.98,
@@ -118,7 +118,7 @@ export const DEFAULT_SETTINGS = {
     loreOpenAIKeySalt: '',
     loreOpenAIKeyIv: '',
     loreOpenAIKeySet: false,
-    loreOpenAIUseJsonMode: true,
+    loreOpenAIUseJsonMode: false,
     loreOpenAIUseSTProxy: false,
 
     // Lore generation parameters (separate from main RP model settings)
@@ -199,6 +199,8 @@ export function getDefaultState() {
             lastTokenEstimate: 0,
             turnsSinceCompression: 0,
             lastChatLength: 0,
+            cachedText: '',
+            lastError: '',
         },
         continuityCompressionStatus: {
             lastCompressedAt: 0,
@@ -207,6 +209,8 @@ export function getDefaultState() {
             lastTokenEstimate: 0,
             turnsSinceCompression: 0,
             lastChatLength: 0,
+            cachedText: '',
+            lastError: '',
         },
 
         // Lore panel UI state (schema v4)
@@ -250,7 +254,7 @@ export function getDefaultState() {
 }
 
 // ── Extraction prompt template ──────────────────────────────────────────────────
-export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State Extractor for a Harry Potter / Hogwarts roleplay. Your task is to read the latest roleplay messages and the current continuity state, then output a JSON delta describing only what changed.
+export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State Extractor for a Harry Potter / Hogwarts roleplay. Your task is to read the latest roleplay messages and the current continuity state, then output a JSON delta describing what changed. If this is the first useful scan and the current state is mostly empty, output all clearly established continuity details as additions/changes.
 
 <rules>
 1. Output ONLY a valid JSON object — no markdown fences, no preamble, no commentary.
@@ -260,7 +264,7 @@ export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State 
 5. Character knowledge arrays should be merged (added to existing), not replaced.
 6. For secrets, relationships, and threads: use "added" for new entries, "updated" for changes to existing entries (with index), "removed" for removed entries.
 7. Be conservative — only flag continuity issues when there is a clear contradiction, not just ambiguity.
-8. Canon era, in-universe date, and canon boundary should only change when explicitly established in the narrative.
+8. Canon era, in-universe date, and canon boundary should only change when explicitly established in the narrative. If the current state is empty/unset, treat clearly established details as additions instead of returning no changes.
 9. Track clothing, posture, physical state, carried items, goals, emotional state, trust, affection, desire, and connection when clearly implied.
 10. Emotional state should be current-state, not permanent personality. Avoid feedback loops: reduce or omit heightened emotion unless the latest messages reinforce it.
 11. Numeric emotional values use -5 to +5 where 0 is neutral. Do not jump more than 2 points from the current state unless the scene explicitly justifies it.
@@ -343,6 +347,7 @@ Output ONLY valid JSON:
 
 Rules:
 - Do not invent a precise date if only an era is known.
+- Recognize Harry Potter school-year mapping: Sep 1991-Aug 1992 = Philosopher/Sorcerer's Stone Year 1; Sep 1992-Aug 1993 = Chamber of Secrets Year 2; Sep 1993-Aug 1994 = Prisoner of Azkaban Year 3; Sep 1994-Aug 1995 = Goblet of Fire Year 4; Sep 1995-Aug 1996 = Order of the Phoenix Year 5; Sep 1996-Aug 1997 = Half-Blood Prince Year 6; Sep 1997-Aug 1998 = Deathly Hallows Year 7.
 - Prefer canon boundary phrases when precise dates are unclear.
 - If time travel is implied, separate sceneDate from subjectiveDate.
 - Output JSON only.`;

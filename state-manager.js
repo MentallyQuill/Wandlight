@@ -462,14 +462,13 @@ function normalizeContinuityStructure(state) {
     normalizeStateEntries(state);
 
     if (!state.continuityCompressionStatus || typeof state.continuityCompressionStatus !== 'object') {
-        state.continuityCompressionStatus = getDefaultState().continuityCompressionStatus || {
-            lastCompressedAt: 0,
-            lastSignature: '',
-            lastMode: 'direct',
-            lastTokenEstimate: 0,
-            turnsSinceCompression: 0,
-            lastChatLength: 0,
-        };
+        state.continuityCompressionStatus = getDefaultState().continuityCompressionStatus;
+    } else {
+        const defaults = getDefaultState().continuityCompressionStatus;
+        state.continuityCompressionStatus = mergeDefaults(state.continuityCompressionStatus, defaults);
+        state.continuityCompressionStatus.lastCompressedAt = Number.isFinite(Number(state.continuityCompressionStatus.lastCompressedAt)) ? Number(state.continuityCompressionStatus.lastCompressedAt) : 0;
+        state.continuityCompressionStatus.lastTokenEstimate = Number.isFinite(Number(state.continuityCompressionStatus.lastTokenEstimate)) ? Number(state.continuityCompressionStatus.lastTokenEstimate) : 0;
+        state.continuityCompressionStatus.turnsSinceCompression = Number.isFinite(Number(state.continuityCompressionStatus.turnsSinceCompression)) ? Number(state.continuityCompressionStatus.turnsSinceCompression) : 0;
     }
 }
 

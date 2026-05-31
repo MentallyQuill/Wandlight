@@ -25,7 +25,7 @@ import {
 import { buildMemo, buildMemoPreview, buildContinuityPreview, buildLorePreview, getMemoSignature } from './memo-builder.js';
 import { onExtractionTriggered } from './extractor.js';
 import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
-import { validateLoreProviderConfiguration } from './lore-llm-client.js';
+import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
 
 const PANEL_ID = 'wandlight-lore-panel';
 const MIN_PANEL_WIDTH = 420;
@@ -1325,8 +1325,8 @@ function renderInjectionTab(container, state) {
     const activeLore = getPanelLoreState(state).counts.active || 0;
     const continuityPreview = buildContinuityPreview(state, settings.continuityInjectionMode || 'direct');
     const lorePreview = buildLorePreview(state, settings.loreInjectionMode || 'direct');
-    recordCompressionPreview(state, settings.loreInjectionMode || 'direct', lorePreview, 'lore');
-    recordCompressionPreview(state, settings.continuityInjectionMode || 'direct', continuityPreview, 'continuity');
+    updateCompressionTurnStatus(state, 'lore');
+    updateCompressionTurnStatus(state, 'continuity');
 
     container.appendChild(createSectionHeader(
         'Injection',
@@ -1367,19 +1367,19 @@ function renderInjectionTab(container, state) {
     const continuityTitle = document.createElement('div');
     continuityTitle.className = 'wandlight-runtime-card-title';
     continuityTitle.textContent = 'Continuity Handling Mode';
-    addTooltip(continuityTitle, 'Direct sends the structured continuity state with detail. Compressed shortens continuity sections and cools heightened emotions toward neutral unless recent chat reinforced them.');
+    addTooltip(continuityTitle, 'Direct sends the structured continuity state with detail. Compressed uses the Continuity provider to produce a concise cached version from the direct continuity block.');
     continuityCard.appendChild(continuityTitle);
     const continuityButtons = document.createElement('div');
     continuityButtons.className = 'wandlight-mode-buttons';
     continuityButtons.appendChild(createContinuityModeButton('direct', 'Direct', 'Insert editable continuity state with full section detail.', settings));
-    continuityButtons.appendChild(createContinuityModeButton('compressed', 'Compressed', 'Shorten continuity state for lower context cost. Heightened short-term emotions cool toward neutral over time.', settings));
+    continuityButtons.appendChild(createContinuityModeButton('compressed', 'Compressed', 'Use a model-compressed continuity block. If no cached compression exists, clicking Compressed starts a compression request.', settings));
     continuityCard.appendChild(continuityButtons);
 
     const continuityLevel = document.createElement('label');
     continuityLevel.className = 'wandlight-slider-row';
     const continuityLevelText = document.createElement('span');
     continuityLevelText.textContent = `Compression level: ${settings.continuityCompressionLevel || 2}`;
-    addTooltip(continuityLevelText, 'Higher levels shorten continuity-state lines more aggressively. This does not edit stored state.');
+    addTooltip(continuityLevelText, 'Higher levels ask the Continuity provider for a shorter compressed continuity block. This does not edit stored state.');
     const continuityRange = document.createElement('input');
     continuityRange.type = 'range';
     continuityRange.min = '1';
@@ -1415,7 +1415,13 @@ function renderInjectionTab(container, state) {
     decay.appendChild(decayText);
     decay.appendChild(decayInput);
     continuityCard.appendChild(decay);
-    continuityCard.appendChild(createKeyValue('Continuity status', getContinuityCompressionStatusText(getState()), 'Shows when compressed continuity preview was last calculated.'));
+    continuityCard.appendChild(createKeyValue('Continuity status', getContinuityCompressionStatusText(getState()), 'Shows when model-compressed continuity was last calculated.'));
+    const continuityCompressActions = document.createElement('div');
+    continuityCompressActions.className = 'wandlight-primary-actions';
+    continuityCompressActions.appendChild(createButton('Compress Continuity Now', 'Uses the Continuity provider to compress the direct Continuity Injection Preview and cache it for compressed injection.', async (btn) => {
+        await runModelCompression('continuity', btn);
+    }, 'wandlight-primary-button'));
+    continuityCard.appendChild(continuityCompressActions);
     container.appendChild(continuityCard);
 
     const loreCard = document.createElement('div');
@@ -1423,12 +1429,12 @@ function renderInjectionTab(container, state) {
     const loreTitle = document.createElement('div');
     loreTitle.className = 'wandlight-runtime-card-title';
     loreTitle.textContent = 'Lore Handling Mode';
-    addTooltip(loreTitle, 'Direct sends selected active lore with full facts. Compressed shortens unpinned facts before injection; pinned entries remain more detailed.');
+    addTooltip(loreTitle, 'Direct sends selected active lore with full facts. Compressed uses the Lore provider to produce a concise cached version of the direct lore block. Pinned entries are emphasized as protected details.');
     loreCard.appendChild(loreTitle);
     const loreButtons = document.createElement('div');
     loreButtons.className = 'wandlight-mode-buttons';
     loreButtons.appendChild(createInjectionModeButton('direct', 'Direct', 'Insert active lore entries mostly verbatim, subject to the active-lore cap.', settings));
-    loreButtons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Shorten unpinned lore facts during injection so more entries fit into context. Stored lore is not changed.', settings));
+    loreButtons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Use a model-compressed lore block. If no cached compression exists, clicking Compressed starts a compression request. Stored lore is not changed.', settings));
     loreCard.appendChild(loreButtons);
     loreCard.appendChild(createKeyValue('Active lore available', String(activeLore), 'Entries eligible for prompt injection after filters, pinning, and muting.'));
     loreCard.appendChild(createKeyValue('Pinned protection', 'enabled', 'Pinned entries are prioritized and kept less compressed than ordinary entries.'));
@@ -1437,7 +1443,7 @@ function renderInjectionTab(container, state) {
     levelLabel.className = 'wandlight-slider-row';
     const levelText = document.createElement('span');
     levelText.textContent = `Compression level: ${settings.loreCompressionLevel || 2}`;
-    addTooltip(levelText, 'Higher levels shorten unpinned entries more aggressively. Pinned entries are preserved with more detail.');
+    addTooltip(levelText, 'Higher levels ask the Lore provider for a shorter compressed lore block. Pinned entries are identified as protected details.');
     const level = document.createElement('input');
     level.type = 'range';
     level.min = '1';
@@ -1458,7 +1464,7 @@ function renderInjectionTab(container, state) {
     intervalLabel.className = 'wandlight-inline-field';
     const intervalText = document.createElement('span');
     intervalText.textContent = 'Auto-compress interval';
-    addTooltip(intervalText, 'For future model-based compression caching. Current deterministic compression updates immediately when lore or settings change.');
+    addTooltip(intervalText, 'Number of completed chat turns before Wandlight should refresh model-compressed lore after lore changes. Manual compression is available with Compress Lore Now.');
     const interval = document.createElement('input');
     interval.type = 'number';
     interval.min = '1';
@@ -1474,7 +1480,13 @@ function renderInjectionTab(container, state) {
     intervalLabel.appendChild(intervalText);
     intervalLabel.appendChild(interval);
     loreCard.appendChild(intervalLabel);
-    loreCard.appendChild(createKeyValue('Lore compression status', getCompressionStatusText(getState()), 'Shows when compressed lore preview was last calculated and how many chat turns have elapsed since then.'));
+    loreCard.appendChild(createKeyValue('Lore compression status', getCompressionStatusText(getState()), 'Shows when model-compressed lore was last calculated and how many chat turns have elapsed since then.'));
+    const loreCompressActions = document.createElement('div');
+    loreCompressActions.className = 'wandlight-primary-actions';
+    loreCompressActions.appendChild(createButton('Compress Lore Now', 'Uses the Lore provider to compress the direct Lore Injection Preview and cache it for compressed injection.', async (btn) => {
+        await runModelCompression('lore', btn);
+    }, 'wandlight-primary-button'));
+    loreCard.appendChild(loreCompressActions);
     container.appendChild(loreCard);
 
     container.appendChild(createInjectionPreviewCard('Continuity Injection Preview', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This preview shows only Continuity tab state. It can be placed at a different depth later because it is now separated from Lore.'));
@@ -1516,8 +1528,8 @@ function refreshInjectionPreviewOnly() {
     const settings = getSettings();
     const continuity = buildContinuityPreview(state, settings.continuityInjectionMode || 'direct');
     const lore = buildLorePreview(state, settings.loreInjectionMode || 'direct');
-    recordCompressionPreview(state, settings.continuityInjectionMode || 'direct', continuity, 'continuity');
-    recordCompressionPreview(state, settings.loreInjectionMode || 'direct', lore, 'lore');
+    updateCompressionTurnStatus(state, 'continuity');
+    updateCompressionTurnStatus(state, 'lore');
 
     const continuityPre = panelRoot?.querySelector('.wandlight-continuity-injection-preview');
     if (continuityPre) {
@@ -1530,38 +1542,138 @@ function refreshInjectionPreviewOnly() {
     }
 }
 
-function recordCompressionPreview(state, mode, memo, kind = 'lore') {
+function updateCompressionTurnStatus(state, kind = 'lore') {
     if (!state) return;
     const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
-    if (!state[statusKey]) {
-        state[statusKey] = {
-            lastCompressedAt: 0,
-            lastSignature: '',
-            lastMode: 'direct',
-            lastTokenEstimate: 0,
-            turnsSinceCompression: 0,
-            lastChatLength: 0,
-        };
-    }
-    const signature = getMemoSignature(state, mode, kind);
-    const chatLength = getChatLength();
     const status = state[statusKey];
+    if (!status?.lastCompressedAt) return;
+    const chatLength = getChatLength();
+    status.turnsSinceCompression = Math.max(0, chatLength - Number(status.lastChatLength || chatLength));
+    saveState(state);
+}
 
-    if (mode === 'compressed' && status.lastSignature !== signature) {
-        status.lastCompressedAt = Date.now();
-        status.lastSignature = signature;
-        status.lastMode = mode;
-        status.lastTokenEstimate = estimateTokens(memo || '');
-        status.lastChatLength = chatLength;
-        status.turnsSinceCompression = 0;
-        saveState(state);
-        return;
+async function runModelCompression(kind = 'lore', btn = null) {
+    const settings = getSettings();
+    const providerKind = kind === 'continuity' ? 'continuity' : 'lore';
+    const validation = validateLoreProviderConfiguration(providerKind);
+    if (!validation.ok) {
+        toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression blocked: ${validation.message}`, 'error');
+        return null;
     }
 
-    if (mode === 'compressed') {
-        status.turnsSinceCompression = Math.max(0, chatLength - Number(status.lastChatLength || chatLength));
-        saveState(state);
+    const originalText = btn?.textContent || '';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = kind === 'continuity' ? 'Compressing continuity...' : 'Compressing lore...';
     }
+
+    try {
+        const state = getState();
+        const directText = kind === 'continuity'
+            ? buildContinuityPreview(state, 'direct')
+            : buildLorePreview(state, 'direct');
+
+        if (!directText || !directText.trim()) {
+            toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} preview is empty; nothing to compress.`, 'warning');
+            return null;
+        }
+
+        const level = kind === 'continuity'
+            ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 2))
+            : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 2));
+
+        const context = JSON.stringify({
+            sceneDate: state?.loreContext?.sceneDate || state?.canon?.inUniverseDate || '',
+            canonBoundary: state?.loreContext?.canonBoundary || state?.canon?.canonBoundary || '',
+            branchId: state?.loreContext?.branchId || 'main',
+            scene: state?.scene || {},
+        }, null, 2);
+
+        const compressionPrompt = buildCompressionPrompt(kind, level, context, directText);
+        const compressed = await sendLoreRequest(
+            'You are Wandlight Compression. Output only the compressed injection block. Do not use markdown fences. Do not add commentary.',
+            compressionPrompt,
+            {
+                providerKind,
+                maxTokens: Math.max(256, Math.min(2048, Math.ceil(directText.length / 3))),
+                prefill: '',
+            }
+        );
+
+        const cleaned = cleanCompressedText(compressed);
+        if (!cleaned) {
+            throw new Error('Compression returned empty text.');
+        }
+
+        const freshState = getState();
+        const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
+        if (!freshState[statusKey]) freshState[statusKey] = {};
+        freshState[statusKey] = {
+            ...freshState[statusKey],
+            lastCompressedAt: Date.now(),
+            lastSignature: getMemoSignature(freshState, 'compressed', kind),
+            lastMode: 'compressed',
+            lastTokenEstimate: estimateTokens(cleaned),
+            turnsSinceCompression: 0,
+            lastChatLength: getChatLength(),
+            cachedText: cleaned,
+            lastError: '',
+        };
+        saveState(freshState);
+        refreshPanelBody({ preserveScroll: false });
+        toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression updated.`);
+        return cleaned;
+    } catch (e) {
+        const freshState = getState();
+        const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
+        if (freshState[statusKey]) {
+            freshState[statusKey].lastError = e?.message || String(e);
+            saveState(freshState);
+        }
+        toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression failed: ${e?.message || e}`, 'error');
+        refreshPanelBody({ preserveScroll: false });
+        return null;
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    }
+}
+
+function buildCompressionPrompt(kind, level, context, directText) {
+    const kindLabel = kind === 'continuity' ? 'Continuity State' : 'Lore Entries';
+    const compressionTargets = {
+        1: 'light compression: preserve most details; remove redundancy only',
+        2: 'moderate compression: concise but still descriptive',
+        3: 'firm compression: keep only roleplay-relevant facts and current-scene implications',
+        4: 'heavy compression: short bullets; preserve critical secrets, constraints, and pinned/protected details',
+        5: 'aggressive compression: minimum viable context; only essential facts, constraints, secrets, and active hazards',
+    };
+
+    return `Compress the following Wandlight ${kindLabel} injection block for a Harry Potter roleplay.
+
+Story context:
+${context}
+
+Compression level ${level}: ${compressionTargets[level] || compressionTargets[2]}.
+
+Rules:
+- Preserve facts that affect current character behavior, secrets, continuity constraints, locations, relationships, active goals, and contradictions.
+- Do not invent new facts.
+- Do not remove do-not-reveal / only-reveal constraints.
+- For lore, preserve pinned/protected entries more fully than ordinary entries.
+- For continuity, keep current scene, character state, knowledge boundaries, and active emotional state if relevant.
+- Output only the compressed injection text, with the same general heading style if useful.
+
+Direct injection block:
+${directText}`;
+}
+
+function cleanCompressedText(text) {
+    return String(text || '')
+        .replace(/```(?:text|markdown)?\s*([\s\S]*?)```/i, '$1')
+        .trim();
 }
 
 function getCompressionStatusText(state) {
@@ -1570,11 +1682,18 @@ function getCompressionStatusText(state) {
     if ((settings.loreInjectionMode || 'direct') !== 'compressed') {
         return 'Direct mode active; compression not used.';
     }
+    const currentSignature = getMemoSignature(state, 'compressed', 'lore');
+    if (status.lastSignature !== currentSignature) {
+        return status.lastError ? `cached compression is stale; last error: ${status.lastError}` : 'Cached compression is missing or stale. Click Compress Lore Now.';
+    }
+    if (status.lastError) {
+        return `last compression failed: ${status.lastError}`;
+    }
     if (!status.lastCompressedAt) {
-        return 'Compressed preview not calculated yet.';
+        return 'No cached model compression yet. Click Compress Lore Now.';
     }
     const when = new Date(status.lastCompressedAt).toLocaleTimeString();
-    return `last calculated ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens`;
+    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens`;
 }
 
 function getContinuityCompressionStatusText(state) {
@@ -1583,11 +1702,18 @@ function getContinuityCompressionStatusText(state) {
     if ((settings.continuityInjectionMode || 'direct') !== 'compressed') {
         return 'Direct mode active; continuity compression not used.';
     }
+    const currentSignature = getMemoSignature(state, 'compressed', 'continuity');
+    if (status.lastSignature !== currentSignature) {
+        return status.lastError ? `cached compression is stale; last error: ${status.lastError}` : 'Cached compression is missing or stale. Click Compress Continuity Now.';
+    }
+    if (status.lastError) {
+        return `last compression failed: ${status.lastError}`;
+    }
     if (!status.lastCompressedAt) {
-        return 'Compressed continuity preview not calculated yet.';
+        return 'No cached model compression yet. Click Compress Continuity Now.';
     }
     const when = new Date(status.lastCompressedAt).toLocaleTimeString();
-    return `last calculated ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens`;
+    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens`;
 }
 
 function getChatLength() {
@@ -1599,6 +1725,14 @@ function getChatLength() {
     }
 }
 
+function hasValidModelCompression(kind = 'lore') {
+    const state = getState();
+    const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
+    const status = state?.[statusKey] || {};
+    const signature = getMemoSignature(state, 'compressed', kind);
+    return status.lastSignature === signature && typeof status.cachedText === 'string' && status.cachedText.trim();
+}
+
 function createInjectionModeButton(mode, label, tooltip, settings) {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -1606,11 +1740,15 @@ function createInjectionModeButton(mode, label, tooltip, settings) {
     if ((settings.loreInjectionMode || 'direct') === mode) btn.classList.add('wandlight-mode-button-active');
     btn.textContent = label;
     addTooltip(btn, tooltip);
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
         const next = getSettings();
         next.loreInjectionMode = mode;
         saveSettings(next);
-        refreshPanelBody({ preserveScroll: false });
+        if (mode === 'compressed' && !hasValidModelCompression('lore')) {
+            await runModelCompression('lore', btn);
+        } else {
+            refreshPanelBody({ preserveScroll: false });
+        }
         refreshHeader();
         toast(`Lore injection mode set to ${label}.`);
     });
@@ -1624,11 +1762,15 @@ function createContinuityModeButton(mode, label, tooltip, settings) {
     if ((settings.continuityInjectionMode || 'direct') === mode) btn.classList.add('wandlight-mode-button-active');
     btn.textContent = label;
     addTooltip(btn, tooltip);
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
         const next = getSettings();
         next.continuityInjectionMode = mode;
         saveSettings(next);
-        refreshPanelBody({ preserveScroll: false });
+        if (mode === 'compressed' && !hasValidModelCompression('continuity')) {
+            await runModelCompression('continuity', btn);
+        } else {
+            refreshPanelBody({ preserveScroll: false });
+        }
         refreshHeader();
         toast(`Continuity injection mode set to ${label}.`);
     });

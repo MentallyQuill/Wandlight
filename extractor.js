@@ -68,6 +68,88 @@ function collectRecentMessages(chat, count = 10) {
  * @param {string} response - Raw LLM response text
  * @returns {Object|null} Parsed + validated WandlightDelta or null on failure
  */
+function isPlainObject(value) {
+    return value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isArrayDeltaShape(value) {
+    return isPlainObject(value) && (
+        Array.isArray(value.added) ||
+        Array.isArray(value.updated) ||
+        Array.isArray(value.removed) ||
+        Array.isArray(value.resolved)
+    );
+}
+
+function coerceArrayOrPatch(value) {
+    if (Array.isArray(value)) return { added: value };
+    if (isArrayDeltaShape(value)) return value;
+    return value;
+}
+
+function coerceContinuityFlags(value) {
+    if (Array.isArray(value)) return { added: value };
+    if (isPlainObject(value)) return value;
+    return value;
+}
+
+function coerceFullStateOrLooseDelta(parsed) {
+    if (!isPlainObject(parsed)) return parsed;
+
+    const knownKeys = ['canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags'];
+    let delta = parsed;
+
+    // Models often return a full state object on first scan instead of a WandlightDelta.
+    // Treat known top-level continuity sections as changes, then normalize section shapes.
+    if (!isPlainObject(delta.changes)) {
+        const candidate = isPlainObject(parsed.state) ? parsed.state
+            : isPlainObject(parsed.continuityState) ? parsed.continuityState
+            : isPlainObject(parsed.continuity) ? parsed.continuity
+            : parsed;
+        const hasKnownTopLevel = knownKeys.some(k => k in candidate);
+        if (hasKnownTopLevel) {
+            const changes = {};
+            for (const key of knownKeys) {
+                if (candidate[key] !== undefined) changes[key] = candidate[key];
+            }
+            delta = { summary: parsed.summary || 'Initial continuity state extracted', changes };
+        } else if (Object.keys(parsed).length === 0) {
+            delta = { summary: 'No changes detected', changes: {} };
+        }
+    }
+
+    if (!isPlainObject(delta.changes)) return delta;
+
+    const changes = { ...delta.changes };
+
+    if (changes.characters !== undefined) changes.characters = coerceArrayOrPatch(changes.characters);
+    if (changes.inventory !== undefined) changes.inventory = coerceArrayOrPatch(changes.inventory);
+    if (changes.objectives !== undefined) changes.objectives = coerceArrayOrPatch(changes.objectives);
+    if (changes.secrets !== undefined) changes.secrets = coerceArrayOrPatch(changes.secrets);
+    if (changes.relationships !== undefined) changes.relationships = coerceArrayOrPatch(changes.relationships);
+    if (changes.threads !== undefined) changes.threads = coerceArrayOrPatch(changes.threads);
+    if (changes.continuityFlags !== undefined) changes.continuityFlags = coerceContinuityFlags(changes.continuityFlags);
+
+    // Some models return singular fields for secrets/relationships/threads under the object.
+    for (const key of ['secrets', 'relationships', 'threads']) {
+        const value = changes[key];
+        if (isPlainObject(value) && !isArrayDeltaShape(value)) {
+            changes[key] = { added: [value] };
+        }
+    }
+
+    delta = { ...delta, changes };
+    return delta;
+}
+
+/**
+ * Parses a JSON delta string from the LLM extraction response.
+ * Handles markdown fences, leading/trailing non-JSON text, and bad escapes.
+ * Then validates the parsed delta against the schema.
+ *
+ * @param {string} response - Raw LLM response text
+ * @returns {Object|null} Parsed + validated WandlightDelta or null on failure
+ */
 function parseDeltaResponse(response) {
     if (!response || typeof response !== 'string') return null;
 
@@ -95,32 +177,75 @@ function parseDeltaResponse(response) {
         return null;
     }
 
-    // Ensure parsed has changes key — LLMs sometimes return bare objects
-    if (parsed && typeof parsed === 'object' && !parsed.changes) {
-        // If the object has known change keys at top level, wrap them
-        const knownKeys = ['canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags'];
-        const hasChangesKey = knownKeys.some(k => k in parsed);
-        if (hasChangesKey) {
-            parsed = { summary: parsed.summary || '', changes: parsed };
-        } else if (Object.keys(parsed).length === 0) {
-            // Empty object — treat as no-op
-            parsed = { summary: 'No changes detected', changes: {} };
-        }
-    }
+    parsed = coerceFullStateOrLooseDelta(parsed);
 
-    // Validate against the formal delta schema
-    if (!parsed.changes) {
-        console.warn(`${LOG_PREFIX} Parsed delta has no "changes" key`);
+    // Validate against the formal delta schema after coercion.
+    if (!parsed?.changes) {
+        console.warn(`${LOG_PREFIX} Parsed continuity response has no usable changes/state object`);
         return null;
     }
 
     const { valid, errors } = validateDelta(parsed);
     if (!valid) {
-        console.warn(`${LOG_PREFIX} Delta validation failed:`, errors.join('; '));
+        console.warn(`${LOG_PREFIX} Delta validation failed after coercion:`, errors.join('; '));
+        console.debug(`${LOG_PREFIX} Coerced delta candidate:`, parsed);
         return null;
     }
 
     return parsed;
+}
+
+function inferHpBoundaryFromText(text) {
+    const value = String(text || '');
+    const monthMap = {
+        jan: 0, january: 0,
+        feb: 1, february: 1,
+        mar: 2, march: 2,
+        apr: 3, april: 3,
+        may: 4,
+        jun: 5, june: 5,
+        jul: 6, july: 6,
+        aug: 7, august: 7,
+        sep: 8, sept: 8, september: 8,
+        oct: 9, october: 9,
+        nov: 10, november: 10,
+        dec: 11, december: 11,
+    };
+    const match = value.match(/\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)?\.?\s*,?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(\d{4})\b/i);
+    if (!match) return { date: '', boundary: '' };
+    const month = monthMap[match[1].toLowerCase().replace('.', '')];
+    const year = Number(match[3]);
+    const schoolYear = month >= 8 ? year : year - 1;
+    const map = {
+        1991: "Philosopher's/Sorcerer's Stone era, Year 1",
+        1992: 'Chamber of Secrets era, Year 2',
+        1993: 'Prisoner of Azkaban era, Year 3',
+        1994: 'Goblet of Fire era, Year 4',
+        1995: 'Order of the Phoenix era, Year 5',
+        1996: 'Half-Blood Prince era, Year 6',
+        1997: 'Deathly Hallows era, Year 7',
+    };
+    return { date: match[0].trim(), boundary: map[schoolYear] || '' };
+}
+
+function inferFallbackContinuityDelta(messages, state = {}) {
+    const inferred = inferHpBoundaryFromText(messages);
+    if (!inferred.date && !inferred.boundary) return null;
+
+    const changes = { canon: {} };
+    if (inferred.date && state?.canon?.inUniverseDate !== inferred.date) {
+        changes.canon.inUniverseDate = inferred.date;
+    }
+    if (inferred.boundary && state?.canon?.canonBoundary !== inferred.boundary) {
+        changes.canon.canonBoundary = inferred.boundary;
+        changes.canon.era = inferred.boundary.replace(/,\s*Year\s*\d+$/i, '');
+    }
+
+    if (!Object.keys(changes.canon).length) return null;
+    return {
+        summary: 'Fallback continuity date/context inferred locally from message heading.',
+        changes,
+    };
 }
 
 /**
@@ -252,7 +377,10 @@ export async function onExtractionTriggered(options = {}) {
         }
 
         // Run the extraction LLM call
-        const delta = await runExtractionCall(stateJson, messages);
+        let delta = await runExtractionCall(stateJson, messages);
+        if (!delta) {
+            delta = inferFallbackContinuityDelta(messages, state);
+        }
         let result = { status: 'no_valid_delta' };
 
         if (delta) {

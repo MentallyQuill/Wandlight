@@ -363,6 +363,73 @@ function chunkMessages(messages = [], chunkSize = 10) {
 }
 
 
+function parseSceneDateParts(value) {
+    const text = String(value || '');
+    const monthMap = {
+        jan: 0, january: 0,
+        feb: 1, february: 1,
+        mar: 2, march: 2,
+        apr: 3, april: 3,
+        may: 4,
+        jun: 5, june: 5,
+        jul: 6, july: 6,
+        aug: 7, august: 7,
+        sep: 8, sept: 8, september: 8,
+        oct: 9, october: 9,
+        nov: 10, november: 10,
+        dec: 11, december: 11,
+    };
+
+    let match = text.match(/\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)?\.?\s*,?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(\d{4})\b/i);
+    if (match) {
+        return { month: monthMap[match[1].toLowerCase().replace('.', '')], day: Number(match[2]), year: Number(match[3]) };
+    }
+
+    match = text.match(/\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/);
+    if (match) {
+        const year = Number(match[3].length === 2 ? `19${match[3]}` : match[3]);
+        return { month: Number(match[1]) - 1, day: Number(match[2]), year };
+    }
+
+    return null;
+}
+
+function inferHarryPotterCanonBoundary(sceneDate) {
+    const parts = parseSceneDateParts(sceneDate);
+    if (!parts || !Number.isFinite(parts.year) || !Number.isFinite(parts.month)) return '';
+
+    const schoolYear = parts.month >= 8 ? parts.year : parts.year - 1;
+    const map = {
+        1991: "Philosopher's/Sorcerer's Stone era, Year 1",
+        1992: 'Chamber of Secrets era, Year 2',
+        1993: 'Prisoner of Azkaban era, Year 3',
+        1994: 'Goblet of Fire era, Year 4',
+        1995: 'Order of the Phoenix era, Year 5',
+        1996: 'Half-Blood Prince era, Year 6',
+        1997: 'Deathly Hallows era, Year 7',
+    };
+    return map[schoolYear] || '';
+}
+
+function correctHarryPotterCanonContext(context) {
+    const normalized = normalizeLoreContext(context || {});
+    const inferred = inferHarryPotterCanonBoundary(normalized.sceneDate || normalized.subjectiveDate || '');
+    if (!inferred) return normalized;
+
+    const current = String(normalized.canonBoundary || '');
+    const hasKnownWrongHpYear = /\b(OotP|Order of the Phoenix|Half[- ]?Blood Prince|HBP|Deathly Hallows|Goblet of Fire|Prisoner of Azkaban|Chamber of Secrets|Year\s+[1-7])\b/i.test(current)
+        && current.toLowerCase() !== inferred.toLowerCase();
+
+    if (!current || hasKnownWrongHpYear) {
+        normalized.canonBoundary = inferred;
+        normalized.summary = normalized.summary
+            ? `${normalized.summary} Canon boundary normalized from scene date.`
+            : `Canon boundary inferred from scene date: ${inferred}.`;
+    }
+
+    return normalized;
+}
+
 function inferContextLocallyFromMessages(messages, state = getState()) {
     const text = String(messages || '');
     const result = {
@@ -376,8 +443,8 @@ function inferContextLocallyFromMessages(messages, state = getState()) {
 
     const datePatterns = [
         /(?:^|\n)\s*(?:date|day|in[- ]?universe date|scene date)\s*[:\-]\s*([^\n]+)/i,
-        /(?:^|\n)\s*#{1,6}\s*([^\n]*(?:\b\d{4}\b|\bJanuary\b|\bFebruary\b|\bMarch\b|\bApril\b|\bMay\b|\bJune\b|\bJuly\b|\bAugust\b|\bSeptember\b|\bOctober\b|\bNovember\b|\bDecember\b)[^\n]*)/i,
-        /\b((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})\b/i,
+        /(?:^|\n)\s*#{1,6}\s*([^\n]*(?:\b\d{4}\b|\bJan\.?\b|\bFeb\.?\b|\bMar\.?\b|\bApr\.?\b|\bJun\.?\b|\bJul\.?\b|\bAug\.?\b|\bSep\.?\b|\bSept\.?\b|\bOct\.?\b|\bNov\.?\b|\bDec\.?\b|\bJanuary\b|\bFebruary\b|\bMarch\b|\bApril\b|\bMay\b|\bJune\b|\bJuly\b|\bAugust\b|\bSeptember\b|\bOctober\b|\bNovember\b|\bDecember\b)[^\n]*)/i,
+        /\b((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)?\.?\s*,?\s*(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+\d{1,2}(?:st|nd|rd|th)?\s*,?\s+\d{4})\b/i,
         /\b(\d{1,2}\/\d{1,2}\/\d{2,4})\b/,
     ];
     for (const pattern of datePatterns) {
@@ -403,7 +470,8 @@ function inferContextLocallyFromMessages(messages, state = getState()) {
         result.timeTravelMode = /future/i.test(tt[0]) ? 'visitor_from_future' : 'alternate_branch';
     }
 
-    return result.sceneDate || result.canonBoundary || result.branchId !== 'main' ? normalizeLoreContext(result) : null;
+    const corrected = correctHarryPotterCanonContext(result);
+    return corrected.sceneDate || corrected.canonBoundary || corrected.branchId !== 'main' ? corrected : null;
 }
 
 // ── Lore Context Detection ──────────────────────────────────────────────────────
@@ -472,7 +540,7 @@ export async function runLoreContextDetection(options = {}) {
             return null;
         }
 
-        const normalized = normalizeLoreContext({ ...parsed, lastDetectedAt: Date.now() });
+        const normalized = correctHarryPotterCanonContext({ ...parsed, lastDetectedAt: Date.now() });
         setLoreContext(normalized);
         progress?.('Context detection complete.', 100);
 

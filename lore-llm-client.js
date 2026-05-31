@@ -37,7 +37,7 @@ function getProviderSettings(kind = 'lore') {
         openAIBaseUrl: settings[`${prefix}OpenAIBaseUrl`] || '',
         openAIModel: settings[`${prefix}OpenAIModel`] || '',
         openAIKeySet: !!settings[`${prefix}OpenAIKeySet`],
-        openAIUseJsonMode: settings[`${prefix}OpenAIUseJsonMode`] !== false,
+        openAIUseJsonMode: settings[`${prefix}OpenAIUseJsonMode`] === true,
         openAIUseSTProxy: !!settings[`${prefix}OpenAIUseSTProxy`],
         temperature: Number(settings[`${prefix}Temperature`] ?? 0.7),
         topP: Number(settings[`${prefix}TopP`] ?? 0.98),
@@ -407,8 +407,9 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
             includeInstruct: true,
             preset: cfg.completionPresetId || undefined,
             completionPreset: cfg.completionPresetId || undefined,
-            reasoning_effort: 'medium',
-            reasoningEffort: 'medium',
+            // Do not force reasoning_effort here. Some providers/profiles, especially DeepSeek-compatible
+            // endpoints, reject unsupported values. If a SillyTavern connection profile itself sends
+            // reasoning_effort:'auto', fix that profile/preset or use Wandlight's direct OpenAI-compatible provider.
         },
     );
 

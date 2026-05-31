@@ -424,7 +424,7 @@ function setupProviderControls(container, kind, label) {
     if (openaiBaseUrl) openaiBaseUrl.value = settings[baseUrlKey] || '';
     if (openaiModelSearch) openaiModelSearch.value = settings[modelKey] || '';
     if (openaiModel) openaiModel.value = settings[modelKey] || '';
-    if (openaiJsonMode) openaiJsonMode.checked = settings[jsonModeKey] !== false;
+    if (openaiJsonMode) openaiJsonMode.checked = settings[jsonModeKey] === true;
     if (openaiSTProxy) openaiSTProxy.checked = !!settings[proxyKey];
 
     function refreshProviderRows() {

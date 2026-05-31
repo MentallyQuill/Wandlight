@@ -95,6 +95,7 @@ export function saveState(state) {
     if (!state._version) {
         state._version = SCHEMA_VERSION;
     }
+    state = sanitizeLoreArraysForStorage(state);
     chatMetadata[MODULE_KEY] = state;
     if (typeof saveMetadata === 'function') {
         saveMetadata();
@@ -131,9 +132,12 @@ export function pushStateSnapshot(state, summary, maxSnapshots) {
         snapshotState = JSON.parse(JSON.stringify(state));
     }
 
-    // Strip the snapshot of its own history/meta fields to keep it compact
+    // Strip the snapshot of its own history/meta fields to keep it compact.
+    // Pending canon database proposals can be large and should never be copied into undo history.
     snapshotState.stateHistory = [];
     snapshotState.memoHistory = [];
+    snapshotState.pendingLoreEntries = [];
+    snapshotState.pendingLoreMeta = null;
     snapshotState.lastDelta = null;
 
     const snapshot = {
@@ -201,6 +205,7 @@ export function saveStateWithSnapshot(state, maxSnapshots) {
     if (!ctx || !ctx.chatMetadata) return;
     const { chatMetadata, saveMetadata } = ctx;
     if (!state._version) state._version = SCHEMA_VERSION;
+    state = sanitizeLoreArraysForStorage(state);
 
     // Build compact memo snapshot for display history
     if (typeof globalThis._wandlightBuildMemo === 'function') {
@@ -232,9 +237,21 @@ function truncateText(value, limit = 1000) {
 }
 
 function compactStringArray(values, limit = 12, textLimit = 160) {
-    return Array.isArray(values)
-        ? values.map(v => truncateText(v, textLimit).trim()).filter(Boolean).slice(0, limit)
-        : [];
+    const rawValues = Array.isArray(values) ? values : [];
+    const seen = new Set();
+    const out = [];
+
+    for (const raw of rawValues) {
+        const text = truncateText(raw, textLimit).trim();
+        if (!text) continue;
+        const key = text.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(text);
+        if (out.length >= limit) break;
+    }
+
+    return out;
 }
 
 function compactStringMapForStorage(value, limit = 16, textLimit = 120) {
@@ -514,6 +531,7 @@ export function migrateState(state) {
     state.loreContext = normalizeLoreContext(state.loreContext || {});
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []);
     state.pendingLoreEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
+    sanitizeLoreArraysForStorage(state);
 
     normalizeContinuityStructure(state);
 

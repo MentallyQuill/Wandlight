@@ -64,6 +64,23 @@ function asStringArray(value) {
     return [];
 }
 
+function uniqueLimitedStringArray(values, limit = 32) {
+    const seen = new Set();
+    const out = [];
+
+    for (const raw of asStringArray(values)) {
+        const text = String(raw || '').trim();
+        if (!text) continue;
+        const key = text.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(text);
+        if (out.length >= limit) break;
+    }
+
+    return out;
+}
+
 function asFirstString(...values) {
     for (const value of values) {
         if (value && typeof value === 'object' && !Array.isArray(value)) continue;
@@ -198,19 +215,21 @@ function normalizeScope(input) {
     const appliesTo = asStringArray(input.appliesTo);
     const knownScopeFields = new Set(['characters', 'locations', 'factions', 'topics', 'objects', 'spells', 'schoolYears', 'books', 'eras']);
     const extra = {};
+
     for (const [key, value] of Object.entries(raw)) {
         if (!knownScopeFields.has(key)) extra[key] = value;
     }
+
     return {
-        characters: asStringArray(raw.characters).concat(asStringArray(activeWhen.charactersPresentAny), appliesTo),
-        locations: asStringArray(raw.locations).concat(asStringArray(activeWhen.locationsAny)),
-        factions: asStringArray(raw.factions),
-        topics: asStringArray(raw.topics).concat(asStringArray(activeWhen.tagsAny)),
-        objects: asStringArray(raw.objects),
-        spells: asStringArray(raw.spells),
-        schoolYears: asStringArray(raw.schoolYears),
-        books: asStringArray(raw.books),
-        eras: asStringArray(raw.eras).concat(asStringArray(activeWhen.erasAny)),
+        characters: uniqueLimitedStringArray([raw.characters, activeWhen.charactersPresentAny, appliesTo], 32),
+        locations: uniqueLimitedStringArray([raw.locations, activeWhen.locationsAny], 32),
+        factions: uniqueLimitedStringArray(raw.factions, 24),
+        topics: uniqueLimitedStringArray([raw.topics, activeWhen.tagsAny], 40),
+        objects: uniqueLimitedStringArray(raw.objects, 24),
+        spells: uniqueLimitedStringArray(raw.spells, 24),
+        schoolYears: uniqueLimitedStringArray(raw.schoolYears, 12),
+        books: uniqueLimitedStringArray(raw.books, 12),
+        eras: uniqueLimitedStringArray([raw.eras, activeWhen.erasAny], 24),
         ...extra,
     };
 }
@@ -286,10 +305,10 @@ function normalizeUiBlock(input) {
 function deriveActiveWhen(scope, input) {
     const activeWhen = asPlainObject(input.activeWhen);
     return {
-        erasAny: asStringArray(activeWhen.erasAny).concat(asStringArray(scope.eras), asStringArray(scope.books)),
-        locationsAny: asStringArray(activeWhen.locationsAny).concat(asStringArray(scope.locations)),
-        charactersPresentAny: asStringArray(activeWhen.charactersPresentAny).concat(asStringArray(scope.characters)),
-        tagsAny: asStringArray(activeWhen.tagsAny).concat(asStringArray(scope.topics), asStringArray(scope.spells), asStringArray(scope.objects)),
+        erasAny: uniqueLimitedStringArray([activeWhen.erasAny, scope.eras, scope.books], 32),
+        locationsAny: uniqueLimitedStringArray([activeWhen.locationsAny, scope.locations], 32),
+        charactersPresentAny: uniqueLimitedStringArray([activeWhen.charactersPresentAny, scope.characters], 32),
+        tagsAny: uniqueLimitedStringArray([activeWhen.tagsAny, scope.topics, scope.spells, scope.objects], 40),
     };
 }
 

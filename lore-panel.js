@@ -1,43 +1,33 @@
 /**
- * lore-panel.js — Wandlight Continuity
- * Floating lore matrix panel component.
- * Renders a draggable, collapsible, resizable panel overlaying the chat area.
- * Shows all lore entries with filtering, search, and pending entry management.
+ * lore-panel.js - Wandlight Continuity
+ * Floating roleplay control window.
  *
- * Imports: constants.js, state-manager.js, lore-matrix.js
- * Imported by: index.js
+ * The extension-menu settings panel is reserved for API setup, data/debug, and
+ * raw previews. This window is the runtime surface used during roleplay.
  */
 
-import { MODULE_KEY } from './constants.js';
 import { getPanelLoreState, normalizeLoreMatrix, normalizeLoreEntry } from './lore-matrix.js';
 import {
     getState,
     getSettings,
+    saveSettings,
     saveState,
+    applyDelta,
+    pushStateSnapshot,
     acceptPendingLoreEntries,
     rejectPendingLoreEntries,
     acceptPendingLoreEntry,
     rejectPendingLoreEntry,
 } from './state-manager.js';
-
-// ── DOM cache ───────────────────────────────────────────────────────────────────
-let panelRoot = null;
-let isDragging = false;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
-
-// ── Resize state ────────────────────────────────────────────────────────────────
-let isResizing = false;
-let resizeStartX = 0;
-let resizeStartY = 0;
-let resizeStartWidth = 0;
-let resizeStartHeight = 0;
-
-const MIN_PANEL_WIDTH = 320;
-const MIN_PANEL_HEIGHT = 260;
-const MAX_PANEL_MARGIN = 16;
+import { buildMemo } from './memo-builder.js';
+import { onExtractionTriggered } from './extractor.js';
+import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
 
 const PANEL_ID = 'wandlight-lore-panel';
+const MIN_PANEL_WIDTH = 420;
+const MIN_PANEL_HEIGHT = 360;
+const MAX_PANEL_MARGIN = 16;
+
 const CATEGORY_LABELS = {
     all: 'All',
     active: 'Active',
@@ -49,20 +39,70 @@ const CATEGORY_LABELS = {
     secret: 'Secret',
     rumor: 'Rumor',
     lie: 'Lie',
-    relationship: 'Rel.',
+    relationship: 'Relationship',
     location: 'Location',
     rule: 'Rule',
     timeline: 'Timeline',
 };
 
-// ── Panel lifecycle ─────────────────────────────────────────────────────────────
+const TAB_LABELS = {
+    session: 'Session',
+    generate: 'Generate',
+    review: 'Review',
+    lore: 'Lore',
+};
 
-/**
- * Creates or shows the floating lore panel.
- * Call this from index.js on CHAT_CHANGED or when the user clicks a button.
- */
+const TAB_TOOLTIPS = {
+    session: 'Runtime controls for the current roleplay session: mode, continuity, prompt injection, and quick scan.',
+    generate: 'Run context detection and create pending lore entries from recent roleplay.',
+    review: 'Approve or dismiss extracted continuity changes and pending lore entries before they affect play.',
+    lore: 'Search, filter, pin, mute, tag, and inspect accepted or pending lore entries.',
+};
+
+const WORKFLOW_MODES = {
+    manual: {
+        label: 'Manual',
+        description: 'No automatic extraction or lore generation. Use the buttons in this window when you want Wandlight to scan or generate.',
+        settings: {
+            autoExtract: false,
+            autoApplyDelta: false,
+            autoGenerateLore: false,
+        },
+    },
+    assisted: {
+        label: 'Assisted',
+        description: 'Extracts continuity changes after turns, but stores them for review instead of applying automatically.',
+        settings: {
+            autoExtract: true,
+            autoApplyDelta: false,
+            autoGenerateLore: false,
+        },
+    },
+    automatic: {
+        label: 'Automatic',
+        description: 'Extracts and applies continuity changes automatically. Story-lore generation can run automatically, but generated lore still remains pending review.',
+        settings: {
+            autoExtract: true,
+            autoApplyDelta: true,
+            autoGenerateLore: true,
+        },
+    },
+};
+
+let panelRoot = null;
+let isDragging = false;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
+let isResizing = false;
+let resizeStartX = 0;
+let resizeStartY = 0;
+let resizeStartWidth = 0;
+let resizeStartHeight = 0;
+
+// Public lifecycle ------------------------------------------------------------
+
 export function showLorePanel() {
-    // Persist isOpen = true
     const state = getState();
     if (state?.lorePanel) {
         state.lorePanel.isOpen = true;
@@ -78,99 +118,30 @@ export function showLorePanel() {
     panelRoot.id = PANEL_ID;
     panelRoot.className = 'wandlight-lore-panel';
 
-    // Apply saved dimensions
-    const savedWidth = Math.max(MIN_PANEL_WIDTH, Number(panelState.width) || 420);
-    const savedHeight = Math.max(MIN_PANEL_HEIGHT, Number(panelState.height) || 520);
+    const savedWidth = Math.max(MIN_PANEL_WIDTH, Number(panelState.width) || 520);
+    const savedHeight = Math.max(MIN_PANEL_HEIGHT, Number(panelState.height) || 640);
+    panelRoot.style.width = `${Math.min(savedWidth, Math.max(MIN_PANEL_WIDTH, window.innerWidth - MAX_PANEL_MARGIN))}px`;
+    panelRoot.style.height = `${Math.min(savedHeight, Math.max(MIN_PANEL_HEIGHT, window.innerHeight - MAX_PANEL_MARGIN))}px`;
 
-    panelRoot.style.width = `${Math.min(savedWidth, window.innerWidth - MAX_PANEL_MARGIN)}px`;
-    panelRoot.style.height = `${Math.min(savedHeight, window.innerHeight - MAX_PANEL_MARGIN)}px`;
-
-    // Apply saved collapsed state
     if (panelState.collapsed) {
         panelRoot.classList.add('wandlight-lore-panel-collapsed');
     }
 
-    // Draggable header
-    const header = document.createElement('div');
-    header.className = 'wandlight-lore-panel-header';
-    header.addEventListener('mousedown', onDragStart);
-
-    // Collapse toggle
-    const collapseBtn = document.createElement('button');
-    collapseBtn.className = 'wandlight-lore-panel-collapse-btn';
-    collapseBtn.textContent = panelState.collapsed ? '▶' : '▼';
-    collapseBtn.title = panelState.collapsed ? 'Expand lore panel' : 'Collapse lore panel';
-    collapseBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleCollapse();
-    });
-    header.appendChild(collapseBtn);
-
-    const title = document.createElement('span');
-    title.className = 'wandlight-lore-panel-title';
-    title.textContent = '\uD83D\uDCD6 Lore Matrix';
-    header.appendChild(title);
-
-    // Pending badge
-    const pendingCount = (state?.pendingLoreEntries || []).length;
-    if (pendingCount > 0) {
-        const badge = document.createElement('span');
-        badge.className = 'wandlight-lore-panel-badge';
-        badge.textContent = `+${pendingCount} pending`;
-        header.appendChild(badge);
-    }
-
-    // Close button
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'wandlight-lore-panel-close-btn';
-    closeBtn.textContent = '\u2715';
-    closeBtn.title = 'Close lore panel';
-    closeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        hideLorePanel();
-    });
-    header.appendChild(closeBtn);
-
-    panelRoot.appendChild(header);
-
-    // Body container
-    const body = document.createElement('div');
-    body.className = 'wandlight-lore-panel-body';
-
-    // If collapsed, only render the header
-    if (!panelState.collapsed) {
-        renderPanelBody(body, state);
-    }
-
-    panelRoot.appendChild(body);
-
-    // Add resize handle before appending
-    const resizeHandle = document.createElement('div');
-    resizeHandle.className = 'wandlight-lore-panel-resize-handle';
-    resizeHandle.title = 'Resize lore panel';
-    resizeHandle.addEventListener('pointerdown', onResizeStart);
-    panelRoot.appendChild(resizeHandle);
-
+    renderPanelShell(panelRoot, freshState);
     document.body.appendChild(panelRoot);
 
-    // Restore saved position (clamp with actual panel dimensions)
     if (panelState.x != null && panelState.y != null) {
-        // Wait for browser to compute dimensions
         requestAnimationFrame(() => {
             if (!panelRoot) return;
             panelRoot.style.left = `${Math.max(0, Math.min(panelState.x, window.innerWidth - panelRoot.offsetWidth))}px`;
             panelRoot.style.top = `${Math.max(0, Math.min(panelState.y, window.innerHeight - panelRoot.offsetHeight))}px`;
         });
     } else {
-        // Default: bottom-right of viewport
         panelRoot.style.right = '16px';
         panelRoot.style.bottom = '16px';
     }
 }
 
-/**
- * Hides the panel and persists closed state.
- */
 export function hideLorePanel() {
     removeLorePanel();
     const state = getState();
@@ -180,152 +151,583 @@ export function hideLorePanel() {
     }
 }
 
-/**
- * Removes the panel DOM without saving state.
- */
+export function refreshLorePanel() {
+    const existing = document.getElementById(PANEL_ID);
+    if (!existing) return;
+
+    const state = getState();
+    if (!state?.lorePanel?.isOpen) {
+        removeLorePanel();
+        return;
+    }
+
+    refreshPanelBody({ preserveScroll: true });
+    refreshHeader();
+}
+
 function removeLorePanel() {
     if (panelRoot) {
         panelRoot.remove();
         panelRoot = null;
     }
-    // Also clean up any orphaned panel
     const existing = document.getElementById(PANEL_ID);
     if (existing) existing.remove();
 }
 
-// ── Rendering ───────────────────────────────────────────────────────────────────
+// Shell -----------------------------------------------------------------------
 
-/**
- * Renders the body content of the panel.
- * @param {HTMLElement} container - The panel body element
- * @param {Object} state - WandlightState
- */
+function renderPanelShell(root, state) {
+    root.innerHTML = '';
+
+    const header = document.createElement('div');
+    header.className = 'wandlight-lore-panel-header';
+    header.addEventListener('mousedown', onDragStart);
+
+    const collapseBtn = createIconButton(
+        state?.lorePanel?.collapsed ? '>' : 'v',
+        state?.lorePanel?.collapsed ? 'Expand Wandlight Continuity window.' : 'Collapse Wandlight Continuity window.',
+        'wandlight-lore-panel-collapse-btn',
+        (e) => {
+            e.stopPropagation();
+            toggleCollapse();
+        }
+    );
+    header.appendChild(collapseBtn);
+
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'wandlight-lore-panel-title-wrap';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-lore-panel-title';
+    title.textContent = 'Wandlight Continuity';
+    addTooltip(title, 'Roleplay control window for continuity scanning, generation, review, and lore management.');
+    titleWrap.appendChild(title);
+
+    const status = document.createElement('div');
+    status.className = 'wandlight-lore-panel-status';
+    titleWrap.appendChild(status);
+    header.appendChild(titleWrap);
+
+    const closeBtn = createIconButton('x', 'Close the Wandlight Continuity window. Use /wandlight-lore-panel or the extensions-menu launcher to reopen it.', 'wandlight-lore-panel-close-btn', (e) => {
+        e.stopPropagation();
+        hideLorePanel();
+    });
+    header.appendChild(closeBtn);
+
+    root.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'wandlight-lore-panel-body';
+    root.appendChild(body);
+
+    if (!state?.lorePanel?.collapsed) {
+        renderPanelBody(body, state);
+    }
+
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'wandlight-lore-panel-resize-handle';
+    resizeHandle.addEventListener('pointerdown', onResizeStart);
+    addTooltip(resizeHandle, 'Drag from this corner to resize the Wandlight Continuity window.');
+    root.appendChild(resizeHandle);
+
+    refreshHeader();
+}
+
+function refreshHeader() {
+    if (!panelRoot) return;
+    const status = panelRoot.querySelector('.wandlight-lore-panel-status');
+    if (!status) return;
+
+    const state = getState();
+    const settings = getSettings();
+    const pendingLore = (state?.pendingLoreEntries || []).length;
+    const pendingDelta = state?.lastDelta ? 1 : 0;
+    const activeLore = getPanelLoreState(state).counts.active || 0;
+
+    status.innerHTML = '';
+    status.appendChild(createStatusPill(`Mode: ${getWorkflowLabel(settings)}`, getWorkflowTooltip(settings)));
+    status.appendChild(createStatusPill(settings.enabled ? 'Continuity On' : 'Continuity Off', 'Master runtime toggle. When off, Wandlight does not inject, scan, or generate.'));
+    status.appendChild(createStatusPill(settings.injectMemo ? 'Injection On' : 'Injection Off', 'Whether the continuity memo is injected into roleplay generation prompts.'));
+    if (pendingDelta + pendingLore > 0) {
+        status.appendChild(createStatusPill(`Pending: ${pendingDelta + pendingLore}`, 'Items waiting in Review: extracted continuity changes plus generated lore entries.'));
+    }
+    status.appendChild(createStatusPill(`Active Lore: ${activeLore}`, 'Lore entries currently eligible for prompt injection.'));
+}
+
 function renderPanelBody(container, state) {
     container.innerHTML = '';
 
-    const panelState = state?.lorePanel || {
-        selectedCategory: 'all',
-        search: '',
-        selectedEntryId: '',
-    };
+    const tabs = document.createElement('div');
+    tabs.className = 'wandlight-runtime-tabs';
 
+    const activeTab = normalizeTab(state?.lorePanel?.activeTab);
+    for (const [tabId, label] of Object.entries(TAB_LABELS)) {
+        const tab = document.createElement('button');
+        tab.className = 'wandlight-runtime-tab';
+        if (tabId === activeTab) tab.classList.add('wandlight-runtime-tab-active');
+        tab.type = 'button';
+        tab.textContent = label;
+        addTooltip(tab, TAB_TOOLTIPS[tabId]);
+        tab.addEventListener('click', () => {
+            setPanelState({ activeTab: tabId });
+            refreshPanelBody({ preserveScroll: false });
+        });
+        tabs.appendChild(tab);
+    }
+    container.appendChild(tabs);
+
+    const tabBody = document.createElement('div');
+    tabBody.className = 'wandlight-runtime-tab-body';
+    container.appendChild(tabBody);
+
+    if (activeTab === 'session') {
+        renderSessionTab(tabBody, state);
+    } else if (activeTab === 'generate') {
+        renderGenerateTab(tabBody, state);
+    } else if (activeTab === 'review') {
+        renderReviewTab(tabBody, state);
+    } else {
+        renderLoreTab(tabBody, state);
+    }
+}
+
+// Session tab -----------------------------------------------------------------
+
+function renderSessionTab(container, state) {
+    const settings = getSettings();
+
+    container.appendChild(createSectionHeader(
+        'Session Controls',
+        'Set how Wandlight behaves during roleplay. These controls are intentionally kept out of the extension settings panel.'
+    ));
+
+    const modeCard = document.createElement('div');
+    modeCard.className = 'wandlight-runtime-card';
+
+    const modeTitle = document.createElement('div');
+    modeTitle.className = 'wandlight-runtime-card-title';
+    modeTitle.textContent = 'Workflow Mode';
+    addTooltip(modeTitle, 'Mode is a real behavior preset. Changing it updates automatic extraction, automatic apply, and automatic lore generation settings.');
+    modeCard.appendChild(modeTitle);
+
+    const modeButtons = document.createElement('div');
+    modeButtons.className = 'wandlight-mode-buttons';
+    for (const [mode, cfg] of Object.entries(WORKFLOW_MODES)) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'wandlight-mode-button';
+        if (normalizeWorkflowMode(settings.workflowMode) === mode) btn.classList.add('wandlight-mode-button-active');
+        btn.textContent = cfg.label;
+        addTooltip(btn, cfg.description);
+        btn.addEventListener('click', () => {
+            setWorkflowMode(mode);
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+            toast(`Workflow mode set to ${cfg.label}`);
+        });
+        modeButtons.appendChild(btn);
+    }
+    modeCard.appendChild(modeButtons);
+
+    const modeDesc = document.createElement('div');
+    modeDesc.className = 'wandlight-runtime-help';
+    modeDesc.textContent = WORKFLOW_MODES[normalizeWorkflowMode(settings.workflowMode)].description;
+    modeCard.appendChild(modeDesc);
+
+    container.appendChild(modeCard);
+
+    const toggles = document.createElement('div');
+    toggles.className = 'wandlight-runtime-grid';
+    toggles.appendChild(createToggleCard(
+        'Continuity',
+        settings.enabled,
+        'Master runtime toggle. Off disables prompt injection, automatic extraction, and generation actions until turned back on.',
+        (checked) => {
+            const next = getSettings();
+            next.enabled = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+        }
+    ));
+    toggles.appendChild(createToggleCard(
+        'Prompt Injection',
+        settings.injectMemo,
+        'Injects the compact continuity memo into roleplay generation prompts. This is ephemeral and does not write into chat history.',
+        (checked) => {
+            const next = getSettings();
+            next.injectMemo = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+        }
+    ));
+    toggles.appendChild(createToggleCard(
+        'Lore Injection',
+        settings.injectLore,
+        'Allows active lore matrix entries to be included inside the injected continuity memo.',
+        (checked) => {
+            const next = getSettings();
+            next.injectLore = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+        }
+    ));
+    container.appendChild(toggles);
+
+    const stats = document.createElement('div');
+    stats.className = 'wandlight-runtime-card';
+    const counts = getPanelLoreState(state).counts;
+    const memo = buildMemo(state);
+    stats.appendChild(createKeyValue('Pending continuity changes', state?.lastDelta ? '1' : '0', 'Extracted state delta waiting in Review.'));
+    stats.appendChild(createKeyValue('Pending lore entries', String((state?.pendingLoreEntries || []).length), 'Generated lore entries waiting in Review.'));
+    stats.appendChild(createKeyValue('Accepted lore entries', String(counts.all - counts.pending), 'Lore entries currently stored in the accepted lore matrix.'));
+    stats.appendChild(createKeyValue('Active lore entries', String(counts.active), 'Accepted entries currently eligible for injection.'));
+    stats.appendChild(createKeyValue('Memo estimate', memo ? `${estimateTokens(memo)} tokens` : 'empty', 'Approximate size of the injected continuity memo. Raw preview remains in extension settings.'));
+    container.appendChild(stats);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Scan Current Chat', 'Runs continuity extraction now. In Manual or Assisted mode, changes are sent to Review instead of silently applying.', async (btn) => {
+        await runBusyAction(btn, 'Scanning...', async () => {
+            await onExtractionTriggered({ force: true });
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+            const nextState = getState();
+            if (nextState.lastDelta) {
+                setPanelState({ activeTab: 'review' });
+                refreshPanelBody({ preserveScroll: false });
+                toast('Continuity changes found. Review tab opened.');
+            } else {
+                toast('Scan complete. No pending continuity changes were stored.');
+            }
+        });
+    }, 'wandlight-primary-button'));
+    actions.appendChild(createButton('Open Review', 'Opens the Review tab for pending continuity changes and generated lore entries.', () => {
+        setPanelState({ activeTab: 'review' });
+        refreshPanelBody({ preserveScroll: false });
+    }));
+    actions.appendChild(createButton('Open Lore', 'Opens the Lore tab for searching, pinning, muting, tagging, and inspecting lore entries.', () => {
+        setPanelState({ activeTab: 'lore' });
+        refreshPanelBody({ preserveScroll: false });
+    }));
+    container.appendChild(actions);
+}
+
+// Generate tab ----------------------------------------------------------------
+
+function renderGenerateTab(container, state) {
+    container.appendChild(createSectionHeader(
+        'Generate Pending Lore',
+        'Generation creates reviewable pending lore entries. It does not directly mutate accepted lore.'
+    ));
+
+    const contextCard = document.createElement('div');
+    contextCard.className = 'wandlight-runtime-card';
+    contextCard.appendChild(createKeyValue('Scene date', state?.loreContext?.sceneDate || 'not detected', 'The in-universe date used to select date-sensitive lore.'));
+    contextCard.appendChild(createKeyValue('Canon boundary', state?.loreContext?.canonBoundary || 'not detected', 'The canon cutoff or reference point the detector inferred from the roleplay.'));
+    contextCard.appendChild(createKeyValue('Branch', state?.loreContext?.branchId || 'main', 'Story branch or AU identifier used when generating and filtering lore.'));
+    contextCard.appendChild(createKeyValue('Last detected', state?.loreContext?.lastDetectedAt ? new Date(state.loreContext.lastDetectedAt).toLocaleString() : 'never', 'When Wandlight last detected lore context.'));
+    container.appendChild(contextCard);
+
+    const options = document.createElement('div');
+    options.className = 'wandlight-runtime-card';
+    const optionsTitle = document.createElement('div');
+    optionsTitle.className = 'wandlight-runtime-card-title';
+    optionsTitle.textContent = 'Current Generation Behavior';
+    addTooltip(optionsTitle, 'These are active implemented behaviors in the current generation pipeline.');
+    options.appendChild(optionsTitle);
+    options.appendChild(createKeyValue('Source', 'recent roleplay messages', 'Uses the recent chat window collected by the lore generator.'));
+    options.appendChild(createKeyValue('Output', 'pending lore entries', 'Generated entries are stored in pendingLoreEntries and must be accepted in Review.'));
+    options.appendChild(createKeyValue('Replacement guard', 'enabled', 'If pending entries already exist, the Generate button asks before replacing them.'));
+    options.appendChild(createKeyValue('Tags', '3-5 generated per entry', 'The lore prompt asks the model to create editable tags for search.'));
+    container.appendChild(options);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Detect Context', 'Analyzes current roleplay to infer scene date, canon boundary, branch, and time-travel mode.', async (btn) => {
+        await runBusyAction(btn, 'Detecting...', async () => {
+            const current = getState();
+            pushStateSnapshot(current, 'Detect lore context', getSettings().maxSnapshots);
+            const detected = await runLoreContextDetection();
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+            toast(detected ? 'Lore context detected.' : 'Lore context detection returned no result.', detected ? 'success' : 'warning');
+        });
+    }, 'wandlight-primary-button'));
+
+    actions.appendChild(createButton('Generate Pending Lore', 'Generates lore entries from recent roleplay and the detected context. Results go to Review.', async (btn) => {
+        await runBusyAction(btn, 'Generating...', async () => {
+            const current = getState();
+            const pendingCount = (current.pendingLoreEntries || []).length;
+            if (pendingCount > 0) {
+                const proceed = await confirmAction(
+                    'Replace pending lore?',
+                    `There are already ${pendingCount} pending lore entries. Generating again will replace them. Continue?`
+                );
+                if (!proceed) return;
+            }
+
+            const result = await runLoreGeneration({ force: true, allowReplacePending: true });
+            refreshHeader();
+            if (result?.status === 'proposed') {
+                setPanelState({ activeTab: 'review' });
+                refreshPanelBody({ preserveScroll: false });
+                toast(`${result.validEntryCount || 0} pending lore entries generated. Review tab opened.`);
+            } else {
+                refreshPanelBody({ preserveScroll: false });
+                toast(`Lore generation ended with status: ${result?.status || 'unknown'}`, 'warning');
+            }
+        });
+    }, 'wandlight-primary-button'));
+
+    container.appendChild(actions);
+}
+
+// Review tab ------------------------------------------------------------------
+
+function renderReviewTab(container, state) {
+    const pendingLore = normalizeLoreMatrix(state?.pendingLoreEntries || []);
+    const hasDelta = !!state?.lastDelta;
+
+    container.appendChild(createSectionHeader(
+        'Review Pending Changes',
+        'Approve or dismiss model-produced changes before they enter active continuity or accepted lore.'
+    ));
+
+    const summaryCard = document.createElement('div');
+    summaryCard.className = 'wandlight-runtime-card wandlight-review-summary-card';
+    summaryCard.appendChild(createKeyValue('Continuity changes', hasDelta ? '1 pending' : 'none', 'Extracted state delta from the continuity scanner.'));
+    summaryCard.appendChild(createKeyValue('Lore entries', `${pendingLore.length} pending`, 'Generated lore matrix entries waiting for acceptance.'));
+    container.appendChild(summaryCard);
+
+    const deltaSection = document.createElement('div');
+    deltaSection.className = 'wandlight-review-section';
+    const deltaTitle = document.createElement('h4');
+    deltaTitle.textContent = 'Continuity Changes';
+    addTooltip(deltaTitle, 'These are state changes extracted from recent roleplay: canon date, scene, knowledge, secrets, relationships, threads, and flags.');
+    deltaSection.appendChild(deltaTitle);
+
+    if (hasDelta) {
+        deltaSection.appendChild(createDeltaReviewCard(state.lastDelta));
+    } else {
+        deltaSection.appendChild(createEmptyMessage('No extracted continuity changes are waiting for review.'));
+    }
+    container.appendChild(deltaSection);
+
+    const loreSection = document.createElement('div');
+    loreSection.className = 'wandlight-review-section';
+    const loreTitle = document.createElement('h4');
+    loreTitle.textContent = 'Pending Lore Entries';
+    addTooltip(loreTitle, 'These are generated lore entries. Accepting merges them into the accepted lore matrix; dismissing removes them.');
+    loreSection.appendChild(loreTitle);
+
+    if (pendingLore.length > 0) {
+        const batchInfo = document.createElement('div');
+        batchInfo.className = 'wandlight-runtime-help';
+        batchInfo.textContent = getPendingLoreBatchLabel(state);
+        loreSection.appendChild(batchInfo);
+
+        const actions = document.createElement('div');
+        actions.className = 'wandlight-primary-actions';
+        actions.appendChild(createButton('Apply All Lore', 'Accepts every pending lore entry and merges them into the accepted lore matrix.', () => {
+            const current = getState();
+            pushStateSnapshot(current, 'Accept pending lore entries', getSettings().maxSnapshots);
+            const count = (current.pendingLoreEntries || []).length;
+            acceptPendingLoreEntries();
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+            toast(`${count} lore entries accepted.`);
+        }, 'wandlight-primary-button'));
+        actions.appendChild(createButton('Dismiss All Lore', 'Rejects every pending lore entry without changing the accepted lore matrix.', () => {
+            const current = getState();
+            const count = (current.pendingLoreEntries || []).length;
+            rejectPendingLoreEntries();
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+            toast(`${count} lore entries dismissed.`, 'info');
+        }));
+        loreSection.appendChild(actions);
+
+        const list = document.createElement('div');
+        list.className = 'wandlight-review-lore-list';
+        pendingLore.forEach((entry, idx) => list.appendChild(createPendingLoreReviewCard(entry, idx)));
+        loreSection.appendChild(list);
+    } else {
+        loreSection.appendChild(createEmptyMessage('No generated lore entries are waiting for review.'));
+    }
+    container.appendChild(loreSection);
+}
+
+function createDeltaReviewCard(delta) {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-delta-review-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = delta?.summary || 'Pending continuity changes';
+    addTooltip(title, 'Summary generated by the extraction pass.');
+    card.appendChild(title);
+
+    const keys = Object.keys(delta?.changes || {});
+    card.appendChild(createKeyValue('Sections changed', keys.length ? keys.join(', ') : 'none', 'Top-level state sections affected by this pending delta.'));
+
+    const pre = document.createElement('pre');
+    pre.className = 'wandlight-delta-json-preview';
+    pre.textContent = JSON.stringify(delta, null, 2);
+    addTooltip(pre, 'Raw pending delta. This remains visible here because it is directly relevant to the review decision.');
+    card.appendChild(pre);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Apply Changes', 'Applies this pending delta to the continuity state and clears it from Review.', () => {
+        const current = getState();
+        if (!current.lastDelta) {
+            toast('No pending continuity changes to apply.', 'warning');
+            refreshPanelBody({ preserveScroll: false });
+            return;
+        }
+        pushStateSnapshot(current, 'Apply pending continuity changes', getSettings().maxSnapshots);
+        const next = applyDelta(current, current.lastDelta);
+        next.lastDelta = null;
+        saveState(next);
+        refreshPanelBody({ preserveScroll: false });
+        refreshHeader();
+        toast('Continuity changes applied.');
+    }, 'wandlight-primary-button'));
+    actions.appendChild(createButton('Dismiss Changes', 'Discards this pending delta without changing continuity state.', () => {
+        const current = getState();
+        current.lastDelta = null;
+        saveState(current);
+        refreshPanelBody({ preserveScroll: false });
+        refreshHeader();
+        toast('Continuity changes dismissed.', 'info');
+    }));
+    card.appendChild(actions);
+
+    return card;
+}
+
+function createPendingLoreReviewCard(entry, index) {
+    const card = document.createElement('div');
+    card.className = 'wandlight-review-lore-card';
+
+    const header = document.createElement('div');
+    header.className = 'wandlight-review-lore-card-header';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-review-lore-title';
+    title.textContent = entry.title || `Pending lore ${index + 1}`;
+    addTooltip(title, 'Generated lore entry title.');
+    header.appendChild(title);
+
+    const status = document.createElement('span');
+    status.className = 'wandlight-lore-badge wandlight-lore-badge-pending';
+    status.textContent = 'pending';
+    addTooltip(status, 'This lore entry has not been accepted into the active lore matrix yet.');
+    header.appendChild(status);
+    card.appendChild(header);
+
+    const meta = document.createElement('div');
+    meta.className = 'wandlight-lore-entry-meta';
+    meta.appendChild(createBadge(entry.category || 'canon', `Category: ${entry.category || 'canon'}`));
+    meta.appendChild(createBadge(`P${entry.priority || 50}`, 'Priority used when selecting active lore for injection.'));
+    if (entry.confidence !== undefined) meta.appendChild(createBadge(`confidence ${entry.confidence}`, 'Model-provided confidence for this entry.'));
+    card.appendChild(meta);
+
+    if (Array.isArray(entry.tags) && entry.tags.length) {
+        card.appendChild(createReadOnlyTags(entry.tags));
+    }
+
+    const fact = document.createElement('div');
+    fact.className = 'wandlight-lore-entry-fact';
+    fact.textContent = entry.fact || '(No fact text)';
+    addTooltip(fact, 'The fact that will be merged into the accepted lore matrix if applied.');
+    card.appendChild(fact);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Apply', 'Accepts this single lore entry and merges it into the accepted lore matrix.', () => {
+        const current = getState();
+        pushStateSnapshot(current, `Accept lore entry: ${entry.title || index + 1}`, getSettings().maxSnapshots);
+        acceptPendingLoreEntry(index);
+        refreshPanelBody({ preserveScroll: true });
+        refreshHeader();
+        toast('Lore entry accepted.');
+    }, 'wandlight-primary-button'));
+    actions.appendChild(createButton('Dismiss', 'Rejects this single lore entry without changing accepted lore.', () => {
+        rejectPendingLoreEntry(index);
+        refreshPanelBody({ preserveScroll: true });
+        refreshHeader();
+        toast('Lore entry dismissed.', 'info');
+    }));
+    card.appendChild(actions);
+
+    return card;
+}
+
+// Lore tab --------------------------------------------------------------------
+
+function renderLoreTab(container, state) {
+    container.appendChild(createSectionHeader(
+        'Lore Matrix',
+        'Manage accepted and pending lore. Search checks titles and tags first, then fact text and notes.'
+    ));
+
+    const panelState = state?.lorePanel || { selectedCategory: 'all', search: '' };
     const loreState = getPanelLoreState(state);
     const { entries, categories, counts } = loreState;
 
-    // ── Pending entries bar ──
-    const pendingEntries = normalizeLoreMatrix(state?.pendingLoreEntries || []);
-    if (pendingEntries.length > 0) {
-        const pendingBar = document.createElement('div');
-        pendingBar.className = 'wandlight-lore-pending-bar';
-
-        const pendingLabel = document.createElement('span');
-        pendingLabel.className = 'wandlight-lore-pending-label';
-        pendingLabel.textContent = `${pendingEntries.length} pending entries`;
-        pendingBar.appendChild(pendingLabel);
-
-        const pendingActions = document.createElement('div');
-        pendingActions.className = 'wandlight-lore-pending-actions';
-
-        const acceptAllBtn = document.createElement('button');
-        acceptAllBtn.className = 'wandlight-lore-pending-accept';
-        acceptAllBtn.textContent = 'Accept All';
-        acceptAllBtn.addEventListener('click', () => {
-            acceptPendingLoreEntries();
-            refreshLorePanelBody({ preserveScroll: true });
-        });
-        pendingActions.appendChild(acceptAllBtn);
-
-        const rejectAllBtn = document.createElement('button');
-        rejectAllBtn.className = 'wandlight-lore-pending-reject';
-        rejectAllBtn.textContent = 'Reject All';
-        rejectAllBtn.addEventListener('click', () => {
-            rejectPendingLoreEntries();
-            refreshLorePanelBody({ preserveScroll: true });
-        });
-        pendingActions.appendChild(rejectAllBtn);
-
-        pendingBar.appendChild(pendingActions);
-        container.appendChild(pendingBar);
-    }
-
-    // ── Category tabs ──
-    const tabBar = document.createElement('div');
-    tabBar.className = 'wandlight-lore-tabs';
+    const tabs = document.createElement('div');
+    tabs.className = 'wandlight-lore-tabs';
     for (const cat of categories) {
         const tab = document.createElement('button');
         tab.className = 'wandlight-lore-tab';
-        if (cat === panelState.selectedCategory) {
-            tab.classList.add('wandlight-lore-tab-active');
-        }
+        if (cat === panelState.selectedCategory) tab.classList.add('wandlight-lore-tab-active');
+        tab.type = 'button';
         const label = CATEGORY_LABELS[cat] || cat;
-        let catCount;
-        if (cat === 'all') {
-            catCount = counts.all;
-        } else if (cat === 'active') {
-            catCount = counts.active;
-        } else if (cat === 'pinned') {
-            catCount = counts.pinned;
-        } else if (cat === 'suppressed') {
-            catCount = counts.suppressed;
-        } else if (cat === 'pending') {
-            catCount = counts.pending;
-        } else {
-            catCount = entries.filter(e => e.category === cat).length;
-        }
+        const catCount = getCategoryCount(cat, entries, counts);
         tab.textContent = `${label} (${catCount})`;
+        addTooltip(tab, getCategoryTooltip(cat));
         tab.addEventListener('click', () => {
-            setPanelFilter('category', cat);
-            refreshLorePanelBody({ preserveScroll: false });
+            setPanelState({ selectedCategory: cat });
+            refreshPanelBody({ preserveScroll: false });
         });
-        tabBar.appendChild(tab);
+        tabs.appendChild(tab);
     }
-    container.appendChild(tabBar);
+    container.appendChild(tabs);
 
-    // ── Search row ──
     const filterRow = document.createElement('div');
     filterRow.className = 'wandlight-lore-filter-row';
 
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.className = 'wandlight-lore-search';
-    searchInput.placeholder = 'Search lore entries\u2026';
-    searchInput.value = panelState.search;
+    searchInput.placeholder = 'Search titles and tags...';
+    searchInput.value = panelState.search || '';
+    addTooltip(searchInput, 'Searches lore entry titles and tags first. Fact text, notes, and IDs are searched as fallback.');
     searchInput.addEventListener('input', (e) => {
-        setPanelFilter('search', e.target.value);
-
+        setPanelState({ search: e.target.value });
         const list = container.querySelector('.wandlight-lore-entry-list');
-        if (list) {
-            renderEntryList(list, getState());
-        }
+        if (list) renderEntryList(list, getState());
     });
     filterRow.appendChild(searchInput);
-
     container.appendChild(filterRow);
 
-    // ── Entry list ──
     const list = document.createElement('div');
     list.className = 'wandlight-lore-entry-list';
     renderEntryList(list, state);
     container.appendChild(list);
 }
 
-/**
- * Filters lore entries by category and search query, then renders into the list element.
- * @param {HTMLElement} list - The entry list container
- * @param {Object} state - WandlightState
- */
 function renderEntryList(list, state) {
     if (!list) return;
-
     list.innerHTML = '';
 
     const filtered = getFilteredLoreEntries(state);
-
     if (filtered.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'wandlight-lore-empty';
-        empty.textContent = 'No lore entries found.';
-        list.appendChild(empty);
+        list.appendChild(createEmptyMessage('No lore entries match the current filter.'));
         return;
     }
 
@@ -334,12 +736,6 @@ function renderEntryList(list, state) {
     }
 }
 
-/**
- * Returns lore entries filtered by category and search query.
- * Search matches title, tags, fact, notes, and id — scored and sorted.
- * @param {Object} state - WandlightState
- * @returns {Object[]} Filtered and sorted lore entries
- */
 function getFilteredLoreEntries(state) {
     const panelState = state?.lorePanel || {
         selectedCategory: 'all',
@@ -358,34 +754,15 @@ function getFilteredLoreEntries(state) {
         filtered = filtered.filter(e => e.isSuppressed);
     } else if (panelState.selectedCategory === 'pending') {
         filtered = filtered.filter(e => e.isPending);
-    } else if (panelState.selectedCategory !== 'all') {
+    } else if (panelState.selectedCategory && panelState.selectedCategory !== 'all') {
         filtered = filtered.filter(e => e.category === panelState.selectedCategory);
     }
 
     const query = String(panelState.search || '').trim().toLowerCase();
     if (!query) return filtered;
 
-    const score = (entry) => {
-        const title = String(entry.title || '').toLowerCase();
-        const tags = Array.isArray(entry.tags)
-            ? entry.tags.map(t => String(t).toLowerCase())
-            : [];
-        const fact = String(entry.fact || '').toLowerCase();
-        const id = String(entry.id || '').toLowerCase();
-        const notes = String(entry.notes || '').toLowerCase();
-
-        if (title === query) return 100;
-        if (tags.some(t => t === query)) return 90;
-        if (title.includes(query)) return 80;
-        if (tags.some(t => t.includes(query))) return 70;
-        if (fact.includes(query)) return 40;
-        if (notes.includes(query)) return 30;
-        if (id.includes(query)) return 20;
-        return 0;
-    };
-
     return filtered
-        .map(entry => ({ entry, score: score(entry) }))
+        .map(entry => ({ entry, score: scoreSearchEntry(entry, query) }))
         .filter(item => item.score > 0)
         .sort((a, b) =>
             b.score - a.score
@@ -395,36 +772,36 @@ function getFilteredLoreEntries(state) {
         .map(item => item.entry);
 }
 
-/**
- * Creates a single lore entry card.
- * @param {Object} entry - Annotated lore entry from getPanelLoreState
- * @param {Object} state - WandlightState
- * @returns {HTMLElement}
- */
+function scoreSearchEntry(entry, query) {
+    const title = String(entry.title || '').toLowerCase();
+    const tags = Array.isArray(entry.tags) ? entry.tags.map(t => String(t).toLowerCase()) : [];
+    const fact = String(entry.fact || '').toLowerCase();
+    const id = String(entry.id || '').toLowerCase();
+    const notes = String(entry.notes || '').toLowerCase();
+
+    if (title === query) return 100;
+    if (tags.some(t => t === query)) return 90;
+    if (title.includes(query)) return 80;
+    if (tags.some(t => t.includes(query))) return 70;
+    if (fact.includes(query)) return 40;
+    if (notes.includes(query)) return 30;
+    if (id.includes(query)) return 20;
+    return 0;
+}
+
 function createEntryCard(entry, state) {
     const card = document.createElement('div');
     card.className = 'wandlight-lore-entry-card';
 
-    if (entry.isPending) {
-        card.classList.add('wandlight-lore-entry-pending');
-    }
-    if (entry.isActive) {
-        card.classList.add('wandlight-lore-entry-active');
-    }
-    if (entry.isPinned) {
-        card.classList.add('wandlight-lore-entry-pinned');
-    }
-    if (entry.isSuppressed) {
-        card.classList.add('wandlight-lore-entry-suppressed');
-    }
+    if (entry.isPending) card.classList.add('wandlight-lore-entry-pending');
+    if (entry.isActive) card.classList.add('wandlight-lore-entry-active');
+    if (entry.isPinned) card.classList.add('wandlight-lore-entry-pinned');
+    if (entry.isSuppressed) card.classList.add('wandlight-lore-entry-suppressed');
 
-    // Show selected entry expanded
     const panelState = state?.lorePanel || {};
-    if (panelState.selectedEntryId === entry.id) {
-        card.classList.add('wandlight-lore-entry-expanded');
-    }
+    const isExpanded = panelState.selectedEntryId === entry.id;
+    if (isExpanded) card.classList.add('wandlight-lore-entry-expanded');
 
-    // ── Header row ──
     const headerRow = document.createElement('div');
     headerRow.className = 'wandlight-lore-entry-header';
 
@@ -433,192 +810,134 @@ function createEntryCard(entry, state) {
 
     const titleEl = document.createElement('span');
     titleEl.className = 'wandlight-lore-entry-title';
-    titleEl.textContent = entry.title;
-    titleEl.title = entry.title;
+    titleEl.textContent = entry.title || '(Untitled lore)';
+    addTooltip(titleEl, 'Click the card to expand details. Tags beside this title are editable search tags.');
     titleWrap.appendChild(titleEl);
-
     titleWrap.appendChild(createTagsRow(entry));
     headerRow.appendChild(titleWrap);
 
-    // Action buttons
     const actions = document.createElement('div');
     actions.className = 'wandlight-lore-entry-actions';
 
-    // Pin/Unpin button
-    const pinBtn = document.createElement('button');
-    pinBtn.className = 'wandlight-lore-entry-btn';
-    pinBtn.textContent = entry.isPinned ? '\uD83D\uDCCC' : '\uD83D\uDCCD';
-    pinBtn.title = entry.isPinned ? 'Unpin from active lore' : 'Pin to active lore';
-    pinBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePinEntry(entry.id);
-        refreshLorePanelBody({ preserveScroll: true });
-    });
+    const pinBtn = createIconButton(
+        entry.isPinned ? 'Pinned' : 'Pin',
+        entry.isPinned ? 'Remove this entry from pinned lore. Pinned lore is prioritized for injection.' : 'Pin this entry so it is prioritized for injection.',
+        'wandlight-lore-entry-btn',
+        (e) => {
+            e.stopPropagation();
+            togglePinEntry(entry.id);
+            refreshPanelBody({ preserveScroll: true });
+            refreshHeader();
+        }
+    );
     actions.appendChild(pinBtn);
 
-    // Suppress/Unsuppress button
-    const suppressBtn = document.createElement('button');
-    suppressBtn.className = 'wandlight-lore-entry-btn';
-    suppressBtn.textContent = entry.isSuppressed ? '\uD83D\uDD07' : '\uD83D\uDD0A';
-    suppressBtn.title = entry.isSuppressed ? 'Unsuppress entry' : 'Suppress entry from injection';
-    suppressBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleSuppressEntry(entry.id);
-        refreshLorePanelBody({ preserveScroll: true });
-    });
+    const suppressBtn = createIconButton(
+        entry.isSuppressed ? 'Muted' : 'Mute',
+        entry.isSuppressed ? 'Unmute this entry so it can become active again.' : 'Mute this entry so it will not be injected into prompts.',
+        'wandlight-lore-entry-btn',
+        (e) => {
+            e.stopPropagation();
+            toggleSuppressEntry(entry.id);
+            refreshPanelBody({ preserveScroll: true });
+            refreshHeader();
+        }
+    );
     actions.appendChild(suppressBtn);
 
     headerRow.appendChild(actions);
     card.appendChild(headerRow);
 
-    // ── Meta badges ──
     const metaRow = document.createElement('div');
     metaRow.className = 'wandlight-lore-entry-meta';
-
-    const categoryBadge = document.createElement('span');
-    categoryBadge.className = `wandlight-lore-badge wandlight-lore-badge-${entry.category}`;
-    categoryBadge.textContent = entry.category;
-    metaRow.appendChild(categoryBadge);
-
-    if (entry.truthStatus && entry.truthStatus !== 'true') {
-        const truthBadge = document.createElement('span');
-        truthBadge.className = 'wandlight-lore-badge wandlight-lore-badge-truth';
-        truthBadge.textContent = entry.truthStatus;
-        metaRow.appendChild(truthBadge);
-    }
-
-    if (entry.isPending) {
-        const pendingBadge = document.createElement('span');
-        pendingBadge.className = 'wandlight-lore-badge wandlight-lore-badge-pending';
-        pendingBadge.textContent = 'pending';
-        metaRow.appendChild(pendingBadge);
-    }
-
-    if (entry.priority) {
-        const prioBadge = document.createElement('span');
-        prioBadge.className = 'wandlight-lore-badge wandlight-lore-badge-priority';
-        prioBadge.textContent = `P${entry.priority}`;
-        metaRow.appendChild(prioBadge);
-    }
-
+    metaRow.appendChild(createBadge(entry.category || 'canon', `Category: ${entry.category || 'canon'}`));
+    if (entry.truthStatus && entry.truthStatus !== 'true') metaRow.appendChild(createBadge(entry.truthStatus, 'Truth/reveal status for this entry.'));
+    if (entry.isPending) metaRow.appendChild(createBadge('pending', 'This entry is pending review.'));
+    if (entry.priority) metaRow.appendChild(createBadge(`P${entry.priority}`, 'Priority used when selecting active lore for injection.'));
+    if (entry.isPinned) metaRow.appendChild(createBadge('pinned', 'Pinned entries are prioritized for injection.'));
+    if (entry.isSuppressed) metaRow.appendChild(createBadge('muted', 'Muted entries are excluded from injection.'));
     card.appendChild(metaRow);
 
-    // ── Fact text ──
     const factEl = document.createElement('div');
     factEl.className = 'wandlight-lore-entry-fact';
-    factEl.textContent = truncateText(entry.fact || '', 120);
+    factEl.textContent = truncateText(entry.fact || '', 140);
+    addTooltip(factEl, 'Lore fact text. Expand the card to inspect the full entry.');
     card.appendChild(factEl);
 
-    // ── Click to toggle expand ──
     card.addEventListener('click', () => {
-        const currentPanelState = (getState()?.lorePanel) || {};
+        const currentPanelState = getState()?.lorePanel || {};
         const newId = currentPanelState.selectedEntryId === entry.id ? '' : entry.id;
-        setPanelFilter('selectedEntryId', newId);
-        refreshLorePanelBody({ preserveScroll: true });
+        setPanelState({ selectedEntryId: newId });
+        refreshPanelBody({ preserveScroll: true });
     });
 
-    // ── Expanded details ──
-    if (panelState.selectedEntryId === entry.id) {
+    if (isExpanded) {
         const details = document.createElement('div');
         details.className = 'wandlight-lore-entry-details';
 
-        // Full fact
-        if (entry.fact && entry.fact.length > 120) {
+        if (entry.fact && entry.fact.length > 140) {
             const fullFact = document.createElement('div');
             fullFact.className = 'wandlight-lore-entry-full-fact';
             fullFact.textContent = entry.fact;
             details.appendChild(fullFact);
         }
 
-        // Truth info
-        const truthInfo = [];
-        if (entry.publicVersion) {
-            truthInfo.push(`Public version: ${entry.publicVersion}`);
-        }
-        if (entry.whoKnowsTruth?.length) {
-            truthInfo.push(`Who knows: ${entry.whoKnowsTruth.join(', ')}`);
-        }
-        if (entry.whoSuspects?.length) {
-            truthInfo.push(`Who suspects: ${entry.whoSuspects.join(', ')}`);
-        }
-        if (entry.revealPolicy) {
-            truthInfo.push(`Reveal policy: ${entry.revealPolicy}`);
-        }
-        if (truthInfo.length > 0) {
-            const truthEl = document.createElement('div');
-            truthEl.className = 'wandlight-lore-entry-truth-info';
-            truthEl.innerHTML = truthInfo.map(t => `<div>${escapeHtml(t)}</div>`).join('');
-            details.appendChild(truthEl);
+        const detailRows = [];
+        if (entry.source) detailRows.push(['Source', entry.source]);
+        if (entry.scope) detailRows.push(['Scope', entry.scope]);
+        if (entry.appliesTo?.length) detailRows.push(['Applies to', entry.appliesTo.join(', ')]);
+        if (entry.publicVersion) detailRows.push(['Public version', entry.publicVersion]);
+        if (entry.whoKnowsTruth?.length) detailRows.push(['Who knows truth', entry.whoKnowsTruth.join(', ')]);
+        if (entry.whoSuspects?.length) detailRows.push(['Who suspects', entry.whoSuspects.join(', ')]);
+        if (entry.revealPolicy) detailRows.push(['Reveal policy', entry.revealPolicy]);
+        if (entry.validFrom || entry.validTo) detailRows.push(['Valid window', `${entry.validFrom || '...'} to ${entry.validTo || '...'}`]);
+        if (entry.notes) detailRows.push(['Notes', entry.notes]);
+
+        for (const [label, value] of detailRows) {
+            details.appendChild(createKeyValue(label, value, `${label} metadata for this lore entry.`));
         }
 
-        // Date window
-        if (entry.validFrom || entry.validTo) {
-            const dateEl = document.createElement('div');
-            dateEl.className = 'wandlight-lore-entry-date-window';
-            dateEl.textContent = `Valid: ${entry.validFrom || '\u2026'} \u2192 ${entry.validTo || '\u2026'}`;
-            details.appendChild(dateEl);
-        }
-
-        // Active conditions
         const aw = entry.activeWhen || {};
         const conditions = [];
         if (aw.erasAny?.length) conditions.push(`Eras: ${aw.erasAny.join(', ')}`);
         if (aw.locationsAny?.length) conditions.push(`Locations: ${aw.locationsAny.join(', ')}`);
         if (aw.charactersPresentAny?.length) conditions.push(`Cast: ${aw.charactersPresentAny.join(', ')}`);
         if (aw.tagsAny?.length) conditions.push(`Tags: ${aw.tagsAny.join(', ')}`);
-        if (conditions.length > 0) {
-            const condEl = document.createElement('div');
-            condEl.className = 'wandlight-lore-entry-conditions';
-            condEl.innerHTML = `<strong>Active when:</strong><br>${conditions.map(c => escapeHtml(c)).join('<br>')}`;
-            details.appendChild(condEl);
+        if (conditions.length) {
+            const cond = document.createElement('div');
+            cond.className = 'wandlight-lore-entry-conditions';
+            cond.textContent = `Active when: ${conditions.join(' | ')}`;
+            addTooltip(cond, 'Context conditions used to determine whether this lore entry should be active.');
+            details.appendChild(cond);
         }
 
-        // Notes
-        if (entry.notes) {
-            const notesEl = document.createElement('div');
-            notesEl.className = 'wandlight-lore-entry-notes';
-            notesEl.textContent = `Notes: ${entry.notes}`;
-            details.appendChild(notesEl);
-        }
-
-        // ── Per-entry accept/reject buttons (only for pending entries) ──
         if (entry.isPending) {
-            const entryActions = document.createElement('div');
-            entryActions.className = 'wandlight-lore-entry-pending-actions';
-
-            const acceptBtn = document.createElement('button');
-            acceptBtn.className = 'wandlight-lore-entry-accept';
-            acceptBtn.textContent = '\u2713 Accept';
-            acceptBtn.title = 'Accept this lore entry into the matrix';
-            acceptBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const currentState = getState();
-                const pending = normalizeLoreMatrix(currentState?.pendingLoreEntries || []);
+            const pendingActions = document.createElement('div');
+            pendingActions.className = 'wandlight-lore-entry-pending-actions';
+            pendingActions.appendChild(createButton('Apply', 'Accepts this pending entry into the lore matrix.', (btn, e) => {
+                e?.stopPropagation?.();
+                const current = getState();
+                const pending = normalizeLoreMatrix(current?.pendingLoreEntries || []);
                 const idx = pending.findIndex(pe => pe.id === entry.id);
                 if (idx >= 0) {
+                    pushStateSnapshot(current, `Accept lore entry: ${entry.title}`, getSettings().maxSnapshots);
                     acceptPendingLoreEntry(idx);
-                    refreshLorePanelBody({ preserveScroll: true });
+                    refreshPanelBody({ preserveScroll: true });
+                    refreshHeader();
                 }
-            });
-            entryActions.appendChild(acceptBtn);
-
-            const rejectBtn = document.createElement('button');
-            rejectBtn.className = 'wandlight-lore-entry-reject';
-            rejectBtn.textContent = '\u2717 Reject';
-            rejectBtn.title = 'Reject this lore entry';
-            rejectBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const currentState = getState();
-                const pending = normalizeLoreMatrix(currentState?.pendingLoreEntries || []);
+            }, 'wandlight-primary-button'));
+            pendingActions.appendChild(createButton('Dismiss', 'Rejects this pending entry.', (btn, e) => {
+                e?.stopPropagation?.();
+                const current = getState();
+                const pending = normalizeLoreMatrix(current?.pendingLoreEntries || []);
                 const idx = pending.findIndex(pe => pe.id === entry.id);
                 if (idx >= 0) {
                     rejectPendingLoreEntry(idx);
-                    refreshLorePanelBody({ preserveScroll: true });
+                    refreshPanelBody({ preserveScroll: true });
+                    refreshHeader();
                 }
-            });
-            entryActions.appendChild(rejectBtn);
-
-            details.appendChild(entryActions);
+            }));
+            details.appendChild(pendingActions);
         }
 
         card.appendChild(details);
@@ -627,19 +946,14 @@ function createEntryCard(entry, state) {
     return card;
 }
 
-// ── Tag rendering ───────────────────────────────────────────────────────────────
+// Tags ------------------------------------------------------------------------
 
-/**
- * Creates the tags row element for an entry card.
- * @param {Object} entry - Lore entry
- * @returns {HTMLElement}
- */
 function createTagsRow(entry) {
     const row = document.createElement('div');
     row.className = 'wandlight-lore-entry-tags';
+    addTooltip(row, 'Tags are editable search labels. Search matches tags as well as entry titles.');
 
     const tags = Array.isArray(entry.tags) ? entry.tags : [];
-
     for (const tag of tags) {
         const chip = document.createElement('span');
         chip.className = 'wandlight-lore-tag-chip';
@@ -648,12 +962,12 @@ function createTagsRow(entry) {
         removeBtn.className = 'wandlight-lore-tag-remove';
         removeBtn.type = 'button';
         removeBtn.textContent = 'x';
-        removeBtn.title = `Remove tag: ${tag}`;
+        addTooltip(removeBtn, `Remove tag: ${tag}`);
         removeBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             removeLoreTag(entry.id, tag);
-            refreshLorePanelBody({ preserveScroll: true });
+            refreshPanelBody({ preserveScroll: true });
         });
         chip.appendChild(removeBtn);
 
@@ -661,7 +975,6 @@ function createTagsRow(entry) {
         label.className = 'wandlight-lore-tag-label';
         label.textContent = tag;
         chip.appendChild(label);
-
         row.appendChild(chip);
     }
 
@@ -669,7 +982,7 @@ function createTagsRow(entry) {
     addBtn.className = 'wandlight-lore-tag-add';
     addBtn.type = 'button';
     addBtn.textContent = '+';
-    addBtn.title = 'Add search tag';
+    addTooltip(addBtn, 'Add a searchable tag to this lore entry.');
     addBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -680,12 +993,21 @@ function createTagsRow(entry) {
     return row;
 }
 
-/**
- * Shows an inline text input for adding a new tag.
- * @param {HTMLElement} row - The tags row element
- * @param {string} entryId
- * @param {HTMLElement} addBtn - The add button element
- */
+function createReadOnlyTags(tags) {
+    const row = document.createElement('div');
+    row.className = 'wandlight-lore-entry-tags';
+    for (const tag of tags) {
+        const chip = document.createElement('span');
+        chip.className = 'wandlight-lore-tag-chip';
+        const label = document.createElement('span');
+        label.className = 'wandlight-lore-tag-label';
+        label.textContent = tag;
+        chip.appendChild(label);
+        row.appendChild(chip);
+    }
+    return row;
+}
+
 function showInlineTagInput(row, entryId, addBtn) {
     if (row.querySelector('.wandlight-lore-tag-input')) return;
 
@@ -693,10 +1015,10 @@ function showInlineTagInput(row, entryId, addBtn) {
     input.className = 'wandlight-lore-tag-input';
     input.type = 'text';
     input.placeholder = 'tag';
+    addTooltip(input, 'Type a tag and press Enter. Press Escape to cancel.');
 
     input.addEventListener('click', e => e.stopPropagation());
     input.addEventListener('mousedown', e => e.stopPropagation());
-
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -708,107 +1030,36 @@ function showInlineTagInput(row, entryId, addBtn) {
             input.remove();
         }
     });
-
     input.addEventListener('blur', () => {
-        if (input.value.trim()) {
-            commitInlineTagInput(entryId, input.value);
-        } else {
-            input.remove();
-        }
+        if (input.value.trim()) commitInlineTagInput(entryId, input.value);
+        else input.remove();
     });
 
     row.insertBefore(input, addBtn);
     requestAnimationFrame(() => input.focus());
 }
 
-/**
- * Commits the inline tag input value.
- * @param {string} entryId
- * @param {string} rawTag
- */
 function commitInlineTagInput(entryId, rawTag) {
     const tag = normalizeTag(rawTag);
-
     if (!tag) {
-        refreshLorePanelBody({ preserveScroll: true });
+        refreshPanelBody({ preserveScroll: true });
         return;
     }
-
     addLoreTag(entryId, tag);
-    refreshLorePanelBody({ preserveScroll: true });
+    refreshPanelBody({ preserveScroll: true });
 }
 
-/**
- * Normalizes a tag string: trimmed, single-space, max 40 chars.
- * @param {string} value
- * @returns {string}
- */
 function normalizeTag(value) {
-    return String(value || '')
-        .trim()
-        .replace(/\s+/g, ' ')
-        .slice(0, 40);
+    return String(value || '').trim().replace(/\s+/g, ' ').slice(0, 40);
 }
 
-// ── User actions ────────────────────────────────────────────────────────────────
-
-/**
- * Toggles a lore entry's pinned state in loreSelection.
- * @param {string} entryId
- */
-function togglePinEntry(entryId) {
-    const state = getState();
-    if (!state?.loreSelection) return;
-    const sel = state.loreSelection;
-    const idx = sel.pinnedIds.indexOf(entryId);
-    if (idx >= 0) {
-        sel.pinnedIds.splice(idx, 1);
-    } else {
-        sel.pinnedIds.push(entryId);
-        // Unsuppress when pinning (pin implies active, not suppressed)
-        const supIdx = sel.suppressedIds.indexOf(entryId);
-        if (supIdx >= 0) sel.suppressedIds.splice(supIdx, 1);
-    }
-    saveState(state);
-}
-
-/**
- * Toggles a lore entry's suppressed state in loreSelection.
- * @param {string} entryId
- */
-function toggleSuppressEntry(entryId) {
-    const state = getState();
-    if (!state?.loreSelection) return;
-    const sel = state.loreSelection;
-    const idx = sel.suppressedIds.indexOf(entryId);
-    if (idx >= 0) {
-        sel.suppressedIds.splice(idx, 1);
-    } else {
-        sel.suppressedIds.push(entryId);
-        // Unpin when suppressing (suppress implies not active)
-        const pinIdx = sel.pinnedIds.indexOf(entryId);
-        if (pinIdx >= 0) sel.pinnedIds.splice(pinIdx, 1);
-    }
-    saveState(state);
-}
-
-/**
- * Updates a lore entry in-place by entryId.
- * @param {string} entryId
- * @param {Function} updater - Receives the entry, returns the updated entry
- * @returns {boolean} Whether the entry was found and updated
- */
 function updateLoreEntryById(entryId, updater) {
     const state = getState();
-
-    if (!entryId || typeof updater !== 'function') {
-        return false;
-    }
+    if (!entryId || typeof updater !== 'function') return false;
 
     for (const key of ['loreMatrix', 'pendingLoreEntries']) {
         const list = Array.isArray(state[key]) ? state[key] : [];
         const idx = list.findIndex(entry => entry?.id === entryId);
-
         if (idx >= 0) {
             const updated = normalizeLoreEntry(updater(list[idx]));
             updated.userEdited = true;
@@ -818,46 +1069,21 @@ function updateLoreEntryById(entryId, updater) {
             return true;
         }
     }
-
     return false;
 }
 
-/**
- * Adds a tag to a lore entry.
- * @param {string} entryId
- * @param {string} tag
- * @returns {boolean}
- */
 function addLoreTag(entryId, tag) {
     const clean = normalizeTag(tag);
-
-    if (!clean) {
-        return false;
-    }
-
+    if (!clean) return false;
     return updateLoreEntryById(entryId, (entry) => {
-        const tags = Array.isArray(entry.tags)
-            ? entry.tags.map(normalizeTag).filter(Boolean)
-            : [];
-
+        const tags = Array.isArray(entry.tags) ? entry.tags.map(normalizeTag).filter(Boolean) : [];
         const exists = tags.some(t => t.toLowerCase() === clean.toLowerCase());
-
-        return {
-            ...entry,
-            tags: exists ? tags : [...tags, clean],
-        };
+        return { ...entry, tags: exists ? tags : [...tags, clean] };
     });
 }
 
-/**
- * Removes a tag from a lore entry.
- * @param {string} entryId
- * @param {string} tag
- * @returns {boolean}
- */
 function removeLoreTag(entryId, tag) {
     const clean = normalizeTag(tag).toLowerCase();
-
     return updateLoreEntryById(entryId, (entry) => ({
         ...entry,
         tags: (Array.isArray(entry.tags) ? entry.tags : [])
@@ -866,21 +1092,53 @@ function removeLoreTag(entryId, tag) {
     }));
 }
 
-/**
- * Sets a specific filter value on the lorePanel state.
- * @param {string} key - 'category', 'search', or 'selectedEntryId'
- * @param {*} value
- */
-function setPanelFilter(key, value) {
+// Mutations -------------------------------------------------------------------
+
+function togglePinEntry(entryId) {
     const state = getState();
-    if (!state?.lorePanel) return;
-    state.lorePanel[key] = value;
+    if (!state?.loreSelection) return;
+    const sel = state.loreSelection;
+    const idx = sel.pinnedIds.indexOf(entryId);
+    if (idx >= 0) {
+        sel.pinnedIds.splice(idx, 1);
+    } else {
+        sel.pinnedIds.push(entryId);
+        const supIdx = sel.suppressedIds.indexOf(entryId);
+        if (supIdx >= 0) sel.suppressedIds.splice(supIdx, 1);
+    }
     saveState(state);
 }
 
-/**
- * Toggles the collapsed state of the panel.
- */
+function toggleSuppressEntry(entryId) {
+    const state = getState();
+    if (!state?.loreSelection) return;
+    const sel = state.loreSelection;
+    const idx = sel.suppressedIds.indexOf(entryId);
+    if (idx >= 0) {
+        sel.suppressedIds.splice(idx, 1);
+    } else {
+        sel.suppressedIds.push(entryId);
+        const pinIdx = sel.pinnedIds.indexOf(entryId);
+        if (pinIdx >= 0) sel.pinnedIds.splice(pinIdx, 1);
+    }
+    saveState(state);
+}
+
+function setWorkflowMode(mode) {
+    const normalized = normalizeWorkflowMode(mode);
+    const settings = getSettings();
+    settings.workflowMode = normalized;
+    Object.assign(settings, WORKFLOW_MODES[normalized].settings);
+    saveSettings(settings);
+}
+
+function setPanelState(patch) {
+    const state = getState();
+    if (!state?.lorePanel) return;
+    Object.assign(state.lorePanel, patch || {});
+    saveState(state);
+}
+
 function toggleCollapse() {
     const state = getState();
     if (!state?.lorePanel) return;
@@ -889,44 +1147,40 @@ function toggleCollapse() {
     showLorePanel();
 }
 
-/**
- * Re-renders the panel body while keeping the panel root in place.
- * Optionally preserves scroll position.
- * @param {Object} [options]
- * @param {boolean} [options.preserveScroll=false]
- */
-function refreshLorePanelBody(options = {}) {
+function refreshPanelBody(options = {}) {
     if (!panelRoot) return;
-
     const body = panelRoot.querySelector('.wandlight-lore-panel-body');
     if (!body) return;
 
-    const list = panelRoot.querySelector('.wandlight-lore-entry-list');
-    const scrollTop = options.preserveScroll && list ? list.scrollTop : 0;
+    const activeScroll = getActiveScrollElement();
+    const scrollTop = options.preserveScroll && activeScroll ? activeScroll.scrollTop : 0;
 
     const state = getState();
     renderPanelBody(body, state);
 
     if (options.preserveScroll) {
-        const newList = panelRoot.querySelector('.wandlight-lore-entry-list');
-        if (newList) {
-            newList.scrollTop = scrollTop;
-        }
+        const newScroll = getActiveScrollElement();
+        if (newScroll) newScroll.scrollTop = scrollTop;
     }
 }
 
-// ── Drag handling ───────────────────────────────────────────────────────────────
+function getActiveScrollElement() {
+    if (!panelRoot) return null;
+    return panelRoot.querySelector('.wandlight-lore-entry-list')
+        || panelRoot.querySelector('.wandlight-runtime-tab-body');
+}
+
+// Drag and resize -------------------------------------------------------------
 
 function onDragStart(e) {
-    // Don't start dragging if clicking on a button
-    if (e.target.tagName === 'BUTTON') return;
+    if (!panelRoot) return;
+    if (e.target.closest('button, input, textarea, select, .wandlight-lore-panel-resize-handle')) return;
 
     isDragging = true;
     const rect = panelRoot.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;
     dragOffsetY = e.clientY - rect.top;
 
-    // Switch from right/bottom positioning to left/top
     panelRoot.style.right = '';
     panelRoot.style.bottom = '';
     panelRoot.style.left = `${rect.left}px`;
@@ -938,11 +1192,9 @@ function onDragStart(e) {
 }
 
 function onDragMove(e) {
-    if (!isDragging) return;
+    if (!isDragging || !panelRoot) return;
     const x = e.clientX - dragOffsetX;
     const y = e.clientY - dragOffsetY;
-
-    // Clamp within viewport
     const maxX = window.innerWidth - panelRoot.offsetWidth;
     const maxY = window.innerHeight - panelRoot.offsetHeight;
     panelRoot.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
@@ -950,25 +1202,19 @@ function onDragMove(e) {
 }
 
 function onDragEnd() {
+    if (!panelRoot) return;
     isDragging = false;
     panelRoot.style.cursor = '';
-
     savePanelGeometry();
-
     document.removeEventListener('mousemove', onDragMove);
     document.removeEventListener('mouseup', onDragEnd);
 }
 
-// ── Resize handling ─────────────────────────────────────────────────────────────
-
 function onResizeStart(e) {
-    if (e.button !== 0) return;
-    if (!panelRoot) return;
+    if (e.button !== 0 || !panelRoot) return;
 
     isResizing = true;
-
     const rect = panelRoot.getBoundingClientRect();
-
     resizeStartX = e.clientX;
     resizeStartY = e.clientY;
     resizeStartWidth = rect.width;
@@ -982,7 +1228,6 @@ function onResizeStart(e) {
 
     e.preventDefault();
     e.stopPropagation();
-
     e.currentTarget.setPointerCapture?.(e.pointerId);
 
     document.addEventListener('pointermove', onResizeMove);
@@ -992,99 +1237,241 @@ function onResizeStart(e) {
 
 function onResizeMove(e) {
     if (!isResizing || !panelRoot) return;
-
     const rect = panelRoot.getBoundingClientRect();
-
-    const maxWidth = Math.max(
-        MIN_PANEL_WIDTH,
-        window.innerWidth - rect.left - MAX_PANEL_MARGIN
-    );
-
-    const maxHeight = Math.max(
-        MIN_PANEL_HEIGHT,
-        window.innerHeight - rect.top - MAX_PANEL_MARGIN
-    );
-
-    const width = Math.max(
-        MIN_PANEL_WIDTH,
-        Math.min(maxWidth, resizeStartWidth + (e.clientX - resizeStartX))
-    );
-
-    const height = Math.max(
-        MIN_PANEL_HEIGHT,
-        Math.min(maxHeight, resizeStartHeight + (e.clientY - resizeStartY))
-    );
-
+    const maxWidth = Math.max(MIN_PANEL_WIDTH, window.innerWidth - rect.left - MAX_PANEL_MARGIN);
+    const maxHeight = Math.max(MIN_PANEL_HEIGHT, window.innerHeight - rect.top - MAX_PANEL_MARGIN);
+    const width = Math.max(MIN_PANEL_WIDTH, Math.min(maxWidth, resizeStartWidth + (e.clientX - resizeStartX)));
+    const height = Math.max(MIN_PANEL_HEIGHT, Math.min(maxHeight, resizeStartHeight + (e.clientY - resizeStartY)));
     panelRoot.style.width = `${width}px`;
     panelRoot.style.height = `${height}px`;
 }
 
 function onResizeEnd() {
     if (!isResizing || !panelRoot) return;
-
     isResizing = false;
     panelRoot.classList.remove('wandlight-lore-panel-resizing');
-
     savePanelGeometry();
-
     document.removeEventListener('pointermove', onResizeMove);
     document.removeEventListener('pointerup', onResizeEnd);
     document.removeEventListener('pointercancel', onResizeEnd);
 }
 
-/**
- * Saves the current panel geometry (x, y, width, height) to state.
- */
 function savePanelGeometry() {
     if (!panelRoot) return;
-
     const state = getState();
     if (!state?.lorePanel) return;
-
     const rect = panelRoot.getBoundingClientRect();
-
     state.lorePanel.x = Math.round(rect.left);
     state.lorePanel.y = Math.round(rect.top);
-
     if (!panelRoot.classList.contains('wandlight-lore-panel-collapsed')) {
         state.lorePanel.width = Math.round(rect.width);
         state.lorePanel.height = Math.round(rect.height);
     }
-
     saveState(state);
 }
 
-// ── Helpers ─────────────────────────────────────────────────────────────────────
+// UI helpers ------------------------------------------------------------------
+
+function createSectionHeader(title, description) {
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-section-header';
+    const h = document.createElement('h3');
+    h.textContent = title;
+    addTooltip(h, description);
+    wrap.appendChild(h);
+    const p = document.createElement('p');
+    p.textContent = description;
+    wrap.appendChild(p);
+    return wrap;
+}
+
+function createToggleCard(label, checked, tooltip, onChange) {
+    const card = document.createElement('label');
+    card.className = 'wandlight-toggle-card';
+    addTooltip(card, tooltip);
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = !!checked;
+    input.addEventListener('change', () => onChange(input.checked));
+    card.appendChild(input);
+
+    const text = document.createElement('span');
+    text.textContent = label;
+    card.appendChild(text);
+
+    const state = document.createElement('span');
+    state.className = 'wandlight-toggle-state';
+    state.textContent = checked ? 'On' : 'Off';
+    card.appendChild(state);
+
+    return card;
+}
+
+function createKeyValue(label, value, tooltip) {
+    const row = document.createElement('div');
+    row.className = 'wandlight-key-value';
+    addTooltip(row, tooltip || label);
+
+    const k = document.createElement('span');
+    k.className = 'wandlight-key';
+    k.textContent = label;
+    row.appendChild(k);
+
+    const v = document.createElement('span');
+    v.className = 'wandlight-value';
+    v.textContent = String(value ?? '');
+    row.appendChild(v);
+
+    return row;
+}
+
+function createButton(label, tooltip, handler, className = '') {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `wandlight-runtime-button ${className}`.trim();
+    btn.textContent = label;
+    addTooltip(btn, tooltip);
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handler?.(btn, e);
+    });
+    return btn;
+}
+
+function createIconButton(label, tooltip, className, handler) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = className;
+    btn.textContent = label;
+    addTooltip(btn, tooltip);
+    btn.addEventListener('click', handler);
+    return btn;
+}
+
+function createBadge(text, tooltip) {
+    const badge = document.createElement('span');
+    badge.className = 'wandlight-lore-badge';
+    badge.textContent = text;
+    addTooltip(badge, tooltip);
+    return badge;
+}
+
+function createStatusPill(text, tooltip) {
+    const pill = document.createElement('span');
+    pill.className = 'wandlight-status-pill';
+    pill.textContent = text;
+    addTooltip(pill, tooltip);
+    return pill;
+}
+
+function createEmptyMessage(text) {
+    const empty = document.createElement('div');
+    empty.className = 'wandlight-lore-empty';
+    empty.textContent = text;
+    return empty;
+}
+
+function addTooltip(el, text) {
+    if (!el || !text) return el;
+    el.dataset.tooltip = text;
+    el.title = text;
+    return el;
+}
+
+async function runBusyAction(btn, busyText, action) {
+    if (!btn || typeof action !== 'function') return;
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = busyText;
+    try {
+        await action();
+    } catch (e) {
+        console.error('[Wandlight Continuity] Runtime action failed:', e);
+        toast(e?.message ? `Action failed: ${e.message}` : 'Action failed.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+    }
+}
+
+async function confirmAction(title, message) {
+    const hasPopupConfirm = typeof Popup !== 'undefined' && Popup.show && typeof Popup.show.confirm === 'function';
+    if (hasPopupConfirm) return await Popup.show.confirm(title, message);
+    if (typeof confirm === 'function') return confirm(`${title}\n\n${message}`);
+    return true;
+}
+
+function toast(message, type = 'success') {
+    if (typeof toastr === 'undefined') return;
+    if (type === 'error' && toastr.error) toastr.error(message);
+    else if (type === 'warning' && toastr.warning) toastr.warning(message);
+    else if (type === 'info' && toastr.info) toastr.info(message);
+    else if (toastr.success) toastr.success(message);
+}
+
+function normalizeTab(tab) {
+    return Object.prototype.hasOwnProperty.call(TAB_LABELS, tab) ? tab : 'session';
+}
+
+function normalizeWorkflowMode(mode) {
+    return Object.prototype.hasOwnProperty.call(WORKFLOW_MODES, mode) ? mode : 'assisted';
+}
+
+function getWorkflowLabel(settings) {
+    return WORKFLOW_MODES[normalizeWorkflowMode(settings?.workflowMode)].label;
+}
+
+function getWorkflowTooltip(settings) {
+    return WORKFLOW_MODES[normalizeWorkflowMode(settings?.workflowMode)].description;
+}
+
+function getCategoryCount(cat, entries, counts) {
+    if (cat === 'all') return counts.all;
+    if (cat === 'active') return counts.active;
+    if (cat === 'pinned') return counts.pinned;
+    if (cat === 'suppressed') return counts.suppressed;
+    if (cat === 'pending') return counts.pending;
+    return entries.filter(e => e.category === cat).length;
+}
+
+function getCategoryTooltip(cat) {
+    const map = {
+        all: 'Shows every accepted and pending lore entry.',
+        active: 'Shows lore currently eligible for injection, including pinned entries.',
+        pinned: 'Shows entries manually prioritized for injection.',
+        suppressed: 'Shows muted entries excluded from injection.',
+        pending: 'Shows generated entries that still need review.',
+        canon: 'Shows entries categorized as canon facts.',
+        au: 'Shows alternate-universe or branch-specific lore.',
+        secret: 'Shows hidden or private facts.',
+        rumor: 'Shows uncertain or rumored information.',
+        lie: 'Shows false beliefs or deception entries.',
+        relationship: 'Shows relationship-specific lore.',
+        location: 'Shows place-specific lore.',
+        rule: 'Shows rule, magic, or system constraints.',
+        timeline: 'Shows date-sensitive events and timeline facts.',
+    };
+    return map[cat] || `Shows lore entries in category: ${cat}.`;
+}
+
+function getPendingLoreBatchLabel(state) {
+    const meta = state?.pendingLoreMeta || {};
+    const parts = [];
+    if (meta.createdAt) parts.push(`Generated ${new Date(meta.createdAt).toLocaleString()}`);
+    if (meta.status) parts.push(`status: ${meta.status}`);
+    if (meta.validEntryCount !== undefined) parts.push(`${meta.validEntryCount} valid`);
+    if (meta.rawEntryCount !== undefined) parts.push(`${meta.rawEntryCount} raw`);
+    if (meta.droppedEntryCount) parts.push(`${meta.droppedEntryCount} dropped`);
+    return parts.length ? parts.join(' | ') : 'Pending lore batch awaiting review.';
+}
+
+function estimateTokens(text) {
+    return Math.ceil(String(text || '').length / 4);
+}
 
 function truncateText(text, maxLen) {
-    if (!text || text.length <= maxLen) return text;
-    return text.slice(0, maxLen).replace(/\s+\S*$/, '') + '\u2026';
-}
-
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-// ── Public API ──────────────────────────────────────────────────────────────────
-
-/**
- * Recreates the panel in-place (e.g., after state changes from extraction).
- */
-export function refreshLorePanel() {
-    const existing = document.getElementById(PANEL_ID);
-
-    if (!existing) {
-        return;
-    }
-
-    const state = getState();
-
-    if (!state?.lorePanel?.isOpen) {
-        removeLorePanel();
-        return;
-    }
-
-    refreshLorePanelBody({ preserveScroll: true });
+    const value = String(text || '');
+    if (value.length <= maxLen) return value;
+    return value.slice(0, maxLen).replace(/\s+\S*$/, '') + '...';
 }

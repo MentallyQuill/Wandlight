@@ -371,7 +371,7 @@ function installExtensionsMenuButton() {
     const btn = document.createElement('div');
     btn.id = 'wandlight-extensions-menu-button';
     btn.className = 'list-group-item flex-container flexGap5 interactable';
-    btn.title = 'Wandlight Continuity — Settings, State Viewer, Lore Matrix Panel';
+    btn.title = 'Open Wandlight Continuity runtime window. API and debug settings remain in the extensions panel.';
 
     btn.innerHTML = `\uD83E\uDE84 <span>Wandlight Continuity</span>`;
 
@@ -405,6 +405,16 @@ function wireSettingsPanel(container) {
     if (!container) return;
 
     const settings = getSettings();
+
+
+    // Open runtime window button in settings panel
+    const openWindowBtn = container.querySelector('#wandlight_open_window');
+    if (openWindowBtn) {
+        openWindowBtn.addEventListener('click', () => {
+            showLorePanel();
+            refreshLorePanel();
+        });
+    }
 
     // ── Toggle controls → save settings ───────────────────────────────────
     const toggles = container.querySelectorAll('[data-setting]');

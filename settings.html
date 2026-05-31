@@ -6,249 +6,39 @@
         </div>
         <div class="inline-drawer-content">
 
-            <!-- General Settings -->
+            <!-- Runtime handoff -->
             <div class="inline-drawer">
                 <div class="inline-drawer-toggle inline-drawer-header">
-                    <i class="fa-solid fa-gears" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>General Settings</b>
+                    <i class="fa-solid fa-window-restore" style="margin-right: 8px; opacity: 0.7;"></i>
+                    <b>Runtime Window</b>
                     <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
                 </div>
                 <div class="inline-drawer-content">
                     <div class="flex-container flexFlowColumn gap-1">
-
-                        <label class="checkbox_label">
-                            <input id="wandlight_enabled" type="checkbox" data-setting="enabled" checked />
-                            <span>Enable Wandlight Continuity</span>
-                        </label>
-
-                        <label class="checkbox_label">
-                            <input id="wandlight_inject_memo" type="checkbox" data-setting="injectMemo" checked />
-                            <span>Inject Continuity Memo</span>
-                            <i class="fa-solid fa-circle-question interactable"
-                                title="Prepends a compact continuity memo to the last user message before each generation. Ephemeral — never persists to chat."></i>
-                        </label>
-
-                        <label class="checkbox_label">
-                            <input id="wandlight_auto_extract" type="checkbox" data-setting="autoExtract" checked />
-                            <span>Auto-Extract State Deltas</span>
-                            <i class="fa-solid fa-circle-question interactable"
-                                title="After each generation, silently calls the LLM to extract continuity changes as JSON deltas and merge them into state."></i>
-                        </label>
-
-                        <label class="checkbox_label">
-                            <input id="wandlight_auto_apply" type="checkbox" data-setting="autoApplyDelta" checked />
-                            <span>Auto-Apply Deltas</span>
-                            <i class="fa-solid fa-circle-question interactable"
-                                title="Automatically apply extracted deltas to the continuity state. Disable to review deltas before applying."></i>
-                        </label>
-
-                        <label class="checkbox_label">
-                            <input id="wandlight_debug_mode" type="checkbox" data-setting="debugMode" />
-                            <span>Debug Mode</span>
-                            <i class="fa-solid fa-circle-question interactable"
-                                title="Enables verbose console logging for troubleshooting."></i>
-                        </label>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Extraction Settings -->
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <i class="fa-solid fa-microscope" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>Extraction Settings</b>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <div class="flex-container flexFlowColumn gap-1">
-
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                            <span style="flex-shrink: 0;">Extraction Interval:</span>
-                            <input id="wandlight_extraction_interval" type="range" data-setting="extractionInterval" min="1" max="10" value="1" style="flex: 1;" />
-                            <span id="wandlight_extraction_interval_value" style="min-width: 20px; text-align: right;">1</span>
-                        </div>
-                        <small style="opacity: 0.6; margin-top: -4px;">Run extraction every N generations. 1 = every turn, 3 = every 3rd turn.</small>
-
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px;">
-                            <span style="flex-shrink: 0;">Max Snapshots:</span>
-                            <input id="wandlight_max_snapshots" type="range" data-setting="maxSnapshots" min="5" max="100" value="20" style="flex: 1;" />
-                            <span id="wandlight_max_snapshots_value" style="min-width: 24px; text-align: right;">20</span>
-                        </div>
-                        <small style="opacity: 0.6; margin-top: -4px;">Maximum state/memo snapshots kept in history for undo support.</small>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <i class="fa-solid fa-bolt" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>Actions</b>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <div class="flex-container flexFlowColumn gap-1">
-
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            <button id="wandlight_extract_now" class="menu_button interactable"
-                                title="Manually run continuity state extraction now">
-                                <i class="fa-solid fa-eye"></i> Extract Now
-                            </button>
-                            <button id="wandlight_undo_change" class="menu_button interactable"
-                                title="Undo the last change to continuity state">
-                                <i class="fa-solid fa-undo"></i> Undo Last Change
-                            </button>
-                            <button id="wandlight_reset_state" class="menu_button interactable"
-                                style="color: #ff6666;"
-                                title="Reset all continuity state to defaults (undo available via Undo Last Change)">
-                                <i class="fa-solid fa-trash"></i> Reset State
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lore Matrix -->
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <i class="fa-solid fa-book-atlas" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>Lore Matrix</b>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <div class="flex-container flexFlowColumn gap-1">
-
-                        <label class="checkbox_label">
-                            <input id="wandlight_auto_generate_lore" type="checkbox" data-setting="autoGenerateLore" />
-                            <span>Auto-Generate Lore</span>
-                            <i class="fa-solid fa-circle-question interactable"
-                                title="After each extraction, automatically detect scene context and generate/update lore entries."></i>
-                        </label>
-
-                        <label class="checkbox_label">
-                            <input id="wandlight_inject_lore" type="checkbox" data-setting="injectLore" checked />
-                            <span>Inject Active Lore in Memo</span>
-                            <i class="fa-solid fa-circle-question interactable"
-                                title="Adds active lore matrix entries to the ephemeral continuity memo. Disable to keep lore in state without injecting it into prompts."></i>
-                        </label>
-
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                            <span style="flex-shrink: 0;">Max Lore in Memo:</span>
-                            <input id="wandlight_max_lore_entries_in_memo" type="range" data-setting="maxLoreEntriesInMemo" min="1" max="12" value="6" style="flex: 1;" />
-                            <span id="wandlight_max_lore_entries_in_memo_value" style="min-width: 24px; text-align: right;">6</span>
-                        </div>
-                        <small style="opacity: 0.6; margin-top: -4px;">Maximum active lore entries injected into the continuity memo.</small>
-
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px;">
-                            <span style="flex-shrink: 0;">Max Lore in Matrix:</span>
-                            <input id="wandlight_max_lore_entries_in_matrix" type="range" data-setting="maxLoreEntriesInMatrix" min="10" max="100" value="50" style="flex: 1;" />
-                            <span id="wandlight_max_lore_entries_in_matrix_value" style="min-width: 24px; text-align: right;">50</span>
-                        </div>
-                        <small style="opacity: 0.6; margin-top: -4px;">Maximum lore entries retained in the accepted matrix.</small>
-
-                        <div id="wandlight_lore_context_preview" class="wandlight-lore-context"
-                            style="font-family: monospace; font-size: 0.78em; line-height: 1.35;
-                            background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 4px;
-                            max-height: 120px; overflow-y: auto; margin: 4px 0; opacity: 0.8;">
-                            <em>Context not yet detected</em>
-                        </div>
-
-                        <div id="wandlight_lore_matrix_preview" class="wandlight-lore-matrix"
-                            style="font-family: monospace; font-size: 0.78em; line-height: 1.35;
-                            background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 4px;
-                            max-height: 220px; overflow-y: auto; margin: 4px 0;">
-                            <em>No lore entries</em>
-                        </div>
-
-                        <div id="wandlight_pending_lore_preview" class="wandlight-lore-matrix"
-                            style="font-family: monospace; font-size: 0.78em; line-height: 1.35;
-                            background: rgba(80, 140, 255, 0.12); padding: 8px 10px; border-radius: 4px;
-                            max-height: 180px; overflow-y: auto; margin: 4px 0;">
-                            <em>No pending lore entries</em>
-                        </div>
-
-                        <div id="wandlight_lore_stale_badge" class="wandlight-lore-stale-badge"
-                            style="display: none; font-size: 0.78em; color: #ffaa44; background: rgba(255, 170, 68, 0.12);
-                            border: 1px solid rgba(255, 170, 68, 0.3); border-radius: 4px; padding: 4px 8px; margin: 2px 0;">
-                        </div>
-
-                        <div id="wandlight_lore_batch_status" class="wandlight-lore-batch-status"
-                            style="font-size: 0.75em; opacity: 0.65; margin: 1px 0 4px 0; font-style: italic;">
-                        </div>
-
-                        <div class="wandlight-lore-entry-count" style="font-size: 0.8em; opacity: 0.7;">
-                            <span id="wandlight_lore_count">0</span> accepted
-                            <span style="opacity: 0.4; margin: 0 6px;">|</span>
-                            <span id="wandlight_pending_lore_count" style="color: #88aaff;">0</span> pending
-                        </div>
-
-                        <!-- Lore Matrix JSON Editor -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
-                            <span style="font-size: 0.82em; opacity: 0.7;">Lore Matrix JSON Editor</span>
-                            <button id="wandlight_lore_matrix_toggle_editor" class="menu_button interactable"
-                                style="font-size: 0.78em; padding: 2px 10px;"
-                                title="Toggle raw JSON editor for the accepted lore matrix">
-                                <i class="fa-solid fa-code"></i> Toggle Editor
-                            </button>
-                        </div>
-                        <textarea id="wandlight_lore_matrix_json" class="wandlight-lore-editor"
-                            style="min-height: 180px; font-family: monospace; font-size: 0.78em;
-                            background: rgba(0,0,0,0.3); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.15);
-                            border-radius: 4px; padding: 10px; resize: vertical; width: 100%; box-sizing: border-box;
-                            display: none;"></textarea>
-                        <div id="wandlight_lore_matrix_save_row" style="display: none;">
-                            <button id="wandlight_lore_matrix_save" class="menu_button interactable"
-                                style="background: rgba(80, 140, 255, 0.18); border-color: #5588ff; margin-top: 4px;"
-                                title="Save JSON edits to the accepted lore matrix">
-                                <i class="fa-solid fa-floppy-disk"></i> Save Lore Matrix
-                            </button>
-                            <small style="opacity: 0.6; margin-left: 8px;">Edits affect the accepted matrix only (not pending)</small>
-                        </div>
-
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            <button id="wandlight_detect_lore_context" class="menu_button interactable"
-                                title="Analyze current scene for era, location, and characters to determine lore context">
-                                <i class="fa-solid fa-magnifying-glass"></i> Detect Context
-                            </button>
-                            <button id="wandlight_generate_lore" class="menu_button interactable"
-                                title="Generate new lore entries based on recent messages and current scene context">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Lore
-                            </button>
-                            <button id="wandlight_accept_all_lore" class="menu_button interactable"
-                                style="background: rgba(80, 180, 100, 0.18); border-color: #55bb66;"
-                                title="Accept all pending lore generation results">
-                                <i class="fa-solid fa-check-double"></i> Accept All
-                            </button>
-                            <button id="wandlight_reject_all_lore" class="menu_button interactable"
-                                style="background: rgba(200, 100, 80, 0.18); border-color: #cc6655;"
-                                title="Reject all pending lore generation results">
-                                <i class="fa-solid fa-xmark"></i> Reject All
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lore Model Provider -->
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <i class="fa-solid fa-microchip" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>Lore Model Provider</b>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <div class="flex-container flexFlowColumn gap-1">
-
-                        <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
-                            Select which model generates lore entries. Different from your main RP model.
+                        <p style="font-size: 0.85em; opacity: 0.72; margin-bottom: 4px;">
+                            During roleplay, use the Wandlight Continuity window for mode, injection toggles, scanning, generation, review, and lore editing. This settings panel is reserved for API setup, debug previews, and data tools.
                         </p>
+                        <button id="wandlight_open_window" class="menu_button interactable"
+                            title="Open the Wandlight Continuity runtime window.">
+                            <i class="fa-solid fa-up-right-from-square"></i> Open Wandlight Window
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-                        <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Provider</label>
-                        <select id="wandlight_lore_provider" class="text_pole" style="width: 100%;">
+            <!-- API and Model Settings -->
+            <div class="inline-drawer">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <i class="fa-solid fa-plug" style="margin-right: 8px; opacity: 0.7;"></i>
+                    <b>API and Model Settings</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <div class="flex-container flexFlowColumn gap-1">
+
+                        <label style="font-size: 0.9em; font-weight: bold;">Lore Provider</label>
+                        <select id="wandlight_lore_provider" class="text_pole" style="width: 100%;"
+                            title="Select which model source Wandlight uses for context detection and lore generation.">
                             <option value="st">Current SillyTavern Model</option>
                             <option value="profile">Connection Profile</option>
                             <option value="openai_compatible">OpenAI-Compatible Endpoint</option>
@@ -256,12 +46,14 @@
 
                         <div id="wandlight_lore_profile_row" style="display: none;">
                             <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Connection Profile</label>
-                            <select id="wandlight_lore_profile_id" class="text_pole" style="width: 100%;">
-                                <option value="">— Select Profile —</option>
+                            <select id="wandlight_lore_profile_id" class="text_pole" style="width: 100%;"
+                                title="Connection profile used for Wandlight lore tasks.">
+                                <option value="">Select Profile</option>
                             </select>
                             <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Completion Preset</label>
-                            <select id="wandlight_lore_completion_preset_id" class="text_pole" style="width: 100%;">
-                                <option value="">— Default —</option>
+                            <select id="wandlight_lore_completion_preset_id" class="text_pole" style="width: 100%;"
+                                title="Optional completion preset used for Wandlight lore tasks.">
+                                <option value="">Default</option>
                             </select>
                         </div>
 
@@ -269,17 +61,19 @@
                             <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Base URL</label>
                             <input id="wandlight_lore_openai_base_url" class="text_pole" type="text"
                                 placeholder="https://api.openai.com"
+                                title="OpenAI-compatible base URL for lore tasks."
                                 style="width: 100%;">
 
                             <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Model</label>
                             <div style="display: flex; gap: 6px; align-items: center;">
                                 <select id="wandlight_lore_openai_model" class="text_pole"
+                                    title="Model ID used for Wandlight lore tasks."
                                     style="flex: 1;">
-                                    <option value="">— Type or fetch models —</option>
+                                    <option value="">Type or fetch models</option>
                                 </select>
                                 <button id="wandlight_lore_fetch_models" class="menu_button interactable"
-                                    style="background: rgba(80, 140, 255, 0.18); border-color: #5588ff; font-size: 0.78em; padding: 2px 8px; white-space: nowrap;"
-                                    title="Fetch available models from the configured API endpoint">
+                                    style="font-size: 0.78em; padding: 2px 8px; white-space: nowrap;"
+                                    title="Fetch available models from the configured API endpoint.">
                                     <i class="fa-solid fa-cloud-arrow-down"></i> Fetch Models
                                 </button>
                             </div>
@@ -287,34 +81,23 @@
                             <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">API Key</label>
                             <div style="display: flex; gap: 6px; align-items: center;">
                                 <input id="wandlight_lore_openai_key" class="text_pole" type="password"
-                                    placeholder="Enter API key (stored encrypted at rest)"
+                                    placeholder="Enter API key"
+                                    title="API key stored encrypted locally for Wandlight lore tasks."
                                     style="flex: 1;">
                                 <button id="wandlight_lore_openai_key_save" class="menu_button interactable"
-                                    style="background: rgba(80, 140, 255, 0.18); border-color: #5588ff;"
-                                    title="Encrypt and store the entered API key">
+                                    title="Encrypt and store the entered API key.">
                                     <i class="fa-solid fa-floppy-disk"></i> Store
                                 </button>
                                 <button id="wandlight_lore_openai_key_clear" class="menu_button interactable"
-                                    style="background: rgba(200, 100, 80, 0.18); border-color: #cc6655;"
-                                    title="Remove stored key">
+                                    title="Remove the stored API key.">
                                     <i class="fa-solid fa-trash"></i> Clear
                                 </button>
                             </div>
                             <small id="wandlight_lore_openai_key_status" style="opacity: 0.6; margin-top: 2px; display: block;"></small>
-                            <small style="opacity: 0.5; font-style: italic; margin-top: 2px; display: block;">
-                                Your key is encrypted locally with a machine-derived key before being stored on disk.
-                            </small>
 
                             <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85em;">
                                 <input id="wandlight_lore_openai_json_mode" type="checkbox">
-                                Use JSON mode (response_format: json_object)
-                            </label>
-
-                            <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85em;">
-                                <input id="wandlight_lore_openai_use_st_proxy" type="checkbox">
-                                Route through SillyTavern proxy
-                                <i class="fa-solid fa-circle-question interactable"
-                                    title="When enabled, API requests go through SillyTavern's built-in proxy (seamless). When disabled, requests go directly to the endpoint (requires CORS support)."></i>
+                                Use JSON mode
                             </label>
                         </div>
 
@@ -324,18 +107,21 @@
                                 <label style="font-size: 0.78em; opacity: 0.7;">Temperature</label>
                                 <input id="wandlight_lore_temperature" class="text_pole" type="number"
                                     min="0" max="2" step="0.05" value="0.1"
+                                    title="Temperature for Wandlight context and lore-generation calls."
                                     style="width: 100%;">
                             </div>
                             <div style="flex: 1; min-width: 100px;">
                                 <label style="font-size: 0.78em; opacity: 0.7;">Top P</label>
                                 <input id="wandlight_lore_top_p" class="text_pole" type="number"
                                     min="0" max="1" step="0.05" value="0.9"
+                                    title="Top-p sampling value for Wandlight context and lore-generation calls."
                                     style="width: 100%;">
                             </div>
                             <div style="flex: 1; min-width: 100px;">
                                 <label style="font-size: 0.78em; opacity: 0.7;">Max Tokens</label>
                                 <input id="wandlight_lore_max_tokens" class="text_pole" type="number"
                                     min="64" max="16384" step="64" value="2048"
+                                    title="Maximum response tokens for Wandlight context and lore-generation calls."
                                     style="width: 100%;">
                             </div>
                         </div>
@@ -344,17 +130,17 @@
                 </div>
             </div>
 
-            <!-- Continuity Memo Preview -->
+            <!-- Prompt Injection Debug -->
             <div class="inline-drawer">
                 <div class="inline-drawer-toggle inline-drawer-header">
                     <i class="fa-solid fa-scroll" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>Continuity Memo Preview</b>
+                    <b>Prompt Injection Debug</b>
                     <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
                 </div>
                 <div class="inline-drawer-content">
                     <div class="flex-container flexFlowColumn gap-1">
                         <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
-                            This is the text injected before each generation. It reflects the current continuity state.
+                            Raw preview of the continuity memo that can be injected into generation prompts. Runtime injection toggles live in the Wandlight window.
                         </p>
                         <pre id="wandlight_memo_preview" class="wandlight-memo-preview"
                             style="white-space: pre-wrap; font-family: monospace; font-size: 0.82em;
@@ -362,57 +148,38 @@
                             max-height: 300px; overflow-y: auto; margin: 0;">(Loading continuity state...)</pre>
                         <button id="wandlight_refresh_memo" class="menu_button interactable"
                             style="align-self: flex-start; margin-top: 4px;"
-                            title="Refresh the memo preview from the current state">
+                            title="Refresh the raw memo preview from current state.">
                             <i class="fa-solid fa-rotate"></i> Refresh Preview
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Pending Continuity Changes -->
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <i class="fa-solid fa-code-merge" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>Pending Continuity Changes</b>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <div class="flex-container flexFlowColumn gap-1">
-                        <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
-                            Most recent extraction delta. Apply to merge into state, or dismiss to discard.
-                        </p>
-                        <div id="wandlight_delta_preview" class="wandlight-delta-preview"
-                            style="font-family: monospace; font-size: 0.82em;
-                            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;
-                            max-height: 250px; overflow-y: auto; margin: 0;">
-                            <em>No pending changes</em>
-                        </div>
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">
-                            <button id="wandlight_apply_delta" class="menu_button interactable"
-                                style="background: rgba(80, 180, 100, 0.18); border-color: #55bb66;"
-                                title="Apply the pending changes to the continuity state">
-                                <i class="fa-solid fa-check"></i> Apply Changes
-                            </button>
-                            <button id="wandlight_dismiss_delta" class="menu_button interactable"
-                                title="Dismiss the pending changes without applying">
-                                <i class="fa-solid fa-xmark"></i> Dismiss
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- State Viewer -->
+            <!-- Data and Developer Debug -->
             <div class="inline-drawer">
                 <div class="inline-drawer-toggle inline-drawer-header">
                     <i class="fa-solid fa-database" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>State Viewer</b>
+                    <b>Data and Developer Debug</b>
                     <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
                 </div>
                 <div class="inline-drawer-content">
                     <div class="flex-container flexFlowColumn gap-1">
+                        <label class="checkbox_label">
+                            <input id="wandlight_debug_mode" type="checkbox" data-setting="debugMode" />
+                            <span>Debug Mode</span>
+                            <i class="fa-solid fa-circle-question interactable"
+                                title="Enables verbose console logging for Wandlight troubleshooting."></i>
+                        </label>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px;">
+                            <span style="flex-shrink: 0;">Max Snapshots:</span>
+                            <input id="wandlight_max_snapshots" type="range" data-setting="maxSnapshots" min="5" max="100" value="20" style="flex: 1;" />
+                            <span id="wandlight_max_snapshots_value" style="min-width: 24px; text-align: right;">20</span>
+                        </div>
+                        <small style="opacity: 0.6; margin-top: -4px;">Maximum state snapshots kept for undo support.</small>
+
                         <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
-                            Current continuity state. Edit the raw JSON or use Import/Export.
+                            Current continuity state. Double-click the summary to edit raw JSON.
                         </p>
                         <div id="wandlight_state_display" class="wandlight-state-display"
                             style="font-family: monospace; font-size: 0.78em;
@@ -428,21 +195,29 @@
 
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                             <button id="wandlight_refresh_state" class="menu_button interactable"
-                                title="Reload state from storage">
+                                title="Reload state from chat metadata.">
                                 <i class="fa-solid fa-rotate"></i> Refresh
                             </button>
                             <button id="wandlight_save_state" class="menu_button interactable"
-                                style="background: rgba(80, 140, 255, 0.18); border-color: #5588ff;"
-                                title="Save edited state">
+                                title="Save edited raw state JSON.">
                                 <i class="fa-solid fa-floppy-disk"></i> Save State
                             </button>
+                            <button id="wandlight_undo_change" class="menu_button interactable"
+                                title="Undo the last saved continuity state change.">
+                                <i class="fa-solid fa-undo"></i> Undo Last Change
+                            </button>
                             <button id="wandlight_import_state" class="menu_button interactable"
-                                title="Import state from a JSON file">
+                                title="Import Wandlight state from a JSON file.">
                                 <i class="fa-solid fa-file-import"></i> Import
                             </button>
                             <button id="wandlight_export_state" class="menu_button interactable"
-                                title="Download current state as JSON">
+                                title="Export current Wandlight state to a JSON file.">
                                 <i class="fa-solid fa-file-export"></i> Export
+                            </button>
+                            <button id="wandlight_reset_state" class="menu_button interactable"
+                                style="color: #ff6666;"
+                                title="Reset all continuity state to defaults. A snapshot is taken first so this can be undone.">
+                                <i class="fa-solid fa-trash"></i> Reset State
                             </button>
                         </div>
                     </div>

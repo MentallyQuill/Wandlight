@@ -62,6 +62,7 @@ export const DEFAULT_SETTINGS = {
     maxLoreEntriesInMemo: 6,
     maxLoreEntriesInMatrix: 50,
     autoGenerateLore: false,
+    workflowMode: 'assisted', // 'manual' | 'assisted' | 'automatic'
 
     // Lore model provider
     loreProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
@@ -137,6 +138,7 @@ export function getDefaultState() {
             selectedCategory: 'all',
             search: '',
             selectedEntryId: '',
+            activeTab: 'session',
             showOnlyActive: false,
             width: 420,
             height: 520,

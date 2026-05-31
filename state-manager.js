@@ -363,9 +363,18 @@ export function migrateState(state) {
         state.lorePanel.selectedCategory = state.lorePanel.selectedCategory || 'all';
         state.lorePanel.search = state.lorePanel.search || '';
         state.lorePanel.selectedEntryId = state.lorePanel.selectedEntryId || '';
-        state.lorePanel.showOnlyActive = !!state.lorePanel.showOnlyActive;
-        state.lorePanel.width = Number.isFinite(state.lorePanel.width) && state.lorePanel.width >= 300 ? state.lorePanel.width : 420;
-        state.lorePanel.height = Number.isFinite(state.lorePanel.height) && state.lorePanel.height >= 200 ? state.lorePanel.height : 520;
+        state.lorePanel.activeTab = ['session', 'generate', 'review', 'lore'].includes(state.lorePanel.activeTab)
+            ? state.lorePanel.activeTab
+            : 'session';
+        state.lorePanel.showOnlyActive = false;
+        state.lorePanel.width = Number.isFinite(Number(state.lorePanel.width)) && Number(state.lorePanel.width) >= 320 ? Number(state.lorePanel.width) : 420;
+        state.lorePanel.height = Number.isFinite(Number(state.lorePanel.height)) && Number(state.lorePanel.height) >= 260 ? Number(state.lorePanel.height) : 520;
+        if (state.lorePanel.x !== undefined) {
+            state.lorePanel.x = Number.isFinite(Number(state.lorePanel.x)) ? Number(state.lorePanel.x) : undefined;
+        }
+        if (state.lorePanel.y !== undefined) {
+            state.lorePanel.y = Number.isFinite(Number(state.lorePanel.y)) ? Number(state.lorePanel.y) : undefined;
+        }
     }
 
     // Normalize loreSelection

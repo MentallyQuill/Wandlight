@@ -1,0 +1,424 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "age_harry_potter",
+      "title": "Harry Potter age constraint",
+      "kind": "age_gate",
+      "category": "age",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 60,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1980-07-31",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter"
+        ],
+        "topics": [
+          "age",
+          "school year"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry Potter has canon birthdate 1980-07-31; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "injection": "Harry Potter has canon birthdate 1980-07-31; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "constraints": [
+          "Compute Harry Potter age from 1980-07-31 when the story date is known."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Harry",
+          "age"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "age_hermione_granger",
+      "title": "Hermione Granger age constraint",
+      "kind": "age_gate",
+      "category": "age",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 60,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1979-09-19",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Hermione Granger"
+        ],
+        "topics": [
+          "age",
+          "school year"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Hermione Granger has canon birthdate 1979-09-19; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "injection": "Hermione Granger has canon birthdate 1979-09-19; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "constraints": [
+          "Compute Hermione Granger age from 1979-09-19 when the story date is known."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Hermione",
+          "age"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "age_ron_weasley",
+      "title": "Ron Weasley age constraint",
+      "kind": "age_gate",
+      "category": "age",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 60,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1980-03-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Ron Weasley"
+        ],
+        "topics": [
+          "age",
+          "school year"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Ron Weasley has canon birthdate 1980-03-01; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "injection": "Ron Weasley has canon birthdate 1980-03-01; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "constraints": [
+          "Compute Ron Weasley age from 1980-03-01 when the story date is known."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Ron",
+          "age"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "age_draco_malfoy",
+      "title": "Draco Malfoy age constraint",
+      "kind": "age_gate",
+      "category": "age",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 60,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1980-06-05",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Draco Malfoy"
+        ],
+        "topics": [
+          "age",
+          "school year"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Draco Malfoy has canon birthdate 1980-06-05; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "injection": "Draco Malfoy has canon birthdate 1980-06-05; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "constraints": [
+          "Compute Draco Malfoy age from 1980-06-05 when the story date is known."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Draco",
+          "age"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "age_ginny_weasley",
+      "title": "Ginny Weasley age constraint",
+      "kind": "age_gate",
+      "category": "age",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 60,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1981-08-11",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Ginny Weasley"
+        ],
+        "topics": [
+          "age",
+          "school year"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Ginny Weasley has canon birthdate 1981-08-11; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "injection": "Ginny Weasley has canon birthdate 1981-08-11; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "constraints": [
+          "Compute Ginny Weasley age from 1981-08-11 when the story date is known."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Ginny",
+          "age"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "age_neville_longbottom",
+      "title": "Neville Longbottom age constraint",
+      "kind": "age_gate",
+      "category": "age",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 60,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1980-07-30",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Neville Longbottom"
+        ],
+        "topics": [
+          "age",
+          "school year"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Neville Longbottom has canon birthdate 1980-07-30; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "injection": "Neville Longbottom has canon birthdate 1980-07-30; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "constraints": [
+          "Compute Neville Longbottom age from 1980-07-30 when the story date is known."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Neville",
+          "age"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "age_luna_lovegood",
+      "title": "Luna Lovegood age constraint",
+      "kind": "age_gate",
+      "category": "age",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 60,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1981-02-13",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Luna Lovegood"
+        ],
+        "topics": [
+          "age",
+          "school year"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Luna Lovegood has canon birthdate 1981-02-13; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "injection": "Luna Lovegood has canon birthdate 1981-02-13; compute age from the active story date and keep school-year behavior age-appropriate.",
+        "constraints": [
+          "Compute Luna Lovegood age from 1981-02-13 when the story date is known."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Luna",
+          "age"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

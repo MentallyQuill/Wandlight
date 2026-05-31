@@ -1,0 +1,256 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "institution_hogwarts_year6_staff",
+      "title": "Hogwarts staff roles in Year 6",
+      "kind": "institution_state",
+      "category": "place",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 85,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "classes",
+          "staff",
+          "school year"
+        ],
+        "schoolYears": [
+          6
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "In Year 6, Snape teaches Defense Against the Dark Arts and Slughorn teaches Potions.",
+        "injection": "In Year 6, Snape teaches Defense Against the Dark Arts and Slughorn teaches Potions.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Hogwarts",
+          "Year 6",
+          "staff"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "institution_hogwarts_year5_umbridge",
+      "title": "Hogwarts under Umbridge influence",
+      "kind": "institution_state",
+      "category": "place",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 85,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-09-01",
+        "validTo": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "Umbridge",
+          "Ministry",
+          "Defense Against the Dark Arts"
+        ],
+        "schoolYears": [
+          5
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "In Year 5, Umbridge and Ministry rules restrict Hogwarts and defensive education.",
+        "injection": "In Year 5, Umbridge and Ministry rules restrict Hogwarts and defensive education.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Hogwarts",
+          "Year 5",
+          "Umbridge"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "institution_ministry_year5_denial",
+      "title": "Ministry public position in Year 5",
+      "kind": "institution_state",
+      "category": "faction",
+      "canonStatus": "canon",
+      "truthStatus": "public_belief",
+      "revealPolicy": "public",
+      "priority": 85,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-07-01",
+        "validTo": "1996-06-17",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "factions": [
+          "Ministry of Magic"
+        ],
+        "topics": [
+          "Voldemort",
+          "public belief",
+          "denial"
+        ],
+        "schoolYears": [
+          5
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 5, the Ministry line denies or downplays Voldemort\u2019s return.",
+        "injection": "During Year 5, the Ministry line denies or downplays Voldemort\u2019s return.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Ministry",
+          "Year 5",
+          "denial"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "institution_ministry_year6_acknowledges_war",
+      "title": "Ministry public position in Year 6",
+      "kind": "institution_state",
+      "category": "faction",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 85,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-06-18",
+        "validTo": "1997-07-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "factions": [
+          "Ministry of Magic"
+        ],
+        "topics": [
+          "Voldemort",
+          "war",
+          "public truth"
+        ],
+        "schoolYears": [
+          6
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "By Year 6, the Ministry and public acknowledge Voldemort\u2019s return and the war climate is open.",
+        "injection": "By Year 6, the Ministry and public acknowledge Voldemort\u2019s return and the war climate is open.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Ministry",
+          "Year 6",
+          "war"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

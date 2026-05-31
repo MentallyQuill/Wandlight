@@ -1,0 +1,1163 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "event_harry_enters_hogwarts",
+      "title": "Harry starts Hogwarts",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1992-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher Stone"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          1
+        ],
+        "books": [
+          "Philosopher Stone"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry is a first-year Gryffindor student after September 1991.",
+        "injection": "Harry is a first-year Gryffindor student after September 1991.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-1"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Philosopher Stone",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_quirrell_stone_aftermath",
+      "title": "Quirrell and Stone incident resolved",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1992-06-04",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher Stone"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          1
+        ],
+        "books": [
+          "Philosopher Stone"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the end of Year 1, the Philosopher Stone plot is resolved and Quirrell is dead.",
+        "injection": "After the end of Year 1, the Philosopher Stone plot is resolved and Quirrell is dead.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-1"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Philosopher Stone",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_chamber_opened",
+      "title": "Chamber of Secrets active period",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1992-10-31",
+        "validTo": "1993-05-29",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 2, the Chamber of Secrets threat affects Hogwarts until it is resolved near the end of the school year.",
+        "injection": "During Year 2, the Chamber of Secrets threat affects Hogwarts until it is resolved near the end of the school year.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-2"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Chamber of Secrets",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_chamber_resolved",
+      "title": "Chamber of Secrets resolved",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1993-05-29",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After late Year 2, Ginny is rescued and the Chamber of Secrets incident is over, though it remains sensitive history.",
+        "injection": "After late Year 2, Ginny is rescued and the Chamber of Secrets incident is over, though it remains sensitive history.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-2"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Chamber of Secrets",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_sirius_public_fugitive",
+      "title": "Sirius Black is publicly treated as fugitive",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1993-08-01",
+        "validTo": "1994-06-30",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 3, the public believes Sirius Black is a dangerous fugitive.",
+        "injection": "During Year 3, the public believes Sirius Black is a dangerous fugitive.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-3"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Prisoner of Azkaban",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_sirius_truth_to_trio",
+      "title": "Trio learns Sirius truth",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-06-06",
+        "validTo": "1996-06-18",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the Shrieking Shack events, Harry, Ron, and Hermione know Sirius was not the traitor, but this is not public knowledge.",
+        "injection": "After the Shrieking Shack events, Harry, Ron, and Hermione know Sirius was not the traitor, but this is not public knowledge.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-3"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Prisoner of Azkaban",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_triwizard_tournament",
+      "title": "Triwizard Tournament year",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1995-06-24",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 4, the Triwizard Tournament shapes Hogwarts life and Harry is an unexpected champion.",
+        "injection": "During Year 4, the Triwizard Tournament shapes Hogwarts life and Harry is an unexpected champion.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-4"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_voldemort_returns_private_truth",
+      "title": "Voldemort returns at graveyard",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-06-24",
+        "validTo": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the graveyard, Harry and a small group know Voldemort has returned, while public institutions deny it for much of Year 5.",
+        "injection": "After the graveyard, Harry and a small group know Voldemort has returned, while public institutions deny it for much of Year 5.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-4"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_ministry_denial_ootp",
+      "title": "Ministry denial period",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-07-01",
+        "validTo": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 5, the Ministry publicly denies Voldemort\u2019s return and discredits Harry and Dumbledore.",
+        "injection": "During Year 5, the Ministry publicly denies Voldemort\u2019s return and discredits Harry and Dumbledore.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-5"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_umbridge_hogwarts",
+      "title": "Umbridge influence at Hogwarts",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-09-01",
+        "validTo": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 5, Dolores Umbridge and Ministry oversight restrict Hogwarts and defensive education.",
+        "injection": "During Year 5, Dolores Umbridge and Ministry oversight restrict Hogwarts and defensive education.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-5"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_sirius_death_after",
+      "title": "Sirius is dead after Department of Mysteries",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-06-18",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the Department of Mysteries battle, Sirius Black is dead and Harry is grieving.",
+        "injection": "After the Department of Mysteries battle, Sirius Black is dead and Harry is grieving.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-5"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_voldemort_public_acknowledged",
+      "title": "Voldemort return publicly acknowledged",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-06-18",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the Ministry battle, Voldemort\u2019s return is publicly acknowledged.",
+        "injection": "After the Ministry battle, Voldemort\u2019s return is publicly acknowledged.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-5"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_hbp_school_year",
+      "title": "Half-Blood Prince school year",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 6, Snape teaches Defense Against the Dark Arts, Slughorn teaches Potions, and the war climate is public.",
+        "injection": "During Year 6, Snape teaches Defense Against the Dark Arts, Slughorn teaches Potions, and the war climate is public.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_dumbledore_private_lessons",
+      "title": "Dumbledore teaches Harry about Voldemort past",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 6, Dumbledore privately teaches Harry about Voldemort\u2019s past and the Horcrux problem.",
+        "injection": "During Year 6, Dumbledore privately teaches Harry about Voldemort\u2019s past and the Horcrux problem.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_dumbledore_alive_pre_tower",
+      "title": "Dumbledore alive before Astronomy Tower",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-29",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Before the Astronomy Tower event near the end of Year 6, Dumbledore is alive and still Headmaster.",
+        "injection": "Before the Astronomy Tower event near the end of Year 6, Dumbledore is alive and still Headmaster.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_dumbledore_death_after",
+      "title": "Dumbledore dead after Astronomy Tower",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1997-06-30",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the end of Year 6, Dumbledore is dead and Hogwarts leadership changes.",
+        "injection": "After the end of Year 6, Dumbledore is dead and Hogwarts leadership changes.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_ministry_falls",
+      "title": "Ministry falls under Voldemort control",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1997-08-01",
+        "validTo": "1998-05-02",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After summer 1997, the Ministry is under Voldemort-aligned control.",
+        "injection": "After summer 1997, the Ministry is under Voldemort-aligned control.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-7"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_horcrux_hunt",
+      "title": "Horcrux hunt period",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1997-08-01",
+        "validTo": "1998-05-02",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 7, Harry, Ron, and Hermione are not attending normal Hogwarts classes and are hunting Horcruxes.",
+        "injection": "During Year 7, Harry, Ron, and Hermione are not attending normal Hogwarts classes and are hunting Horcruxes.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-7"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "event_battle_hogwarts_after",
+      "title": "Battle of Hogwarts aftermath",
+      "kind": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1998-05-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "topics": [
+          "timeline",
+          "canon state"
+        ],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the Battle of Hogwarts, Voldemort is defeated and many war losses are known.",
+        "injection": "After the Battle of Hogwarts, Voldemort is defeated and many war losses are known.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "timeline",
+          "year-7"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

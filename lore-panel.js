@@ -26,7 +26,7 @@ import { buildMemo, buildMemoPreview, buildContinuityPreview, buildLorePreview, 
 import { onExtractionTriggered } from './extractor.js';
 import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
-import { proposeCanonLoreForContext } from './canon-lore-db.js';
+import { proposeCanonLoreForContext, getLoreTaxonomySync } from './canon-lore-db.js';
 
 const PANEL_ID = 'wandlight-lore-panel';
 const MIN_PANEL_WIDTH = 420;
@@ -75,11 +75,48 @@ const TAB_TOOLTIPS = {
 };
 
 
-const LORE_CATEGORY_VALUES = ['canon', 'au', 'secret', 'rumor', 'lie', 'relationship', 'location', 'rule', 'timeline', 'character', 'event', 'item', 'knowledge', 'place', 'faction', 'spell', 'artifact'];
-const LORE_CANON_STATUS_VALUES = ['canon', 'divergent', 'au', 'fanon', 'unknown'];
-const LORE_TRUTH_STATUS_VALUES = ['true', 'false', 'public-belief', 'rumor', 'contested', 'hidden'];
-const LORE_REVEAL_POLICY_VALUES = ['public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals'];
-const LORE_PRIORITY_VALUES = [10, 25, 50, 75, 90];
+const LORE_PRIORITY_VALUES = [10, 25, 50, 75, 90, 100];
+
+function getLoreRegistry(registryName) {
+    const taxonomy = getLoreTaxonomySync();
+    return taxonomy?.[registryName] || {};
+}
+
+function getLoreRegistryValues(registryName, fallback = []) {
+    const registry = getLoreRegistry(registryName);
+    const values = Object.keys(registry);
+    return values.length ? values : fallback;
+}
+
+function getLoreFieldRegistry(field) {
+    if (field === 'category') return 'categories';
+    if (field === 'canonStatus') return 'canonStatuses';
+    if (field === 'truthStatus') return 'truthStatuses';
+    if (field === 'revealPolicy') return 'revealPolicies';
+    return '';
+}
+
+function getLoreRegistryMeta(registryName, value) {
+    const registry = getLoreRegistry(registryName);
+    return registry?.[value] || null;
+}
+
+function getLoreDisplayLabel(field, value) {
+    if (field === 'priority') return `P${value}`;
+    const registryName = getLoreFieldRegistry(field);
+    const meta = registryName ? getLoreRegistryMeta(registryName, value) : null;
+    return meta?.label || CATEGORY_LABELS[value] || String(value || '');
+}
+
+function applyLoreRegistryStyle(el, field, value) {
+    const registryName = getLoreFieldRegistry(field);
+    const meta = registryName ? getLoreRegistryMeta(registryName, value) : null;
+    if (!meta) return el;
+    if (meta.color) el.style.background = meta.color;
+    if (meta.textColor) el.style.color = meta.textColor;
+    if (meta.color) el.style.borderColor = meta.color;
+    return el;
+}
 
 const WORKFLOW_MODES = {
     manual: {
@@ -2194,10 +2231,10 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
 
     const meta = document.createElement('div');
     meta.className = 'wandlight-lore-entry-meta';
-    meta.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', LORE_CATEGORY_VALUES, `Category: ${entry.category || 'canon'}. Click to cycle category.`));
-    meta.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', LORE_CANON_STATUS_VALUES, `Canon status: ${entry.canonStatus || 'unknown'}. Click to cycle.`));
-    meta.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', LORE_TRUTH_STATUS_VALUES, `Truth/reveal status: ${entry.truthStatus || 'true'}. Click to cycle.`));
-    meta.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', LORE_REVEAL_POLICY_VALUES, `Reveal policy: ${entry.revealPolicy || 'private'}. Click to cycle.`));
+    meta.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', null, `Category: ${entry.category || 'canon'}. Click to cycle category.`));
+    meta.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', null, `Canon status: ${entry.canonStatus || 'unknown'}. Click to cycle.`));
+    meta.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', null, `Truth/reveal status: ${entry.truthStatus || 'true'}. Click to cycle.`));
+    meta.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', null, `Reveal policy: ${entry.revealPolicy || 'private'}. Click to cycle.`));
     meta.appendChild(createEditablePriorityBadge(entry));
     if (entry.confidence !== undefined) meta.appendChild(createBadge(`confidence ${entry.confidence}`, 'Model-provided confidence for this entry.'));
     card.appendChild(meta);
@@ -2265,7 +2302,7 @@ function renderLoreTab(container, state) {
         tab.className = 'wandlight-lore-tab';
         if (cat === panelState.selectedCategory) tab.classList.add('wandlight-lore-tab-active');
         tab.type = 'button';
-        const label = CATEGORY_LABELS[cat] || cat;
+        const label = getLoreDisplayLabel('category', cat);
         const catCount = getCategoryCount(cat, entries, counts);
         tab.textContent = `${label} (${catCount})`;
         addTooltip(tab, getCategoryTooltip(cat));
@@ -2380,23 +2417,34 @@ function getLoreCategoryRank(category) {
     return idx >= 0 ? idx : 99;
 }
 
-function createEditableLoreMetaBadge(entry, field, value, values, tooltip) {
-    const label = field === 'category'
-        ? (CATEGORY_LABELS[value] || value)
-        : value;
-    const badge = createBadge(label, tooltip);
+function createEditableLoreMetaBadge(entry, field, value, values = null, tooltip = '') {
+    const fallbackValues = {
+        category: ['canon', 'au', 'secret', 'relationship', 'timeline', 'character', 'event', 'item', 'knowledge', 'place', 'faction', 'spell', 'artifact', 'behavior', 'skill', 'age', 'future_guard', 'constraint'],
+        canonStatus: ['canon', 'divergent', 'au', 'fanon', 'contested', 'unknown'],
+        truthStatus: ['true', 'false', 'public_belief', 'public-belief', 'rumor', 'contested', 'hidden'],
+        revealPolicy: ['public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals'],
+    };
+    const registryName = getLoreFieldRegistry(field);
+    const effectiveValues = Array.isArray(values) && values.length
+        ? values
+        : getLoreRegistryValues(registryName, fallbackValues[field] || []);
+    const currentValue = String(value || effectiveValues[0] || '');
+    const label = getLoreDisplayLabel(field, currentValue);
+    const meta = registryName ? getLoreRegistryMeta(registryName, currentValue) : null;
+    const help = tooltip || meta?.description || `${field}: ${currentValue}. Click to cycle.`;
+    const badge = createBadge(label, help);
+    applyLoreRegistryStyle(badge, field, currentValue);
     badge.classList.add('wandlight-lore-badge-clickable');
     badge.type = 'button';
     badge.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const currentValue = String(value || values[0]);
-        const currentIndex = values.indexOf(currentValue);
-        const nextValue = values[(currentIndex + 1) % values.length];
+        const idx = effectiveValues.indexOf(currentValue);
+        const nextValue = effectiveValues[(idx >= 0 ? idx + 1 : 0) % effectiveValues.length];
         updateLoreEntryById(entry.id, raw => ({ ...raw, [field]: nextValue }));
         refreshPanelBody({ preserveScroll: true });
         refreshHeader();
-        toast(`${entry.title || 'Lore entry'} ${field} set to ${nextValue}.`, 'info');
+        toast(`${entry.title || 'Lore entry'} ${field} set to ${getLoreDisplayLabel(field, nextValue)}.`, 'info');
     });
     return badge;
 }
@@ -2497,10 +2545,10 @@ function createEntryCard(entry, state) {
 
     const metaRow = document.createElement('div');
     metaRow.className = 'wandlight-lore-entry-meta';
-    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', LORE_CATEGORY_VALUES, `Category: ${entry.category || 'canon'}. Click to cycle category.`));
-    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', LORE_CANON_STATUS_VALUES, `Canon status: ${entry.canonStatus || 'unknown'}. Click to cycle.`));
-    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', LORE_TRUTH_STATUS_VALUES, `Truth/reveal status: ${entry.truthStatus || 'true'}. Click to cycle.`));
-    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', LORE_REVEAL_POLICY_VALUES, `Reveal policy: ${entry.revealPolicy || 'private'}. Click to cycle.`));
+    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', null, `Category: ${entry.category || 'canon'}. Click to cycle category.`));
+    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', null, `Canon status: ${entry.canonStatus || 'unknown'}. Click to cycle.`));
+    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', null, `Truth/reveal status: ${entry.truthStatus || 'true'}. Click to cycle.`));
+    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', null, `Reveal policy: ${entry.revealPolicy || 'private'}. Click to cycle.`));
     metaRow.appendChild(createEditablePriorityBadge(entry));
     if (entry.isPending) metaRow.appendChild(createBadge('pending', 'This entry is pending review.'));
     if (entry.isPinned) metaRow.appendChild(createBadge('pinned', 'Pinned entries are prioritized for injection.'));
@@ -3146,29 +3194,14 @@ function getCategoryCount(cat, entries, counts) {
 }
 
 function getCategoryTooltip(cat) {
+    const registryMeta = getLoreRegistryMeta('categories', cat);
+    if (registryMeta?.description) return registryMeta.description;
     const map = {
         all: 'Shows every accepted and pending lore entry.',
         active: 'Shows lore currently eligible for injection, including pinned entries.',
         pinned: 'Shows entries manually prioritized for injection.',
         suppressed: 'Shows muted entries excluded from injection.',
         pending: 'Shows generated entries that still need review.',
-        canon: 'Shows entries categorized as canon facts.',
-        au: 'Shows alternate-universe or branch-specific lore.',
-        secret: 'Shows hidden or private facts.',
-        rumor: 'Shows uncertain or rumored information.',
-        lie: 'Shows false beliefs or deception entries.',
-        relationship: 'Shows relationship-specific lore.',
-        location: 'Shows place-specific lore.',
-        rule: 'Shows rule, magic, or system constraints.',
-        timeline: 'Shows date-sensitive events and timeline facts.',
-        character: 'Shows character-specific canon or story facts.',
-        event: 'Shows dated events and historical/context milestones.',
-        item: 'Shows object and item lore.',
-        knowledge: 'Shows knowledge-state and information-control lore.',
-        place: 'Shows place and setting lore.',
-        faction: 'Shows group, house, institution, and faction lore.',
-        spell: 'Shows spell and magic-mechanics lore.',
-        artifact: 'Shows important magical object lore.',
     };
     return map[cat] || `Shows lore entries in category: ${cat}.`;
 }

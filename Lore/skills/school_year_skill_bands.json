@@ -1,0 +1,424 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "skill_band_year_1",
+      "title": "Hogwarts Year 1 skill band",
+      "kind": "skill_band",
+      "category": "skill",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1992-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": ""
+      },
+      "scope": {
+        "schoolYears": [
+          1
+        ],
+        "topics": [
+          "school skill",
+          "magic ability"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "First-years are beginners learning foundational charms, potions, transfiguration, flying, and magical safety.",
+        "injection": "First-years are beginners learning foundational charms, potions, transfiguration, flying, and magical safety.",
+        "constraints": [
+          "First-years are beginners learning foundational charms, potions, transfiguration, flying, and magical safety."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "year-1",
+          "skill-band"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "skill_band_year_2",
+      "title": "Hogwarts Year 2 skill band",
+      "kind": "skill_band",
+      "category": "skill",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1992-09-01",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": ""
+      },
+      "scope": {
+        "schoolYears": [
+          2
+        ],
+        "topics": [
+          "school skill",
+          "magic ability"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Second-years have basic spell competence but should not handle advanced defensive or nonverbal magic routinely.",
+        "injection": "Second-years have basic spell competence but should not handle advanced defensive or nonverbal magic routinely.",
+        "constraints": [
+          "Second-years have basic spell competence but should not handle advanced defensive or nonverbal magic routinely."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "year-2",
+          "skill-band"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "skill_band_year_3",
+      "title": "Hogwarts Year 3 skill band",
+      "kind": "skill_band",
+      "category": "skill",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1993-09-01",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": ""
+      },
+      "scope": {
+        "schoolYears": [
+          3
+        ],
+        "topics": [
+          "school skill",
+          "magic ability"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Third-years add electives and develop more independent magical competence; Harry learns Patronus work unusually early.",
+        "injection": "Third-years add electives and develop more independent magical competence; Harry learns Patronus work unusually early.",
+        "constraints": [
+          "Third-years add electives and develop more independent magical competence; Harry learns Patronus work unusually early."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "year-3",
+          "skill-band"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "skill_band_year_4",
+      "title": "Hogwarts Year 4 skill band",
+      "kind": "skill_band",
+      "category": "skill",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": ""
+      },
+      "scope": {
+        "schoolYears": [
+          4
+        ],
+        "topics": [
+          "school skill",
+          "magic ability"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Fourth-years are intermediate students; they learn about serious curses but should not casually perform adult-level magic.",
+        "injection": "Fourth-years are intermediate students; they learn about serious curses but should not casually perform adult-level magic.",
+        "constraints": [
+          "Fourth-years are intermediate students; they learn about serious curses but should not casually perform adult-level magic."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "year-4",
+          "skill-band"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "skill_band_year_5",
+      "title": "Hogwarts Year 5 skill band",
+      "kind": "skill_band",
+      "category": "skill",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-09-01",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": ""
+      },
+      "scope": {
+        "schoolYears": [
+          5
+        ],
+        "topics": [
+          "school skill",
+          "magic ability"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Fifth-years prepare for OWLs; Dumbledore\u2019s Army members may have improved defensive skills.",
+        "injection": "Fifth-years prepare for OWLs; Dumbledore\u2019s Army members may have improved defensive skills.",
+        "constraints": [
+          "Fifth-years prepare for OWLs; Dumbledore\u2019s Army members may have improved defensive skills."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "year-5",
+          "skill-band"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "skill_band_year_6",
+      "title": "Hogwarts Year 6 skill band",
+      "kind": "skill_band",
+      "category": "skill",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": ""
+      },
+      "scope": {
+        "schoolYears": [
+          6
+        ],
+        "topics": [
+          "school skill",
+          "magic ability"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Sixth-years enter NEWT-level work, begin nonverbal magic training, and have more advanced subject specialization.",
+        "injection": "Sixth-years enter NEWT-level work, begin nonverbal magic training, and have more advanced subject specialization.",
+        "constraints": [
+          "Sixth-years enter NEWT-level work, begin nonverbal magic training, and have more advanced subject specialization."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "year-6",
+          "skill-band"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "skill_band_year_7",
+      "title": "Hogwarts Year 7 skill band",
+      "kind": "skill_band",
+      "category": "skill",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1997-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": ""
+      },
+      "scope": {
+        "schoolYears": [
+          7
+        ],
+        "topics": [
+          "school skill",
+          "magic ability"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Seventh-year-age students may have advanced skills, but the trio\u2019s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school.",
+        "injection": "Seventh-year-age students may have advanced skills, but the trio\u2019s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school.",
+        "constraints": [
+          "Seventh-year-age students may have advanced skills, but the trio\u2019s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "year-7",
+          "skill-band"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

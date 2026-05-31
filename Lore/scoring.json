@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "weights": {
+    "dateMatch": 30,
+    "characterMatch": 25,
+    "locationMatch": 12,
+    "topicMatch": 18,
+    "priority": 15,
+    "futureGuard": 20,
+    "conflictPenalty": -50
+  },
+  "kindBoosts": {
+    "future_guard": 20,
+    "knowledge_gate": 18,
+    "spell_gate": 12,
+    "behavior_gate": 10,
+    "age_gate": 8,
+    "event_anchor": 14,
+    "skill_band": 10,
+    "relationship_gate": 10,
+    "institution_state": 10
+  }
+}

@@ -6,22 +6,23 @@
  * Imported by: state-manager.js, memo-builder.js, lore-generator.js, index.js
  */
 
-const VALID_CATEGORIES = new Set([
+const DEFAULT_CATEGORIES = [
     'canon', 'au', 'secret', 'rumor', 'lie', 'relationship', 'location', 'rule', 'timeline',
     'character', 'event', 'item', 'knowledge', 'place', 'faction', 'spell', 'artifact',
-]);
+    'constraint', 'future_guard', 'age', 'behavior', 'skill', 'institution', 'object', 'emotion',
+];
 
-const VALID_CANON_STATUS = new Set([
-    'canon', 'divergent', 'au', 'fanon', 'unknown',
-]);
+const DEFAULT_CANON_STATUS = [
+    'canon', 'divergent', 'au', 'fanon', 'contested', 'unknown',
+];
 
-const VALID_TRUTH_STATUS = new Set([
-    'true', 'false', 'public-belief', 'rumor', 'contested', 'hidden',
-]);
+const DEFAULT_TRUTH_STATUS = [
+    'true', 'false', 'public-belief', 'public_belief', 'rumor', 'contested', 'hidden',
+];
 
-const VALID_REVEAL_POLICIES = new Set([
+const DEFAULT_REVEAL_POLICIES = [
     'public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals',
-]);
+];
 
 const VALID_STATUS = new Set([
     'active', 'disabled', 'pinned', 'archived',
@@ -31,22 +32,77 @@ const VALID_TIME_TRAVEL_MODES = new Set([
     'none', 'visitor_from_future', 'past_changed', 'alternate_branch',
 ]);
 
+const KNOWN_TOP_LEVEL_FIELDS = new Set([
+    'schemaVersion', 'id', 'title', 'name', 'kind', 'gateType', 'category', 'canonStatus', 'truthStatus',
+    'revealPolicy', 'tags', 'priority', 'status', 'protected', 'locked', 'userEditable', 'userEdited',
+    'date', 'scope', 'visibility', 'content', 'effects', 'source', 'sourceInfo', 'ui', 'extensions',
+    // legacy aliases
+    'fact', 'description', 'detail', 'text', 'summary', 'notes', 'validFrom', 'validTo', 'branchId',
+    'whoKnowsTruth', 'whoSuspects', 'whoBelievesPublicVersion', 'publicVersion', 'activeWhen',
+    'appliesTo', 'confidence',
+]);
+
 function asString(value) {
     return typeof value === 'string' ? value.trim() : '';
 }
 
+function asNumber(value, fallback = 0) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
+}
+
 function asStringArray(value) {
-    return Array.isArray(value)
-        ? value.filter(v => typeof v === 'string').map(v => v.trim()).filter(Boolean)
-        : [];
+    if (Array.isArray(value)) {
+        return value
+            .flatMap(v => Array.isArray(v) ? v : [v])
+            .map(v => typeof v === 'string' || typeof v === 'number' ? String(v).trim() : '')
+            .filter(Boolean);
+    }
+    if (typeof value === 'string') {
+        return value.split(',').map(v => v.trim()).filter(Boolean);
+    }
+    return [];
 }
 
 function asFirstString(...values) {
     for (const value of values) {
+        if (value && typeof value === 'object' && !Array.isArray(value)) continue;
         const text = asString(value);
         if (text) return text;
     }
     return '';
+}
+
+function asPlainObject(value) {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
+function asBoolean(value, fallback = false) {
+    return typeof value === 'boolean' ? value : fallback;
+}
+
+function asPriority(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return 50;
+    return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+function stableIdFromTitle(title, fallback = 'lore_entry') {
+    const base = String(title || fallback)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .slice(0, 72);
+
+    return base || fallback;
+}
+
+function normalizeEnum(value, fallback, allowed = null) {
+    const raw = asString(value);
+    if (!raw) return fallback;
+    if (!allowed) return raw;
+    const set = new Set(allowed);
+    return set.has(raw) ? raw : raw;
 }
 
 export function normalizeLoreTag(value) {
@@ -80,23 +136,166 @@ function normalizeLoreTags(value, limit = 10) {
     return output;
 }
 
-function asBoolean(value, fallback = false) {
-    return typeof value === 'boolean' ? value : fallback;
+function normalizeStringMap(value) {
+    if (Array.isArray(value)) {
+        return Object.fromEntries(asStringArray(value).map(v => [v, 'unknown']));
+    }
+    const input = asPlainObject(value);
+    const out = {};
+    for (const [key, val] of Object.entries(input)) {
+        const cleanKey = asString(key);
+        if (!cleanKey) continue;
+        if (Array.isArray(val)) out[cleanKey] = asStringArray(val).join(', ');
+        else if (val && typeof val === 'object') out[cleanKey] = JSON.stringify(val);
+        else out[cleanKey] = asString(val) || String(val ?? '').trim() || 'unknown';
+    }
+    return out;
 }
 
-function asPriority(value) {
-    if (!Number.isFinite(value)) return 50;
-    return Math.max(0, Math.min(100, Math.round(value)));
+function stringMapKeys(value) {
+    return Object.keys(normalizeStringMap(value));
 }
 
-function stableIdFromTitle(title, fallback = 'lore_entry') {
-    const base = String(title || fallback)
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '_')
-        .replace(/^_+|_+$/g, '')
-        .slice(0, 72);
+function preserveUnknownFields(input) {
+    const unknown = {};
+    for (const [key, value] of Object.entries(asPlainObject(input))) {
+        if (!KNOWN_TOP_LEVEL_FIELDS.has(key)) {
+            unknown[key] = value;
+        }
+    }
+    return unknown;
+}
 
-    return base || fallback;
+function mergeExtensions(input) {
+    const extensions = { ...asPlainObject(input.extensions) };
+    const unknown = preserveUnknownFields(input);
+    if (Object.keys(unknown).length) {
+        extensions.unrecognized = {
+            ...(asPlainObject(extensions.unrecognized)),
+            ...unknown,
+        };
+    }
+    return extensions;
+}
+
+function normalizeDateBlock(input) {
+    const raw = asPlainObject(input.date);
+    return {
+        validFrom: asFirstString(raw.validFrom, input.validFrom),
+        validTo: asFirstString(raw.validTo, input.validTo),
+        precision: asFirstString(raw.precision, input.datePrecision) || 'unknown',
+        schoolYear: raw.schoolYear ?? input.schoolYear ?? null,
+        book: asFirstString(raw.book, input.book),
+        era: asFirstString(raw.era, input.era),
+        label: asFirstString(raw.label, input.dateLabel),
+        approximate: asBoolean(raw.approximate, false),
+    };
+}
+
+function normalizeScope(input) {
+    const raw = asPlainObject(input.scope);
+    const activeWhen = asPlainObject(input.activeWhen);
+    const appliesTo = asStringArray(input.appliesTo);
+    const knownScopeFields = new Set(['characters', 'locations', 'factions', 'topics', 'objects', 'spells', 'schoolYears', 'books', 'eras']);
+    const extra = {};
+    for (const [key, value] of Object.entries(raw)) {
+        if (!knownScopeFields.has(key)) extra[key] = value;
+    }
+    return {
+        characters: asStringArray(raw.characters).concat(asStringArray(activeWhen.charactersPresentAny), appliesTo),
+        locations: asStringArray(raw.locations).concat(asStringArray(activeWhen.locationsAny)),
+        factions: asStringArray(raw.factions),
+        topics: asStringArray(raw.topics).concat(asStringArray(activeWhen.tagsAny)),
+        objects: asStringArray(raw.objects),
+        spells: asStringArray(raw.spells),
+        schoolYears: asStringArray(raw.schoolYears),
+        books: asStringArray(raw.books),
+        eras: asStringArray(raw.eras).concat(asStringArray(activeWhen.erasAny)),
+        ...extra,
+    };
+}
+
+function normalizeVisibility(input) {
+    const raw = asPlainObject(input.visibility);
+    return {
+        publicFrom: asString(raw.publicFrom),
+        secretUntil: asString(raw.secretUntil),
+        knownBy: normalizeStringMap(raw.knownBy ?? input.knownBy ?? input.whoKnowsTruth),
+        notKnownByBefore: normalizeStringMap(raw.notKnownByBefore ?? input.notKnownByBefore),
+        suspectedBy: normalizeStringMap(raw.suspectedBy ?? input.suspectedBy ?? input.whoSuspects),
+        believedBy: normalizeStringMap(raw.believedBy ?? input.whoBelievesPublicVersion),
+    };
+}
+
+function normalizeContentBlock(input, factFallback) {
+    const raw = asPlainObject(input.content);
+    const publicVersion = asFirstString(raw.publicVersion, input.publicVersion);
+    return {
+        fact: asFirstString(raw.fact, raw.text, input.fact, input.description, input.detail, input.text, input.summary, factFallback),
+        injection: asFirstString(raw.injection, input.injection),
+        constraints: asStringArray(raw.constraints ?? input.constraints),
+        antiLore: asStringArray(raw.antiLore ?? input.antiLore),
+        publicVersion,
+        notes: asFirstString(raw.notes, input.notes),
+    };
+}
+
+function normalizeEffectsBlock(input) {
+    const raw = asPlainObject(input.effects);
+    return {
+        addsTags: asStringArray(raw.addsTags),
+        blocksTermsBeforeDate: asStringArray(raw.blocksTermsBeforeDate),
+        protectsEntries: asStringArray(raw.protectsEntries),
+        stateHints: asPlainObject(raw.stateHints),
+        injectionRules: asPlainObject(raw.injectionRules),
+    };
+}
+
+function normalizeSourceBlock(input) {
+    const raw = asPlainObject(input.source);
+    if (typeof input.source === 'string') {
+        return {
+            id: input.source,
+            work: '',
+            book: '',
+            chapter: '',
+            confidence: asNumber(input.confidence, 0.5),
+            notes: '',
+        };
+    }
+    return {
+        id: asFirstString(raw.id, input.sourceId),
+        work: asFirstString(raw.work, input.work),
+        book: asFirstString(raw.book, input.sourceBook),
+        chapter: asFirstString(raw.chapter, input.chapter),
+        confidence: Math.max(0, Math.min(1, asNumber(raw.confidence ?? input.confidence, 0.5))),
+        notes: asFirstString(raw.notes, input.sourceNotes),
+    };
+}
+
+function normalizeUiBlock(input) {
+    const raw = asPlainObject(input.ui);
+    return {
+        color: asString(raw.color),
+        textColor: asString(raw.textColor),
+        icon: asString(raw.icon),
+        defaultCollapsed: asBoolean(raw.defaultCollapsed, false),
+    };
+}
+
+function deriveActiveWhen(scope, input) {
+    const activeWhen = asPlainObject(input.activeWhen);
+    return {
+        erasAny: asStringArray(activeWhen.erasAny).concat(asStringArray(scope.eras), asStringArray(scope.books)),
+        locationsAny: asStringArray(activeWhen.locationsAny).concat(asStringArray(scope.locations)),
+        charactersPresentAny: asStringArray(activeWhen.charactersPresentAny).concat(asStringArray(scope.characters)),
+        tagsAny: asStringArray(activeWhen.tagsAny).concat(asStringArray(scope.topics), asStringArray(scope.spells), asStringArray(scope.objects)),
+    };
+}
+
+function deriveSourceString(sourceInfo, input) {
+    if (typeof input.source === 'string' && input.source.trim()) return input.source.trim();
+    return sourceInfo.id || [sourceInfo.work, sourceInfo.book, sourceInfo.chapter].filter(Boolean).join(':') || 'model-generated';
 }
 
 // ── Lore Context normalization ──────────────────────────────────────────────────
@@ -124,57 +323,83 @@ export function normalizeLoreContext(input = {}) {
 // ── Lore Entry normalization ────────────────────────────────────────────────────
 
 /**
- * Normalizes a single lore entry to its canonical shape.
+ * Normalizes a single lore entry to its canonical v2 shape while preserving legacy aliases.
+ * New user-defined fields are kept under extensions.unrecognized instead of being discarded.
  * @param {*} input - Raw lore entry (may be partial or malformed)
  * @returns {Object} Normalized lore entry
  */
 export function normalizeLoreEntry(input = {}) {
     if (!input || typeof input !== 'object') input = {};
-    const fact = asFirstString(input.fact, input.content, input.description, input.detail, input.text, input.summary);
-    const title = asFirstString(input.title, input.name, fact) || 'Lore Entry';
-    const category = asString(input.category);
-    const canonStatus = asString(input.canonStatus);
-    const truthStatus = asString(input.truthStatus);
-    const revealPolicy = asString(input.revealPolicy);
-    const status = asString(input.status);
 
-    const activeWhen = input.activeWhen && typeof input.activeWhen === 'object' && !Array.isArray(input.activeWhen)
-        ? input.activeWhen
-        : {};
+    const legacyContentString = typeof input.content === 'string' ? input.content : '';
+    const title = asFirstString(input.title, input.name, input.fact, legacyContentString, input.description, input.detail, input.text, input.summary) || 'Lore Entry';
+    const kind = asFirstString(input.kind, input.gateType) || 'fact';
+    const category = asFirstString(input.category) || 'canon';
+    const date = normalizeDateBlock(input);
+    const scope = normalizeScope(input);
+    const visibility = normalizeVisibility(input);
+    const content = normalizeContentBlock(input, legacyContentString || title);
+    const effects = normalizeEffectsBlock(input);
+    const sourceInfo = normalizeSourceBlock(input);
+    const ui = normalizeUiBlock(input);
+    const extensions = mergeExtensions(input);
+    const tags = normalizeLoreTags([
+        ...asStringArray(input.tags),
+        ...asStringArray(effects.addsTags),
+        kind,
+        category,
+    ]);
+    const status = asString(input.status);
+    const canonStatus = normalizeEnum(input.canonStatus, 'unknown', DEFAULT_CANON_STATUS);
+    const truthStatus = normalizeEnum(input.truthStatus, 'true', DEFAULT_TRUTH_STATUS);
+    const revealPolicy = normalizeEnum(input.revealPolicy, 'private', DEFAULT_REVEAL_POLICIES);
+    const priority = asPriority(input.priority);
+    const source = deriveSourceString(sourceInfo, input);
+    const activeWhen = deriveActiveWhen(scope, input);
+    const publicVersion = content.publicVersion;
+    const whoKnowsTruth = Array.from(new Set([...asStringArray(input.whoKnowsTruth), ...stringMapKeys(visibility.knownBy)]));
+    const whoSuspects = Array.from(new Set([...asStringArray(input.whoSuspects), ...stringMapKeys(visibility.suspectedBy)]));
+    const whoBelievesPublicVersion = Array.from(new Set([...asStringArray(input.whoBelievesPublicVersion), ...stringMapKeys(visibility.believedBy)]));
 
     return {
+        schemaVersion: Number.isFinite(Number(input.schemaVersion)) ? Number(input.schemaVersion) : 2,
         id: asString(input.id) || stableIdFromTitle(title),
         title,
-        tags: normalizeLoreTags(input.tags),
-        category: VALID_CATEGORIES.has(category) ? category : 'canon',
-        fact,
-        canonStatus: VALID_CANON_STATUS.has(canonStatus) ? canonStatus : 'unknown',
-        truthStatus: VALID_TRUTH_STATUS.has(truthStatus) ? truthStatus : 'true',
-
-        validFrom: asString(input.validFrom),
-        validTo: asString(input.validTo),
-        branchId: asString(input.branchId) || 'main',
-
-        whoKnowsTruth: asStringArray(input.whoKnowsTruth),
-        whoSuspects: asStringArray(input.whoSuspects),
-        whoBelievesPublicVersion: asStringArray(input.whoBelievesPublicVersion),
-        publicVersion: asString(input.publicVersion),
-
-        revealPolicy: VALID_REVEAL_POLICIES.has(revealPolicy) ? revealPolicy : 'private',
-
-        activeWhen: {
-            erasAny: asStringArray(activeWhen.erasAny),
-            locationsAny: asStringArray(activeWhen.locationsAny),
-            charactersPresentAny: asStringArray(activeWhen.charactersPresentAny),
-            tagsAny: asStringArray(activeWhen.tagsAny),
-        },
-
-        priority: asPriority(input.priority),
+        kind,
+        gateType: asFirstString(input.gateType, kind),
+        tags,
+        category,
+        canonStatus,
+        truthStatus,
+        revealPolicy,
+        priority,
         status: VALID_STATUS.has(status) ? status : 'active',
-        source: asString(input.source) || 'model-generated',
+        protected: asBoolean(input.protected, false),
+        userEditable: input.userEditable === undefined ? true : asBoolean(input.userEditable, true),
         userEdited: asBoolean(input.userEdited),
         locked: asBoolean(input.locked),
-        notes: asString(input.notes),
+        branchId: asString(input.branchId) || 'main',
+
+        date,
+        scope,
+        visibility,
+        content,
+        effects,
+        sourceInfo,
+        ui,
+        extensions,
+
+        // Legacy aliases retained for current UI, duplicate detection, injection, and old states.
+        fact: content.fact,
+        validFrom: date.validFrom,
+        validTo: date.validTo,
+        whoKnowsTruth,
+        whoSuspects,
+        whoBelievesPublicVersion,
+        publicVersion,
+        activeWhen,
+        source,
+        notes: content.notes,
     };
 }
 

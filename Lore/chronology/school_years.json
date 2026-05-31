@@ -1,0 +1,438 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "chronology_school_year_1",
+      "title": "Canon school year window: Year 1",
+      "kind": "event_anchor",
+      "category": "timeline",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1992-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher Stone"
+      },
+      "scope": {
+        "schoolYears": [
+          1
+        ],
+        "books": [
+          "Philosopher Stone"
+        ],
+        "topics": [
+          "school year",
+          "canon date"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Year 1 aligns with Philosopher Stone chronology for Harry\u2019s cohort.",
+        "injection": "Year 1 aligns with Philosopher Stone chronology for Harry\u2019s cohort.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Year 1",
+          "Philosopher Stone",
+          "school-year"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Philosopher Stone",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "chronology_school_year_2",
+      "title": "Canon school year window: Year 2",
+      "kind": "event_anchor",
+      "category": "timeline",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1992-09-01",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "topics": [
+          "school year",
+          "canon date"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Year 2 aligns with Chamber of Secrets chronology for Harry\u2019s cohort.",
+        "injection": "Year 2 aligns with Chamber of Secrets chronology for Harry\u2019s cohort.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Year 2",
+          "Chamber of Secrets",
+          "school-year"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Chamber of Secrets",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "chronology_school_year_3",
+      "title": "Canon school year window: Year 3",
+      "kind": "event_anchor",
+      "category": "timeline",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1993-09-01",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "topics": [
+          "school year",
+          "canon date"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Year 3 aligns with Prisoner of Azkaban chronology for Harry\u2019s cohort.",
+        "injection": "Year 3 aligns with Prisoner of Azkaban chronology for Harry\u2019s cohort.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Year 3",
+          "Prisoner of Azkaban",
+          "school-year"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Prisoner of Azkaban",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "chronology_school_year_4",
+      "title": "Canon school year window: Year 4",
+      "kind": "event_anchor",
+      "category": "timeline",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "topics": [
+          "school year",
+          "canon date"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Year 4 aligns with Goblet of Fire chronology for Harry\u2019s cohort.",
+        "injection": "Year 4 aligns with Goblet of Fire chronology for Harry\u2019s cohort.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Year 4",
+          "Goblet of Fire",
+          "school-year"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "chronology_school_year_5",
+      "title": "Canon school year window: Year 5",
+      "kind": "event_anchor",
+      "category": "timeline",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-09-01",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "topics": [
+          "school year",
+          "canon date"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Year 5 aligns with Order of the Phoenix chronology for Harry\u2019s cohort.",
+        "injection": "Year 5 aligns with Order of the Phoenix chronology for Harry\u2019s cohort.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Year 5",
+          "Order of the Phoenix",
+          "school-year"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "chronology_school_year_6",
+      "title": "Canon school year window: Year 6",
+      "kind": "event_anchor",
+      "category": "timeline",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "topics": [
+          "school year",
+          "canon date"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Year 6 aligns with Half-Blood Prince chronology for Harry\u2019s cohort.",
+        "injection": "Year 6 aligns with Half-Blood Prince chronology for Harry\u2019s cohort.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Year 6",
+          "Half-Blood Prince",
+          "school-year"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "chronology_school_year_7",
+      "title": "Canon school year window: Year 7",
+      "kind": "event_anchor",
+      "category": "timeline",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1997-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "topics": [
+          "school year",
+          "canon date"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Year 7 aligns with Deathly Hallows chronology for Harry\u2019s cohort.",
+        "injection": "Year 7 aligns with Deathly Hallows chronology for Harry\u2019s cohort.",
+        "constraints": [],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Year 7",
+          "Deathly Hallows",
+          "school-year"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

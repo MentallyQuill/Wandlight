@@ -1,0 +1,500 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "behavior_harry_potter_year_4",
+      "title": "Harry Potter behavior - Year 4",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 75,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter"
+        ],
+        "topics": [
+          "behavior",
+          "personality",
+          "year 4"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry is defensive under public scrutiny during the Triwizard year. He is brave but often isolated by suspicion and attention.",
+        "injection": "Harry is defensive under public scrutiny during the Triwizard year; He is brave but often isolated by suspicion and attention; Do not write him with Year 7 war knowledge in Year 4.",
+        "constraints": [
+          "Do not write him with Year 7 war knowledge in Year 4."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Harry",
+          "year-4",
+          "behavior"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_harry_potter_year_5",
+      "title": "Harry Potter behavior - Year 5",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-09-01",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter"
+        ],
+        "topics": [
+          "behavior",
+          "personality",
+          "year 5"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry is angry, traumatized, and frustrated by disbelief during Year 5. He distrusts Ministry narratives and is protective of friends.",
+        "injection": "Harry is angry, traumatized, and frustrated by disbelief during Year 5; He distrusts Ministry narratives and is protective of friends; His volatility should cool or shift if the current scene gives him relief; do not keep anger permanently maxed without reinforcement.",
+        "constraints": [
+          "His volatility should cool or shift if the current scene gives him relief; do not keep anger permanently maxed without reinforcement."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Harry",
+          "year-5",
+          "behavior"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_harry_potter_year_6",
+      "title": "Harry Potter behavior - Year 6",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter"
+        ],
+        "topics": [
+          "behavior",
+          "personality",
+          "year 6"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry is more experienced, suspicious of Draco, and still affected by Sirius\u2019s death. He is increasingly burdened by Dumbledore\u2019s lessons.",
+        "injection": "Harry is more experienced, suspicious of Draco, and still affected by Sirius\u2019s death; He is increasingly burdened by Dumbledore\u2019s lessons; Do not write him as a naive first-year.",
+        "constraints": [
+          "Do not write him as a naive first-year."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Harry",
+          "year-6",
+          "behavior"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_hermione_granger_year_4",
+      "title": "Hermione Granger behavior - Year 4",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Hermione Granger"
+        ],
+        "topics": [
+          "behavior",
+          "personality",
+          "year 4"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Hermione is highly studious, morally driven, and invested in causes such as house-elf welfare. She is protective of Harry but does not know future war secrets.",
+        "injection": "Hermione is highly studious, morally driven, and invested in causes such as house-elf welfare; She is protective of Harry but does not know future war secrets; Do not let her explain Horcruxes or Deathly Hallows in Year 4.",
+        "constraints": [
+          "Do not let her explain Horcruxes or Deathly Hallows in Year 4."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Hermione",
+          "year-4",
+          "behavior"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_hermione_granger_year_6",
+      "title": "Hermione Granger behavior - Year 6",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Hermione Granger"
+        ],
+        "topics": [
+          "behavior",
+          "personality",
+          "year 6"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Hermione is academically advanced and skeptical of suspicious shortcuts. She can reason well about danger but does not know every hidden truth automatically.",
+        "injection": "Hermione is academically advanced and skeptical of suspicious shortcuts; She can reason well about danger but does not know every hidden truth automatically; Keep her knowledge bounded by what she has actually learned by the date.",
+        "constraints": [
+          "Keep her knowledge bounded by what she has actually learned by the date."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Hermione",
+          "year-6",
+          "behavior"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_ron_weasley_year_4",
+      "title": "Ron Weasley behavior - Year 4",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 68,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Ron Weasley"
+        ],
+        "topics": [
+          "behavior",
+          "personality",
+          "year 4"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Ron is loyal but can be insecure, especially around fame, money, and comparison. Conflict can happen but loyalty generally reasserts itself.",
+        "injection": "Ron is loyal but can be insecure, especially around fame, money, and comparison; Conflict can happen but loyalty generally reasserts itself; Do not use later-war maturity too early without story development.",
+        "constraints": [
+          "Do not use later-war maturity too early without story development."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Ron",
+          "year-4",
+          "behavior"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_draco_malfoy_year_6",
+      "title": "Draco Malfoy behavior - Year 6",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 85,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Draco Malfoy"
+        ],
+        "topics": [
+          "behavior",
+          "personality",
+          "year 6"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Draco is under severe pressure during Year 6 and behaves more secretively. His hostility is mixed with fear and obligation.",
+        "injection": "Draco is under severe pressure during Year 6 and behaves more secretively; His hostility is mixed with fear and obligation; Most characters should not know the full reason for his stress before the climax.",
+        "constraints": [
+          "Most characters should not know the full reason for his stress before the climax."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Draco",
+          "year-6",
+          "behavior"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_albus_dumbledore_year_6",
+      "title": "Albus Dumbledore behavior - Year 6",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 85,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Albus Dumbledore"
+        ],
+        "topics": [
+          "behavior",
+          "personality",
+          "year 6"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dumbledore is actively guiding Harry through Voldemort\u2019s past while withholding some information. He remains calm and strategic but physically weakened.",
+        "injection": "Dumbledore is actively guiding Harry through Voldemort\u2019s past while withholding some information; He remains calm and strategic but physically weakened; Before the tower event he is alive and still directing parts of the war effort.",
+        "constraints": [
+          "Before the tower event he is alive and still directing parts of the war effort."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Albus",
+          "year-6",
+          "behavior"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

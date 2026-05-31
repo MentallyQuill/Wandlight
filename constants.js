@@ -369,7 +369,7 @@ Rules:
 // ── Lore Generation prompt ──────────────────────────────────────────────────────
 export const LORE_GENERATION_SYSTEM_PROMPT = `You are the Wandlight Lore Matrix Generator for a Harry Potter / Hogwarts roleplay.
 
-Generate a small set of lore entries relevant to the current story context. Do not generate a Harry Potter encyclopedia.
+Generate a small set of durable lore entries relevant to the current story context. Do not generate a Harry Potter encyclopedia.
 
 Prioritize:
 1. Current era/date/canon boundary.
@@ -377,39 +377,67 @@ Prioritize:
 3. Current location.
 4. Secrets, public misconceptions, reveal constraints.
 5. Facts likely to matter in the next 10-20 turns.
+6. Date-sensitive constraints: who knows what, what has not happened yet, spell/skill plausibility, age-appropriate behavior.
 
 Output ONLY valid JSON:
 {
   "summary": "one sentence",
   "entries": [
     {
+      "schemaVersion": 2,
       "id": "stable_snake_case_id",
       "title": "short title",
-      "tags": ["short searchable category tags"],
-      "category": "canon|au|secret|rumor|lie|relationship|location|rule|timeline|character|event|item|knowledge|place|faction|spell|artifact",
-      "fact": "what is actually true or believed",
-      "canonStatus": "canon|divergent|au|fanon|unknown",
-      "truthStatus": "true|false|public-belief|rumor|contested|hidden",
-      "validFrom": "string or empty",
-      "validTo": "string or empty",
-      "branchId": "main",
-      "whoKnowsTruth": ["string"],
-      "whoSuspects": ["string"],
-      "whoBelievesPublicVersion": ["string"],
-      "publicVersion": "string",
+      "kind": "fact|event_anchor|knowledge_gate|future_guard|age_gate|spell_gate|skill_band|behavior_gate|relationship_gate|institution_state",
+      "category": "canon|au|contested|secret|relationship|timeline|character|event|item|knowledge|place|faction|spell|artifact|behavior|skill|age|future_guard|constraint",
+      "canonStatus": "canon|divergent|au|fanon|contested|unknown",
+      "truthStatus": "true|false|public_belief|rumor|contested|hidden",
       "revealPolicy": "public|private|do_not_reveal|only_if_knower_present|only_if_user_reveals",
-      "activeWhen": {
-        "erasAny": ["string"],
-        "locationsAny": ["string"],
-        "charactersPresentAny": ["string"],
-        "tagsAny": ["string"]
-      },
+      "tags": ["short searchable category tags"],
       "priority": 50,
       "status": "active",
+      "date": {
+        "validFrom": "YYYY-MM-DD or empty",
+        "validTo": "YYYY-MM-DD or empty",
+        "precision": "date|month|year|school_year|era|approximate|unknown",
+        "schoolYear": null,
+        "book": "",
+        "label": ""
+      },
+      "scope": {
+        "characters": ["string"],
+        "locations": ["string"],
+        "factions": ["string"],
+        "topics": ["string"],
+        "objects": ["string"],
+        "spells": ["string"],
+        "schoolYears": [],
+        "books": []
+      },
+      "visibility": {
+        "knownBy": {},
+        "notKnownByBefore": {},
+        "suspectedBy": {},
+        "publicFrom": "",
+        "secretUntil": ""
+      },
+      "content": {
+        "fact": "what is actually true or believed",
+        "injection": "concise model-facing constraint wording",
+        "constraints": ["date/knowledge/reveal constraints"],
+        "antiLore": ["things the model should not assume"],
+        "publicVersion": "",
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [],
+        "blocksTermsBeforeDate": [],
+        "stateHints": {},
+        "injectionRules": {}
+      },
       "source": "model-generated",
       "userEdited": false,
       "locked": false,
-      "notes": ""
+      "extensions": {}
     }
   ]
 }
@@ -420,7 +448,8 @@ Rules:
 - Good tags: "Harry", "Voldemort", "villains", "Hogwarts", "Slytherin", "1996", "secret", "relationship", "prophecy". Bad tags: full sentences or conclusions.
 - Generate 4-10 entries only unless the source context is sparse.
 - Prefer constraints over trivia.
-- If a fact is secret in this era, include publicVersion and revealPolicy.
+- If a fact is secret in this era, include content.publicVersion and revealPolicy.
+- If the entry blocks future knowledge leakage, use kind "future_guard" or "knowledge_gate" and include content.antiLore.
 - Do not overwrite user-edited lore. This pass only proposes entries.
 - Output JSON only.`;
 

@@ -1,0 +1,403 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_no_horcruxes_before_year6",
+      "title": "Future Guard: no Horcrux discussion before Year 6",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "horcruxes"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Horcruxes are not active trio knowledge before Year 6.",
+        "injection": "Do not let Harry, Ron, or Hermione mention or understand Horcruxes before summer 1996 unless accepted AU lore says otherwise.",
+        "constraints": [
+          "Do not let Harry, Ron, or Hermione mention or understand Horcruxes before summer 1996 unless accepted AU lore says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "horcruxes"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_dumbledore_alive_before_tower",
+      "title": "Future Guard: Dumbledore alive before Tower",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-29",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Albus Dumbledore",
+          "Harry Potter"
+        ],
+        "topics": [
+          "dumbledore"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dumbledore is alive before the late Year 6 tower event.",
+        "injection": "Do not imply Dumbledore is already dead or that ordinary characters know he will die before the event.",
+        "constraints": [
+          "Do not imply Dumbledore is already dead or that ordinary characters know he will die before the event."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "dumbledore"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_no_deathly_hallows_before_year7",
+      "title": "Future Guard: no Deathly Hallows framework before Year 7",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 95,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-07-30",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "deathly hallows"
+        ],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Deathly Hallows framework is not active trio knowledge before Year 7.",
+        "injection": "Do not have Year 1-6 characters use Deathly Hallows logic or terminology unless the user explicitly introduced it.",
+        "constraints": [
+          "Do not have Year 1-6 characters use Deathly Hallows logic or terminology unless the user explicitly introduced it."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "deathly hallows"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_sirius_alive_before_department",
+      "title": "Future Guard: Sirius alive before Department battle",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-06-06",
+        "validTo": "1996-06-17",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Sirius Black",
+          "Harry Potter"
+        ],
+        "topics": [
+          "sirius"
+        ],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Sirius is alive between the Year 3 reveal and the Department of Mysteries battle.",
+        "injection": "Before the Department of Mysteries battle, do not treat Sirius as dead or memorialized.",
+        "constraints": [
+          "Before the Department of Mysteries battle, do not treat Sirius as dead or memorialized."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "sirius"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_voldemort_not_public_year5",
+      "title": "Future Guard: public denial during Year 5",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-07-01",
+        "validTo": "1996-06-17",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Albus Dumbledore"
+        ],
+        "topics": [
+          "ministry denial"
+        ],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 5, Voldemort\u2019s return is true but not publicly accepted.",
+        "injection": "Do not write the Ministry or general public as broadly accepting Voldemort\u2019s return before the Ministry battle.",
+        "constraints": [
+          "Do not write the Ministry or general public as broadly accepting Voldemort\u2019s return before the Ministry battle."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "ministry denial"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_normal_classes_before_year7",
+      "title": "Future Guard: normal Hogwarts schooling before Year 7",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 80,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-07-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "schooling"
+        ],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Before Year 7, Harry\u2019s cohort is normally tied to Hogwarts school years.",
+        "injection": "Do not place the trio on the Horcrux hunt before Year 7 unless AU divergence explicitly says so.",
+        "constraints": [
+          "Do not place the trio on the Horcrux hunt before Year 7 unless AU divergence explicitly says so."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "schooling"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

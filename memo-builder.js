@@ -273,10 +273,24 @@ function compressLine(text, settings, kind) {
     return truncateForInjection(text, limits[level - 1]);
 }
 
+function getLoreInjectionText(entry) {
+    const content = entry?.content || {};
+    const text = content.injection || content.fact || entry.fact || '';
+    const constraints = Array.isArray(content.constraints) && content.constraints.length
+        ? ` Constraints: ${content.constraints.join(' ')}`
+        : '';
+    const antiLore = Array.isArray(content.antiLore) && content.antiLore.length
+        ? ` Avoid: ${content.antiLore.join(' ')}`
+        : '';
+    return `${text}${constraints}${antiLore}`.trim();
+}
+
 function formatLoreEntryForInjection(entry, settings, isPinned = false) {
+    const injectionText = getLoreInjectionText(entry);
+    const kind = entry.kind && entry.kind !== 'fact' ? `/${entry.kind}` : '';
     if ((settings?.loreInjectionMode || 'direct') !== 'compressed') {
-        const parts = [`- <${entry.category}> **${entry.title}**`];
-        if (entry.fact) parts.push(`\n    ${entry.fact}`);
+        const parts = [`- <${entry.category}${kind}> **${entry.title}**`];
+        if (injectionText) parts.push(`\n    ${injectionText}`);
         appendRevealHints(parts, entry);
         return parts.join('');
     }
@@ -287,8 +301,8 @@ function formatLoreEntryForInjection(entry, settings, isPinned = false) {
     const limit = isPinned ? pinnedLimits[level - 1] : regularLimits[level - 1];
     const tags = Array.isArray(entry.tags) && entry.tags.length ? ` [${entry.tags.slice(0, 4).join(', ')}]` : '';
     const pin = isPinned ? ' pinned' : '';
-    const fact = truncateForInjection(entry.fact || '', limit);
-    const parts = [`- <${entry.category}${pin}> ${entry.title}${tags}: ${fact}`];
+    const fact = truncateForInjection(injectionText, limit);
+    const parts = [`- <${entry.category}${kind}${pin}> ${entry.title}${tags}: ${fact}`];
     appendRevealHints(parts, entry, true);
     return parts.join('');
 }

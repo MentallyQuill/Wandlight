@@ -1,7 +1,15 @@
 {
-  "version": 2,
   "schemaVersion": 2,
+  "databaseId": "wandlight.hp.date_constraints",
+  "title": "Wandlight Harry Potter Date Constraint Database",
+  "description": "Chronology, knowledge, age, behavior, spell, skill, and future-guard constraints for canon-date alignment.",
+  "defaultLocale": "en",
   "generatedAt": "2026-05-31",
+  "registries": {
+    "taxonomy": "taxonomy.json",
+    "gateTypes": "gate-types.json",
+    "scoring": "scoring.json"
+  },
   "files": [
     "chronology/school_years.json",
     "chronology/major_events.json",

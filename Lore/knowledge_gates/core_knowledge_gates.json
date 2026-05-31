@@ -1,0 +1,511 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_horcruxes_before_year6",
+      "title": "Horcrux knowledge gate before Year 6",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1996-06-30",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "Horcruxes",
+          "knowledge gate"
+        ]
+      },
+      "visibility": {
+        "notKnownByBefore": {
+          "Harry Potter": "1996-07-01",
+          "Hermione Granger": "1996-07-01",
+          "Ron Weasley": "1996-07-01"
+        }
+      },
+      "content": {
+        "fact": "Before summer 1996, the trio should not understand or casually discuss Horcruxes.",
+        "injection": "Before 1996-07-01, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Horcruxes unless the AU introduced it early.",
+        "constraints": [
+          "Block premature knowledge of Horcruxes."
+        ],
+        "antiLore": [
+          "Do not have Harry Potter explain Horcruxes before 1996-07-01.",
+          "Do not have Hermione Granger explain Horcruxes before 1996-07-01.",
+          "Do not have Ron Weasley explain Horcruxes before 1996-07-01."
+        ],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Horcruxes",
+          "knowledge-gate",
+          "future-guard"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_deathly_hallows_before_year7",
+      "title": "Deathly Hallows knowledge gate before Year 7",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 95,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-07-30",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "Deathly Hallows",
+          "knowledge gate"
+        ]
+      },
+      "visibility": {
+        "notKnownByBefore": {
+          "Harry Potter": "1997-07-31",
+          "Hermione Granger": "1997-07-31",
+          "Ron Weasley": "1997-07-31"
+        }
+      },
+      "content": {
+        "fact": "Before the Year 7 quest, the trio should not frame events around the Deathly Hallows.",
+        "injection": "Before 1997-07-31, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Deathly Hallows unless the AU introduced it early.",
+        "constraints": [
+          "Block premature knowledge of Deathly Hallows."
+        ],
+        "antiLore": [
+          "Do not have Harry Potter explain Deathly Hallows before 1997-07-31.",
+          "Do not have Hermione Granger explain Deathly Hallows before 1997-07-31.",
+          "Do not have Ron Weasley explain Deathly Hallows before 1997-07-31."
+        ],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "knowledge-gate",
+          "future-guard"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_prophecy_before_department",
+      "title": "Prophecy knowledge gate before Department of Mysteries",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1996-06-18",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter"
+        ],
+        "topics": [
+          "full prophecy",
+          "knowledge gate"
+        ]
+      },
+      "visibility": {
+        "notKnownByBefore": {
+          "Harry Potter": "1996-06-18"
+        }
+      },
+      "content": {
+        "fact": "Before the Department of Mysteries aftermath, Harry does not know the full prophecy contents.",
+        "injection": "Before 1996-06-18, Harry Potter should not know or casually discuss full prophecy unless the AU introduced it early.",
+        "constraints": [
+          "Block premature knowledge of full prophecy."
+        ],
+        "antiLore": [
+          "Do not have Harry Potter explain full prophecy before 1996-06-18."
+        ],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "full prophecy",
+          "knowledge-gate",
+          "future-guard"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_snape_prince_before_year6",
+      "title": "Half-Blood Prince identity gate",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "Half-Blood Prince identity",
+          "knowledge gate"
+        ]
+      },
+      "visibility": {
+        "notKnownByBefore": {
+          "Harry Potter": "1997-06-30",
+          "Hermione Granger": "1997-06-30",
+          "Ron Weasley": "1997-06-30"
+        }
+      },
+      "content": {
+        "fact": "Before the end of Year 6, the trio should not know that Snape is the Half-Blood Prince.",
+        "injection": "Before 1997-06-30, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Half-Blood Prince identity unless the AU introduced it early.",
+        "constraints": [
+          "Block premature knowledge of Half-Blood Prince identity."
+        ],
+        "antiLore": [
+          "Do not have Harry Potter explain Half-Blood Prince identity before 1997-06-30.",
+          "Do not have Hermione Granger explain Half-Blood Prince identity before 1997-06-30.",
+          "Do not have Ron Weasley explain Half-Blood Prince identity before 1997-06-30."
+        ],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince identity",
+          "knowledge-gate",
+          "future-guard"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_sirius_truth_before_poa_end",
+      "title": "Sirius truth gate before Year 3 climax",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 85,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1994-06-05",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "Sirius Black innocence",
+          "knowledge gate"
+        ]
+      },
+      "visibility": {
+        "notKnownByBefore": {
+          "Harry Potter": "1994-06-06",
+          "Hermione Granger": "1994-06-06",
+          "Ron Weasley": "1994-06-06"
+        }
+      },
+      "content": {
+        "fact": "Before the Shrieking Shack events, the trio should not know Sirius was not the traitor.",
+        "injection": "Before 1994-06-06, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Sirius Black innocence unless the AU introduced it early.",
+        "constraints": [
+          "Block premature knowledge of Sirius Black innocence."
+        ],
+        "antiLore": [
+          "Do not have Harry Potter explain Sirius Black innocence before 1994-06-06.",
+          "Do not have Hermione Granger explain Sirius Black innocence before 1994-06-06.",
+          "Do not have Ron Weasley explain Sirius Black innocence before 1994-06-06."
+        ],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Sirius Black innocence",
+          "knowledge-gate",
+          "future-guard"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_voldemort_return_before_graveyard",
+      "title": "Voldemort return gate before graveyard",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1995-06-23",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "Voldemort return",
+          "knowledge gate"
+        ]
+      },
+      "visibility": {
+        "notKnownByBefore": {
+          "Harry Potter": "1995-06-24",
+          "Hermione Granger": "1995-06-24",
+          "Ron Weasley": "1995-06-24"
+        }
+      },
+      "content": {
+        "fact": "Before the graveyard event, the trio should not know Voldemort has regained a body.",
+        "injection": "Before 1995-06-24, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Voldemort return unless the AU introduced it early.",
+        "constraints": [
+          "Block premature knowledge of Voldemort return."
+        ],
+        "antiLore": [
+          "Do not have Harry Potter explain Voldemort return before 1995-06-24.",
+          "Do not have Hermione Granger explain Voldemort return before 1995-06-24.",
+          "Do not have Ron Weasley explain Voldemort return before 1995-06-24."
+        ],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Voldemort return",
+          "knowledge-gate",
+          "future-guard"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_draco_mission_public_before_tower",
+      "title": "Draco mission secrecy gate",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "do_not_reveal",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-06-29",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley",
+          "general Hogwarts students"
+        ],
+        "topics": [
+          "Draco mission",
+          "knowledge gate"
+        ]
+      },
+      "visibility": {
+        "notKnownByBefore": {
+          "Harry Potter": "1997-06-30",
+          "Hermione Granger": "1997-06-30",
+          "Ron Weasley": "1997-06-30",
+          "general Hogwarts students": "1997-06-30"
+        }
+      },
+      "content": {
+        "fact": "Before the Astronomy Tower climax, Draco\u2019s exact mission is not public knowledge.",
+        "injection": "Before 1997-06-30, Harry Potter, Hermione Granger, Ron Weasley, general Hogwarts students should not know or casually discuss Draco mission unless the AU introduced it early.",
+        "constraints": [
+          "Block premature knowledge of Draco mission."
+        ],
+        "antiLore": [
+          "Do not have Harry Potter explain Draco mission before 1997-06-30.",
+          "Do not have Hermione Granger explain Draco mission before 1997-06-30.",
+          "Do not have Ron Weasley explain Draco mission before 1997-06-30."
+        ],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Draco mission",
+          "knowledge-gate",
+          "future-guard"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "",
+        "chapter": "",
+        "confidence": 0.85,
+        "notes": "Curated date constraint seed entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

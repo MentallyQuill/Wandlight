@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 2,
+  "gateTypes": {
+    "fact": {
+      "label": "Fact",
+      "description": "Ordinary date-relevant fact.",
+      "defaultPriority": 50,
+      "injectionRole": "positive_context"
+    },
+    "event_anchor": {
+      "label": "Event Anchor",
+      "description": "Canon event that changes world or character state.",
+      "defaultPriority": 75,
+      "injectionRole": "timeline_anchor"
+    },
+    "knowledge_gate": {
+      "label": "Knowledge Gate",
+      "description": "Controls who knows a fact by date.",
+      "defaultPriority": 90,
+      "injectionRole": "knowledge_constraint"
+    },
+    "future_guard": {
+      "label": "Future Guard",
+      "description": "Prevents premature future-canon leakage.",
+      "defaultPriority": 95,
+      "injectionRole": "negative_constraint"
+    },
+    "age_gate": {
+      "label": "Age Gate",
+      "description": "Computes or constrains character age by date.",
+      "defaultPriority": 60,
+      "injectionRole": "character_constraint"
+    },
+    "spell_gate": {
+      "label": "Spell Gate",
+      "description": "Controls spell knowledge, learning date, and plausible magical ability.",
+      "defaultPriority": 80,
+      "injectionRole": "ability_constraint"
+    },
+    "skill_band": {
+      "label": "Skill Band",
+      "description": "Broad ability expectations for a school year or training level.",
+      "defaultPriority": 70,
+      "injectionRole": "ability_constraint"
+    },
+    "behavior_gate": {
+      "label": "Behavior Gate",
+      "description": "Date-sensitive characterization guidance.",
+      "defaultPriority": 65,
+      "injectionRole": "behavior_constraint"
+    },
+    "relationship_gate": {
+      "label": "Relationship Gate",
+      "description": "Date-sensitive relationship state.",
+      "defaultPriority": 65,
+      "injectionRole": "relationship_constraint"
+    },
+    "institution_state": {
+      "label": "Institution State",
+      "description": "Date-sensitive status of places, offices, classes, and institutions.",
+      "defaultPriority": 70,
+      "injectionRole": "setting_constraint"
+    }
+  }
+}

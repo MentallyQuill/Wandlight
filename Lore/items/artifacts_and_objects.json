@@ -35,7 +35,39 @@
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Hogwarts",
+          "classroom"
+        ],
+        "objects": [
+          "wands"
+        ],
+        "topics": [
+          "ordinary magical tool",
+          "magic",
+          "school equipment"
+        ],
+        "schoolYears": [
+          "Year 1",
+          "Year 2",
+          "Year 3",
+          "Year 4",
+          "Year 5",
+          "Year 6",
+          "Year 7"
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      }
     },
     {
       "id": "canon_marauders_map_known_item",
@@ -87,7 +119,40 @@
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Fred Weasley",
+          "George Weasley",
+          "Remus Lupin"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "objects": [
+          "Marauder's Map"
+        ],
+        "topics": [
+          "secret map",
+          "stealth",
+          "Hogwarts layout"
+        ],
+        "schoolYears": [
+          "Year 3",
+          "Year 4",
+          "Year 5",
+          "Year 6",
+          "Year 7"
+        ],
+        "books": [
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      }
     },
     {
       "id": "canon_invisibility_cloak_known_item",
@@ -131,7 +196,43 @@
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "objects": [
+          "Invisibility Cloak"
+        ],
+        "topics": [
+          "stealth",
+          "private artifact",
+          "hidden movement"
+        ],
+        "schoolYears": [
+          "Year 1",
+          "Year 2",
+          "Year 3",
+          "Year 4",
+          "Year 5",
+          "Year 6",
+          "Year 7"
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      }
     },
     {
       "id": "canon_horcrux_concept_secret",
@@ -181,7 +282,30 @@
           "horcruxes_revealed_to_trio"
         ]
       },
-      "content": {}
+      "content": {},
+      "scope": {
+        "characters": [
+          "Lord Voldemort",
+          "Albus Dumbledore",
+          "Harry Potter"
+        ],
+        "objects": [
+          "Horcruxes"
+        ],
+        "topics": [
+          "dark magic",
+          "secret knowledge",
+          "restricted knowledge"
+        ],
+        "schoolYears": [
+          "Year 6",
+          "Year 7"
+        ],
+        "books": [
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      }
     }
   ]
 }

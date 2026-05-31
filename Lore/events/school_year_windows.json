@@ -37,7 +37,27 @@
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "canon window",
+          "1991",
+          "1992",
+          "first year"
+        ],
+        "eras": [
+          "1991-1992 school year"
+        ],
+        "schoolYears": [
+          "Year 1"
+        ],
+        "books": [
+          "Philosopher's Stone"
+        ]
+      }
     },
     {
       "id": "canon_year_2_cos_window",
@@ -75,7 +95,27 @@
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "canon window",
+          "1992",
+          "1993",
+          "second year"
+        ],
+        "eras": [
+          "1992-1993 school year"
+        ],
+        "schoolYears": [
+          "Year 2"
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ]
+      }
     },
     {
       "id": "canon_year_3_poa_window",
@@ -113,7 +153,27 @@
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "canon window",
+          "1993",
+          "1994",
+          "third year"
+        ],
+        "eras": [
+          "1993-1994 school year"
+        ],
+        "schoolYears": [
+          "Year 3"
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ]
+      }
     },
     {
       "id": "canon_year_4_gof_window",
@@ -152,7 +212,28 @@
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "canon window",
+          "1994",
+          "1995",
+          "fourth year",
+          "Triwizard Tournament"
+        ],
+        "eras": [
+          "1994-1995 school year"
+        ],
+        "schoolYears": [
+          "Year 4"
+        ],
+        "books": [
+          "Goblet of Fire"
+        ]
+      }
     },
     {
       "id": "canon_year_5_ootp_window",
@@ -192,7 +273,29 @@
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Hogwarts",
+          "Ministry of Magic"
+        ],
+        "topics": [
+          "canon window",
+          "1995",
+          "1996",
+          "fifth year",
+          "Ministry interference"
+        ],
+        "eras": [
+          "1995-1996 school year"
+        ],
+        "schoolYears": [
+          "Year 5"
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      }
     },
     {
       "id": "canon_year_6_hbp_window",
@@ -232,7 +335,28 @@
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "canon window",
+          "1996",
+          "1997",
+          "sixth year",
+          "Voldemort war"
+        ],
+        "eras": [
+          "1996-1997 school year"
+        ],
+        "schoolYears": [
+          "Year 6"
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      }
     },
     {
       "id": "canon_year_7_dh_window",
@@ -270,7 +394,28 @@
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Britain"
+        ],
+        "topics": [
+          "canon window",
+          "1997",
+          "1998",
+          "seventh year",
+          "war"
+        ],
+        "eras": [
+          "1997-1998 war year"
+        ],
+        "schoolYears": [
+          "Year 7"
+        ],
+        "books": [
+          "Deathly Hallows"
+        ]
+      }
     }
   ]
 }

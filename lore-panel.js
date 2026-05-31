@@ -101,6 +101,17 @@ ${loreText}`),
 }
 
 const LORE_PRIORITY_VALUES = [10, 25, 50, 75, 90, 100];
+const LORE_SCOPE_DISPLAY_ORDER = [
+    { key: 'characters', label: 'Characters', weight: 80 },
+    { key: 'locations', label: 'Locations', weight: 64 },
+    { key: 'factions', label: 'Factions', weight: 56 },
+    { key: 'objects', label: 'Objects', weight: 48 },
+    { key: 'spells', label: 'Spells', weight: 48 },
+    { key: 'topics', label: 'Topics', weight: 32 },
+    { key: 'eras', label: 'Eras', weight: 24 },
+    { key: 'schoolYears', label: 'School years', weight: 24 },
+    { key: 'books', label: 'Books', weight: 16 },
+];
 
 let activeLoreGenerationController = null;
 
@@ -3841,6 +3852,8 @@ function sortLoreEntriesForPanel(a, b) {
     if (categoryScore) return categoryScore;
     const priorityScore = Number(b.priority || 50) - Number(a.priority || 50);
     if (priorityScore) return priorityScore;
+    const scopeScore = getLoreScopeSpecificity(b) - getLoreScopeSpecificity(a);
+    if (scopeScore) return scopeScore;
     return String(a.title || '').localeCompare(String(b.title || ''));
 }
 
@@ -4054,6 +4067,7 @@ function createSpellMetadataBadges(entry) {
 function scoreSearchEntry(entry, query) {
     const title = String(entry.title || '').toLowerCase();
     const tags = Array.isArray(entry.tags) ? entry.tags.map(t => String(t).toLowerCase()) : [];
+    const scope = formatLoreScope(entry.scope).toLowerCase();
     const fact = String(entry.fact || '').toLowerCase();
     const id = String(entry.id || '').toLowerCase();
     const notes = String(entry.notes || '').toLowerCase();
@@ -4062,6 +4076,7 @@ function scoreSearchEntry(entry, query) {
     if (tags.some(t => t === query)) return 90;
     if (title.includes(query)) return 80;
     if (tags.some(t => t.includes(query))) return 70;
+    if (scope.includes(query)) return 55;
     if (fact.includes(query)) return 40;
     if (notes.includes(query)) return 30;
     if (id.includes(query)) return 20;
@@ -4194,7 +4209,7 @@ function createEntryCard(entry, state) {
 
         const detailRows = [];
         if (entry.source) detailRows.push(['Source', entry.source]);
-        if (entry.scope) detailRows.push(['Scope', entry.scope]);
+        if (hasDisplayableScope(entry.scope)) detailRows.push(['Scope', entry.scope]);
         if (entry.appliesTo?.length) detailRows.push(['Applies to', entry.appliesTo.join(', ')]);
         if (entry.publicVersion) detailRows.push(['Public version', entry.publicVersion]);
         if (entry.whoKnowsTruth?.length) detailRows.push(['Who knows truth', entry.whoKnowsTruth.join(', ')]);
@@ -4649,6 +4664,113 @@ function createToggleCard(label, checked, tooltip, onChange) {
     return card;
 }
 
+
+function isPlainObjectValue(value) {
+    return value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function uniqueDisplayStrings(value) {
+    const rawValues = Array.isArray(value) ? value : (typeof value === 'string' ? value.split(',') : []);
+    const seen = new Set();
+    const out = [];
+    for (const raw of rawValues) {
+        if (raw && typeof raw === 'object') continue;
+        const text = String(raw ?? '').trim();
+        if (!text) continue;
+        const key = text.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(text);
+    }
+    return out.sort(compareScopeDisplayValues);
+}
+
+function compareScopeDisplayValues(a, b) {
+    const yearA = String(a).match(/\bYear\s+(\d+)\b/i);
+    const yearB = String(b).match(/\bYear\s+(\d+)\b/i);
+    if (yearA && yearB) return Number(yearA[1]) - Number(yearB[1]);
+    const numA = String(a).match(/\b(19\d{2}|20\d{2})\b/);
+    const numB = String(b).match(/\b(19\d{2}|20\d{2})\b/);
+    if (numA && numB && numA[1] !== numB[1]) return Number(numA[1]) - Number(numB[1]);
+    return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+}
+
+function getDisplayableScopeEntries(scope = {}) {
+    if (!isPlainObjectValue(scope)) return [];
+    const known = new Set(LORE_SCOPE_DISPLAY_ORDER.map(item => item.key));
+    const ordered = LORE_SCOPE_DISPLAY_ORDER
+        .map(item => ({ ...item, values: uniqueDisplayStrings(scope[item.key]) }))
+        .filter(item => item.values.length > 0);
+
+    const extras = Object.entries(scope)
+        .filter(([key]) => !known.has(key))
+        .map(([key, value]) => ({ key, label: humanizeScopeKey(key), weight: 1, values: uniqueDisplayStrings(value) }))
+        .filter(item => item.values.length > 0)
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+    return [...ordered, ...extras];
+}
+
+function humanizeScopeKey(key) {
+    return String(key || '')
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/^./, c => c.toUpperCase());
+}
+
+function hasDisplayableScope(scope) {
+    return getDisplayableScopeEntries(scope).length > 0;
+}
+
+function formatLoreScope(scope = {}) {
+    const entries = getDisplayableScopeEntries(scope);
+    if (!entries.length) return 'Global / broad context';
+    return entries
+        .map(item => `${item.label}: ${item.values.join(', ')}`)
+        .join(' | ');
+}
+
+function getLoreScopeSpecificity(entry = {}) {
+    return getDisplayableScopeEntries(entry.scope || {}).reduce((total, item) => {
+        const first = Math.max(0, Number(item.weight) || 1);
+        const additional = Math.max(0, item.values.length - 1) * Math.max(1, Math.round(first / 8));
+        return total + first + additional;
+    }, 0);
+}
+
+function formatStructuredValue(value) {
+    if (value == null) return '';
+    if (Array.isArray(value)) return uniqueDisplayStrings(value).join(', ');
+    if (!isPlainObjectValue(value)) return String(value);
+
+    const parts = Object.entries(value)
+        .map(([key, val]) => {
+            if (Array.isArray(val) || typeof val === 'string') {
+                const values = uniqueDisplayStrings(val);
+                return values.length ? `${humanizeScopeKey(key)}: ${values.join(', ')}` : '';
+            }
+            if (isPlainObjectValue(val)) {
+                const nested = Object.entries(val)
+                    .map(([nestedKey, nestedValue]) => `${humanizeScopeKey(nestedKey)}=${formatStructuredValue(nestedValue)}`)
+                    .filter(Boolean)
+                    .join(', ');
+                return nested ? `${humanizeScopeKey(key)}: ${nested}` : '';
+            }
+            const text = String(val ?? '').trim();
+            return text ? `${humanizeScopeKey(key)}: ${text}` : '';
+        })
+        .filter(Boolean);
+
+    return parts.join(' | ');
+}
+
+function formatKeyValueDisplay(label, value) {
+    if (String(label || '').toLowerCase() === 'scope') return formatLoreScope(value);
+    return formatStructuredValue(value);
+}
+
 function createKeyValue(label, value, tooltip) {
     const row = document.createElement('div');
     row.className = 'wandlight-key-value';
@@ -4661,7 +4783,7 @@ function createKeyValue(label, value, tooltip) {
 
     const v = document.createElement('span');
     v.className = 'wandlight-value';
-    v.textContent = String(value ?? '');
+    v.textContent = formatKeyValueDisplay(label, value);
     row.appendChild(v);
 
     return row;

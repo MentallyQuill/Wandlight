@@ -2717,3 +2717,57 @@
     font-size: 0.78em;
     line-height: 1.35;
 }
+
+/* Live feedback fix: accepted lore list owns scrolling; cards do not flex-shrink into a non-scrollable column. */
+.wandlight-runtime-tab-body-lore {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-accepted-collapsible[open] {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+}
+
+.wandlight-lore-accepted-collapsible[open] > .wandlight-collapsible-summary {
+    flex: 0 0 auto !important;
+}
+
+.wandlight-lore-accepted-collapsible[open] > .wandlight-collapsible-content,
+.wandlight-accepted-lore-section {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+}
+
+.wandlight-accepted-lore-section .wandlight-lore-controls {
+    flex: 0 0 auto !important;
+    max-height: min(300px, 42vh);
+    overflow-y: auto;
+}
+
+.wandlight-accepted-lore-section .wandlight-lore-entry-list {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+    touch-action: pan-y;
+}
+
+.wandlight-accepted-lore-section .wandlight-lore-entry-list > * {
+    flex: 0 0 auto !important;
+}

@@ -37,7 +37,41 @@
       "status": "active",
       "source": "canon-lore-db:characters/adults_and_factions.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "characters": [
+          "Albus Dumbledore"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Headmaster's office"
+        ],
+        "factions": [
+          "Hogwarts staff",
+          "Order of the Phoenix"
+        ],
+        "topics": [
+          "headmaster",
+          "authority figure",
+          "Voldemort resistance"
+        ],
+        "schoolYears": [
+          "Year 1",
+          "Year 2",
+          "Year 3",
+          "Year 4",
+          "Year 5",
+          "Year 6"
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince"
+        ]
+      }
     },
     {
       "id": "canon_snape_potions_defense_role",
@@ -81,7 +115,42 @@
       "status": "active",
       "source": "canon-lore-db:characters/adults_and_factions.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "characters": [
+          "Severus Snape"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Potions classroom",
+          "Defense classroom"
+        ],
+        "factions": [
+          "Hogwarts staff"
+        ],
+        "topics": [
+          "professor",
+          "Potions",
+          "Defense Against the Dark Arts",
+          "school staff"
+        ],
+        "schoolYears": [
+          "Year 1",
+          "Year 2",
+          "Year 3",
+          "Year 4",
+          "Year 5",
+          "Year 6"
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince"
+        ]
+      }
     },
     {
       "id": "canon_order_of_the_phoenix_faction",
@@ -126,7 +195,36 @@
       "status": "active",
       "source": "canon-lore-db:characters/adults_and_factions.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "characters": [
+          "Albus Dumbledore",
+          "Sirius Black",
+          "Remus Lupin",
+          "Alastor Moody"
+        ],
+        "factions": [
+          "Order of the Phoenix"
+        ],
+        "topics": [
+          "secret organization",
+          "Voldemort resistance",
+          "war"
+        ],
+        "eras": [
+          "Second Wizarding War"
+        ],
+        "schoolYears": [
+          "Year 5",
+          "Year 6",
+          "Year 7"
+        ],
+        "books": [
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      }
     },
     {
       "id": "canon_death_eaters_faction",
@@ -169,7 +267,36 @@
       "status": "active",
       "source": "canon-lore-db:characters/adults_and_factions.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "characters": [
+          "Lord Voldemort",
+          "Draco Malfoy",
+          "Bellatrix Lestrange"
+        ],
+        "factions": [
+          "Death Eaters"
+        ],
+        "topics": [
+          "Voldemort followers",
+          "war",
+          "dark magic",
+          "public threat"
+        ],
+        "eras": [
+          "Second Wizarding War"
+        ],
+        "schoolYears": [
+          "Year 5",
+          "Year 6",
+          "Year 7"
+        ],
+        "books": [
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      }
     }
   ]
 }

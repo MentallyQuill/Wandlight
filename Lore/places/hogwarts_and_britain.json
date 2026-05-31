@@ -36,7 +36,44 @@
       "status": "active",
       "source": "canon-lore-db:places/hogwarts_and_britain.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [
+          "Hogwarts staff",
+          "Gryffindor",
+          "Hufflepuff",
+          "Ravenclaw",
+          "Slytherin"
+        ],
+        "topics": [
+          "school",
+          "castle",
+          "students",
+          "rules",
+          "magical protections"
+        ],
+        "schoolYears": [
+          "Year 1",
+          "Year 2",
+          "Year 3",
+          "Year 4",
+          "Year 5",
+          "Year 6",
+          "Year 7"
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      }
     },
     {
       "id": "canon_hogsmeade_student_village",
@@ -73,7 +110,33 @@
       "status": "active",
       "source": "canon-lore-db:places/hogwarts_and_britain.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "locations": [
+          "Hogsmeade",
+          "Three Broomsticks",
+          "Honeydukes"
+        ],
+        "topics": [
+          "village",
+          "student visits",
+          "school rules"
+        ],
+        "schoolYears": [
+          "Year 3",
+          "Year 4",
+          "Year 5",
+          "Year 6",
+          "Year 7"
+        ],
+        "books": [
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      }
     },
     {
       "id": "canon_ministry_of_magic_public_authority",
@@ -117,7 +180,37 @@
       "status": "active",
       "source": "canon-lore-db:places/hogwarts_and_britain.json",
       "locked": true,
-      "content": {}
+      "content": {},
+      "scope": {
+        "characters": [
+          "Cornelius Fudge",
+          "Rufus Scrimgeour",
+          "Dolores Umbridge"
+        ],
+        "locations": [
+          "Ministry of Magic",
+          "London"
+        ],
+        "factions": [
+          "Ministry of Magic"
+        ],
+        "topics": [
+          "government",
+          "law enforcement",
+          "public policy",
+          "school politics"
+        ],
+        "schoolYears": [
+          "Year 5",
+          "Year 6",
+          "Year 7"
+        ],
+        "books": [
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      }
     }
   ]
 }

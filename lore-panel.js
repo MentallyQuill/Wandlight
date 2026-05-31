@@ -904,16 +904,19 @@ function createCanonLoreDatabaseCard(state) {
                 maxEntries: getSettings().canonLoreMaxEntries || 12,
                 progress: (message, percent) => setFeatureProgress('context', message, percent),
             });
-            refreshPanelBody({ preserveScroll: false });
-            refreshHeader();
             if (result?.status === 'proposed') {
+                refreshPanelBody({ preserveScroll: false });
+                refreshHeader();
                 setFeatureProgress('context', `Canon database proposed ${result.proposedCount || 0} pending lore entries.`, 100);
                 resetFeatureProgress('context');
                 toast(`Canon database proposed ${result.proposedCount || 0} pending lore entries.`);
             } else if (result?.status === 'duplicates_only') {
-                setFeatureProgress('context', 'Canon database matches were already present or similar.', 100);
+                // Do not refresh the whole panel for a no-op duplicate result. In chats that
+                // already contain oversized pending canon entries, a full refresh can freeze.
+                setFeatureProgress('context', `Canon database matched ${result.matchedCount || 0}, but selected proposals were already present by id/title.`, 100);
                 resetFeatureProgress('context');
-                toast('Canon database matches were already present or similar.', 'info');
+                refreshHeader();
+                toast('Canon database matches were already present by id/title.', 'info');
             } else if (result?.status === 'no_date') {
                 toast('Canon database needs a parseable Scene date first.', 'warning');
             } else if (result?.status === 'disabled') {

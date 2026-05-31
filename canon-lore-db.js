@@ -14,7 +14,7 @@
 
 import { LOG_PREFIX } from './constants.js';
 import { getState, getSettings, saveState, pushStateSnapshot } from './state-manager.js';
-import { normalizeLoreMatrix, filterDuplicateLoreEntries, buildLoreGenerationKey } from './lore-matrix.js';
+import { normalizeLoreMatrix, buildLoreGenerationKey } from './lore-matrix.js';
 
 const MANIFEST_URL = new URL('./Lore/manifest.json', import.meta.url);
 const LEGACY_INDEX_URL = new URL('./Lore/index.json', import.meta.url);
@@ -382,6 +382,127 @@ function compactCanonLoreEntryForPending(entry) {
     };
 }
 
+function canonicalKey(value) {
+    return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function compactStringMap(value, limit = 12, textLimit = 80) {
+    const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    const out = {};
+    for (const [key, raw] of Object.entries(input).slice(0, limit)) {
+        const cleanKey = String(key || '').slice(0, textLimit).trim();
+        if (!cleanKey) continue;
+        out[cleanKey] = String(raw || '').slice(0, textLimit).trim() || 'unknown';
+    }
+    return out;
+}
+
+function compactPendingCanonEntryForStorage(entry) {
+    const normalized = normalizeLoreMatrix([entry])[0] || entry;
+    const trim = (value, limit = 800) => String(value || '').slice(0, limit);
+    const sliceStrings = (values, limit = 8, textLimit = 180) => Array.isArray(values)
+        ? values.map(v => trim(v, textLimit)).filter(Boolean).slice(0, limit)
+        : [];
+
+    return {
+        schemaVersion: normalized.schemaVersion || 2,
+        id: normalized.id,
+        title: trim(normalized.title, 160),
+        kind: normalized.kind || 'fact',
+        gateType: normalized.gateType || normalized.kind || 'fact',
+        category: normalized.category || 'canon',
+        canonStatus: normalized.canonStatus || 'canon',
+        truthStatus: normalized.truthStatus || 'true',
+        revealPolicy: normalized.revealPolicy || 'private',
+        priority: Number.isFinite(Number(normalized.priority)) ? Number(normalized.priority) : 50,
+        protected: !!normalized.protected,
+        userEditable: normalized.userEditable !== false,
+        date: {
+            validFrom: trim(normalized.date?.validFrom || normalized.validFrom, 32),
+            validTo: trim(normalized.date?.validTo || normalized.validTo, 32),
+            precision: trim(normalized.date?.precision, 32),
+            schoolYear: normalized.date?.schoolYear ?? null,
+            book: trim(normalized.date?.book, 80),
+            label: trim(normalized.date?.label, 120),
+        },
+        scope: {
+            characters: sliceStrings(normalized.scope?.characters, 10, 80),
+            locations: sliceStrings(normalized.scope?.locations, 8, 80),
+            factions: sliceStrings(normalized.scope?.factions, 8, 80),
+            topics: sliceStrings(normalized.scope?.topics, 12, 80),
+            objects: sliceStrings(normalized.scope?.objects, 8, 80),
+            spells: sliceStrings(normalized.scope?.spells, 8, 80),
+            schoolYears: sliceStrings(normalized.scope?.schoolYears, 8, 32),
+            books: sliceStrings(normalized.scope?.books, 8, 80),
+            eras: sliceStrings(normalized.scope?.eras, 8, 80),
+        },
+        visibility: {
+            publicFrom: trim(normalized.visibility?.publicFrom, 32),
+            secretUntil: trim(normalized.visibility?.secretUntil, 32),
+            knownBy: compactStringMap(normalized.visibility?.knownBy, 12, 80),
+            notKnownByBefore: compactStringMap(normalized.visibility?.notKnownByBefore, 12, 80),
+            suspectedBy: compactStringMap(normalized.visibility?.suspectedBy, 8, 80),
+        },
+        content: {
+            fact: trim(normalized.content?.fact || normalized.fact, 900),
+            injection: trim(normalized.content?.injection, 900),
+            constraints: sliceStrings(normalized.content?.constraints, 6, 240),
+            antiLore: sliceStrings(normalized.content?.antiLore, 6, 240),
+            notes: trim(normalized.content?.notes || normalized.notes, 400),
+        },
+        source: CANON_DB_SOURCE,
+        sourceInfo: typeof normalized.sourceInfo === 'object' && normalized.sourceInfo ? {
+            work: trim(normalized.sourceInfo.work, 80),
+            book: trim(normalized.sourceInfo.book, 80),
+            chapter: trim(normalized.sourceInfo.chapter, 80),
+            confidence: normalized.sourceInfo.confidence,
+        } : {},
+        tags: sliceStrings(normalized.tags, 10, 40),
+    };
+}
+
+function fastFilterCanonDuplicates(entries = [], existingEntries = []) {
+    const existingIds = new Set();
+    const existingTitles = new Set();
+    const acceptedIds = new Set();
+    const acceptedTitles = new Set();
+    const accepted = [];
+    const dropped = [];
+
+    for (const entry of Array.isArray(existingEntries) ? existingEntries : []) {
+        const id = canonicalKey(entry?.id);
+        const title = canonicalKey(entry?.title || entry?.name);
+        if (id) existingIds.add(id);
+        if (title) existingTitles.add(title);
+    }
+
+    for (const raw of Array.isArray(entries) ? entries : []) {
+        const entry = compactPendingCanonEntryForStorage(raw);
+        const id = canonicalKey(entry.id);
+        const title = canonicalKey(entry.title);
+        let reason = '';
+        if (!id || !title || !(entry.content?.fact || entry.fact)) reason = 'missing id, title, or fact';
+        else if (existingIds.has(id) || acceptedIds.has(id)) reason = `duplicate id: ${entry.id}`;
+        else if (existingTitles.has(title) || acceptedTitles.has(title)) reason = `duplicate title: ${entry.title}`;
+
+        if (reason) {
+            dropped.push({ id: entry.id, title: entry.title, reason });
+            continue;
+        }
+        accepted.push(entry);
+        acceptedIds.add(id);
+        acceptedTitles.add(title);
+    }
+
+    return { entries: accepted, dropped };
+}
+
+
 
 export async function queryCanonLoreDatabase(context = null, options = {}) {
     const settings = getSettings();
@@ -447,17 +568,19 @@ export async function proposeCanonLoreForContext(context = null, options = {}) {
         return { ...query, proposedCount: 0 };
     }
 
-    const existing = normalizeLoreMatrix([...(state.loreMatrix || []), ...(state.pendingLoreEntries || [])]);
-    const filtered = filterDuplicateLoreEntries(query.entries, existing);
-    const entries = normalizeLoreMatrix(filtered.entries).map(entry => ({
-        ...entry,
-        source: entry.source || CANON_DB_SOURCE,
-    }));
+    // Canon database proposals use a deliberately cheap duplicate pass.
+    // Do not run fuzzy/Jaccard duplicate checks here: if an older chat already contains
+    // oversized pending canon entries, full normalization + fuzzy comparison can lock the browser.
+    const existing = [...(Array.isArray(state.loreMatrix) ? state.loreMatrix : []), ...(Array.isArray(state.pendingLoreEntries) ? state.pendingLoreEntries : [])];
+    const filtered = fastFilterCanonDuplicates(query.entries, existing);
+    const entries = filtered.entries;
 
     if (!entries.length) {
         dbState.lastProposedCount = 0;
-        dbState.lastStatus = `Matched ${query.matchedCount} canon database entries, but all were already present or similar.`;
+        dbState.lastStatus = `Matched ${query.matchedCount} canon database entries, but the top ${query.entries.length} proposal(s) were already present by id/title.`;
         state.canonLoreDatabase = dbState;
+        // getState() sanitizes oversized legacy canon payloads before we reach this point,
+        // so saving here persists the repair instead of serializing the old heavy data.
         saveState(state);
         return { ...query, status: 'duplicates_only', proposedCount: 0, dropped: filtered.dropped };
     }

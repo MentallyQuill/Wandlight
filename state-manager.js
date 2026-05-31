@@ -221,6 +221,146 @@ export function saveStateWithSnapshot(state, maxSnapshots) {
     }
 }
 
+
+// ── Storage safety / recovery helpers ─────────────────────────────────────────
+
+const MAX_PENDING_LORE_ENTRIES = 100;
+const MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE = 500;
+
+function truncateText(value, limit = 1000) {
+    return String(value || '').slice(0, limit);
+}
+
+function compactStringArray(values, limit = 12, textLimit = 160) {
+    return Array.isArray(values)
+        ? values.map(v => truncateText(v, textLimit).trim()).filter(Boolean).slice(0, limit)
+        : [];
+}
+
+function compactStringMapForStorage(value, limit = 16, textLimit = 120) {
+    const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    const out = {};
+    for (const [key, raw] of Object.entries(input).slice(0, limit)) {
+        const cleanKey = truncateText(key, textLimit).trim();
+        if (!cleanKey) continue;
+        out[cleanKey] = truncateText(raw, textLimit).trim() || 'unknown';
+    }
+    return out;
+}
+
+function compactLoreEntryForStorage(entry) {
+    const normalized = normalizeLoreEntry(entry || {});
+    return {
+        schemaVersion: normalized.schemaVersion || 2,
+        id: truncateText(normalized.id, 140),
+        title: truncateText(normalized.title, 180),
+        kind: normalized.kind || 'fact',
+        gateType: normalized.gateType || normalized.kind || 'fact',
+        category: normalized.category || 'canon',
+        canonStatus: normalized.canonStatus || 'unknown',
+        truthStatus: normalized.truthStatus || 'true',
+        revealPolicy: normalized.revealPolicy || 'private',
+        tags: compactStringArray(normalized.tags, 10, 40),
+        priority: Number.isFinite(Number(normalized.priority)) ? Number(normalized.priority) : 50,
+        status: normalized.status || 'active',
+        protected: !!normalized.protected,
+        locked: !!normalized.locked,
+        userEditable: normalized.userEditable !== false,
+        userEdited: !!normalized.userEdited,
+        date: {
+            validFrom: truncateText(normalized.date?.validFrom || normalized.validFrom, 32),
+            validTo: truncateText(normalized.date?.validTo || normalized.validTo, 32),
+            precision: truncateText(normalized.date?.precision, 32),
+            schoolYear: normalized.date?.schoolYear ?? null,
+            book: truncateText(normalized.date?.book, 100),
+            era: truncateText(normalized.date?.era, 100),
+            label: truncateText(normalized.date?.label, 140),
+        },
+        scope: {
+            characters: compactStringArray(normalized.scope?.characters, 12, 100),
+            locations: compactStringArray(normalized.scope?.locations, 10, 100),
+            factions: compactStringArray(normalized.scope?.factions, 10, 100),
+            topics: compactStringArray(normalized.scope?.topics, 14, 100),
+            objects: compactStringArray(normalized.scope?.objects, 10, 100),
+            spells: compactStringArray(normalized.scope?.spells, 10, 100),
+            schoolYears: compactStringArray(normalized.scope?.schoolYears, 8, 32),
+            books: compactStringArray(normalized.scope?.books, 8, 100),
+            eras: compactStringArray(normalized.scope?.eras, 8, 100),
+        },
+        visibility: {
+            publicFrom: truncateText(normalized.visibility?.publicFrom, 32),
+            secretUntil: truncateText(normalized.visibility?.secretUntil, 32),
+            knownBy: compactStringMapForStorage(normalized.visibility?.knownBy, 16, 120),
+            notKnownByBefore: compactStringMapForStorage(normalized.visibility?.notKnownByBefore, 16, 120),
+            suspectedBy: compactStringMapForStorage(normalized.visibility?.suspectedBy, 12, 120),
+        },
+        content: {
+            fact: truncateText(normalized.content?.fact || normalized.fact, 1200),
+            injection: truncateText(normalized.content?.injection, 1200),
+            constraints: compactStringArray(normalized.content?.constraints, 8, 260),
+            antiLore: compactStringArray(normalized.content?.antiLore, 8, 260),
+            publicVersion: truncateText(normalized.content?.publicVersion, 500),
+            notes: truncateText(normalized.content?.notes || normalized.notes, 600),
+        },
+        fact: truncateText(normalized.fact || normalized.content?.fact, 1200),
+        source: typeof normalized.source === 'string' ? truncateText(normalized.source, 180) : 'wandlight',
+        sourceInfo: {
+            work: truncateText(normalized.sourceInfo?.work, 100),
+            book: truncateText(normalized.sourceInfo?.book, 100),
+            chapter: truncateText(normalized.sourceInfo?.chapter, 100),
+            confidence: normalized.sourceInfo?.confidence,
+        },
+    };
+}
+
+function sanitizeLoreArraysForStorage(state) {
+    if (!state || typeof state !== 'object') return state;
+
+    if (Array.isArray(state.pendingLoreEntries)) {
+        state.pendingLoreEntries = state.pendingLoreEntries
+            .slice(0, MAX_PENDING_LORE_ENTRIES)
+            .map(compactLoreEntryForStorage);
+    } else {
+        state.pendingLoreEntries = [];
+    }
+
+    if (Array.isArray(state.loreMatrix)) {
+        const limited = state.loreMatrix.length > MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE
+            ? state.loreMatrix.slice(-MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE)
+            : state.loreMatrix;
+        state.loreMatrix = limited.map(entry => {
+            const source = typeof entry?.source === 'string' ? entry.source : '';
+            return source.includes('canon-lore-db') ? compactLoreEntryForStorage(entry) : entry;
+        });
+    } else {
+        state.loreMatrix = [];
+    }
+
+    if (Array.isArray(state.stateHistory)) {
+        state.stateHistory = state.stateHistory.slice(-Math.max(0, Number(getSettings().maxSnapshots) || DEFAULT_SETTINGS.maxSnapshots || 5)).map(snapshot => {
+            if (!snapshot || typeof snapshot !== 'object') return snapshot;
+            if (snapshot.state && typeof snapshot.state === 'object') {
+                snapshot.state.pendingLoreEntries = [];
+                if (Array.isArray(snapshot.state.loreMatrix) && snapshot.state.loreMatrix.length > 200) {
+                    snapshot.state.loreMatrix = snapshot.state.loreMatrix.slice(-200).map(entry => {
+                        const source = typeof entry?.source === 'string' ? entry.source : '';
+                        return source.includes('canon-lore-db') ? compactLoreEntryForStorage(entry) : entry;
+                    });
+                }
+                snapshot.state.stateHistory = [];
+                snapshot.state.memoHistory = [];
+            }
+            return snapshot;
+        });
+    }
+
+    if (state.pendingLoreEntries.length === 0) {
+        state.pendingLoreMeta = null;
+    }
+
+    return state;
+}
+
 // ── State migration ─────────────────────────────────────────────────────────────
 
 /**
@@ -367,6 +507,9 @@ export function migrateState(state) {
     }
 
     // ── Always normalize lore fields post-migration ────────────────────────
+    // First compact known-heavy canon DB payloads and oversized pending batches so
+    // a poisoned chat can recover instead of freezing during panel render/save.
+    sanitizeLoreArraysForStorage(state);
     // Even v4 states can become malformed through manual editing or old imports.
     state.loreContext = normalizeLoreContext(state.loreContext || {});
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []);

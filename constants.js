@@ -65,6 +65,7 @@ export const DEFAULT_SETTINGS = {
     contextDetectionAutoInterval: 5,
     loreGenerationMode: 'manual', // 'manual' | 'automatic'
     loreGenerationAutoInterval: 10,
+    contextSourceMessageCount: 20,
 
     // Lore matrix
     injectLore: true,

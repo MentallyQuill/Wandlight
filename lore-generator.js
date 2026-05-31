@@ -442,7 +442,7 @@ export async function runLoreContextDetection(options = {}) {
             loreContext: state.loreContext,
         }, null, 0);
 
-        const messages = getRecentMessages(settings.loreSourceMessageCount || 20);
+        const messages = getRecentMessages(settings.contextSourceMessageCount || settings.loreSourceMessageCount || 20);
         progress?.('Sending context detection request...', 35);
         const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nDetect the current lore context. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
 

@@ -1978,12 +1978,9 @@ function hasAnyModelCompression(kind = 'lore') {
 
 function hasCompressibleText(text) {
     const clean = String(text || '')
-        .replace(/Direct mode active;[^
-]*/gi, '')
-        .replace(/No accepted active lore entries[^
-]*/gi, '')
-        .replace(/No continuity state[^
-]*/gi, '')
+        .replace(/Direct mode active;[^\n]*/gi, '')
+        .replace(/No accepted active lore entries[^\n]*/gi, '')
+        .replace(/No continuity state[^\n]*/gi, '')
         .trim();
     return clean.length > 80;
 }

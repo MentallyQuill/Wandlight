@@ -65,17 +65,24 @@
                                 style="width: 100%;">
 
                             <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Model</label>
-                            <div style="display: flex; gap: 6px; align-items: center;">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <input id="wandlight_lore_openai_model_search" class="text_pole" type="text"
+                                        placeholder="Search or type model ID..."
+                                        title="Type to search fetched models, or type an exact model ID to use even if the provider list is very large."
+                                        style="flex: 1;">
+                                    <button id="wandlight_lore_fetch_models" class="menu_button interactable"
+                                        style="font-size: 0.78em; padding: 2px 8px; white-space: nowrap;"
+                                        title="Fetch available models from the configured API endpoint.">
+                                        <i class="fa-solid fa-cloud-arrow-down"></i> Fetch Models
+                                    </button>
+                                </div>
                                 <select id="wandlight_lore_openai_model" class="text_pole"
-                                    title="Model ID used for Wandlight lore tasks."
-                                    style="flex: 1;">
-                                    <option value="">Type or fetch models</option>
+                                    title="Filtered fetched model list. Selecting an item copies it into the search/model field."
+                                    style="width: 100%;">
+                                    <option value="">Fetch models or type a model ID above</option>
                                 </select>
-                                <button id="wandlight_lore_fetch_models" class="menu_button interactable"
-                                    style="font-size: 0.78em; padding: 2px 8px; white-space: nowrap;"
-                                    title="Fetch available models from the configured API endpoint.">
-                                    <i class="fa-solid fa-cloud-arrow-down"></i> Fetch Models
-                                </button>
+                                <small style="opacity: 0.6; margin-top: -2px;">Typing saves the exact model ID and filters fetched results; the dropdown is optional.</small>
                             </div>
 
                             <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">API Key</label>
@@ -106,14 +113,14 @@
                             <div style="flex: 1; min-width: 100px;">
                                 <label style="font-size: 0.78em; opacity: 0.7;">Temperature</label>
                                 <input id="wandlight_lore_temperature" class="text_pole" type="number"
-                                    min="0" max="2" step="0.05" value="0.1"
+                                    min="0" max="2" step="0.05" value="0.7"
                                     title="Temperature for Wandlight context and lore-generation calls."
                                     style="width: 100%;">
                             </div>
                             <div style="flex: 1; min-width: 100px;">
                                 <label style="font-size: 0.78em; opacity: 0.7;">Top P</label>
                                 <input id="wandlight_lore_top_p" class="text_pole" type="number"
-                                    min="0" max="1" step="0.05" value="0.9"
+                                    min="0" max="1" step="0.05" value="0.98"
                                     title="Top-p sampling value for Wandlight context and lore-generation calls."
                                     style="width: 100%;">
                             </div>
@@ -172,11 +179,11 @@
                         </label>
 
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px;">
-                            <span style="flex-shrink: 0;">Max Snapshots:</span>
+                            <span style="flex-shrink: 0;">State History Limit:</span>
                             <input id="wandlight_max_snapshots" type="range" data-setting="maxSnapshots" min="5" max="100" value="20" style="flex: 1;" />
                             <span id="wandlight_max_snapshots_value" style="min-width: 24px; text-align: right;">20</span>
                         </div>
-                        <small style="opacity: 0.6; margin-top: -4px;">Maximum state snapshots kept for undo support.</small>
+                        <small style="opacity: 0.6; margin-top: -4px;">Maximum undo history points kept for Wandlight state-history recovery.</small>
 
                         <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
                             Current continuity state. Double-click the summary to edit raw JSON.

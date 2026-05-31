@@ -363,9 +363,10 @@ export function migrateState(state) {
         state.lorePanel.selectedCategory = state.lorePanel.selectedCategory || 'all';
         state.lorePanel.search = state.lorePanel.search || '';
         state.lorePanel.selectedEntryId = state.lorePanel.selectedEntryId || '';
-        state.lorePanel.activeTab = ['session', 'generate', 'review', 'lore'].includes(state.lorePanel.activeTab)
+        state.lorePanel.activeTab = ['session', 'generate', 'review', 'injection', 'lore'].includes(state.lorePanel.activeTab)
             ? state.lorePanel.activeTab
             : 'session';
+        state.lorePanel.reviewSelectedIds = Array.isArray(state.lorePanel.reviewSelectedIds) ? state.lorePanel.reviewSelectedIds : [];
         state.lorePanel.showOnlyActive = false;
         state.lorePanel.width = Number.isFinite(Number(state.lorePanel.width)) && Number(state.lorePanel.width) >= 320 ? Number(state.lorePanel.width) : 420;
         state.lorePanel.height = Number.isFinite(Number(state.lorePanel.height)) && Number(state.lorePanel.height) >= 260 ? Number(state.lorePanel.height) : 520;

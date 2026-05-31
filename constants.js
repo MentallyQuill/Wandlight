@@ -64,6 +64,11 @@ export const DEFAULT_SETTINGS = {
     autoGenerateLore: false,
     workflowMode: 'assisted', // 'manual' | 'assisted' | 'automatic'
 
+    // Lore injection / compression
+    loreInjectionMode: 'direct', // 'direct' | 'compressed'
+    loreCompressionLevel: 2, // 1=minimal, 5=aggressive
+    loreCompressionTurnInterval: 8,
+
     // Lore model provider
     loreProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
     loreProfileId: '',
@@ -80,8 +85,8 @@ export const DEFAULT_SETTINGS = {
     loreOpenAIUseSTProxy: false,
 
     // Lore generation parameters (separate from main RP model settings)
-    loreTemperature: 0.1,
-    loreTopP: 0.9,
+    loreTemperature: 0.7,
+    loreTopP: 0.98,
     loreMaxTokens: 2048,
     loreRepairOnParseFail: true,
 };
@@ -139,6 +144,7 @@ export function getDefaultState() {
             search: '',
             selectedEntryId: '',
             activeTab: 'session',
+            reviewSelectedIds: [],
             showOnlyActive: false,
             width: 420,
             height: 520,

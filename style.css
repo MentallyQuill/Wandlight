@@ -1115,3 +1115,195 @@
     border-style: solid;
     border-color: rgba(212, 200, 168, 0.35) transparent transparent transparent;
 }
+
+/* Wandlight iteration 2: house-archive dark palette, portal tooltips, and workflow polish */
+.wandlight-lore-panel {
+    --wandlight-bg: rgba(18, 12, 18, 0.97);
+    --wandlight-bg-2: rgba(36, 16, 24, 0.94);
+    --wandlight-surface: rgba(43, 28, 28, 0.74);
+    --wandlight-surface-2: rgba(18, 18, 24, 0.62);
+    --wandlight-border: rgba(185, 139, 54, 0.38);
+    --wandlight-border-soft: rgba(185, 139, 54, 0.18);
+    --wandlight-gold: #d7b56d;
+    --wandlight-gold-soft: #b9903c;
+    --wandlight-red: #5c1724;
+    --wandlight-green: #1f4a38;
+    --wandlight-text: #f1ead8;
+    --wandlight-muted: rgba(241, 234, 216, 0.68);
+    background:
+        radial-gradient(circle at top left, rgba(92, 23, 36, 0.42), transparent 36%),
+        linear-gradient(145deg, var(--wandlight-bg), rgba(9, 12, 18, 0.98));
+    border-color: var(--wandlight-border);
+    color: var(--wandlight-text);
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(215, 181, 109, 0.08) inset;
+}
+
+.wandlight-lore-panel-header {
+    background: linear-gradient(90deg, rgba(92, 23, 36, 0.72), rgba(20, 24, 32, 0.88));
+    border-bottom: 1px solid var(--wandlight-border-soft);
+}
+
+.wandlight-lore-panel-title,
+.wandlight-runtime-card-title,
+.wandlight-section-header h3,
+.wandlight-review-section h4,
+.wandlight-review-lore-title,
+.wandlight-lore-entry-title {
+    color: var(--wandlight-gold);
+}
+
+.wandlight-status-pill,
+.wandlight-runtime-card,
+.wandlight-review-lore-card,
+.wandlight-toggle-card,
+.wandlight-lore-entry-card {
+    background: var(--wandlight-surface-2);
+    border-color: var(--wandlight-border-soft);
+}
+
+.wandlight-runtime-tab,
+.wandlight-mode-button,
+.wandlight-runtime-button,
+.wandlight-lore-tab {
+    background: rgba(18, 18, 24, 0.72);
+    border-color: var(--wandlight-border-soft);
+    color: var(--wandlight-text);
+}
+
+.wandlight-runtime-tab:hover,
+.wandlight-runtime-tab-active,
+.wandlight-mode-button:hover,
+.wandlight-runtime-button:hover,
+.wandlight-mode-button-active,
+.wandlight-primary-button,
+.wandlight-lore-tab:hover,
+.wandlight-lore-tab-active {
+    background: rgba(92, 23, 36, 0.48);
+    border-color: var(--wandlight-border);
+    color: var(--wandlight-gold);
+}
+
+.wandlight-danger-zone-card {
+    border-color: rgba(176, 58, 58, 0.42);
+    background: rgba(52, 12, 18, 0.35);
+}
+
+.wandlight-danger-zone-title {
+    color: #e0a06d;
+}
+
+.wandlight-danger-button {
+    border-color: rgba(176, 58, 58, 0.48);
+}
+
+.wandlight-danger-button:hover {
+    background: rgba(120, 28, 36, 0.42);
+    border-color: rgba(220, 100, 90, 0.72);
+}
+
+.wandlight-lore-panel-resize-handle {
+    right: 0 !important;
+    left: auto !important;
+    bottom: 0 !important;
+    cursor: nwse-resize;
+}
+
+.wandlight-lore-panel-resize-handle::after {
+    border-right-color: rgba(215, 181, 109, 0.78);
+    border-bottom-color: rgba(215, 181, 109, 0.78);
+}
+
+.wandlight-runtime-tab-body-lore {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.wandlight-lore-controls {
+    flex: 0 0 auto;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    padding-bottom: 6px;
+    background: linear-gradient(180deg, rgba(18, 12, 18, 0.98), rgba(18, 12, 18, 0.92));
+    border-bottom: 1px solid var(--wandlight-border-soft);
+}
+
+.wandlight-lore-tabs {
+    max-height: 68px;
+    overflow-y: auto;
+}
+
+.wandlight-lore-entry-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-top: 6px;
+}
+
+.wandlight-pin-help {
+    margin-top: 4px;
+}
+
+.wandlight-review-bulk-card {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.wandlight-review-select-all {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.86em;
+    margin-bottom: 6px;
+    cursor: pointer;
+}
+
+.wandlight-review-lore-card-selected {
+    border-color: rgba(215, 181, 109, 0.65);
+    background: rgba(92, 23, 36, 0.28);
+}
+
+.wandlight-review-lore-checkbox {
+    flex: 0 0 auto;
+}
+
+.wandlight-slider-row,
+.wandlight-inline-field {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin: 6px 0;
+    font-size: 0.84em;
+}
+
+.wandlight-slider-row input[type="range"] {
+    flex: 1;
+}
+
+.wandlight-inline-field input[type="number"] {
+    width: 72px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--wandlight-border-soft);
+    color: var(--wandlight-text);
+    border-radius: 5px;
+    padding: 3px 5px;
+}
+
+.wandlight-floating-tooltip {
+    position: fixed;
+    display: none;
+    z-index: 2147483000;
+    max-width: 300px;
+    pointer-events: none;
+    background: rgba(9, 8, 11, 0.98);
+    color: #f4ecd9;
+    border: 1px solid rgba(215, 181, 109, 0.56);
+    border-radius: 7px;
+    padding: 7px 9px;
+    font-size: 12px;
+    line-height: 1.35;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.68);
+}

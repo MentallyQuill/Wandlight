@@ -368,6 +368,7 @@ function setupLoreProviderPanel(container) {
     const openaiRow = container.querySelector('#wandlight_lore_openai_row');
     const openaiBaseUrl = container.querySelector('#wandlight_lore_openai_base_url');
     const openaiModel = container.querySelector('#wandlight_lore_openai_model');
+    const openaiModelSearch = container.querySelector('#wandlight_lore_openai_model_search');
     const openaiKey = container.querySelector('#wandlight_lore_openai_key');
     const openaiKeySaveBtn = container.querySelector('#wandlight_lore_openai_key_save');
     const openaiKeyClearBtn = container.querySelector('#wandlight_lore_openai_key_clear');
@@ -380,10 +381,11 @@ function setupLoreProviderPanel(container) {
     // ── Set initial values ────────────────────────────────────────────
     if (providerSelect) providerSelect.value = settings.loreProvider || 'st';
     if (openaiBaseUrl) openaiBaseUrl.value = settings.loreOpenAIBaseUrl || '';
+    if (openaiModelSearch) openaiModelSearch.value = settings.loreOpenAIModel || '';
     if (openaiModel) openaiModel.value = settings.loreOpenAIModel || '';
     if (openaiJsonMode) openaiJsonMode.checked = !!settings.loreOpenAIUseJsonMode;
-    if (tempInput) tempInput.value = settings.loreTemperature ?? 0.1;
-    if (topPInput) topPInput.value = settings.loreTopP ?? 0.9;
+    if (tempInput) tempInput.value = settings.loreTemperature ?? 0.7;
+    if (topPInput) topPInput.value = settings.loreTopP ?? 0.98;
     if (maxTokensInput) maxTokensInput.value = settings.loreMaxTokens ?? 2048;
 
     // ── Show/hide provider-specific rows ──────────────────────────────
@@ -465,10 +467,68 @@ function setupLoreProviderPanel(container) {
             saveLoreProviderSettings(settings);
         });
     }
+    let fetchedLoreModels = [];
+
+    function saveLoreModel(value) {
+        settings.loreOpenAIModel = String(value || '').trim();
+        saveLoreProviderSettings(settings);
+    }
+
+    function renderLoreModelOptions(filter = '') {
+        if (!openaiModel) return;
+        const query = String(filter || '').trim().toLowerCase();
+        const current = settings.loreOpenAIModel || '';
+        const matches = fetchedLoreModels
+            .filter(m => {
+                const id = String(m.id || '');
+                const name = String(m.name || m.id || '');
+                if (!query) return true;
+                return id.toLowerCase().includes(query) || name.toLowerCase().includes(query);
+            })
+            .slice(0, 200);
+
+        openaiModel.innerHTML = '';
+
+        const typed = String(openaiModelSearch?.value || current || '').trim();
+        if (typed) {
+            const opt = document.createElement('option');
+            opt.value = typed;
+            opt.textContent = `Use typed model: ${typed}`;
+            openaiModel.appendChild(opt);
+        } else {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = fetchedLoreModels.length ? 'Select a fetched model' : 'Fetch models or type a model ID above';
+            openaiModel.appendChild(opt);
+        }
+
+        for (const m of matches) {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = m.name && m.name !== m.id ? `${m.name} (${m.id})` : m.id;
+            openaiModel.appendChild(opt);
+        }
+
+        openaiModel.value = current || typed || '';
+    }
+
+    if (openaiModelSearch) {
+        openaiModelSearch.addEventListener('input', () => {
+            const typed = openaiModelSearch.value.trim();
+            saveLoreModel(typed);
+            renderLoreModelOptions(typed);
+        });
+        openaiModelSearch.addEventListener('change', () => {
+            saveLoreModel(openaiModelSearch.value.trim());
+        });
+    }
+
     if (openaiModel) {
         openaiModel.addEventListener('change', () => {
-            settings.loreOpenAIModel = openaiModel.value.trim();
-            saveLoreProviderSettings(settings);
+            const selected = openaiModel.value.trim();
+            if (openaiModelSearch) openaiModelSearch.value = selected;
+            saveLoreModel(selected);
+            renderLoreModelOptions(selected);
         });
     }
     if (openaiJsonMode) {
@@ -481,13 +541,13 @@ function setupLoreProviderPanel(container) {
     // ── Generation parameter handlers ─────────────────────────────────
     if (tempInput) {
         tempInput.addEventListener('change', () => {
-            settings.loreTemperature = parseFloat(tempInput.value) || 0.1;
+            settings.loreTemperature = parseFloat(tempInput.value) || 0.7;
             saveLoreProviderSettings(settings);
         });
     }
     if (topPInput) {
         topPInput.addEventListener('change', () => {
-            settings.loreTopP = parseFloat(topPInput.value) || 0.9;
+            settings.loreTopP = parseFloat(topPInput.value) || 0.98;
             saveLoreProviderSettings(settings);
         });
     }
@@ -551,32 +611,16 @@ function setupLoreProviderPanel(container) {
 
     // ── Fetch Models button ──────────────────────────────────────────
     const fetchModelsBtn = container.querySelector('#wandlight_lore_fetch_models');
-    if (fetchModelsBtn && openaiModel) {
+    if (fetchModelsBtn) {
         fetchModelsBtn.addEventListener('click', async () => {
             fetchModelsBtn.disabled = true;
             const origText = fetchModelsBtn.textContent;
             fetchModelsBtn.textContent = 'Fetching...';
             try {
                 const models = await fetchLoreModels();
-                const currentVal = openaiModel.value;
-                openaiModel.innerHTML = '';
-                if (models.length === 0) {
-                    const opt = document.createElement('option');
-                    opt.value = '';
-                    opt.textContent = '(No models found)';
-                    openaiModel.appendChild(opt);
-                }
-                for (const m of models) {
-                    const opt = document.createElement('option');
-                    opt.value = m.id;
-                    opt.textContent = m.name || m.id;
-                    openaiModel.appendChild(opt);
-                }
-                // Restore previous selection if it's still in the list
-                if (currentVal && models.some(m => m.id === currentVal)) {
-                    openaiModel.value = currentVal;
-                }
-                if (typeof toastr !== 'undefined') toastr.success(`${models.length} model(s) fetched`);
+                fetchedLoreModels = Array.isArray(models) ? models : [];
+                renderLoreModelOptions(openaiModelSearch?.value || settings.loreOpenAIModel || '');
+                if (typeof toastr !== 'undefined') toastr.success(`${fetchedLoreModels.length} model(s) fetched; showing up to 200 matching results.`);
             } catch (e) {
                 if (typeof toastr !== 'undefined') toastr.error('Fetch failed: ' + e.message);
             } finally {
@@ -585,6 +629,8 @@ function setupLoreProviderPanel(container) {
             }
         });
     }
+
+    renderLoreModelOptions(settings.loreOpenAIModel || '');
 
     // ── Initial state ─────────────────────────────────────────────────
     refreshProviderRows();

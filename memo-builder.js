@@ -201,24 +201,11 @@ export function buildMemo(state) {
         const activeLore = getInjectableLoreEntries(state, maxLore);
         if (activeLore.length > 0) {
             lines.push('');
-            lines.push('## Story Lore');
+            lines.push(settings.loreInjectionMode === 'compressed' ? '## Story Lore (Compressed)' : '## Story Lore');
+            const pinnedIds = new Set(state?.loreSelection?.pinnedIds || []);
             for (const entry of activeLore) {
-                const parts = [`- <${entry.category}> **${entry.title}**`];
-                if (entry.fact) {
-                    parts.push(`\n    ${entry.fact}`);
-                }
-                // Show reveal policy hint
-                if (entry.revealPolicy === 'do_not_reveal') {
-                    parts.push('\n    (Do Not Reveal — keep hidden from characters)');
-                } else if (entry.revealPolicy === 'only_if_knower_present') {
-                    parts.push(`\n    (Only reveal if knowers present: ${(entry.whoKnowsTruth || []).join(', ') || 'unknown'})`);
-                } else if (entry.revealPolicy === 'only_if_user_reveals') {
-                    parts.push('\n    (Only reveal if {{user}} brings it up)');
-                }
-                if (entry.publicVersion && entry.truthStatus !== 'true') {
-                    parts.push(`\n    (Public version: ${entry.publicVersion})`);
-                }
-                lines.push(parts.join(''));
+                const isPinned = pinnedIds.has(entry.id);
+                lines.push(formatLoreEntryForInjection(entry, settings, isPinned));
             }
             hasContent = true;
         }
@@ -227,6 +214,51 @@ export function buildMemo(state) {
     if (!hasContent) return '';
 
     return '[WANDLIGHT CONTINUITY STATE]\n' + lines.join('\n') + '\n[/WANDLIGHT CONTINUITY STATE]';
+}
+
+
+function formatLoreEntryForInjection(entry, settings, isPinned = false) {
+    if ((settings?.loreInjectionMode || 'direct') !== 'compressed') {
+        const parts = [`- <${entry.category}> **${entry.title}**`];
+        if (entry.fact) {
+            parts.push(`\n    ${entry.fact}`);
+        }
+        appendRevealHints(parts, entry);
+        return parts.join('');
+    }
+
+    const level = Math.max(1, Math.min(5, Number(settings?.loreCompressionLevel) || 2));
+    const regularLimits = [320, 240, 180, 120, 80];
+    const pinnedLimits = [520, 420, 320, 240, 180];
+    const limit = isPinned ? pinnedLimits[level - 1] : regularLimits[level - 1];
+    const tags = Array.isArray(entry.tags) && entry.tags.length ? ` [${entry.tags.slice(0, 4).join(', ')}]` : '';
+    const pin = isPinned ? ' pinned' : '';
+    const fact = truncateForInjection(entry.fact || '', limit);
+    const parts = [`- <${entry.category}${pin}> ${entry.title}${tags}: ${fact}`];
+
+    // Preserve reveal/safety hints even in compressed mode.
+    appendRevealHints(parts, entry, true);
+    return parts.join('');
+}
+
+function appendRevealHints(parts, entry, compact = false) {
+    const prefix = compact ? ' ' : '\n    ';
+    if (entry.revealPolicy === 'do_not_reveal') {
+        parts.push(`${prefix}(Do Not Reveal)`);
+    } else if (entry.revealPolicy === 'only_if_knower_present') {
+        parts.push(`${prefix}(Only reveal if knowers present: ${(entry.whoKnowsTruth || []).join(', ') || 'unknown'})`);
+    } else if (entry.revealPolicy === 'only_if_user_reveals') {
+        parts.push(`${prefix}(Only reveal if {{user}} brings it up)`);
+    }
+    if (entry.publicVersion && entry.truthStatus !== 'true') {
+        parts.push(`${prefix}(Public version: ${truncateForInjection(entry.publicVersion, 160)})`);
+    }
+}
+
+function truncateForInjection(text, maxLen) {
+    const value = String(text || '').replace(/\s+/g, ' ').trim();
+    if (value.length <= maxLen) return value;
+    return value.slice(0, maxLen).replace(/\s+\S*$/, '') + '...';
 }
 
 // ── Expose on globalThis for dynamic access from state-manager (saveStateWithSnapshot) ──

@@ -878,31 +878,8 @@ function wireLoreMatrixEditor() {
                 userEdited: true,
                 locked: true,
             }));
+            // Accepted lore is intentionally uncapped; the runtime Lore tab pages the UI.
             state.loreMatrix = normalized;
-
-            // Enforce maxLoreEntriesInMatrix cap, preserving protected entries
-            const maxEntries = Number(getSettings().maxLoreEntriesInMatrix) || 50;
-            const protectedEntries = state.loreMatrix.filter(e =>
-                e.locked || e.userEdited || e.status === 'pinned'
-            );
-            const regularEntries = state.loreMatrix.filter(e =>
-                !(e.locked || e.userEdited || e.status === 'pinned')
-            );
-
-            if (protectedEntries.length > maxEntries) {
-                if (typeof toastr !== 'undefined') {
-                    toastr.warning(
-                        `Lore matrix has ${protectedEntries.length} protected entries, ` +
-                        `exceeding the configured cap of ${maxEntries}. Keeping all protected entries.`
-                    );
-                }
-                state.loreMatrix = protectedEntries;
-            } else {
-                state.loreMatrix = [
-                    ...protectedEntries,
-                    ...regularEntries.sort((a, b) => (b.priority || 50) - (a.priority || 50)),
-                ].slice(0, maxEntries);
-            }
 
             saveState(state);
             if (typeof toastr !== 'undefined') toastr.success('Lore matrix saved (' + normalized.length + ' entries).');

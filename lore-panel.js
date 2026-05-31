@@ -1618,7 +1618,7 @@ function renderInjectionTab(container, state) {
     const continuityButtons = document.createElement('div');
     continuityButtons.className = 'wandlight-mode-buttons';
     continuityButtons.appendChild(createContinuityModeButton('direct', 'Direct', 'Insert editable continuity state with full section detail.', settings));
-    continuityButtons.appendChild(createContinuityModeButton('compressed', 'Compressed', 'Use a model-compressed continuity block. If no cached compression exists, clicking Compressed starts a compression request.', settings));
+    continuityButtons.appendChild(createContinuityModeButton('compressed', 'Compressed', 'Use the last saved model-compressed continuity block. If no cached compression exists, Direct text is shown until you click Compress Continuity Now.', settings));
     continuityCard.appendChild(continuityButtons);
 
     const continuityLevel = document.createElement('label');
@@ -1680,7 +1680,7 @@ function renderInjectionTab(container, state) {
     const loreButtons = document.createElement('div');
     loreButtons.className = 'wandlight-mode-buttons';
     loreButtons.appendChild(createInjectionModeButton('direct', 'Direct', 'Insert active lore entries mostly verbatim, subject to the active-lore cap.', settings));
-    loreButtons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Use a model-compressed lore block. If no cached compression exists, clicking Compressed starts a compression request. Stored lore is not changed.', settings));
+    loreButtons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Use the last saved model-compressed lore block. If no cached compression exists, Direct text is shown until you click Compress Lore Now. Stored lore is not changed.', settings));
     loreCard.appendChild(loreButtons);
     loreCard.appendChild(createKeyValue('Active lore available', String(activeLore), 'Entries eligible for prompt injection after filters, pinning, and muting.'));
     loreCard.appendChild(createKeyValue('Pinned protection', 'enabled', 'Pinned entries are prioritized and kept less compressed than ordinary entries.'));
@@ -1742,7 +1742,7 @@ function renderInjectionTab(container, state) {
 
 function createInjectionPlacementCard(settings) {
     const card = document.createElement('div');
-    card.className = 'wandlight-runtime-card';
+    card.className = 'wandlight-runtime-card wandlight-prompt-placement-card';
 
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
@@ -1756,7 +1756,7 @@ function createInjectionPlacementCard(settings) {
     card.appendChild(help);
 
     const grid = document.createElement('div');
-    grid.className = 'wandlight-runtime-grid';
+    grid.className = 'wandlight-runtime-grid wandlight-prompt-placement-grid';
 
     grid.appendChild(createPlacementSelect('Injection method', 'injectionTransport', settings.injectionTransport || 'extension_prompt', [
         ['extension_prompt', 'Extension Prompt: role/depth'],
@@ -2203,7 +2203,7 @@ function createPendingLoreReviewSection(state) {
 
         section.appendChild(createPendingLoreBulkControls(pendingLore, state));
 
-        const visibleLimit = Math.max(5, Math.min(50, Number(state?.lorePanel?.pendingReviewVisibleLimit) || 10));
+        const visibleLimit = Math.max(5, Math.min(1000, Number(state?.lorePanel?.pendingReviewVisibleLimit) || 10));
         const list = document.createElement('div');
         list.className = 'wandlight-review-lore-list wandlight-pending-lore-list';
         pendingLore.slice(0, visibleLimit).forEach((entry, idx) => list.appendChild(createPendingLoreReviewCard(entry, idx, isPendingLoreSelected(state, entry))));

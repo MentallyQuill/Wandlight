@@ -51,6 +51,12 @@ export function buildContinuityMemo(state, settingsOverride = {}) {
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
     const cached = getCachedModelCompression(state, settings, 'continuity');
     if (cached) return cached;
+    // Compressed mode should use model-compressed cached text only. If no cache
+    // exists, fall back to direct preview/injection rather than deterministic
+    // truncation; the Injection tab tells the user to run Compress Continuity Now.
+    if ((settings.continuityInjectionMode || 'direct') === 'compressed') {
+        settings.continuityInjectionMode = 'direct';
+    }
     const cfg = state.continuityConfig || {};
     const lines = [];
 
@@ -199,6 +205,11 @@ export function buildLoreMemo(state, settingsOverride = {}) {
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
     const cached = getCachedModelCompression(state, settings, 'lore');
     if (cached) return cached;
+    // Same rule as continuity: compressed mode uses cached model compression only.
+    // Without a cache, use direct injection until the user explicitly compresses.
+    if ((settings.loreInjectionMode || 'direct') === 'compressed') {
+        settings.loreInjectionMode = 'direct';
+    }
     const maxLore = Number(settings.maxLoreEntriesInMemo) || MAX_LORE_ENTRIES_IN_MEMO;
     const activeLore = getInjectableLoreEntries(state, maxLore);
     if (!activeLore.length) return '';

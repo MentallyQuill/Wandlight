@@ -1729,3 +1729,138 @@
     padding: 0 4px;
     min-height: 13px;
 }
+
+/* ── Injection placement compact layout and final live feedback polish ─────── */
+.wandlight-prompt-placement-card .wandlight-runtime-help {
+    font-size: 0.70em;
+    line-height: 1.25;
+}
+
+.wandlight-prompt-placement-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 6px;
+    margin: 5px 0 6px 0;
+}
+
+.wandlight-prompt-placement-card .wandlight-inline-field {
+    display: grid;
+    grid-template-columns: minmax(60px, 84px) minmax(0, 1fr);
+    align-items: center;
+    gap: 4px;
+    margin: 2px 0;
+    min-width: 0;
+    font-size: 0.70em;
+}
+
+.wandlight-prompt-placement-card .wandlight-inline-field span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.82;
+}
+
+.wandlight-prompt-placement-card .wandlight-inline-field select,
+.wandlight-prompt-placement-card .wandlight-inline-field input[type="number"] {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 22px;
+    box-sizing: border-box;
+    border: 1px solid var(--wandlight-border-soft);
+    border-radius: 5px;
+    background: rgba(10, 12, 16, 0.86);
+    color: var(--wandlight-text);
+    font-size: 0.92em;
+    line-height: 1;
+    padding: 1px 5px;
+}
+
+.wandlight-prompt-placement-card .wandlight-inline-field select {
+    padding-right: 16px;
+}
+
+/* Make accepted and pending scroll regions visually consistent. */
+.wandlight-lore-entry-list,
+.wandlight-pending-lore-list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(120, 138, 156, 0.78) rgba(10, 12, 16, 0.38);
+}
+
+.wandlight-lore-entry-list::-webkit-scrollbar,
+.wandlight-pending-lore-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.wandlight-lore-entry-list::-webkit-scrollbar-track,
+.wandlight-pending-lore-list::-webkit-scrollbar-track {
+    background: rgba(10, 12, 16, 0.38);
+    border-radius: 8px;
+}
+
+.wandlight-lore-entry-list::-webkit-scrollbar-thumb,
+.wandlight-pending-lore-list::-webkit-scrollbar-thumb {
+    background: rgba(120, 138, 156, 0.78);
+    border-radius: 8px;
+}
+
+.wandlight-lore-show-more,
+.wandlight-small-button {
+    background: rgba(42, 52, 64, 0.88) !important;
+    border-color: rgba(126, 145, 165, 0.52) !important;
+    color: #d7e1ea !important;
+}
+
+.wandlight-lore-show-more:hover,
+.wandlight-small-button:hover {
+    background: rgba(58, 72, 88, 0.96) !important;
+    border-color: rgba(155, 176, 196, 0.72) !important;
+}
+
+/* Final chip compaction: outer chip is ~20px shorter than the old oversized rows. */
+.wandlight-lore-meta-select-wrap {
+    height: 14px !important;
+    min-height: 14px !important;
+    padding: 0 2px 0 4px !important;
+    gap: 2px !important;
+    align-items: center !important;
+    max-width: 148px !important;
+    font-size: 0.58em !important;
+    line-height: 1 !important;
+}
+
+.wandlight-lore-meta-select-prefix {
+    height: 12px !important;
+    min-height: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 1 !important;
+}
+
+.wandlight-lore-meta-select {
+    height: 12px !important;
+    min-height: 12px !important;
+    max-width: 92px !important;
+    line-height: 1 !important;
+    padding: 0 12px 0 3px !important;
+    font-size: 0.92em !important;
+    vertical-align: middle !important;
+}
+
+.wandlight-lore-meta-select-priority .wandlight-lore-meta-select {
+    max-width: 50px !important;
+}
+
+.wandlight-lore-entry-title-wrap,
+.wandlight-review-lore-title {
+    margin-left: 12px !important;
+}
+
+.wandlight-lore-entry-tags {
+    margin-left: 2px;
+}
+
+@media (max-width: 430px) {
+    .wandlight-prompt-placement-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -696,7 +696,7 @@ export function migrateState(state) {
         }
         state.lorePanel.showOnlyActive = false;
         state.lorePanel.pendingReviewVisibleLimit = Number.isFinite(Number(state.lorePanel.pendingReviewVisibleLimit))
-            ? Math.max(5, Math.min(50, Number(state.lorePanel.pendingReviewVisibleLimit)))
+            ? Math.max(5, Math.min(1000, Number(state.lorePanel.pendingReviewVisibleLimit)))
             : getDefaultState().lorePanel.pendingReviewVisibleLimit;
         state.lorePanel.width = Number.isFinite(Number(state.lorePanel.width)) && Number(state.lorePanel.width) >= 320 ? Number(state.lorePanel.width) : 420;
         state.lorePanel.height = Number.isFinite(Number(state.lorePanel.height)) && Number(state.lorePanel.height) >= 260 ? Number(state.lorePanel.height) : 520;
@@ -1763,23 +1763,10 @@ export function acceptPendingLoreEntries() {
 
     const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
 
-    let merged = mergeLoreEntries(existing, pending);
+    const merged = mergeLoreEntries(existing, pending);
 
-    // Enforce maxLoreEntriesInMatrix cap, preserving locked/userEdited/pinned entries.
-    const max = Number(settings.maxLoreEntriesInMatrix) || 50;
-    if (merged.length > max) {
-        const protectedEntries = merged.filter(e => e.locked || e.userEdited || e.status === 'pinned');
-        const regularEntries = merged
-            .filter(e => !(e.locked || e.userEdited || e.status === 'pinned'))
-            .sort((a, b) => (b.priority || 50) - (a.priority || 50) || (a.title || '').localeCompare(b.title || ''));
-
-        if (protectedEntries.length > max) {
-            merged = protectedEntries;
-        } else {
-            merged = [...protectedEntries, ...regularEntries].slice(0, max);
-        }
-    }
-
+    // Accepted lore is intentionally uncapped. The Lore tab uses paged rendering
+    // so large matrices stay usable without deleting lower-priority entries.
     state.loreMatrix = merged;
     state.pendingLoreEntries = [];
     state.pendingLoreMeta = null;
@@ -1854,23 +1841,8 @@ export function acceptPendingLoreEntry(entryIndex) {
     const acceptedEntry = pending[entryIndex];
     const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
 
-    // Merge the single entry into loreMatrix
-    const settings = getSettings();
-    let merged = mergeLoreEntries(existing, [acceptedEntry]);
-
-    // Enforce cap
-    const max = Number(settings.maxLoreEntriesInMatrix) || 50;
-    if (merged.length > max) {
-        const protectedEntries = merged.filter(e => e.locked || e.userEdited || e.status === 'pinned');
-        const regularEntries = merged
-            .filter(e => !(e.locked || e.userEdited || e.status === 'pinned'))
-            .sort((a, b) => (b.priority || 50) - (a.priority || 50) || (a.title || '').localeCompare(b.title || ''));
-        if (protectedEntries.length > max) {
-            merged = protectedEntries;
-        } else {
-            merged = [...protectedEntries, ...regularEntries].slice(0, max);
-        }
-    }
+    // Merge the single entry into the uncapped lore matrix. UI paging handles scale.
+    const merged = mergeLoreEntries(existing, [acceptedEntry]);
 
     state.loreMatrix = merged;
 

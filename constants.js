@@ -71,7 +71,8 @@ export const DEFAULT_SETTINGS = {
     // Lore matrix
     injectLore: true,
     maxLoreEntriesInMemo: 6,
-    maxLoreEntriesInMatrix: 50,
+    // Accepted Lore Matrix is intentionally uncapped. UI uses paging so hundreds of entries remain usable.
+    maxLoreEntriesInMatrix: 0,
     autoGenerateLore: false,
     workflowMode: 'manual', // legacy UI preset; explicit tab modes are authoritative
 

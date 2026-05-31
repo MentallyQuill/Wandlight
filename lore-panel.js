@@ -6,7 +6,7 @@
  * raw previews. This window is the runtime surface used during roleplay.
  */
 
-import { getPanelLoreState, getInjectableLoreEntries, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag } from './lore-matrix.js';
+import { getPanelLoreState, getInjectableLoreEntries, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag, LORE_LIFECYCLE_STATUSES } from './lore-matrix.js';
 import { getDefaultState } from './constants.js';
 import {
     getState,
@@ -39,6 +39,11 @@ const CATEGORY_LABELS = {
     pinned: 'Pinned',
     suppressed: 'Muted',
     pending: 'Pending',
+    expired: 'Expired',
+    blocked: 'Story Blocked',
+    future: 'Future',
+    canon_overdue: 'Canon Overdue',
+    divergent: 'Divergent',
     canon: 'Canon',
     au: 'AU',
     secret: 'Secret',
@@ -77,8 +82,8 @@ const TAB_TOOLTIPS = {
 
 
 function getSelectedLoreInjectionCount(state, settings = getSettings()) {
-    const maxLore = Number(settings.maxLoreEntriesInMemo) || 0;
-    return getInjectableLoreEntries(state, maxLore).length;
+    void settings;
+    return getInjectableLoreEntries(state, 0).length;
 }
 
 function getInjectionCharacterStats(state, settings = getSettings()) {
@@ -1322,6 +1327,7 @@ const CONTINUITY_SECTION_LABELS = {
     inventory: 'Inventory / Objects',
     objectives: 'Objectives',
     flags: 'Continuity Flags',
+    storyMilestones: 'Story Milestones',
 };
 
 
@@ -1420,6 +1426,7 @@ function renderContinuityTab(container, state) {
     container.appendChild(createContinuitySectionToggleCard(state));
     container.appendChild(createCanonSceneEditorCard(state));
     container.appendChild(createCharacterStateEditorCard(state));
+    container.appendChild(createStoryMilestonesEditorCard(state));
     container.appendChild(createJsonEditorCard('Knowledge', 'Character-keyed facts. Example: { "Harry": ["knows X"] }', 'knowledge', state.knowledge || {}));
     container.appendChild(createJsonEditorCard('Secrets', 'Non-public facts, who knows them, suspicions, and public versions.', 'secrets', state.secrets || []));
     container.appendChild(createJsonEditorCard('Relationships', 'Relationship state such as trust, tension, and notes.', 'relationships', state.relationships || []));
@@ -1484,6 +1491,21 @@ function createCanonSceneEditorCard(state) {
     card.appendChild(createArrayTextField('Present characters', state?.scene?.presentCharacters || [], 'scene', 'presentCharacters', 'Comma-separated characters currently present.'));
     card.appendChild(createArrayTextField('Nearby characters', state?.scene?.nearbyCharacters || [], 'scene', 'nearbyCharacters', 'Comma-separated characters nearby but not necessarily in the active conversation.'));
     card.appendChild(createJsonEditorCard('Canon divergences', 'AU or changed-canon facts with optional sinceDate fields.', 'canon.divergences', state?.canon?.divergences || [], true));
+    return card;
+}
+
+
+function createStoryMilestonesEditorCard(state) {
+    const card = createJsonEditorCard(
+        'Story Milestones',
+        'Story-state switches used by Lore entries. Canon dates can suggest entries, but milestones decide whether reveal/knowledge entries are actually true. Example: { "horcruxes_revealed_to_trio": { "status": "not_happened", "evidence": [] } }',
+        'storyMilestones',
+        state?.storyMilestones || {}
+    );
+    const schema = document.createElement('div');
+    schema.className = 'wandlight-runtime-help';
+    schema.textContent = 'Statuses: not_happened, suspected, happened, blocked, diverged, unknown. Wandlight should only mark happened when the roleplay establishes it, not merely because the canon date passed.';
+    card.appendChild(schema);
     return card;
 }
 
@@ -2761,6 +2783,8 @@ function getFilteredLoreEntries(state) {
         filtered = filtered.filter(e => e.isPinned);
     } else if (panelState.selectedCategory === 'suppressed') {
         filtered = filtered.filter(e => e.isSuppressed);
+    } else if (['expired', 'blocked', 'future', 'canon_overdue', 'divergent'].includes(panelState.selectedCategory)) {
+        filtered = filtered.filter(e => (e.lifecycleStatus || e.lifecycle?.status || 'active') === panelState.selectedCategory);
     } else if (panelState.selectedCategory && panelState.selectedCategory !== 'all') {
         filtered = filtered.filter(e => e.category === panelState.selectedCategory);
     }
@@ -2798,6 +2822,68 @@ function getLoreCategoryRank(category) {
     const order = ['event', 'timeline', 'character', 'relationship', 'place', 'location', 'faction', 'knowledge', 'secret', 'item', 'artifact', 'spell', 'rule', 'canon', 'au', 'rumor', 'lie'];
     const idx = order.indexOf(category || '');
     return idx >= 0 ? idx : 99;
+}
+
+
+const LIFECYCLE_META = {
+    active: { label: 'Active', color: '#166534', textColor: '#dcfce7', tooltip: 'Injectable now.' },
+    canon_overdue: { label: 'Canon Overdue', color: '#a16207', textColor: '#fef3c7', tooltip: 'Canon timing suggests this should have resolved, but the story milestone has not happened. Still injectable if it is a guard.' },
+    blocked: { label: 'Blocked', color: '#92400e', textColor: '#ffedd5', tooltip: 'Not injected because required story conditions are missing.' },
+    future: { label: 'Future', color: '#1e3a8a', textColor: '#dbeafe', tooltip: 'Not injected yet.' },
+    expired: { label: 'Expired', color: '#4b5563', textColor: '#f9fafb', tooltip: 'Expired by story milestone or hard date. Not injected unless manually overridden.' },
+    divergent: { label: 'Divergent', color: '#7c2d12', textColor: '#ffedd5', tooltip: 'Conflicts with current branch or canon status. Not injected by default.' },
+    muted: { label: 'Muted', color: '#374151', textColor: '#f3f4f6', tooltip: 'Muted by user.' },
+    archived: { label: 'Archived', color: '#111827', textColor: '#e5e7eb', tooltip: 'Archived or disabled.' },
+};
+
+function getLifecycleStatus(entry) {
+    return entry.lifecycleStatus || entry.lifecycle?.status || entry.lifecycle?.computedStatus || 'active';
+}
+
+function createEditableLifecycleBadge(entry) {
+    const value = getLifecycleStatus(entry);
+    const meta = LIFECYCLE_META[value] || LIFECYCLE_META.active;
+    const wrap = document.createElement('label');
+    wrap.className = 'wandlight-lore-lifecycle-select-wrap';
+    wrap.style.setProperty('--wandlight-chip-bg', meta.color);
+    wrap.style.setProperty('--wandlight-chip-fg', meta.textColor);
+    addTooltip(wrap, `${meta.label}: ${entry.lifecycle?.reason || meta.tooltip} Use the dropdown to override this computed state.`);
+
+    const select = document.createElement('select');
+    select.className = 'wandlight-lore-lifecycle-select';
+    select.setAttribute('aria-label', 'Lore lifecycle status');
+    select.addEventListener('click', e => e.stopPropagation());
+    select.addEventListener('mousedown', e => e.stopPropagation());
+
+    for (const status of LORE_LIFECYCLE_STATUSES) {
+        const option = document.createElement('option');
+        option.value = status;
+        option.textContent = LIFECYCLE_META[status]?.label || status;
+        if (status === value) option.selected = true;
+        select.appendChild(option);
+    }
+
+    select.addEventListener('change', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const nextStatus = select.value;
+        updateLoreEntryById(entry.id, raw => ({
+            ...raw,
+            lifecycle: {
+                ...(raw.lifecycle || {}),
+                status: nextStatus,
+                manualOverride: true,
+                reason: `Manually set to ${nextStatus}.`,
+                lastEvaluatedAt: Date.now(),
+            },
+        }), { deferSave: true });
+        if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
+        refreshHeader();
+        toast(`${entry.title || 'Lore entry'} status set to ${LIFECYCLE_META[nextStatus]?.label || nextStatus}.`, 'info');
+    });
+
+    wrap.appendChild(select);
+    return wrap;
 }
 
 function createRegistryBadge(field, value, tooltip = '') {
@@ -2985,6 +3071,7 @@ function createEntryCard(entry, state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-lore-entry-actions';
+    actions.appendChild(createEditableLifecycleBadge(entry));
 
     const pinBtn = createIconButton(
         entry.isPinned ? 'Pinned' : 'Pin',
@@ -3694,6 +3781,7 @@ function getCategoryCount(cat, entries, counts) {
     if (cat === 'pinned') return counts.pinned;
     if (cat === 'suppressed') return counts.suppressed;
     if (cat === 'pending') return counts.pending;
+    if (['expired', 'blocked', 'future', 'canon_overdue', 'divergent'].includes(cat)) return counts[cat] || 0;
     return entries.filter(e => e.category === cat).length;
 }
 
@@ -3706,6 +3794,11 @@ function getCategoryTooltip(cat) {
         pinned: 'Shows entries manually prioritized for injection.',
         suppressed: 'Shows muted entries excluded from injection.',
         pending: 'Shows generated entries that still need review.',
+        expired: 'Shows lore that has expired by story milestone or hard date. Expired entries are not injected unless manually overridden.',
+        blocked: 'Shows lore blocked by missing story milestones or scene conditions.',
+        future: 'Shows lore not yet active for the current story state.',
+        canon_overdue: 'Shows canon-timed lore where the canon date has passed, but the story milestone has not happened.',
+        divergent: 'Shows lore that does not match the current branch or canon status.',
     };
     return map[cat] || `Shows lore entries in category: ${cat}.`;
 }

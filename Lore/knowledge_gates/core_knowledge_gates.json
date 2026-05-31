@@ -38,15 +38,15 @@
         }
       },
       "content": {
-        "fact": "Before summer 1996, the trio should not understand or casually discuss Horcruxes.",
-        "injection": "Before 1996-07-01, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Horcruxes unless the AU introduced it early.",
+        "fact": "The trio should not understand or casually discuss Horcruxes.",
+        "injection": "Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Horcruxes unless this story established it.",
         "constraints": [
           "Block premature knowledge of Horcruxes."
         ],
         "antiLore": [
-          "Do not have Harry Potter explain Horcruxes before 1996-07-01.",
-          "Do not have Hermione Granger explain Horcruxes before 1996-07-01.",
-          "Do not have Ron Weasley explain Horcruxes before 1996-07-01."
+          "Do not have Harry Potter explain Horcruxes .",
+          "Do not have Hermione Granger explain Horcruxes .",
+          "Do not have Ron Weasley explain Horcruxes ."
         ],
         "notes": ""
       },
@@ -71,7 +71,25 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1996-06-30",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "horcruxes_revealed_to_trio"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "horcruxes_revealed_to_trio"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -111,15 +129,15 @@
         }
       },
       "content": {
-        "fact": "Before the Year 7 quest, the trio should not frame events around the Deathly Hallows.",
-        "injection": "Before 1997-07-31, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Deathly Hallows unless the AU introduced it early.",
+        "fact": "The trio should not frame events around the Deathly Hallows.",
+        "injection": "Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Deathly Hallows unless this story established it.",
         "constraints": [
           "Block premature knowledge of Deathly Hallows."
         ],
         "antiLore": [
-          "Do not have Harry Potter explain Deathly Hallows before 1997-07-31.",
-          "Do not have Hermione Granger explain Deathly Hallows before 1997-07-31.",
-          "Do not have Ron Weasley explain Deathly Hallows before 1997-07-31."
+          "Do not have Harry Potter explain Deathly Hallows .",
+          "Do not have Hermione Granger explain Deathly Hallows .",
+          "Do not have Ron Weasley explain Deathly Hallows ."
         ],
         "notes": ""
       },
@@ -144,7 +162,25 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1997-07-30",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "deathly_hallows_revealed_to_trio"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "deathly_hallows_revealed_to_trio"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -180,13 +216,13 @@
         }
       },
       "content": {
-        "fact": "Before the Department of Mysteries aftermath, Harry does not know the full prophecy contents.",
-        "injection": "Before 1996-06-18, Harry Potter should not know or casually discuss full prophecy unless the AU introduced it early.",
+        "fact": "Harry does not know the full prophecy contents.",
+        "injection": "Harry Potter should not know or casually discuss full prophecy unless this story established it.",
         "constraints": [
           "Block premature knowledge of full prophecy."
         ],
         "antiLore": [
-          "Do not have Harry Potter explain full prophecy before 1996-06-18."
+          "Do not have Harry Potter explain full prophecy ."
         ],
         "notes": ""
       },
@@ -211,7 +247,25 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1996-06-18",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "prophecy_revealed_to_harry"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "prophecy_revealed_to_harry"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -251,15 +305,15 @@
         }
       },
       "content": {
-        "fact": "Before the end of Year 6, the trio should not know that Snape is the Half-Blood Prince.",
-        "injection": "Before 1997-06-30, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Half-Blood Prince identity unless the AU introduced it early.",
+        "fact": "The trio should not know that Snape is the Half-Blood Prince.",
+        "injection": "Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Half-Blood Prince identity unless this story established it.",
         "constraints": [
           "Block premature knowledge of Half-Blood Prince identity."
         ],
         "antiLore": [
-          "Do not have Harry Potter explain Half-Blood Prince identity before 1997-06-30.",
-          "Do not have Hermione Granger explain Half-Blood Prince identity before 1997-06-30.",
-          "Do not have Ron Weasley explain Half-Blood Prince identity before 1997-06-30."
+          "Do not have Harry Potter explain Half-Blood Prince identity .",
+          "Do not have Hermione Granger explain Half-Blood Prince identity .",
+          "Do not have Ron Weasley explain Half-Blood Prince identity ."
         ],
         "notes": ""
       },
@@ -284,7 +338,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -324,15 +385,15 @@
         }
       },
       "content": {
-        "fact": "Before the Shrieking Shack events, the trio should not know Sirius was not the traitor.",
-        "injection": "Before 1994-06-06, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Sirius Black innocence unless the AU introduced it early.",
+        "fact": "The trio should not know Sirius was not the traitor.",
+        "injection": "Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Sirius Black innocence unless this story established it.",
         "constraints": [
           "Block premature knowledge of Sirius Black innocence."
         ],
         "antiLore": [
-          "Do not have Harry Potter explain Sirius Black innocence before 1994-06-06.",
-          "Do not have Hermione Granger explain Sirius Black innocence before 1994-06-06.",
-          "Do not have Ron Weasley explain Sirius Black innocence before 1994-06-06."
+          "Do not have Harry Potter explain Sirius Black innocence .",
+          "Do not have Hermione Granger explain Sirius Black innocence .",
+          "Do not have Ron Weasley explain Sirius Black innocence ."
         ],
         "notes": ""
       },
@@ -357,7 +418,25 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1994-06-05",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "sirius_truth_revealed"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "sirius_truth_revealed"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -397,15 +476,15 @@
         }
       },
       "content": {
-        "fact": "Before the graveyard event, the trio should not know Voldemort has regained a body.",
-        "injection": "Before 1995-06-24, Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Voldemort return unless the AU introduced it early.",
+        "fact": "The trio should not know Voldemort has regained a body.",
+        "injection": "Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Voldemort return unless this story established it.",
         "constraints": [
           "Block premature knowledge of Voldemort return."
         ],
         "antiLore": [
-          "Do not have Harry Potter explain Voldemort return before 1995-06-24.",
-          "Do not have Hermione Granger explain Voldemort return before 1995-06-24.",
-          "Do not have Ron Weasley explain Voldemort return before 1995-06-24."
+          "Do not have Harry Potter explain Voldemort return .",
+          "Do not have Hermione Granger explain Voldemort return .",
+          "Do not have Ron Weasley explain Voldemort return ."
         ],
         "notes": ""
       },
@@ -430,7 +509,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1995-06-23",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -472,15 +558,15 @@
         }
       },
       "content": {
-        "fact": "Before the Astronomy Tower climax, Draco\u2019s exact mission is not public knowledge.",
-        "injection": "Before 1997-06-30, Harry Potter, Hermione Granger, Ron Weasley, general Hogwarts students should not know or casually discuss Draco mission unless the AU introduced it early.",
+        "fact": "Draco’s exact mission is not public knowledge.",
+        "injection": "Harry Potter, Hermione Granger, Ron Weasley, general Hogwarts students should not know or casually discuss Draco mission unless this story established it.",
         "constraints": [
           "Block premature knowledge of Draco mission."
         ],
         "antiLore": [
-          "Do not have Harry Potter explain Draco mission before 1997-06-30.",
-          "Do not have Hermione Granger explain Draco mission before 1997-06-30.",
-          "Do not have Ron Weasley explain Draco mission before 1997-06-30."
+          "Do not have Harry Potter explain Draco mission .",
+          "Do not have Hermione Granger explain Draco mission .",
+          "Do not have Ron Weasley explain Draco mission ."
         ],
         "notes": ""
       },
@@ -505,7 +591,25 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1997-06-29",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "dumbledore_death_occurs"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "dumbledore_death_occurs"
+        ],
+        "autoMuteOnExpire": true
+      }
     }
   ]
 }

@@ -42,7 +42,7 @@
         "fact": "Hermione in Year 6 is academically intense, skeptical of unsupported claims, protective of friends, and increasingly aware of wartime danger.",
         "injection": "Hermione in Year 6 should be competent, skeptical, and protective, with war-aware caution rather than early-year naivety.",
         "constraints": [
-          "Do not write Hermione as unaware of Voldemort\u2019s return in Year 6."
+          "Do not write Hermione as unaware of Voldemort’s return in Year 6."
         ],
         "antiLore": [],
         "notes": ""
@@ -68,7 +68,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      }
     },
     {
       "schemaVersion": 2,
@@ -137,7 +144,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      }
     },
     {
       "schemaVersion": 2,
@@ -180,7 +194,7 @@
         "fact": "Draco in Year 6 is under severe pressure, secretive, frightened, and increasingly isolated by his mission.",
         "injection": "Draco in Year 6 should be secretive and strained under pressure; arrogance may mask fear rather than simple school rivalry.",
         "constraints": [
-          "Do not make Draco\u2019s mission public unless discovered."
+          "Do not make Draco’s mission public unless discovered."
         ],
         "antiLore": [],
         "notes": ""
@@ -206,7 +220,19 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "activation": {
+        "requiresEvents": [
+          "draco_mission_revealed"
+        ]
+      }
     },
     {
       "schemaVersion": 2,
@@ -275,7 +301,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      }
     }
   ]
 }

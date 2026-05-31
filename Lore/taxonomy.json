@@ -201,5 +201,47 @@
     "P75": 75,
     "P90": 90,
     "P100": 100
+  },
+  "lifecycleStatuses": {
+    "active": {
+      "label": "Active",
+      "color": "#166534",
+      "textColor": "#dcfce7"
+    },
+    "canon_overdue": {
+      "label": "Canon Overdue",
+      "color": "#a16207",
+      "textColor": "#fef3c7"
+    },
+    "blocked": {
+      "label": "Story Blocked",
+      "color": "#92400e",
+      "textColor": "#ffedd5"
+    },
+    "future": {
+      "label": "Future",
+      "color": "#1e3a8a",
+      "textColor": "#dbeafe"
+    },
+    "expired": {
+      "label": "Expired",
+      "color": "#4b5563",
+      "textColor": "#f9fafb"
+    },
+    "divergent": {
+      "label": "Divergent",
+      "color": "#7c2d12",
+      "textColor": "#ffedd5"
+    },
+    "muted": {
+      "label": "Muted",
+      "color": "#374151",
+      "textColor": "#f3f4f6"
+    },
+    "archived": {
+      "label": "Archived",
+      "color": "#111827",
+      "textColor": "#e5e7eb"
+    }
   }
 }

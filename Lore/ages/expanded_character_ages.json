@@ -34,7 +34,7 @@
       "visibility": {},
       "content": {
         "fact": "Ginny Weasley has a canon/approximate birthdate 1981-08-11; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Ginny Weasley age from 1981-08-11 when the story date is known; keep behavior and school-year assumptions age-appropriate.",
+        "injection": "Compute Ginny Weasley age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
         "constraints": [
           "Use 1981-08-11 as the date basis unless user AU overrides it."
         ],
@@ -61,7 +61,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1981-08-11",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -97,7 +104,7 @@
       "visibility": {},
       "content": {
         "fact": "Neville Longbottom has a canon/approximate birthdate 1980-07-30; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Neville Longbottom age from 1980-07-30 when the story date is known; keep behavior and school-year assumptions age-appropriate.",
+        "injection": "Compute Neville Longbottom age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
         "constraints": [
           "Use 1980-07-30 as the date basis unless user AU overrides it."
         ],
@@ -124,7 +131,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1980-07-30",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -160,7 +174,7 @@
       "visibility": {},
       "content": {
         "fact": "Luna Lovegood has a canon/approximate birthdate 1981-02-13; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Luna Lovegood age from 1981-02-13 when the story date is known; keep behavior and school-year assumptions age-appropriate.",
+        "injection": "Compute Luna Lovegood age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
         "constraints": [
           "Use 1981-02-13 as the date basis unless user AU overrides it."
         ],
@@ -187,7 +201,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1981-02-13",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -223,7 +244,7 @@
       "visibility": {},
       "content": {
         "fact": "Draco Malfoy has a canon/approximate birthdate 1980-06-05; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Draco Malfoy age from 1980-06-05 when the story date is known; keep behavior and school-year assumptions age-appropriate.",
+        "injection": "Compute Draco Malfoy age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
         "constraints": [
           "Use 1980-06-05 as the date basis unless user AU overrides it."
         ],
@@ -250,7 +271,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1980-06-05",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -286,7 +314,7 @@
       "visibility": {},
       "content": {
         "fact": "Fred Weasley has a canon/approximate birthdate 1978-04-01; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Fred Weasley age from 1978-04-01 when the story date is known; keep behavior and school-year assumptions age-appropriate.",
+        "injection": "Compute Fred Weasley age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
         "constraints": [
           "Use 1978-04-01 as the date basis unless user AU overrides it."
         ],
@@ -313,7 +341,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1978-04-01",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -349,7 +384,7 @@
       "visibility": {},
       "content": {
         "fact": "George Weasley has a canon/approximate birthdate 1978-04-01; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute George Weasley age from 1978-04-01 when the story date is known; keep behavior and school-year assumptions age-appropriate.",
+        "injection": "Compute George Weasley age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
         "constraints": [
           "Use 1978-04-01 as the date basis unless user AU overrides it."
         ],
@@ -376,7 +411,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1978-04-01",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -412,7 +454,7 @@
       "visibility": {},
       "content": {
         "fact": "Cedric Diggory has a canon/approximate birthdate 1977-09-01; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Cedric Diggory age from 1977-09-01 when the story date is known; keep behavior and school-year assumptions age-appropriate.",
+        "injection": "Compute Cedric Diggory age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
         "constraints": [
           "Use 1977-09-01 as the date basis unless user AU overrides it."
         ],
@@ -439,7 +481,19 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1977-09-01",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      },
+      "activation": {
+        "requiresEvents": [
+          "cedric_dies"
+        ]
+      }
     },
     {
       "schemaVersion": 2,
@@ -475,7 +529,7 @@
       "visibility": {},
       "content": {
         "fact": "Cho Chang has a canon/approximate birthdate 1979-01-01; compute age from the active story date and keep school-year behavior age-appropriate.",
-        "injection": "Compute Cho Chang age from 1979-01-01 when the story date is known; keep behavior and school-year assumptions age-appropriate.",
+        "injection": "Compute Cho Chang age when the story date is known; keep behavior and school-year assumptions age-appropriate.",
         "constraints": [
           "Use 1979-01-01 as the date basis unless user AU overrides it."
         ],
@@ -502,7 +556,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1979-01-01",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     }
   ]
 }

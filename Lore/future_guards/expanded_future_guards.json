@@ -38,9 +38,9 @@
       "visibility": {},
       "content": {
         "fact": "Cedric Diggory is alive before the Third Task.",
-        "injection": "Before the Third Task, do not imply Cedric is dead or that characters know he will die.",
+        "injection": "Do not imply Cedric is dead or that characters know he will die.",
         "constraints": [
-          "Protect Cedric\u2019s death as a future event."
+          "Protect Cedric’s death as a future event."
         ],
         "antiLore": [],
         "notes": ""
@@ -66,7 +66,25 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedUntil": "1995-06-23",
+        "hardValidTo": "",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "cedric_dies"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "cedric_dies"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -107,9 +125,9 @@
       "visibility": {},
       "content": {
         "fact": "Sirius Black is alive before the Department of Mysteries battle.",
-        "injection": "Before the Department of Mysteries battle, do not imply Sirius is dead or that Harry has already suffered that loss.",
+        "injection": "Do not imply Sirius is dead or that Harry has already suffered that loss.",
         "constraints": [
-          "Protect Sirius\u2019s death as future canon."
+          "Protect Sirius’s death as future canon."
         ],
         "antiLore": [],
         "notes": ""
@@ -135,7 +153,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedUntil": "1996-06-17",
+        "hardValidTo": "",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      }
     },
     {
       "schemaVersion": 2,
@@ -172,8 +197,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Before August 1997, the Ministry has not yet fallen to Death Eater control.",
-        "injection": "Before August 1997, do not write the Ministry as openly Death Eater-controlled unless AU divergence says so.",
+        "fact": "The Ministry has not yet fallen to Death Eater control.",
+        "injection": "Do not write the Ministry as openly Death Eater-controlled unless AU divergence says so.",
         "constraints": [
           "Protect the Ministry fall timing."
         ],
@@ -201,7 +226,25 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedUntil": "1997-07-31",
+        "hardValidTo": "",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "ministry_falls"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "ministry_falls"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -248,8 +291,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "The Deathly Hallows framework is not an active trio quest before Year 7.",
-        "injection": "Before Year 7, do not frame the trio\u2019s decisions around the Deathly Hallows unless AU has introduced them early.",
+        "fact": "The Deathly Hallows framework is not an active trio quest .",
+        "injection": "Do not frame the trio’s decisions around the Deathly Hallows unless AU has introduced them early.",
         "constraints": [
           "Prevent future Year 7 quest leakage."
         ],
@@ -276,7 +319,25 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedUntil": "1997-07-30",
+        "hardValidTo": "",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Deathly Hallows"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "deathly_hallows_revealed_to_trio"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "deathly_hallows_revealed_to_trio"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -320,7 +381,7 @@
       "visibility": {},
       "content": {
         "fact": "The Battle of Hogwarts has not happened before May 1998.",
-        "injection": "Before May 1998, do not imply the Battle of Hogwarts has already occurred or that characters know its outcome.",
+        "injection": "Do not imply the Battle of Hogwarts has already occurred or that characters know its outcome.",
         "constraints": [
           "Protect the final battle as future canon."
         ],
@@ -347,7 +408,14 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedUntil": "1998-05-01",
+        "hardValidTo": "",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Deathly Hallows"
+      }
     }
   ]
 }

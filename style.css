@@ -1915,3 +1915,51 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Lore lifecycle status control */
+.wandlight-lore-lifecycle-select-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    min-height: 20px;
+    max-width: 116px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: var(--wandlight-chip-bg, #166534);
+    color: var(--wandlight-chip-fg, #dcfce7);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.wandlight-lore-lifecycle-select {
+    height: 18px;
+    min-height: 18px;
+    max-width: 112px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.68em;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0 14px 0 4px;
+    outline: none;
+    cursor: pointer;
+}
+
+.wandlight-lore-lifecycle-select option {
+    background: #1b1d22;
+    color: #f3f4f6;
+}
+
+/* Title/tags should align with card content, not indent past metadata chips. */
+.wandlight-lore-entry-title-wrap,
+.wandlight-review-lore-title {
+    margin-left: 0 !important;
+}
+
+.wandlight-lore-entry-tags {
+    margin-left: 0 !important;
+}

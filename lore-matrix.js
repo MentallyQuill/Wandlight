@@ -24,6 +24,12 @@ const DEFAULT_REVEAL_POLICIES = [
     'public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals',
 ];
 
+export const LORE_LIFECYCLE_STATUSES = [
+    'active', 'canon_overdue', 'blocked', 'future', 'expired', 'divergent', 'muted', 'archived',
+];
+
+export const INJECTABLE_LIFECYCLE_STATUSES = new Set(['active', 'canon_overdue']);
+
 const VALID_STATUS = new Set([
     'active', 'disabled', 'pinned', 'archived',
 ]);
@@ -35,7 +41,7 @@ const VALID_TIME_TRAVEL_MODES = new Set([
 const KNOWN_TOP_LEVEL_FIELDS = new Set([
     'schemaVersion', 'id', 'title', 'name', 'kind', 'gateType', 'category', 'canonStatus', 'truthStatus',
     'revealPolicy', 'tags', 'priority', 'status', 'protected', 'locked', 'userEditable', 'userEdited',
-    'date', 'scope', 'visibility', 'content', 'effects', 'source', 'sourceInfo', 'ui', 'extensions',
+    'date', 'canonTiming', 'activation', 'expiration', 'lifecycle', 'scope', 'visibility', 'content', 'effects', 'source', 'sourceInfo', 'ui', 'extensions',
     // legacy aliases
     'fact', 'description', 'detail', 'text', 'summary', 'notes', 'validFrom', 'validTo', 'branchId',
     'whoKnowsTruth', 'whoSuspects', 'whoBelievesPublicVersion', 'publicVersion', 'activeWhen',
@@ -209,6 +215,61 @@ function normalizeDateBlock(input) {
     };
 }
 
+function normalizeCanonTiming(input) {
+    const raw = asPlainObject(input.canonTiming);
+    const date = asPlainObject(input.date);
+    return {
+        canonExpectedFrom: asFirstString(raw.canonExpectedFrom, input.canonExpectedFrom),
+        canonExpectedUntil: asFirstString(raw.canonExpectedUntil, input.canonExpectedUntil),
+        hardValidFrom: asFirstString(raw.hardValidFrom, input.hardValidFrom),
+        hardValidTo: asFirstString(raw.hardValidTo, input.hardValidTo),
+        precision: asFirstString(raw.precision, date.precision, input.datePrecision) || 'unknown',
+        schoolYear: raw.schoolYear ?? date.schoolYear ?? input.schoolYear ?? null,
+        book: asFirstString(raw.book, date.book, input.book),
+        label: asFirstString(raw.label, date.label, input.dateLabel),
+        notes: asFirstString(raw.notes, input.canonTimingNotes),
+    };
+}
+
+function normalizeActivation(input) {
+    const raw = asPlainObject(input.activation);
+    return {
+        requiresEvents: uniqueLimitedStringArray(raw.requiresEvents ?? input.requiresEvents, 32),
+        requiresMissingEvents: uniqueLimitedStringArray(raw.requiresMissingEvents ?? input.requiresMissingEvents, 32),
+        requiresCharacters: uniqueLimitedStringArray(raw.requiresCharacters, 24),
+        requiresLocation: uniqueLimitedStringArray(raw.requiresLocation, 12),
+        requiresTopics: uniqueLimitedStringArray(raw.requiresTopics, 24),
+        requiresCanonStrictness: asFirstString(raw.requiresCanonStrictness, input.requiresCanonStrictness),
+    };
+}
+
+function normalizeExpiration(input) {
+    const raw = asPlainObject(input.expiration);
+    return {
+        expiresWhenEventsHappen: uniqueLimitedStringArray(raw.expiresWhenEventsHappen ?? input.expiresWhenEventsHappen, 32),
+        expiresWhenEntriesActive: uniqueLimitedStringArray(raw.expiresWhenEntriesActive, 32),
+        autoMuteOnExpire: raw.autoMuteOnExpire === undefined ? asBoolean(input.autoMuteOnExpire, true) : asBoolean(raw.autoMuteOnExpire, true),
+    };
+}
+
+function normalizeLifecycle(input) {
+    const raw = asPlainObject(input.lifecycle);
+    const status = asFirstString(raw.status, input.lifecycleStatus);
+    const computedStatus = asFirstString(raw.computedStatus);
+    return {
+        status: LORE_LIFECYCLE_STATUSES.includes(status) ? status : '',
+        computedStatus: LORE_LIFECYCLE_STATUSES.includes(computedStatus) ? computedStatus : '',
+        manualOverride: asBoolean(raw.manualOverride, false),
+        expired: asBoolean(raw.expired, false),
+        expiredAt: asString(raw.expiredAt),
+        expiredReason: asString(raw.expiredReason),
+        autoMutedOnExpire: asBoolean(raw.autoMutedOnExpire, false),
+        lastEvaluatedAt: asNumber(raw.lastEvaluatedAt, 0),
+        lastEvaluatedDate: asString(raw.lastEvaluatedDate),
+        reason: asString(raw.reason),
+    };
+}
+
 function normalizeScope(input) {
     const raw = asPlainObject(input.scope);
     const activeWhen = asPlainObject(input.activeWhen);
@@ -359,6 +420,10 @@ export function normalizeLoreEntry(input = {}) {
     const kind = asFirstString(input.kind, input.gateType) || 'fact';
     const category = asFirstString(input.category) || 'canon';
     const date = normalizeDateBlock(input);
+    const canonTiming = normalizeCanonTiming(input);
+    const activation = normalizeActivation(input);
+    const expiration = normalizeExpiration(input);
+    const lifecycle = normalizeLifecycle(input);
     const scope = normalizeScope(input);
     const visibility = normalizeVisibility(input);
     const content = normalizeContentBlock(input, legacyContentString || title);
@@ -404,6 +469,10 @@ export function normalizeLoreEntry(input = {}) {
         branchId: asString(input.branchId) || 'main',
 
         date,
+        canonTiming,
+        activation,
+        expiration,
+        lifecycle,
         scope,
         visibility,
         content,
@@ -540,15 +609,8 @@ function parseIsoDate(value) {
  * @returns {boolean}
  */
 export function isLoreEntryActive(entry, state) {
-    const e = normalizeLoreEntry(entry);
-
-    if (e.status === 'archived' || e.status === 'disabled') return false;
-    if (e.status === 'pinned') return true;
-    if (!entryBranchMatches(e, state)) return false;
-    if (!dateWindowMatches(e, state)) return false;
-    if (!activeWhenMatches(e, state)) return false;
-
-    return true;
+    const evaluation = evaluateLoreEntryLifecycle(entry, state);
+    return evaluation.shouldInject && INJECTABLE_LIFECYCLE_STATUSES.has(evaluation.status);
 }
 
 /**
@@ -566,6 +628,166 @@ export function getActiveLoreEntries(state, limit = 6) {
         .slice(0, limit);
 }
 
+
+
+// ── Lore lifecycle / story-milestone activation ───────────────────────────────
+
+function normalizeMilestoneStatus(value) {
+    const status = asString(value);
+    return ['not_happened', 'suspected', 'happened', 'blocked', 'diverged', 'unknown'].includes(status)
+        ? status
+        : 'unknown';
+}
+
+function getStoryMilestoneStatus(state, id) {
+    const key = asString(id);
+    if (!key) return 'unknown';
+    const raw = state?.storyMilestones?.[key];
+    if (!raw) return 'not_happened';
+    return normalizeMilestoneStatus(raw.status);
+}
+
+function hasStoryMilestoneHappened(state, id) {
+    const status = getStoryMilestoneStatus(state, id);
+    return status === 'happened' || status === 'diverged';
+}
+
+function allMilestonesHappened(state, ids = []) {
+    return ids.every(id => hasStoryMilestoneHappened(state, id));
+}
+
+function allMilestonesMissing(state, ids = []) {
+    return ids.every(id => !hasStoryMilestoneHappened(state, id));
+}
+
+function sceneDateForState(state) {
+    return state?.loreContext?.sceneDate || state?.canon?.inUniverseDate || '';
+}
+
+function compareStateDate(state, value) {
+    const scene = parseIsoDate(sceneDateForState(state));
+    const target = parseIsoDate(value);
+    if (!scene || !target) return 0;
+    if (scene < target) return -1;
+    if (scene > target) return 1;
+    return 0;
+}
+
+export function evaluateLoreEntryLifecycle(entry, state = {}) {
+    const e = normalizeLoreEntry(entry);
+    const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
+    const pinnedIds = new Set(state?.loreSelection?.pinnedIds || []);
+    const lifecycle = e.lifecycle || {};
+
+    if (suppressedIds.has(e.id)) {
+        return { status: 'muted', shouldInject: false, reason: 'Muted by user.', entry: e };
+    }
+
+    if (lifecycle.manualOverride && lifecycle.status) {
+        const status = lifecycle.status;
+        return {
+            status,
+            shouldInject: INJECTABLE_LIFECYCLE_STATUSES.has(status) || status === 'active' || pinnedIds.has(e.id),
+            reason: lifecycle.reason || 'Manual lifecycle override.',
+            entry: e,
+        };
+    }
+
+    if (e.status === 'archived' || e.status === 'disabled') {
+        return { status: 'archived', shouldInject: false, reason: 'Archived or disabled.', entry: e };
+    }
+
+    if (!entryBranchMatches(e, state)) {
+        return { status: 'divergent', shouldInject: false, reason: 'Branch does not match current story branch.', entry: e };
+    }
+
+    if (e.canonStatus === 'divergent' && (state?.loreContext?.branchId || 'main') === 'main') {
+        return { status: 'divergent', shouldInject: false, reason: 'Marked divergent from current canon branch.', entry: e };
+    }
+
+    const hardFromCmp = e.canonTiming?.hardValidFrom ? compareStateDate(state, e.canonTiming.hardValidFrom) : 0;
+    if (hardFromCmp < 0) return { status: 'future', shouldInject: false, reason: 'Current story date is before hard valid-from date.', entry: e };
+
+    const hardTo = e.canonTiming?.hardValidTo || '';
+    if (hardTo && compareStateDate(state, hardTo) > 0) {
+        return { status: 'expired', shouldInject: false, reason: 'Current story date is after hard valid-to date.', entry: e };
+    }
+
+    if (e.expiration?.expiresWhenEventsHappen?.length && !allMilestonesMissing(state, e.expiration.expiresWhenEventsHappen)) {
+        return { status: 'expired', shouldInject: false, reason: `Expired because story milestone happened: ${e.expiration.expiresWhenEventsHappen.join(', ')}`, entry: e };
+    }
+
+    if (e.activation?.requiresEvents?.length && !allMilestonesHappened(state, e.activation.requiresEvents)) {
+        const expectedFrom = e.canonTiming?.canonExpectedFrom || '';
+        if (expectedFrom && compareStateDate(state, expectedFrom) >= 0) {
+            return { status: 'canon_overdue', shouldInject: false, reason: `Canon date suggests this may apply, but required story milestone has not happened: ${e.activation.requiresEvents.join(', ')}`, entry: e };
+        }
+        return { status: 'future', shouldInject: false, reason: `Waiting for story milestone: ${e.activation.requiresEvents.join(', ')}`, entry: e };
+    }
+
+    if (e.activation?.requiresMissingEvents?.length && !allMilestonesMissing(state, e.activation.requiresMissingEvents)) {
+        return { status: 'expired', shouldInject: false, reason: `Superseded by story milestone: ${e.activation.requiresMissingEvents.join(', ')}`, entry: e };
+    }
+
+    const hasModernTiming = Boolean(e.canonTiming?.canonExpectedFrom || e.canonTiming?.canonExpectedUntil || e.canonTiming?.hardValidFrom || e.canonTiming?.hardValidTo);
+    if (!hasModernTiming && !dateWindowMatches(e, state)) {
+        const cmpTo = e.validTo ? compareStateDate(state, e.validTo) : 0;
+        const cmpFrom = e.validFrom ? compareStateDate(state, e.validFrom) : 0;
+        if (cmpTo > 0) return { status: 'expired', shouldInject: false, reason: 'Current story date is after legacy valid-to date.', entry: e };
+        if (cmpFrom < 0) return { status: 'future', shouldInject: false, reason: 'Current story date is before legacy valid-from date.', entry: e };
+        return { status: 'blocked', shouldInject: false, reason: 'Date window does not match.', entry: e };
+    }
+
+    if (!activeWhenMatches(e, state)) {
+        return { status: 'blocked', shouldInject: false, reason: 'Current scene scope does not match entry scope.', entry: e };
+    }
+
+    const expectedUntil = e.canonTiming?.canonExpectedUntil || '';
+    if (expectedUntil && compareStateDate(state, expectedUntil) > 0 && e.activation?.requiresMissingEvents?.length) {
+        return { status: 'canon_overdue', shouldInject: true, reason: 'Canon expected this guard to be resolved by now, but the story milestone is still missing.', entry: e };
+    }
+
+    return { status: 'active', shouldInject: true, reason: 'Entry applies to current story state.', entry: e };
+}
+
+export function applyLoreLifecycleEvaluation(entry, state = {}) {
+    const evaluation = evaluateLoreEntryLifecycle(entry, state);
+    const lifecycle = {
+        ...(entry.lifecycle || {}),
+        computedStatus: evaluation.status,
+        status: entry.lifecycle?.manualOverride ? entry.lifecycle.status : evaluation.status,
+        reason: evaluation.reason,
+        expired: evaluation.status === 'expired',
+        lastEvaluatedAt: Date.now(),
+        lastEvaluatedDate: sceneDateForState(state),
+    };
+    if (evaluation.status === 'expired' && !lifecycle.expiredAt) {
+        lifecycle.expiredAt = sceneDateForState(state);
+        lifecycle.expiredReason = evaluation.reason;
+    }
+    return normalizeLoreEntry({ ...entry, lifecycle });
+}
+
+export function getResolvedLoreInjection(entry, state = {}) {
+    const evaluation = evaluateLoreEntryLifecycle(entry, state);
+    if (!evaluation.shouldInject) return '';
+    const e = evaluation.entry || normalizeLoreEntry(entry);
+    const content = e.content || {};
+    return stripTemporalBoilerplate(content.injection || content.fact || e.fact || '');
+}
+
+export function stripTemporalBoilerplate(text) {
+    return String(text || '')
+        .replace(/^\s*(before|after|until|prior to|from|as of|during)\s+[^,;:]{3,80}[,;:]\s*/i, '')
+        .replace(/\b(as of|before|after|until|prior to|from)\s+\d{4}-\d{2}-\d{2}\b[,;:]?\s*/gi, '')
+        .replace(/\b(as of|before|after|until|prior to|from)\s+(Year|Book)\s+\d\b[,;:]?\s*/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+export function reevaluateLoreLifecycleEntries(entries = [], state = {}) {
+    return normalizeLoreMatrix(entries).map(entry => applyLoreLifecycleEvaluation(entry, state));
+}
 
 // ── Duplicate detection ────────────────────────────────────────────────────────
 
@@ -713,10 +935,12 @@ export function getPanelLoreState(state) {
     const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
 
     const categories = new Set();
-    const counts = { all: 0, active: 0, pinned: 0, suppressed: 0, pending: pendingEntries.length };
+    const counts = { all: 0, active: 0, pinned: 0, suppressed: 0, pending: pendingEntries.length, expired: 0, blocked: 0, future: 0, canon_overdue: 0, divergent: 0, muted: 0, archived: 0 };
 
     const entries = allEntries.map(entry => {
-        const isActive = isLoreEntryActive(entry, state);
+        const evaluation = evaluateLoreEntryLifecycle(entry, state);
+        const lifecycleStatus = evaluation.status;
+        const isActive = evaluation.shouldInject;
         const isPinned = pinnedIds.has(entry.id);
         const isSuppressed = suppressedIds.has(entry.id);
 
@@ -726,6 +950,7 @@ export function getPanelLoreState(state) {
         if (isActive) counts.active++;
         if (isPinned) counts.pinned++;
         if (isSuppressed) counts.suppressed++;
+        if (counts[lifecycleStatus] !== undefined) counts[lifecycleStatus]++;
 
         return {
             ...entry,
@@ -733,6 +958,7 @@ export function getPanelLoreState(state) {
             isPinned,
             isSuppressed,
             isPending: false,
+            lifecycleStatus,
         };
     });
 
@@ -745,6 +971,7 @@ export function getPanelLoreState(state) {
             isPinned: pinnedIds.has(entry.id),
             isSuppressed: suppressedIds.has(entry.id),
             isPending: true,
+            lifecycleStatus: 'active',
         };
     });
 
@@ -785,52 +1012,29 @@ export function getInjectableLoreEntries(state, limit = 0) {
     const pinnedIds = new Set(state?.loreSelection?.pinnedIds || []);
     const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
     const explicitLimit = Number(limit);
-    const settingsCap = Number(state?._settings?.maxLoreEntriesInMemo);
-    const caps = [explicitLimit, settingsCap]
-        .filter(v => Number.isFinite(v) && v > 0);
-    const effectiveLimit = caps.length ? Math.min(...caps) : Infinity;
+    const effectiveLimit = Number.isFinite(explicitLimit) && explicitLimit > 0 ? explicitLimit : Infinity;
 
-    if (allEntries.length === 0) return [];
-
-    const pinnedEntries = [];
-    const activeCandidateEntries = [];
-    const inactiveEntries = [];
-
+    const injectable = [];
     for (const entry of allEntries) {
         if (suppressedIds.has(entry.id)) continue;
-
-        const isActive = isLoreEntryActive(entry, state);
-
-        if (pinnedIds.has(entry.id)) {
-            pinnedEntries.push(entry);
-        } else if (isActive) {
-            activeCandidateEntries.push(entry);
-        } else {
-            inactiveEntries.push(entry);
-        }
+        const evaluation = evaluateLoreEntryLifecycle(entry, state);
+        if (!evaluation.shouldInject) continue;
+        injectable.push({
+            ...entry,
+            lifecycle: { ...(entry.lifecycle || {}), computedStatus: evaluation.status, status: entry.lifecycle?.manualOverride ? entry.lifecycle.status : evaluation.status, reason: evaluation.reason },
+            lifecycleStatus: evaluation.status,
+            isPinned: pinnedIds.has(entry.id),
+        });
     }
 
-    const sortLoreForInjection = (a, b) =>
-        Number(b.priority || 50) - Number(a.priority || 50)
-        || String(a.title || '').localeCompare(String(b.title || ''));
+    injectable.sort((a, b) =>
+        Number(Boolean(b.isPinned)) - Number(Boolean(a.isPinned))
+        || Number(b.priority || 50) - Number(a.priority || 50)
+        || String(a.title || '').localeCompare(String(b.title || ''))
+    );
 
-    pinnedEntries.sort(sortLoreForInjection);
-    activeCandidateEntries.sort(sortLoreForInjection);
-    inactiveEntries.sort(sortLoreForInjection);
-
-    let result = [...pinnedEntries, ...activeCandidateEntries];
-
-    // If strict context activation selects nothing, fall back to all unmuted lore
-    // so users can still control injection with mute/pin rather than a hidden cap.
-    if (result.length === 0) {
-        result = [...inactiveEntries];
-    }
-
-    if (Number.isFinite(effectiveLimit)) {
-        return result.slice(0, effectiveLimit);
-    }
-
-    return result;
+    if (Number.isFinite(effectiveLimit)) return injectable.slice(0, effectiveLimit);
+    return injectable;
 }
 
 

@@ -88,6 +88,12 @@ export const DEFAULT_SETTINGS = {
     canonLoreAutoPropose: true,
     canonLoreMaxEntries: 10,
 
+    // Lore lifecycle / canon timing
+    canonTimelineStrictness: 'balanced', // 'loose' | 'balanced' | 'strict'
+    autoReevaluateLoreLifecycle: true,
+    autoMuteExpiredLore: true,
+    includeCanonOverdueLore: true,
+
     // Prompt injection transport / placement
     // 'extension_prompt' uses SillyTavern setExtensionPrompt with role/depth.
     // 'interceptor' preserves the legacy behavior: prepend combined memo to the last user message.
@@ -168,6 +174,7 @@ export function getDefaultState() {
             inventory: true,
             objectives: true,
             flags: true,
+            storyMilestones: true,
         },
         scene: {
             location: '',
@@ -181,6 +188,7 @@ export function getDefaultState() {
         characters: [],
         inventory: [],
         objectives: [],
+        storyMilestones: {},
 
         // Lore matrix (schema v2)
         loreContext: {
@@ -299,6 +307,8 @@ export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State 
 12. Respect optional continuity sections. If a section is disabled in the current state, omit changes for that section.
 13. If the current state is sparse or empty, perform an initial-state extraction: populate every active section that is clearly supported by the messages. Do not return only 1-2 categories when scene, characters, knowledge, objectives, inventory, or relationships are evident.
 14. For thinking/reasoning models: put the final JSON in visible message.content. Do not leave the visible answer empty. Do not put the JSON only in hidden reasoning.
+15. Track story milestones separately from canon dates. Do not mark a milestone happened because a canon date passed. Mark it happened only when the roleplay text establishes it.
+16. Milestone statuses are: not_happened, suspected, happened, blocked, diverged, unknown.
 </rules>
 
 <delta_schema>
@@ -345,6 +355,9 @@ export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State 
     "continuityFlags": {
       "added": [{ "type": "contradiction|uncertainty|warning", "description": "string", "severity": "low|medium|high", "timestamp": 0 }],
       "resolved": [0]
+    },
+    "storyMilestones": {
+      "milestone_id": { "status": "not_happened|suspected|happened|blocked|diverged|unknown", "happenedAtStoryDate": "string", "happenedAtTurn": 0, "evidence": ["string"], "confidence": 0.0, "notes": "string" }
     }
   }
 }

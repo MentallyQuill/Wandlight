@@ -60,7 +60,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1994-09-01",
+        "canonExpectedUntil": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      }
     },
     {
       "schemaVersion": 2,
@@ -122,7 +129,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1995-09-01",
+        "canonExpectedUntil": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      }
     },
     {
       "schemaVersion": 2,
@@ -155,8 +169,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Harry is more experienced, suspicious of Draco, and still affected by Sirius\u2019s death. He is increasingly burdened by Dumbledore\u2019s lessons.",
-        "injection": "Harry is more experienced, suspicious of Draco, and still affected by Sirius\u2019s death; He is increasingly burdened by Dumbledore\u2019s lessons; Do not write him as a naive first-year.",
+        "fact": "Harry is more experienced, suspicious of Draco, and still affected by Sirius’s death. He is increasingly burdened by Dumbledore’s lessons.",
+        "injection": "Harry is more experienced, suspicious of Draco, and still affected by Sirius’s death; He is increasingly burdened by Dumbledore’s lessons; Do not write him as a naive first-year.",
         "constraints": [
           "Do not write him as a naive first-year."
         ],
@@ -184,7 +198,25 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "dumbledore_death_occurs"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "dumbledore_death_occurs"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -246,7 +278,25 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1994-09-01",
+        "canonExpectedUntil": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "horcruxes_revealed_to_trio"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "horcruxes_revealed_to_trio"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -308,7 +358,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      }
     },
     {
       "schemaVersion": 2,
@@ -370,7 +427,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1994-09-01",
+        "canonExpectedUntil": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      }
     },
     {
       "schemaVersion": 2,
@@ -432,7 +496,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      }
     },
     {
       "schemaVersion": 2,
@@ -465,8 +536,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Dumbledore is actively guiding Harry through Voldemort\u2019s past while withholding some information. He remains calm and strategic but physically weakened.",
-        "injection": "Dumbledore is actively guiding Harry through Voldemort\u2019s past while withholding some information; He remains calm and strategic but physically weakened; Before the tower event he is alive and still directing parts of the war effort.",
+        "fact": "Dumbledore is actively guiding Harry through Voldemort’s past while withholding some information. He remains calm and strategic but physically weakened.",
+        "injection": "Dumbledore is actively guiding Harry through Voldemort’s past while withholding some information; He remains calm and strategic but physically weakened; Before the tower event he is alive and still directing parts of the war effort.",
         "constraints": [
           "Before the tower event he is alive and still directing parts of the war effort."
         ],
@@ -494,7 +565,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      }
     }
   ]
 }

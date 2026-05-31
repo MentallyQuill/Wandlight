@@ -58,7 +58,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1992-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -118,7 +125,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1992-09-01",
+        "hardValidTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -178,7 +192,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1993-09-01",
+        "hardValidTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -238,7 +259,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1994-09-01",
+        "hardValidTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -270,10 +298,10 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Fifth-years prepare for OWLs; Dumbledore\u2019s Army members may have improved defensive skills.",
-        "injection": "Fifth-years prepare for OWLs; Dumbledore\u2019s Army members may have improved defensive skills.",
+        "fact": "Fifth-years prepare for OWLs; Dumbledore’s Army members may have improved defensive skills.",
+        "injection": "Fifth-years prepare for OWLs; Dumbledore’s Army members may have improved defensive skills.",
         "constraints": [
-          "Fifth-years prepare for OWLs; Dumbledore\u2019s Army members may have improved defensive skills."
+          "Fifth-years prepare for OWLs; Dumbledore’s Army members may have improved defensive skills."
         ],
         "antiLore": [],
         "notes": ""
@@ -298,7 +326,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1995-09-01",
+        "hardValidTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -358,7 +393,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1996-09-01",
+        "hardValidTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -390,10 +432,10 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Seventh-year-age students may have advanced skills, but the trio\u2019s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school.",
-        "injection": "Seventh-year-age students may have advanced skills, but the trio\u2019s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school.",
+        "fact": "Seventh-year-age students may have advanced skills, but the trio’s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school.",
+        "injection": "Seventh-year-age students may have advanced skills, but the trio’s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school.",
         "constraints": [
-          "Seventh-year-age students may have advanced skills, but the trio\u2019s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school."
+          "Seventh-year-age students may have advanced skills, but the trio’s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school."
         ],
         "antiLore": [],
         "notes": ""
@@ -418,7 +460,19 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1997-09-01",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": ""
+      },
+      "activation": {
+        "requiresEvents": [
+          "horcruxes_revealed_to_trio"
+        ]
+      }
     }
   ]
 }

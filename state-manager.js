@@ -8,7 +8,7 @@
  */
 
 import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
-import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey } from './lore-matrix.js';
+import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey, applyLoreLifecycleEvaluation } from './lore-matrix.js';
 
 const MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST = 200000;
 const migratedStateRefs = new WeakSet();
@@ -279,7 +279,7 @@ export function saveStateWithSnapshot(state, maxSnapshots) {
 // ── Storage safety / recovery helpers ─────────────────────────────────────────
 
 const MAX_PENDING_LORE_ENTRIES = 100;
-const MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE = 500;
+const MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE = 0; // 0 = uncapped; never drop accepted lore during storage sanitization
 
 
 function safeJsonSize(value) {
@@ -417,6 +417,41 @@ function compactLoreEntryForStorage(entry) {
             era: truncateText(normalized.date?.era, 100),
             label: truncateText(normalized.date?.label, 140),
         },
+        canonTiming: {
+            canonExpectedFrom: truncateText(normalized.canonTiming?.canonExpectedFrom, 32),
+            canonExpectedUntil: truncateText(normalized.canonTiming?.canonExpectedUntil, 32),
+            hardValidFrom: truncateText(normalized.canonTiming?.hardValidFrom, 32),
+            hardValidTo: truncateText(normalized.canonTiming?.hardValidTo, 32),
+            precision: truncateText(normalized.canonTiming?.precision, 32),
+            schoolYear: normalized.canonTiming?.schoolYear ?? null,
+            book: truncateText(normalized.canonTiming?.book, 100),
+            label: truncateText(normalized.canonTiming?.label, 140),
+        },
+        activation: {
+            requiresEvents: compactStringArray(normalized.activation?.requiresEvents, 10, 100),
+            requiresMissingEvents: compactStringArray(normalized.activation?.requiresMissingEvents, 10, 100),
+            requiresCharacters: compactStringArray(normalized.activation?.requiresCharacters, 10, 100),
+            requiresLocation: compactStringArray(normalized.activation?.requiresLocation, 5, 100),
+            requiresTopics: compactStringArray(normalized.activation?.requiresTopics, 10, 100),
+            requiresCanonStrictness: truncateText(normalized.activation?.requiresCanonStrictness, 32),
+        },
+        expiration: {
+            expiresWhenEventsHappen: compactStringArray(normalized.expiration?.expiresWhenEventsHappen, 10, 100),
+            expiresWhenEntriesActive: compactStringArray(normalized.expiration?.expiresWhenEntriesActive, 10, 100),
+            autoMuteOnExpire: normalized.expiration?.autoMuteOnExpire !== false,
+        },
+        lifecycle: {
+            status: truncateText(normalized.lifecycle?.status, 32),
+            computedStatus: truncateText(normalized.lifecycle?.computedStatus, 32),
+            manualOverride: !!normalized.lifecycle?.manualOverride,
+            expired: !!normalized.lifecycle?.expired,
+            expiredAt: truncateText(normalized.lifecycle?.expiredAt, 32),
+            expiredReason: truncateText(normalized.lifecycle?.expiredReason, 200),
+            autoMutedOnExpire: !!normalized.lifecycle?.autoMutedOnExpire,
+            lastEvaluatedAt: Number.isFinite(Number(normalized.lifecycle?.lastEvaluatedAt)) ? Number(normalized.lifecycle.lastEvaluatedAt) : 0,
+            lastEvaluatedDate: truncateText(normalized.lifecycle?.lastEvaluatedDate, 32),
+            reason: truncateText(normalized.lifecycle?.reason, 200),
+        },
         scope: {
             characters: compactStringArray(normalized.scope?.characters, 12, 100),
             locations: compactStringArray(normalized.scope?.locations, 10, 100),
@@ -466,13 +501,27 @@ function sanitizeLoreArraysForStorage(state) {
     }
 
     if (Array.isArray(state.loreMatrix)) {
-        const limited = state.loreMatrix.length > MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE
-            ? state.loreMatrix.slice(-MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE)
+        if (!state.loreSelection || typeof state.loreSelection !== 'object') state.loreSelection = { pinnedIds: [], suppressedIds: [] };
+        state.loreSelection.suppressedIds = Array.isArray(state.loreSelection.suppressedIds) ? state.loreSelection.suppressedIds : [];
+        const suppressedSet = new Set(state.loreSelection.suppressedIds);
+        const cap = Number(MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE) || 0;
+        const limited = cap > 0 && state.loreMatrix.length > cap
+            ? state.loreMatrix.slice(-cap)
             : state.loreMatrix;
-        state.loreMatrix = limited.map(entry => {
-            const source = typeof entry?.source === 'string' ? entry.source : '';
-            return source.includes('canon-lore-db') ? compactLoreEntryForStorage(entry) : entry;
+        state.loreMatrix = limited.map(raw => {
+            let evaluated = raw;
+            try { evaluated = applyLoreLifecycleEvaluation(raw, state); } catch (_) { evaluated = raw; }
+            const status = evaluated?.lifecycle?.status || evaluated?.lifecycle?.computedStatus || '';
+            if (status === 'expired' && evaluated?.expiration?.autoMuteOnExpire !== false && !evaluated?.lifecycle?.manualOverride) {
+                if (!suppressedSet.has(evaluated.id)) {
+                    suppressedSet.add(evaluated.id);
+                    evaluated.lifecycle = { ...(evaluated.lifecycle || {}), autoMutedOnExpire: true };
+                }
+            }
+            const source = typeof evaluated?.source === 'string' ? evaluated.source : '';
+            return source.includes('canon-lore-db') ? compactLoreEntryForStorage(evaluated) : compactLoreEntryForStorage(evaluated);
         });
+        state.loreSelection.suppressedIds = Array.from(suppressedSet);
     } else {
         state.loreMatrix = [];
     }
@@ -763,6 +812,12 @@ function normalizeContinuityStructure(state) {
         state.scene.nearbyCharacters = Array.isArray(state.scene.nearbyCharacters) ? state.scene.nearbyCharacters.filter(Boolean).map(String) : [];
     }
 
+    if (!state.storyMilestones || typeof state.storyMilestones !== 'object' || Array.isArray(state.storyMilestones)) {
+        state.storyMilestones = {};
+    } else {
+        state.storyMilestones = Object.fromEntries(Object.entries(state.storyMilestones).map(([id, value]) => [String(id), normalizeStoryMilestone(value)]));
+    }
+
     normalizeStateEntries(state);
 
     if (!state.continuityCompressionStatus || typeof state.continuityCompressionStatus !== 'object') {
@@ -902,6 +957,19 @@ function normalizeObjective(raw = {}) {
     };
 }
 
+function normalizeStoryMilestone(raw = {}) {
+    const obj = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+    const allowed = new Set(['not_happened', 'suspected', 'happened', 'blocked', 'diverged', 'unknown']);
+    return {
+        status: allowed.has(obj.status) ? obj.status : 'unknown',
+        happenedAtStoryDate: typeof obj.happenedAtStoryDate === 'string' ? obj.happenedAtStoryDate : '',
+        happenedAtTurn: Number.isFinite(Number(obj.happenedAtTurn)) ? Number(obj.happenedAtTurn) : 0,
+        evidence: Array.isArray(obj.evidence) ? obj.evidence.filter(x => typeof x === 'string') : [],
+        confidence: Number.isFinite(Number(obj.confidence)) ? Math.max(0, Math.min(1, Number(obj.confidence))) : 0,
+        notes: typeof obj.notes === 'string' ? obj.notes : '',
+    };
+}
+
 // ── Delta validation ────────────────────────────────────────────────────────────
 
 /** Valid enum values for validation */
@@ -915,7 +983,7 @@ const VALID_ENUMS = {
 
 /** Known top-level change keys */
 const KNOWN_CHANGE_KEYS = new Set([
-    'canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags',
+    'canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags', 'storyMilestones',
 ]);
 
 /**
@@ -1131,6 +1199,24 @@ export function validateDelta(delta) {
         errors.push('continuityFlags must be an object with added/resolved arrays');
     }
 
+    if (changes.storyMilestones && typeof changes.storyMilestones === 'object' && !Array.isArray(changes.storyMilestones)) {
+        const allowed = new Set(['not_happened', 'suspected', 'happened', 'blocked', 'diverged', 'unknown']);
+        for (const [id, value] of Object.entries(changes.storyMilestones)) {
+            if (!value || typeof value !== 'object' || Array.isArray(value)) {
+                errors.push(`storyMilestones.${id} must be an object`);
+                continue;
+            }
+            if (value.status !== undefined && !allowed.has(value.status)) {
+                errors.push(`storyMilestones.${id}.status must be not_happened|suspected|happened|blocked|diverged|unknown`);
+            }
+            if (value.evidence !== undefined && !Array.isArray(value.evidence)) {
+                errors.push(`storyMilestones.${id}.evidence must be an array`);
+            }
+        }
+    } else if (changes.storyMilestones !== undefined) {
+        errors.push('storyMilestones must be an object keyed by milestone id');
+    }
+
     return { valid: errors.length === 0, errors };
 }
 
@@ -1161,6 +1247,7 @@ export function applyDelta(state, delta) {
         relationships: [...(state.relationships || [])],
         threads: [...(state.threads || [])],
         continuityFlags: [...(state.continuityFlags || [])],
+        storyMilestones: { ...(state.storyMilestones || {}) },
         memoHistory: [...(state.memoHistory || [])],
         stateHistory: [...(state.stateHistory || [])],
         lastDelta: delta,
@@ -1291,6 +1378,13 @@ export function applyDelta(state, delta) {
             next.continuityFlags = next.continuityFlags.filter(
                 (_, i) => !changes.continuityFlags.resolved.includes(i)
             );
+        }
+    }
+
+    if (isSectionEnabled(next, 'storyMilestones') && changes.storyMilestones && typeof changes.storyMilestones === 'object' && !Array.isArray(changes.storyMilestones)) {
+        next.storyMilestones = { ...(next.storyMilestones || {}) };
+        for (const [id, raw] of Object.entries(changes.storyMilestones)) {
+            next.storyMilestones[id] = normalizeStoryMilestone({ ...(next.storyMilestones[id] || {}), ...(raw || {}) });
         }
     }
 

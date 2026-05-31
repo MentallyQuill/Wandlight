@@ -3,7 +3,12 @@
     {
       "id": "canon_wands_general_rule",
       "title": "Wands: ordinary magical tool",
-      "tags": ["wands", "magic", "objects", "school"],
+      "tags": [
+        "wands",
+        "magic",
+        "objects",
+        "school"
+      ],
       "category": "item",
       "fact": "Wands are the standard tool most British witches and wizards use to focus and perform magic.",
       "canonStatus": "canon",
@@ -14,16 +19,33 @@
       "whoKnowsTruth": [],
       "publicVersion": "Wands are normal magical implements.",
       "revealPolicy": "public",
-      "activeWhen": { "erasAny": [], "locationsAny": ["Hogwarts", "classroom"], "charactersPresentAny": [], "tagsAny": ["wands", "magic"] },
+      "activeWhen": {
+        "erasAny": [],
+        "locationsAny": [
+          "Hogwarts",
+          "classroom"
+        ],
+        "charactersPresentAny": [],
+        "tagsAny": [
+          "wands",
+          "magic"
+        ]
+      },
       "priority": 55,
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     },
     {
       "id": "canon_marauders_map_known_item",
       "title": "Marauder's Map",
-      "tags": ["map", "Hogwarts", "secret", "artifact"],
+      "tags": [
+        "map",
+        "Hogwarts",
+        "secret",
+        "artifact"
+      ],
       "category": "artifact",
       "fact": "The Marauder's Map is a magical map of Hogwarts that can reveal people moving through the castle, but its possession and use are not public knowledge.",
       "canonStatus": "canon",
@@ -31,19 +53,51 @@
       "validFrom": "1993-12-01",
       "validTo": "1998-08-31",
       "branchId": "main",
-      "whoKnowsTruth": ["Harry Potter", "Fred Weasley", "George Weasley", "Remus Lupin"],
+      "whoKnowsTruth": [
+        "Harry Potter",
+        "Fred Weasley",
+        "George Weasley",
+        "Remus Lupin"
+      ],
       "publicVersion": "There is no ordinary public explanation for such a map.",
       "revealPolicy": "private",
-      "activeWhen": { "erasAny": ["Year 3", "Year 4", "Year 5", "Year 6", "Year 7"], "locationsAny": ["Hogwarts"], "charactersPresentAny": ["Harry", "Fred", "George", "Lupin"], "tagsAny": ["map", "secret"] },
+      "activeWhen": {
+        "erasAny": [
+          "Year 3",
+          "Year 4",
+          "Year 5",
+          "Year 6",
+          "Year 7"
+        ],
+        "locationsAny": [
+          "Hogwarts"
+        ],
+        "charactersPresentAny": [
+          "Harry",
+          "Fred",
+          "George",
+          "Lupin"
+        ],
+        "tagsAny": [
+          "map",
+          "secret"
+        ]
+      },
       "priority": 72,
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     },
     {
       "id": "canon_invisibility_cloak_known_item",
       "title": "Harry's invisibility cloak",
-      "tags": ["cloak", "Harry", "artifact", "stealth"],
+      "tags": [
+        "cloak",
+        "Harry",
+        "artifact",
+        "stealth"
+      ],
       "category": "artifact",
       "fact": "Harry possesses an invisibility cloak during the Hogwarts years; its use is private and tactically important when stealth matters.",
       "canonStatus": "canon",
@@ -51,19 +105,43 @@
       "validFrom": "1991-12-25",
       "validTo": "1998-08-31",
       "branchId": "main",
-      "whoKnowsTruth": ["Harry Potter", "Ron Weasley", "Hermione Granger"],
+      "whoKnowsTruth": [
+        "Harry Potter",
+        "Ron Weasley",
+        "Hermione Granger"
+      ],
       "publicVersion": "Most people do not know Harry has access to an invisibility cloak.",
       "revealPolicy": "private",
-      "activeWhen": { "erasAny": [], "locationsAny": ["Hogwarts"], "charactersPresentAny": ["Harry", "Ron", "Hermione"], "tagsAny": ["cloak", "stealth"] },
+      "activeWhen": {
+        "erasAny": [],
+        "locationsAny": [
+          "Hogwarts"
+        ],
+        "charactersPresentAny": [
+          "Harry",
+          "Ron",
+          "Hermione"
+        ],
+        "tagsAny": [
+          "cloak",
+          "stealth"
+        ]
+      },
       "priority": 70,
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     },
     {
       "id": "canon_horcrux_concept_secret",
       "title": "Horcrux knowledge is restricted",
-      "tags": ["Horcrux", "Voldemort", "secret", "dark magic"],
+      "tags": [
+        "Horcrux",
+        "Voldemort",
+        "secret",
+        "dark magic"
+      ],
       "category": "knowledge",
       "fact": "The concept of Horcruxes is obscure and dangerous dark magic; detailed knowledge is highly restricted and not common public knowledge.",
       "canonStatus": "canon",
@@ -71,14 +149,39 @@
       "validFrom": "1996-09-01",
       "validTo": "1998-08-31",
       "branchId": "main",
-      "whoKnowsTruth": ["Albus Dumbledore", "Harry Potter"],
+      "whoKnowsTruth": [
+        "Albus Dumbledore",
+        "Harry Potter"
+      ],
       "publicVersion": "Most witches and wizards do not discuss or understand Horcruxes.",
       "revealPolicy": "do_not_reveal",
-      "activeWhen": { "erasAny": ["Year 6", "Half-Blood Prince", "Year 7"], "locationsAny": [], "charactersPresentAny": ["Harry", "Dumbledore", "Voldemort"], "tagsAny": ["Horcrux", "secret"] },
+      "activeWhen": {
+        "erasAny": [
+          "Year 6",
+          "Half-Blood Prince",
+          "Year 7"
+        ],
+        "locationsAny": [],
+        "charactersPresentAny": [
+          "Harry",
+          "Dumbledore",
+          "Voldemort"
+        ],
+        "tagsAny": [
+          "Horcrux",
+          "secret"
+        ]
+      },
       "priority": 90,
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
-      "locked": true
+      "locked": true,
+      "activation": {
+        "requiresEvents": [
+          "horcruxes_revealed_to_trio"
+        ]
+      },
+      "content": {}
     }
   ]
 }

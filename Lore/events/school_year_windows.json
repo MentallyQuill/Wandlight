@@ -3,7 +3,12 @@
     {
       "id": "canon_year_1_ps_window",
       "title": "Canon window: Year 1",
-      "tags": ["Year 1", "1991", "Philosopher Stone", "Hogwarts"],
+      "tags": [
+        "Year 1",
+        "1991",
+        "Philosopher Stone",
+        "Hogwarts"
+      ],
       "category": "event",
       "fact": "From September 1991 through August 1992, the main school-year context aligns with Harry Potter's first year at Hogwarts.",
       "canonStatus": "canon",
@@ -14,16 +19,35 @@
       "whoKnowsTruth": [],
       "publicVersion": "Harry Potter is a first-year student at Hogwarts.",
       "revealPolicy": "public",
-      "activeWhen": { "erasAny": ["Year 1", "Philosopher", "Sorcerer"], "locationsAny": ["Hogwarts"], "charactersPresentAny": [], "tagsAny": ["1991"] },
+      "activeWhen": {
+        "erasAny": [
+          "Year 1",
+          "Philosopher",
+          "Sorcerer"
+        ],
+        "locationsAny": [
+          "Hogwarts"
+        ],
+        "charactersPresentAny": [],
+        "tagsAny": [
+          "1991"
+        ]
+      },
       "priority": 70,
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     },
     {
       "id": "canon_year_2_cos_window",
       "title": "Canon window: Year 2",
-      "tags": ["Year 2", "1992", "Chamber Secrets", "Hogwarts"],
+      "tags": [
+        "Year 2",
+        "1992",
+        "Chamber Secrets",
+        "Hogwarts"
+      ],
       "category": "event",
       "fact": "From September 1992 through August 1993, the main school-year context aligns with Harry Potter's second year at Hogwarts.",
       "canonStatus": "canon",
@@ -34,16 +58,34 @@
       "whoKnowsTruth": [],
       "publicVersion": "Harry Potter is a second-year student at Hogwarts.",
       "revealPolicy": "public",
-      "activeWhen": { "erasAny": ["Year 2", "Chamber"], "locationsAny": ["Hogwarts"], "charactersPresentAny": [], "tagsAny": ["1992"] },
+      "activeWhen": {
+        "erasAny": [
+          "Year 2",
+          "Chamber"
+        ],
+        "locationsAny": [
+          "Hogwarts"
+        ],
+        "charactersPresentAny": [],
+        "tagsAny": [
+          "1992"
+        ]
+      },
       "priority": 70,
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     },
     {
       "id": "canon_year_3_poa_window",
       "title": "Canon window: Year 3",
-      "tags": ["Year 3", "1993", "Azkaban", "Hogwarts"],
+      "tags": [
+        "Year 3",
+        "1993",
+        "Azkaban",
+        "Hogwarts"
+      ],
       "category": "event",
       "fact": "From September 1993 through August 1994, the main school-year context aligns with Harry Potter's third year at Hogwarts.",
       "canonStatus": "canon",
@@ -54,16 +96,34 @@
       "whoKnowsTruth": [],
       "publicVersion": "Harry Potter is a third-year student at Hogwarts.",
       "revealPolicy": "public",
-      "activeWhen": { "erasAny": ["Year 3", "Azkaban"], "locationsAny": ["Hogwarts"], "charactersPresentAny": [], "tagsAny": ["1993"] },
+      "activeWhen": {
+        "erasAny": [
+          "Year 3",
+          "Azkaban"
+        ],
+        "locationsAny": [
+          "Hogwarts"
+        ],
+        "charactersPresentAny": [],
+        "tagsAny": [
+          "1993"
+        ]
+      },
       "priority": 70,
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     },
     {
       "id": "canon_year_4_gof_window",
       "title": "Canon window: Year 4",
-      "tags": ["Year 4", "1994", "Triwizard", "Hogwarts"],
+      "tags": [
+        "Year 4",
+        "1994",
+        "Triwizard",
+        "Hogwarts"
+      ],
       "category": "event",
       "fact": "From September 1994 through August 1995, the main school-year context aligns with Harry Potter's fourth year and the Triwizard Tournament period.",
       "canonStatus": "canon",
@@ -74,16 +134,35 @@
       "whoKnowsTruth": [],
       "publicVersion": "Harry Potter is a fourth-year student during the Triwizard Tournament year.",
       "revealPolicy": "public",
-      "activeWhen": { "erasAny": ["Year 4", "Goblet", "Triwizard"], "locationsAny": ["Hogwarts"], "charactersPresentAny": [], "tagsAny": ["1994"] },
+      "activeWhen": {
+        "erasAny": [
+          "Year 4",
+          "Goblet",
+          "Triwizard"
+        ],
+        "locationsAny": [
+          "Hogwarts"
+        ],
+        "charactersPresentAny": [],
+        "tagsAny": [
+          "1994"
+        ]
+      },
       "priority": 74,
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     },
     {
       "id": "canon_year_5_ootp_window",
       "title": "Canon window: Year 5",
-      "tags": ["Year 5", "1995", "Order Phoenix", "Ministry"],
+      "tags": [
+        "Year 5",
+        "1995",
+        "Order Phoenix",
+        "Ministry"
+      ],
       "category": "event",
       "fact": "From September 1995 through August 1996, the main school-year context aligns with Harry Potter's fifth year and the Ministry's public denial of Voldemort's return.",
       "canonStatus": "canon",
@@ -94,16 +173,36 @@
       "whoKnowsTruth": [],
       "publicVersion": "Harry Potter is a fifth-year student under a tense Ministry-controlled climate.",
       "revealPolicy": "public",
-      "activeWhen": { "erasAny": ["Year 5", "Order of the Phoenix", "OotP"], "locationsAny": ["Hogwarts", "Ministry"], "charactersPresentAny": [], "tagsAny": ["1995"] },
+      "activeWhen": {
+        "erasAny": [
+          "Year 5",
+          "Order of the Phoenix",
+          "OotP"
+        ],
+        "locationsAny": [
+          "Hogwarts",
+          "Ministry"
+        ],
+        "charactersPresentAny": [],
+        "tagsAny": [
+          "1995"
+        ]
+      },
       "priority": 76,
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     },
     {
       "id": "canon_year_6_hbp_window",
       "title": "Canon window: Year 6",
-      "tags": ["Year 6", "1996", "Half Blood Prince", "Voldemort"],
+      "tags": [
+        "Year 6",
+        "1996",
+        "Half Blood Prince",
+        "Voldemort"
+      ],
       "category": "event",
       "fact": "From September 1996 through August 1997, the main school-year context aligns with Harry Potter's sixth year, when Voldemort's return is publicly acknowledged and the Second Wizarding War escalates.",
       "canonStatus": "canon",
@@ -114,16 +213,36 @@
       "whoKnowsTruth": [],
       "publicVersion": "Harry Potter is a sixth-year student during the Half-Blood Prince period.",
       "revealPolicy": "public",
-      "activeWhen": { "erasAny": ["Year 6", "Half-Blood Prince", "HBP"], "locationsAny": ["Hogwarts"], "charactersPresentAny": [], "tagsAny": ["1996", "1997"] },
+      "activeWhen": {
+        "erasAny": [
+          "Year 6",
+          "Half-Blood Prince",
+          "HBP"
+        ],
+        "locationsAny": [
+          "Hogwarts"
+        ],
+        "charactersPresentAny": [],
+        "tagsAny": [
+          "1996",
+          "1997"
+        ]
+      },
       "priority": 80,
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     },
     {
       "id": "canon_year_7_dh_window",
       "title": "Canon window: Year 7",
-      "tags": ["Year 7", "1997", "Deathly Hallows", "war"],
+      "tags": [
+        "Year 7",
+        "1997",
+        "Deathly Hallows",
+        "war"
+      ],
       "category": "event",
       "fact": "From September 1997 through August 1998, the main canon context aligns with the Deathly Hallows period and the open Second Wizarding War.",
       "canonStatus": "canon",
@@ -134,11 +253,24 @@
       "whoKnowsTruth": [],
       "publicVersion": "The wizarding world is in open wartime conditions.",
       "revealPolicy": "public",
-      "activeWhen": { "erasAny": ["Year 7", "Deathly Hallows", "war"], "locationsAny": [], "charactersPresentAny": [], "tagsAny": ["1997", "1998"] },
+      "activeWhen": {
+        "erasAny": [
+          "Year 7",
+          "Deathly Hallows",
+          "war"
+        ],
+        "locationsAny": [],
+        "charactersPresentAny": [],
+        "tagsAny": [
+          "1997",
+          "1998"
+        ]
+      },
       "priority": 82,
       "status": "active",
       "source": "canon-lore-db:events/school_year_windows.json",
-      "locked": true
+      "locked": true,
+      "content": {}
     }
   ]
 }

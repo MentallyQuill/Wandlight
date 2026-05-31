@@ -33,8 +33,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 1 aligns with Philosopher Stone chronology for Harry\u2019s cohort.",
-        "injection": "Year 1 aligns with Philosopher Stone chronology for Harry\u2019s cohort.",
+        "fact": "Year 1 aligns with Philosopher Stone chronology for Harry’s cohort.",
+        "injection": "Year 1 aligns with Philosopher Stone chronology for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -60,7 +60,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1992-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher Stone"
+      }
     },
     {
       "schemaVersion": 2,
@@ -95,8 +102,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 2 aligns with Chamber of Secrets chronology for Harry\u2019s cohort.",
-        "injection": "Year 2 aligns with Chamber of Secrets chronology for Harry\u2019s cohort.",
+        "fact": "Year 2 aligns with Chamber of Secrets chronology for Harry’s cohort.",
+        "injection": "Year 2 aligns with Chamber of Secrets chronology for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -122,7 +129,19 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1992-09-01",
+        "hardValidTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "activation": {
+        "requiresEvents": [
+          "chamber_of_secrets_resolved"
+        ]
+      }
     },
     {
       "schemaVersion": 2,
@@ -157,8 +176,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 3 aligns with Prisoner of Azkaban chronology for Harry\u2019s cohort.",
-        "injection": "Year 3 aligns with Prisoner of Azkaban chronology for Harry\u2019s cohort.",
+        "fact": "Year 3 aligns with Prisoner of Azkaban chronology for Harry’s cohort.",
+        "injection": "Year 3 aligns with Prisoner of Azkaban chronology for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -184,7 +203,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1993-09-01",
+        "hardValidTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      }
     },
     {
       "schemaVersion": 2,
@@ -219,8 +245,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 4 aligns with Goblet of Fire chronology for Harry\u2019s cohort.",
-        "injection": "Year 4 aligns with Goblet of Fire chronology for Harry\u2019s cohort.",
+        "fact": "Year 4 aligns with Goblet of Fire chronology for Harry’s cohort.",
+        "injection": "Year 4 aligns with Goblet of Fire chronology for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -246,7 +272,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1994-09-01",
+        "hardValidTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      }
     },
     {
       "schemaVersion": 2,
@@ -281,8 +314,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 5 aligns with Order of the Phoenix chronology for Harry\u2019s cohort.",
-        "injection": "Year 5 aligns with Order of the Phoenix chronology for Harry\u2019s cohort.",
+        "fact": "Year 5 aligns with Order of the Phoenix chronology for Harry’s cohort.",
+        "injection": "Year 5 aligns with Order of the Phoenix chronology for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -308,7 +341,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1995-09-01",
+        "hardValidTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      }
     },
     {
       "schemaVersion": 2,
@@ -343,8 +383,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 6 aligns with Half-Blood Prince chronology for Harry\u2019s cohort.",
-        "injection": "Year 6 aligns with Half-Blood Prince chronology for Harry\u2019s cohort.",
+        "fact": "Year 6 aligns with Half-Blood Prince chronology for Harry’s cohort.",
+        "injection": "Year 6 aligns with Half-Blood Prince chronology for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -370,7 +410,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1996-09-01",
+        "hardValidTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      }
     },
     {
       "schemaVersion": 2,
@@ -405,8 +452,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 7 aligns with Deathly Hallows chronology for Harry\u2019s cohort.",
-        "injection": "Year 7 aligns with Deathly Hallows chronology for Harry\u2019s cohort.",
+        "fact": "Year 7 aligns with Deathly Hallows chronology for Harry’s cohort.",
+        "injection": "Year 7 aligns with Deathly Hallows chronology for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -432,7 +479,19 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1997-09-01",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "activation": {
+        "requiresEvents": [
+          "deathly_hallows_revealed_to_trio"
+        ]
+      }
     }
   ]
 }

@@ -40,8 +40,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Before Year 2, the trio should not know the Chamber of Secrets plot, basilisk truth, or Tom Riddle diary connection.",
-        "injection": "Before Year 2 events, do not have the trio know about the Chamber, basilisk, or diary unless AU introduced it.",
+        "fact": "The trio should not know the Chamber of Secrets plot, basilisk truth, or Tom Riddle diary connection.",
+        "injection": "Do not have the trio know about the Chamber, basilisk, or diary unless this story established it.",
         "constraints": [
           "Prevent Year 1 leakage of Year 2 mystery knowledge."
         ],
@@ -69,7 +69,25 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1992-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher's Stone"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "chamber_of_secrets_resolved"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "chamber_of_secrets_resolved"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -111,10 +129,10 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Before the Shrieking Shack confrontation, Harry should not know Sirius was innocent or that Peter betrayed his parents.",
-        "injection": "Before late Year 3, characters generally believe Sirius Black betrayed the Potters; Harry does not know Peter Pettigrew is the traitor.",
+        "fact": "Harry should not know Sirius was innocent or that Peter betrayed his parents.",
+        "injection": "Characters generally believe Sirius Black betrayed the Potters; Harry does not know Peter Pettigrew is the traitor.",
         "constraints": [
-          "Block early revelation of Sirius innocence and Peter\u2019s betrayal."
+          "Block early revelation of Sirius innocence and Peter’s betrayal."
         ],
         "antiLore": [],
         "notes": ""
@@ -140,7 +158,25 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1994-06-05",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "sirius_truth_revealed"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "sirius_truth_revealed"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -182,8 +218,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Before the end of Year 4, students should not know that Moody is Barty Crouch Jr. in disguise.",
-        "injection": "Before the Year 4 reveal, do not have characters know Moody is Barty Crouch Jr. unless AU explicitly reveals it early.",
+        "fact": "Students should not know that Moody is Barty Crouch Jr. in disguise.",
+        "injection": "Do not have characters know Moody is Barty Crouch Jr. unless this story established it.",
         "constraints": [
           "Protect the Moody impostor reveal."
         ],
@@ -211,7 +247,25 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1994-09-01",
+        "canonExpectedUntil": "1995-06-24",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "barty_crouch_jr_revealed"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "barty_crouch_jr_revealed"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -248,10 +302,10 @@
       },
       "visibility": {},
       "content": {
-        "fact": "During Year 5, Voldemort has returned but the Ministry publicly denies it until after the Department of Mysteries.",
-        "injection": "In Year 5 before the Ministry battle aftermath, treat Voldemort\u2019s return as true but publicly denied by the Ministry.",
+        "fact": "Voldemort has returned but the Ministry publicly denies it until after the Department of Mysteries.",
+        "injection": "Treat Voldemort’s return as true but publicly denied by the Ministry.",
         "constraints": [
-          "Do not write public institutions as fully accepting Voldemort\u2019s return too early."
+          "Do not write public institutions as fully accepting Voldemort’s return too early."
         ],
         "antiLore": [],
         "notes": ""
@@ -277,7 +331,25 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1995-06-25",
+        "canonExpectedUntil": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "voldemort_return_publicly_acknowledged"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "voldemort_return_publicly_acknowledged"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -318,8 +390,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "During Year 6, Draco\u2019s specific mission and cabinet plan are not public knowledge.",
-        "injection": "Before the Year 6 climax, Draco\u2019s task and Vanishing Cabinet repair should remain secret unless directly discovered in the AU.",
+        "fact": "Draco’s specific mission and cabinet plan are not public knowledge.",
+        "injection": "Draco’s task and Vanishing Cabinet repair should remain secret unless directly discovered in the AU.",
         "constraints": [
           "Harry may suspect Draco, but should not know the full mission without evidence."
         ],
@@ -347,7 +419,25 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-29",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "draco_mission_revealed"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "draco_mission_revealed"
+        ],
+        "autoMuteOnExpire": true
+      }
     },
     {
       "schemaVersion": 2,
@@ -394,10 +484,10 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Snape\u2019s full motivations and loyalty are hidden until near the end of Year 7.",
-        "injection": "Do not reveal Snape\u2019s full loyalty, Lily motivation, or Dumbledore plan before late Year 7 unless AU lore explicitly reveals it.",
+        "fact": "Snape’s full motivations and loyalty are hidden until near the end of Year 7.",
+        "injection": "Do not reveal Snape’s full loyalty, Lily motivation, or Dumbledore plan before late Year 7 unless AU lore explicitly reveals it.",
         "constraints": [
-          "Protect Snape\u2019s late-canon reveal."
+          "Protect Snape’s late-canon reveal."
         ],
         "antiLore": [],
         "notes": ""
@@ -423,7 +513,25 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1998-05-01",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Deathly Hallows"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "snape_loyalty_truth_revealed"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "snape_loyalty_truth_revealed"
+        ],
+        "autoMuteOnExpire": true
+      }
     }
   ]
 }

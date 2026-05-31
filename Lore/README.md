@@ -439,3 +439,172 @@ Before summer 1996, Hermione should not know about Horcruxes or explain Voldemor
 ```
 
 Wandlight works best when the database focuses on chronology, knowledge gates, future guards, spell plausibility, age, behavior, and AU divergence.
+
+## Schema v3: story milestones and lifecycle states
+
+Wandlight now separates canon timing from story truth.
+
+Canon dates are used to suggest and sort lore, but story milestones determine whether reveal/knowledge lore is actually active. This prevents a story that lags behind canon from suddenly giving characters knowledge just because the canon date passed.
+
+### Core rule
+
+Do not write date rules into `content.injection` unless the date itself is useful to the roleplay model. Store timing in metadata and inject only the resolved truth.
+
+Prefer this:
+
+```json
+{
+  "id": "guard_trio_no_horcrux_knowledge",
+  "title": "Trio Does Not Know Horcruxes",
+  "kind": "knowledge_guard",
+  "category": "knowledge",
+  "canonTiming": {
+    "canonExpectedUntil": "1996-07-01",
+    "precision": "approximate"
+  },
+  "activation": {
+    "requiresMissingEvents": ["horcruxes_revealed_to_trio"]
+  },
+  "expiration": {
+    "expiresWhenEventsHappen": ["horcruxes_revealed_to_trio"],
+    "autoMuteOnExpire": true
+  },
+  "content": {
+    "injection": "Harry, Ron, and Hermione do not know about Horcruxes."
+  }
+}
+```
+
+Avoid this:
+
+```json
+{
+  "content": {
+    "injection": "Before summer 1996, Harry, Ron, and Hermione should not know about Horcruxes."
+  }
+}
+```
+
+The first form lets Wandlight handle the date/milestone logic and keeps injected text shorter.
+
+### `canonTiming`
+
+Use `canonTiming` for canon chronology hints.
+
+```json
+"canonTiming": {
+  "canonExpectedFrom": "1996-07-01",
+  "canonExpectedUntil": "1997-06-30",
+  "hardValidFrom": "",
+  "hardValidTo": "",
+  "precision": "approximate",
+  "schoolYear": 6,
+  "book": "Half-Blood Prince",
+  "label": "Year 6"
+}
+```
+
+Meanings:
+
+- `canonExpectedFrom`: canon suggests this may apply from this date, but story evidence may still be required.
+- `canonExpectedUntil`: canon suggests this guard/condition is usually resolved by this date.
+- `hardValidFrom`: the entry cannot apply before this date.
+- `hardValidTo`: the entry cannot apply after this date.
+
+Use hard dates sparingly. Most secret knowledge, reveals, relationship changes, deaths, and betrayals should be milestone-gated instead of hard-date-gated.
+
+### `activation`
+
+Use `activation` for story conditions required before an entry becomes injectable.
+
+```json
+"activation": {
+  "requiresEvents": ["horcruxes_revealed_to_trio"],
+  "requiresMissingEvents": [],
+  "requiresCharacters": [],
+  "requiresLocation": [],
+  "requiresTopics": []
+}
+```
+
+- `requiresEvents`: all listed milestones must be `happened` or `diverged`.
+- `requiresMissingEvents`: all listed milestones must not have happened yet.
+
+### `expiration`
+
+Use `expiration` to expire old guards or superseded lore.
+
+```json
+"expiration": {
+  "expiresWhenEventsHappen": ["horcruxes_revealed_to_trio"],
+  "expiresWhenEntriesActive": [],
+  "autoMuteOnExpire": true
+}
+```
+
+Expired entries are not injected by default. They remain visible in the Lore tab under the Expired filter and can be manually changed back to Active if the story diverges.
+
+### `lifecycle`
+
+Wandlight computes a lifecycle status for every accepted lore entry:
+
+- `active`: injectable now.
+- `canon_overdue`: canon timing says this should probably have resolved, but the story milestone has not happened. Guards may still inject in this state.
+- `blocked`: story/scope conditions are missing.
+- `future`: not ready yet.
+- `expired`: superseded or past a hard date.
+- `divergent`: does not fit the current branch/canon status.
+- `muted`: user muted it.
+- `archived`: disabled/archived.
+
+Users can override this status from the colored dropdown at the left of each lore entry card.
+
+### Story milestones
+
+Story milestones are stored per chat in the Continuity tab under `storyMilestones`.
+
+Example:
+
+```json
+{
+  "horcruxes_revealed_to_trio": {
+    "status": "not_happened",
+    "happenedAtStoryDate": "",
+    "happenedAtTurn": 0,
+    "evidence": [],
+    "confidence": 0,
+    "notes": ""
+  }
+}
+```
+
+Valid statuses:
+
+- `not_happened`
+- `suspected`
+- `happened`
+- `blocked`
+- `diverged`
+- `unknown`
+
+The continuity scanner should only set a milestone to `happened` when the roleplay text establishes it. It should not use canon date alone.
+
+### Recommended milestone IDs
+
+Use stable snake_case IDs:
+
+- `horcruxes_revealed_to_trio`
+- `deathly_hallows_revealed_to_trio`
+- `sirius_truth_revealed`
+- `barty_crouch_jr_revealed`
+- `voldemort_return_publicly_acknowledged`
+- `dumbledore_death_occurs`
+- `cedric_dies`
+- `ministry_falls`
+- `draco_mission_revealed`
+- `snape_loyalty_truth_revealed`
+- `sectumsempra_discovered`
+- `prophecy_revealed_to_harry`
+- `chamber_of_secrets_resolved`
+
+Add new milestones as needed for your AU.

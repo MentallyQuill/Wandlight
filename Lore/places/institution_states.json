@@ -34,8 +34,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "In Year 6, Snape teaches Defense Against the Dark Arts and Slughorn teaches Potions.",
-        "injection": "In Year 6, Snape teaches Defense Against the Dark Arts and Slughorn teaches Potions.",
+        "fact": "Snape teaches Defense Against the Dark Arts and Slughorn teaches Potions.",
+        "injection": "Snape teaches Defense Against the Dark Arts and Slughorn teaches Potions.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -61,7 +61,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      }
     },
     {
       "schemaVersion": 2,
@@ -97,8 +104,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "In Year 5, Umbridge and Ministry rules restrict Hogwarts and defensive education.",
-        "injection": "In Year 5, Umbridge and Ministry rules restrict Hogwarts and defensive education.",
+        "fact": "Umbridge and Ministry rules restrict Hogwarts and defensive education.",
+        "injection": "Umbridge and Ministry rules restrict Hogwarts and defensive education.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -124,7 +131,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1995-09-01",
+        "canonExpectedUntil": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      }
     },
     {
       "schemaVersion": 2,
@@ -160,8 +174,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "During Year 5, the Ministry line denies or downplays Voldemort\u2019s return.",
-        "injection": "During Year 5, the Ministry line denies or downplays Voldemort\u2019s return.",
+        "fact": "The Ministry line denies or downplays Voldemort’s return.",
+        "injection": "The Ministry line denies or downplays Voldemort’s return.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -187,7 +201,19 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1995-07-01",
+        "canonExpectedUntil": "1996-06-17",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "activation": {
+        "requiresEvents": [
+          "voldemort_return_publicly_acknowledged"
+        ]
+      }
     },
     {
       "schemaVersion": 2,
@@ -223,8 +249,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "By Year 6, the Ministry and public acknowledge Voldemort\u2019s return and the war climate is open.",
-        "injection": "By Year 6, the Ministry and public acknowledge Voldemort\u2019s return and the war climate is open.",
+        "fact": "By Year 6, the Ministry and public acknowledge Voldemort’s return and the war climate is open.",
+        "injection": "By Year 6, the Ministry and public acknowledge Voldemort’s return and the war climate is open.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -250,7 +276,19 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "canonExpectedFrom": "1996-06-18",
+        "canonExpectedUntil": "1997-07-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "activation": {
+        "requiresEvents": [
+          "voldemort_return_publicly_acknowledged"
+        ]
+      }
     }
   ]
 }

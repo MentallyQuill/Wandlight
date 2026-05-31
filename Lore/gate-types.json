@@ -60,6 +60,24 @@
       "description": "Date-sensitive status of places, offices, classes, and institutions.",
       "defaultPriority": 70,
       "injectionRole": "setting_constraint"
+    },
+    "knowledge_guard": {
+      "label": "Knowledge Guard",
+      "description": "A negative or protective story-state gate that remains active until its story milestone happens.",
+      "defaultPriority": 95,
+      "injectionRole": "negative_constraint"
+    },
+    "story_milestone": {
+      "label": "Story Milestone",
+      "description": "A roleplay event that activates, expires, blocks, or diverges date-sensitive lore.",
+      "defaultPriority": 70,
+      "injectionRole": "state_control"
+    },
+    "lifecycle_gate": {
+      "label": "Lifecycle Gate",
+      "description": "Controls whether lore is active, future, blocked, expired, or canon-overdue.",
+      "defaultPriority": 75,
+      "injectionRole": "state_control"
     }
   }
 }

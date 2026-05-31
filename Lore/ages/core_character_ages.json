@@ -33,7 +33,7 @@
         "fact": "Harry Potter has canon birthdate 1980-07-31; compute age from the active story date and keep school-year behavior age-appropriate.",
         "injection": "Harry Potter has canon birthdate 1980-07-31; compute age from the active story date and keep school-year behavior age-appropriate.",
         "constraints": [
-          "Compute Harry Potter age from 1980-07-31 when the story date is known."
+          "Compute Harry Potter age when the story date is known."
         ],
         "antiLore": [],
         "notes": ""
@@ -58,7 +58,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1980-07-31",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -93,7 +100,7 @@
         "fact": "Hermione Granger has canon birthdate 1979-09-19; compute age from the active story date and keep school-year behavior age-appropriate.",
         "injection": "Hermione Granger has canon birthdate 1979-09-19; compute age from the active story date and keep school-year behavior age-appropriate.",
         "constraints": [
-          "Compute Hermione Granger age from 1979-09-19 when the story date is known."
+          "Compute Hermione Granger age when the story date is known."
         ],
         "antiLore": [],
         "notes": ""
@@ -118,7 +125,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1979-09-19",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -153,7 +167,7 @@
         "fact": "Ron Weasley has canon birthdate 1980-03-01; compute age from the active story date and keep school-year behavior age-appropriate.",
         "injection": "Ron Weasley has canon birthdate 1980-03-01; compute age from the active story date and keep school-year behavior age-appropriate.",
         "constraints": [
-          "Compute Ron Weasley age from 1980-03-01 when the story date is known."
+          "Compute Ron Weasley age when the story date is known."
         ],
         "antiLore": [],
         "notes": ""
@@ -178,7 +192,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1980-03-01",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -213,7 +234,7 @@
         "fact": "Draco Malfoy has canon birthdate 1980-06-05; compute age from the active story date and keep school-year behavior age-appropriate.",
         "injection": "Draco Malfoy has canon birthdate 1980-06-05; compute age from the active story date and keep school-year behavior age-appropriate.",
         "constraints": [
-          "Compute Draco Malfoy age from 1980-06-05 when the story date is known."
+          "Compute Draco Malfoy age when the story date is known."
         ],
         "antiLore": [],
         "notes": ""
@@ -238,7 +259,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1980-06-05",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -273,7 +301,7 @@
         "fact": "Ginny Weasley has canon birthdate 1981-08-11; compute age from the active story date and keep school-year behavior age-appropriate.",
         "injection": "Ginny Weasley has canon birthdate 1981-08-11; compute age from the active story date and keep school-year behavior age-appropriate.",
         "constraints": [
-          "Compute Ginny Weasley age from 1981-08-11 when the story date is known."
+          "Compute Ginny Weasley age when the story date is known."
         ],
         "antiLore": [],
         "notes": ""
@@ -298,7 +326,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1981-08-11",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -333,7 +368,7 @@
         "fact": "Neville Longbottom has canon birthdate 1980-07-30; compute age from the active story date and keep school-year behavior age-appropriate.",
         "injection": "Neville Longbottom has canon birthdate 1980-07-30; compute age from the active story date and keep school-year behavior age-appropriate.",
         "constraints": [
-          "Compute Neville Longbottom age from 1980-07-30 when the story date is known."
+          "Compute Neville Longbottom age when the story date is known."
         ],
         "antiLore": [],
         "notes": ""
@@ -358,7 +393,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1980-07-30",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     },
     {
       "schemaVersion": 2,
@@ -393,7 +435,7 @@
         "fact": "Luna Lovegood has canon birthdate 1981-02-13; compute age from the active story date and keep school-year behavior age-appropriate.",
         "injection": "Luna Lovegood has canon birthdate 1981-02-13; compute age from the active story date and keep school-year behavior age-appropriate.",
         "constraints": [
-          "Compute Luna Lovegood age from 1981-02-13 when the story date is known."
+          "Compute Luna Lovegood age when the story date is known."
         ],
         "antiLore": [],
         "notes": ""
@@ -418,7 +460,14 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {}
+      "extensions": {},
+      "canonTiming": {
+        "hardValidFrom": "1981-02-13",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": ""
+      }
     }
   ]
 }

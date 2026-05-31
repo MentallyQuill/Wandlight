@@ -12,7 +12,7 @@ import {
     MAX_LORE_ENTRIES_IN_MEMO,
 } from './constants.js';
 import { getSettings } from './state-manager.js';
-import { getInjectableLoreEntries } from './lore-matrix.js';
+import { getInjectableLoreEntries, getResolvedLoreInjection } from './lore-matrix.js';
 
 export function buildMemo(state, settingsOverride = {}) {
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
@@ -210,15 +210,17 @@ export function buildLoreMemo(state, settingsOverride = {}) {
     if ((settings.loreInjectionMode || 'direct') === 'compressed') {
         settings.loreInjectionMode = 'direct';
     }
-    const maxLore = Number(settings.maxLoreEntriesInMemo) || 0;
-    const activeLore = getInjectableLoreEntries(state, maxLore);
+    // Direct lore injection intentionally includes every accepted, unmuted lore entry.
+    // Users exclude entries by muting them; compression can then condense the full
+    // direct block. Do not pass legacy maxLoreEntriesInMemo here.
+    const activeLore = getInjectableLoreEntries(state, 0);
     if (!activeLore.length) return '';
 
     const lines = [];
     lines.push(settings.loreInjectionMode === 'compressed' ? '## Lore Entries (Compressed)' : '## Lore Entries');
     const pinnedIds = new Set(state?.loreSelection?.pinnedIds || []);
     for (const entry of activeLore) {
-        lines.push(formatLoreEntryForInjection(entry, settings, pinnedIds.has(entry.id)));
+        lines.push(formatLoreEntryForInjection(entry, settings, pinnedIds.has(entry.id), state));
     }
     return lines.join('\n');
 }
@@ -286,9 +288,10 @@ function compressLine(text, settings, kind) {
     return truncateForInjection(text, limits[level - 1]);
 }
 
-function getLoreInjectionText(entry) {
+function getLoreInjectionText(entry, state = null) {
+    const resolved = state ? getResolvedLoreInjection(entry, state) : '';
     const content = entry?.content || {};
-    const text = content.injection || content.fact || entry.fact || '';
+    const text = resolved || content.injection || content.fact || entry.fact || '';
     const constraints = Array.isArray(content.constraints) && content.constraints.length
         ? ` Constraints: ${content.constraints.join(' ')}`
         : '';
@@ -298,8 +301,8 @@ function getLoreInjectionText(entry) {
     return `${text}${constraints}${antiLore}`.trim();
 }
 
-function formatLoreEntryForInjection(entry, settings, isPinned = false) {
-    const injectionText = getLoreInjectionText(entry);
+function formatLoreEntryForInjection(entry, settings, isPinned = false, state = null) {
+    const injectionText = getLoreInjectionText(entry, state);
     const kind = entry.kind && entry.kind !== 'fact' ? `/${entry.kind}` : '';
     if ((settings?.loreInjectionMode || 'direct') !== 'compressed') {
         const parts = [`- <${entry.category}${kind}> **${entry.title}**`];

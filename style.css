@@ -1545,3 +1545,54 @@
 .wandlight-lore-badge-only-if-user-reveals { color: #d8b8f0; background: rgba(100, 65, 150, 0.22); }
 .wandlight-lore-badge-muted { color: #a8a8a8; background: rgba(80, 80, 80, 0.2); }
 .wandlight-lore-badge-pinned { color: #f0d080; background: rgba(170, 120, 35, 0.25); }
+
+/* ── Metadata dropdown chips ─────────────────────────────────────────────── */
+.wandlight-lore-meta-select-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid rgba(214, 180, 105, 0.35);
+    border-radius: 999px;
+    background: rgba(45, 29, 28, 0.78);
+    color: #f0e2c1;
+    font-size: 0.72em;
+    line-height: 1;
+    padding: 2px 4px 2px 7px;
+    max-width: 190px;
+}
+
+.wandlight-lore-meta-select-prefix {
+    opacity: 0.78;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.wandlight-lore-meta-select {
+    max-width: 126px;
+    min-width: 72px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.28);
+    color: inherit;
+    font: inherit;
+    font-size: 1em;
+    padding: 2px 18px 2px 6px;
+    outline: none;
+    cursor: pointer;
+}
+
+.wandlight-lore-meta-select option {
+    background: #1d1415;
+    color: #f0e2c1;
+}
+
+.wandlight-lore-meta-select-priority {
+    background: rgba(125, 92, 38, 0.36);
+    border-color: rgba(235, 203, 125, 0.45);
+}
+
+.wandlight-small-button {
+    margin: 6px 0 0 0;
+    font-size: 0.82em;
+    padding: 4px 8px;
+}

@@ -344,6 +344,45 @@ function scoreCanonEntry(entry, state, context, sceneIso, scoring = DEFAULT_SCOR
     return score;
 }
 
+function compactCanonLoreEntryForPending(entry) {
+    const normalized = normalizeLoreMatrix([entry])[0] || entry;
+    return {
+        schemaVersion: normalized.schemaVersion || 2,
+        id: normalized.id,
+        title: normalized.title,
+        kind: normalized.kind || 'fact',
+        gateType: normalized.gateType || normalized.kind || 'fact',
+        category: normalized.category || 'canon',
+        canonStatus: normalized.canonStatus || 'canon',
+        truthStatus: normalized.truthStatus || 'true',
+        revealPolicy: normalized.revealPolicy || 'private',
+        priority: normalized.priority || 50,
+        protected: !!normalized.protected,
+        userEditable: normalized.userEditable !== false,
+        date: normalized.date || {},
+        scope: normalized.scope || {},
+        visibility: normalized.visibility || {},
+        content: {
+            fact: normalized.content?.fact || normalized.fact || '',
+            injection: normalized.content?.injection || '',
+            constraints: Array.isArray(normalized.content?.constraints) ? normalized.content.constraints.slice(0, 8) : [],
+            antiLore: Array.isArray(normalized.content?.antiLore) ? normalized.content.antiLore.slice(0, 8) : [],
+            notes: normalized.content?.notes || '',
+        },
+        effects: {
+            addsTags: Array.isArray(normalized.effects?.addsTags) ? normalized.effects.addsTags.slice(0, 12) : [],
+            blocksTermsBeforeDate: Array.isArray(normalized.effects?.blocksTermsBeforeDate) ? normalized.effects.blocksTermsBeforeDate.slice(0, 12) : [],
+            protectsEntries: Array.isArray(normalized.effects?.protectsEntries) ? normalized.effects.protectsEntries.slice(0, 12) : [],
+            injectionRules: normalized.effects?.injectionRules || {},
+        },
+        sourceInfo: normalized.sourceInfo || {},
+        source: typeof normalized.source === 'string' ? normalized.source : CANON_DB_SOURCE,
+        ui: normalized.ui || {},
+        tags: Array.isArray(normalized.tags) ? normalized.tags.slice(0, 10) : [],
+    };
+}
+
+
 export async function queryCanonLoreDatabase(context = null, options = {}) {
     const settings = getSettings();
     if (settings.canonLoreDatabaseEnabled === false) {
@@ -360,7 +399,7 @@ export async function queryCanonLoreDatabase(context = null, options = {}) {
     }
 
     const db = await loadCanonLoreDatabase();
-    const max = Math.max(1, Math.min(100, Number(options.maxEntries ?? settings.canonLoreMaxEntries) || 12));
+    const max = Math.max(1, Math.min(25, Number(options.maxEntries ?? settings.canonLoreMaxEntries) || 10));
     const candidates = db.entries
         .filter(entry => dateInRange(sceneIso, entry))
         .map(entry => ({ entry, score: scoreCanonEntry(entry, state, effectiveContext, sceneIso, db.scoring) }))
@@ -369,7 +408,7 @@ export async function queryCanonLoreDatabase(context = null, options = {}) {
 
     return {
         status: candidates.length ? 'matched' : 'empty',
-        entries: candidates.slice(0, max).map(item => ({
+        entries: candidates.slice(0, max).map(item => compactCanonLoreEntryForPending({
             ...item.entry,
             source: item.entry.source || CANON_DB_SOURCE,
         })),

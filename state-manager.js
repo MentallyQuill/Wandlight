@@ -410,6 +410,9 @@ export function migrateState(state) {
                 : (key === 'lore' ? Number(state.lorePanel.generationProgress || 0) : 0);
         }
         state.lorePanel.showOnlyActive = false;
+        state.lorePanel.pendingReviewVisibleLimit = Number.isFinite(Number(state.lorePanel.pendingReviewVisibleLimit))
+            ? Math.max(5, Math.min(50, Number(state.lorePanel.pendingReviewVisibleLimit)))
+            : getDefaultState().lorePanel.pendingReviewVisibleLimit;
         state.lorePanel.width = Number.isFinite(Number(state.lorePanel.width)) && Number(state.lorePanel.width) >= 320 ? Number(state.lorePanel.width) : 420;
         state.lorePanel.height = Number.isFinite(Number(state.lorePanel.height)) && Number(state.lorePanel.height) >= 260 ? Number(state.lorePanel.height) : 520;
         if (state.lorePanel.x !== undefined) {

@@ -85,7 +85,7 @@ export const DEFAULT_SETTINGS = {
     // Local canon lore database
     canonLoreDatabaseEnabled: true,
     canonLoreAutoPropose: true,
-    canonLoreMaxEntries: 12,
+    canonLoreMaxEntries: 10,
 
     // Lore injection / compression
     loreInjectionMode: 'direct', // 'direct' | 'compressed'
@@ -236,6 +236,7 @@ export function getDefaultState() {
             selectedEntryId: '',
             activeTab: 'session',
             reviewSelectedIds: [],
+            pendingReviewVisibleLimit: 10,
             generationStatus: 'Idle.',
             generationProgress: 0,
             contextStatus: 'Idle.',

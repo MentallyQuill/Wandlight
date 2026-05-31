@@ -2297,3 +2297,165 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Live feedback patch: Lore/Continuity layout, scroll, and danger styling ── */
+.wandlight-runtime-tab-body {
+    overflow-y: auto;
+}
+
+.wandlight-runtime-tab-body > .wandlight-runtime-card,
+.wandlight-runtime-tab-body > .wandlight-collapsible-card,
+.wandlight-runtime-tab-body > .wandlight-section-header {
+    flex: 0 0 auto;
+}
+
+.wandlight-runtime-tab-body-lore {
+    display: block;
+    overflow-y: auto;
+}
+
+.wandlight-lore-generation-collapsible {
+    flex: 0 0 auto;
+}
+
+.wandlight-lore-generation-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+}
+
+.wandlight-lore-generation-panel {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.wandlight-danger-zone-collapsible {
+    border-color: rgba(220, 80, 80, 0.45) !important;
+    background: linear-gradient(180deg, rgba(92, 18, 24, 0.34), rgba(38, 12, 16, 0.28)) !important;
+}
+
+.wandlight-danger-zone-collapsible > .wandlight-collapsible-summary {
+    color: #ffd0c8 !important;
+    background: rgba(120, 28, 36, 0.28);
+}
+
+.wandlight-danger-zone-collapsible > .wandlight-collapsible-summary .wandlight-collapsible-subtitle {
+    color: #f1a8a0 !important;
+}
+
+.wandlight-collapsible-card:not([open]) {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+.wandlight-collapsible-card:not([open]) > .wandlight-collapsible-content {
+    display: none !important;
+}
+
+.wandlight-lore-pending-collapsible:not([open]),
+.wandlight-lore-accepted-collapsible:not([open]) {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+.wandlight-lore-pending-collapsible > .wandlight-collapsible-summary,
+.wandlight-lore-accepted-collapsible > .wandlight-collapsible-summary,
+.wandlight-lore-generation-collapsible > .wandlight-collapsible-summary {
+    min-height: 30px;
+}
+
+.wandlight-lore-pending-collapsible[open] > .wandlight-collapsible-content,
+.wandlight-lore-accepted-collapsible[open] > .wandlight-collapsible-content {
+    min-height: 42px;
+}
+
+.wandlight-lore-pending-collapsible .wandlight-lore-empty {
+    min-height: 24px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.wandlight-lore-accepted-collapsible[open] {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+.wandlight-lore-accepted-collapsible[open] > .wandlight-collapsible-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: min(620px, 62vh);
+}
+
+.wandlight-accepted-lore-section {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.wandlight-accepted-lore-section .wandlight-lore-controls {
+    flex: 0 0 auto;
+    position: relative;
+    top: auto;
+    z-index: 1;
+}
+
+.wandlight-accepted-lore-section .wandlight-lore-entry-list {
+    flex: 1 1 auto;
+    min-height: 150px;
+    max-height: min(420px, 42vh);
+    overflow-y: auto !important;
+    padding-right: 4px;
+}
+
+.wandlight-pending-lore-list {
+    min-height: 80px;
+    max-height: min(340px, 38vh) !important;
+    overflow-y: auto !important;
+}
+
+.wandlight-lore-entry-header {
+    align-items: flex-start !important;
+    gap: 6px !important;
+}
+
+.wandlight-lore-entry-select {
+    flex: 0 0 auto;
+    margin: 2px 0 0 0 !important;
+    align-self: flex-start;
+}
+
+.wandlight-lore-entry-title-wrap {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+}
+
+.wandlight-lore-entry-title {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    text-align: left !important;
+}
+
+.wandlight-lore-entry-tags {
+    margin-left: 0 !important;
+    justify-content: flex-start !important;
+}
+
+.wandlight-lore-entry-actions {
+    margin-left: auto;
+    align-self: flex-start;
+}
+
+.wandlight-lore-entry-meta,
+.wandlight-lore-entry-fact,
+.wandlight-lore-entry-details {
+    margin-left: 0 !important;
+}

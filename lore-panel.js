@@ -543,7 +543,7 @@ function renderSessionTab(container, state) {
     container.appendChild(stats);
 
     container.appendChild(createCollapsibleSection('session.stateHistory', 'State History', getCountLabel(state?.stateHistory || [], 'undo point'), false, createStateHistoryCard(state), { tooltip: 'Undo history for Wandlight state.' }));
-    container.appendChild(createCollapsibleSection('session.dangerZone', 'Danger Zone', 'Destructive cleanup actions', false, createDangerZoneCard(state), { tooltip: 'Destructive cleanup actions for this chat.' }));
+    container.appendChild(createCollapsibleSection('session.dangerZone', 'Danger Zone', 'Destructive cleanup actions', false, createDangerZoneCard(state), { tooltip: 'Destructive cleanup actions for this chat.', className: 'wandlight-danger-zone-collapsible' }));
 }
 
 function createInstructionsCard() {
@@ -1715,9 +1715,10 @@ function renderContinuityTab(container, state) {
     }
 
     container.appendChild(createCollapsibleSection('continuity.trackedSections', 'Tracked Sections', 'Enable/disable scan and injection sections', false, createContinuitySectionToggleCard(state), { tooltip: 'Optional continuity sections for this chat.' }));
-    container.appendChild(createCanonSceneEditorCard(state));
-    container.appendChild(createCharacterStateEditorCard(state));
-    container.appendChild(createStoryMilestonesEditorCard(state));
+    container.appendChild(createCollapsibleSection('continuity.canonScene', 'Canon and Scene', getContinuityCanonSceneSummary(state), false, createCanonSceneEditorCard(state), { tooltip: 'Core date, scene, cast, and activity fields.' }));
+    container.appendChild(createCollapsibleSection('continuity.canonDivergences', 'Canon Divergences', getCountLabel(state?.canon?.divergences || [], 'divergence'), false, createCanonDivergencesEditorCard(state), { tooltip: 'AU or changed-canon facts separated from the core scene fields.' }));
+    container.appendChild(createCollapsibleSection('continuity.characters', 'Characters', getCountLabel(state.characters || [], 'character'), false, createCharacterStateEditorCard(state), { tooltip: 'Character-specific state: clothing, posture, emotion, goals, and notes.' }));
+    container.appendChild(createCollapsibleSection('continuity.storyMilestones', 'Story Milestones', getCountLabel(state.storyMilestones || {}, 'milestone'), false, createStoryMilestonesEditorCard(state), { tooltip: 'Story-state switches that control lore activation and expiration.' }));
     container.appendChild(createCollapsibleSection('continuity.knowledge', 'Knowledge', getCountLabel(state.knowledge || {}, 'character'), false, createJsonEditorCard('Knowledge', 'Character-keyed facts. Example: { "Harry": ["knows X"] }', 'knowledge', state.knowledge || {}), { tooltip: 'Character-keyed knowledge facts.' }));
     container.appendChild(createCollapsibleSection('continuity.secrets', 'Secrets', getCountLabel(state.secrets || [], 'secret'), false, createJsonEditorCard('Secrets', 'Non-public facts, who knows them, suspicions, and public versions.', 'secrets', state.secrets || []), { tooltip: 'Secret facts and reveal state.' }));
     container.appendChild(createCollapsibleSection('continuity.relationships', 'Relationships', getCountLabel(state.relationships || [], 'relationship'), false, createJsonEditorCard('Relationships', 'Relationship state such as trust, tension, and notes.', 'relationships', state.relationships || []), { tooltip: 'Relationship state such as trust, tension, and notes.' }));
@@ -1781,10 +1782,24 @@ function createCanonSceneEditorCard(state) {
 
     card.appendChild(createArrayTextField('Present characters', state?.scene?.presentCharacters || [], 'scene', 'presentCharacters', 'Comma-separated characters currently present.'));
     card.appendChild(createArrayTextField('Nearby characters', state?.scene?.nearbyCharacters || [], 'scene', 'nearbyCharacters', 'Comma-separated characters nearby but not necessarily in the active conversation.'));
-    card.appendChild(createJsonEditorCard('Canon divergences', 'AU or changed-canon facts with optional sinceDate fields.', 'canon.divergences', state?.canon?.divergences || [], true));
     return card;
 }
 
+function getContinuityCanonSceneSummary(state) {
+    const parts = [state?.canon?.inUniverseDate, state?.scene?.location, state?.scene?.currentActivity]
+        .map(v => String(v || '').trim())
+        .filter(Boolean);
+    return parts.length ? parts.slice(0, 2).join(' · ') : 'core fields';
+}
+
+function createCanonDivergencesEditorCard(state) {
+    return createJsonEditorCard(
+        'Canon Divergences',
+        'AU or changed-canon facts with optional sinceDate fields. Kept separate from Canon and Scene so it can stay collapsed during normal play.',
+        'canon.divergences',
+        state?.canon?.divergences || []
+    );
+}
 
 function createStoryMilestonesEditorCard(state) {
     const card = createJsonEditorCard(
@@ -3382,7 +3397,14 @@ function renderLoreTab(container, state) {
         'Lore',
         'Suggest canon lore from the local database, generate story/AU lore with the model, review pending entries, and manage accepted lore.'
     ));
-    container.appendChild(createLoreGenerationCard(state));
+    container.appendChild(createCollapsibleSection(
+        'lore.generation',
+        'Lore Generation',
+        'canon suggestions + story generation',
+        true,
+        createLoreGenerationCard(state),
+        { tooltip: 'Suggest canon lore from the local database or generate story/AU lore from recent chat messages.', className: 'wandlight-lore-generation-collapsible' }
+    ));
 
     const pendingCount = (state?.pendingLoreEntries || []).length;
     container.appendChild(createCollapsibleSection(
@@ -3893,6 +3915,20 @@ function createEntryCard(entry, state) {
     const headerRow = document.createElement('div');
     headerRow.className = 'wandlight-lore-entry-header';
 
+    const selectBox = document.createElement('input');
+    selectBox.type = 'checkbox';
+    selectBox.className = 'wandlight-lore-entry-select';
+    selectBox.checked = getAcceptedSelectionSet(state).has(entry.id);
+    selectBox.setAttribute('aria-label', 'Select accepted lore entry for bulk actions');
+    addTooltip(selectBox, selectBox.checked ? 'Remove this accepted lore entry from the bulk selection.' : 'Select this accepted lore entry for bulk actions.');
+    selectBox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleAcceptedLoreSelection(entry.id, selectBox.checked);
+        if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
+        refreshAcceptedLoreBulkToolbar();
+    });
+    headerRow.appendChild(selectBox);
+
     const titleWrap = document.createElement('div');
     titleWrap.className = 'wandlight-lore-entry-title-wrap';
 
@@ -3906,20 +3942,6 @@ function createEntryCard(entry, state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-lore-entry-actions';
-
-    const selectBox = document.createElement('input');
-    selectBox.type = 'checkbox';
-    selectBox.className = 'wandlight-lore-entry-select';
-    selectBox.checked = getAcceptedSelectionSet(state).has(entry.id);
-    selectBox.setAttribute('aria-label', 'Select accepted lore entry for bulk actions');
-    addTooltip(selectBox, selectBox.checked ? 'Remove this accepted lore entry from the bulk selection.' : 'Select this accepted lore entry for bulk actions.');
-    selectBox.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleAcceptedLoreSelection(entry.id, selectBox.checked);
-        if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
-        refreshAcceptedLoreBulkToolbar();
-    });
-    actions.appendChild(selectBox);
     actions.appendChild(createEditableLifecycleBadge(entry));
 
     const pinBtn = createIconButton(

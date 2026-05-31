@@ -452,7 +452,6 @@
 }
 
 .wandlight-lore-entry-title {
-    flex: 1;
     font-weight: 600;
     font-size: 0.85em;
     white-space: nowrap;
@@ -552,4 +551,120 @@
 .wandlight-lore-entry-notes {
     color: rgba(255, 255, 255, 0.45);
     font-style: italic;
+}
+
+/* ── Entry title wrap (title + tags row) ─────────────────────────────────────── */
+.wandlight-lore-entry-title-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+/* ── Entry tags row ──────────────────────────────────────────────────────────── */
+.wandlight-lore-entry-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    align-items: center;
+}
+
+/* ── Tag chip ────────────────────────────────────────────────────────────────── */
+.wandlight-lore-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    background: rgba(80, 140, 200, 0.2);
+    border: 1px solid rgba(80, 140, 200, 0.3);
+    border-radius: 8px;
+    padding: 0 2px 0 5px;
+    font-size: 0.7em;
+    white-space: nowrap;
+}
+
+.wandlight-lore-tag-remove {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    font-size: 0.85em;
+    padding: 0 2px;
+    line-height: 1;
+}
+
+.wandlight-lore-tag-remove:hover {
+    color: rgba(255, 100, 100, 0.8);
+}
+
+.wandlight-lore-tag-label {
+    color: #88b4f0;
+}
+
+.wandlight-lore-tag-add {
+    background: none;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    font-size: 0.75em;
+    padding: 0 4px;
+    border-radius: 6px;
+    line-height: 1.2;
+}
+
+.wandlight-lore-tag-add:hover {
+    color: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Inline tag input ────────────────────────────────────────────────────────── */
+.wandlight-lore-tag-input {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(80, 140, 200, 0.4);
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-size: 0.72em;
+    color: #e0e0e0;
+    width: 60px;
+    font-family: inherit;
+}
+
+.wandlight-lore-tag-input:focus {
+    outline: none;
+    border-color: rgba(100, 160, 255, 0.6);
+    box-shadow: 0 0 3px rgba(80, 140, 255, 0.15);
+}
+
+/* ── Panel resize handle ─────────────────────────────────────────────────────── */
+.wandlight-lore-panel-resize-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+    background: linear-gradient(135deg,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        transparent calc(50% + 2px),
+        transparent calc(50% + 2px),
+        rgba(255, 255, 255, 0.15) calc(50% + 3px),
+        transparent calc(50% + 3px),
+        transparent calc(50% + 3px),
+        rgba(255, 255, 255, 0.15) calc(50% + 6px));
+    border-radius: 0 0 8px 0;
+    z-index: 2;
+}
+
+.wandlight-lore-panel-resize-handle:hover {
+    background: linear-gradient(135deg,
+        transparent 50%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent calc(50% + 2px),
+        transparent calc(50% + 2px),
+        rgba(255, 255, 255, 0.3) calc(50% + 3px),
+        transparent calc(50% + 3px),
+        transparent calc(50% + 3px),
+        rgba(255, 255, 255, 0.3) calc(50% + 6px));
 }

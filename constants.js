@@ -138,6 +138,8 @@ export function getDefaultState() {
             search: '',
             selectedEntryId: '',
             showOnlyActive: false,
+            width: 420,
+            height: 520,
         },
 
         // Lore selection (user overrides for active loring)
@@ -263,6 +265,7 @@ Output ONLY valid JSON:
     {
       "id": "stable_snake_case_id",
       "title": "short title",
+      "tags": ["3-5 short editable search tags, e.g. character, location, era, plot-thread"],
       "category": "canon|au|secret|rumor|lie|relationship|location|rule|timeline",
       "fact": "what is actually true or believed",
       "canonStatus": "canon|divergent|au|fanon|unknown",
@@ -292,6 +295,7 @@ Output ONLY valid JSON:
 }
 
 Rules:
+- Give every entry 3-5 concise tags useful for search and filtering.
 - Generate 4-10 entries only.
 - Prefer constraints over trivia.
 - If a fact is secret in this era, include publicVersion and revealPolicy.

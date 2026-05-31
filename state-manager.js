@@ -364,6 +364,8 @@ export function migrateState(state) {
         state.lorePanel.search = state.lorePanel.search || '';
         state.lorePanel.selectedEntryId = state.lorePanel.selectedEntryId || '';
         state.lorePanel.showOnlyActive = !!state.lorePanel.showOnlyActive;
+        state.lorePanel.width = Number.isFinite(state.lorePanel.width) && state.lorePanel.width >= 300 ? state.lorePanel.width : 420;
+        state.lorePanel.height = Number.isFinite(state.lorePanel.height) && state.lorePanel.height >= 200 ? state.lorePanel.height : 520;
     }
 
     // Normalize loreSelection

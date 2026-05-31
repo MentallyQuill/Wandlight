@@ -104,6 +104,7 @@ export function normalizeLoreEntry(input = {}) {
     return {
         id: asString(input.id) || stableIdFromTitle(title),
         title,
+        tags: asStringArray(input.tags),
         category: VALID_CATEGORIES.has(category) ? category : 'canon',
         fact: asString(input.fact),
         canonStatus: VALID_CANON_STATUS.has(canonStatus) ? canonStatus : 'unknown',

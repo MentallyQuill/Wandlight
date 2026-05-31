@@ -1415,3 +1415,51 @@
 .wandlight-lore-panel input[type="checkbox"] {
     accent-color: var(--wandlight-gold, #d7b56d);
 }
+
+/* Continuity tab editors */
+.wandlight-continuity-toggle-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.wandlight-json-editor-card,
+.wandlight-json-editor-embedded {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wandlight-json-editor-embedded {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.18);
+}
+
+.wandlight-continuity-json-editor {
+    width: 100%;
+    min-height: 120px;
+    max-height: 260px;
+    resize: vertical;
+    box-sizing: border-box;
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 10px;
+    background: rgba(8, 6, 10, 0.72);
+    color: var(--SmartThemeBodyColor, #e8dfc5);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.78em;
+    line-height: 1.45;
+    padding: 10px;
+    outline: none;
+}
+
+.wandlight-continuity-json-editor:focus {
+    border-color: rgba(212, 175, 55, 0.55);
+    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.18);
+}
+
+.wandlight-continuity-injection-preview,
+.wandlight-lore-injection-preview {
+    min-height: 150px;
+    max-height: 320px;
+}

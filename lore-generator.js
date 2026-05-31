@@ -261,6 +261,10 @@ function parseJsonResponse(text) {
     const noReasoning = removeLikelyReasoningBlocks(text);
     candidates.push(noReasoning);
     candidates.push(stripJsonFences(noReasoning));
+    if (noReasoning && !noReasoning.trim().startsWith('{') && !noReasoning.trim().startsWith('[')) {
+        candidates.push('{' + noReasoning);
+        candidates.push('[' + noReasoning);
+    }
     candidates.push(findBalancedJsonObject(noReasoning));
     candidates.push(findBalancedJsonObject(stripJsonFences(noReasoning)));
     candidates.push(findBalancedJsonArray(noReasoning));
@@ -340,6 +344,50 @@ function getRecentMessages(count = 8) {
     }
 }
 
+
+function inferContextLocallyFromMessages(messages, state = getState()) {
+    const text = String(messages || '');
+    const result = {
+        sceneDate: state?.loreContext?.sceneDate || state?.canon?.inUniverseDate || '',
+        subjectiveDate: state?.loreContext?.subjectiveDate || '',
+        canonBoundary: state?.loreContext?.canonBoundary || state?.canon?.canonBoundary || '',
+        branchId: state?.loreContext?.branchId || 'main',
+        timeTravelMode: state?.loreContext?.timeTravelMode || 'none',
+        summary: 'Fallback context inferred locally from message headings and current state.',
+    };
+
+    const datePatterns = [
+        /(?:^|\n)\s*(?:date|day|in[- ]?universe date|scene date)\s*[:\-]\s*([^\n]+)/i,
+        /(?:^|\n)\s*#{1,6}\s*([^\n]*(?:\b\d{4}\b|\bJanuary\b|\bFebruary\b|\bMarch\b|\bApril\b|\bMay\b|\bJune\b|\bJuly\b|\bAugust\b|\bSeptember\b|\bOctober\b|\bNovember\b|\bDecember\b)[^\n]*)/i,
+        /\b((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})\b/i,
+        /\b(\d{1,2}\/\d{1,2}\/\d{2,4})\b/,
+    ];
+    for (const pattern of datePatterns) {
+        const match = text.match(pattern);
+        if (match?.[1]) {
+            result.sceneDate = match[1].replace(/^#+\s*/, '').trim();
+            break;
+        }
+    }
+
+    const canonMatch = text.match(/(?:canon|boundary|canon reference|reference point)\s*[:\-]\s*([^\n]+)/i);
+    if (canonMatch?.[1]) {
+        result.canonBoundary = canonMatch[1].trim();
+    }
+
+    const branchMatch = text.match(/(?:branch|timeline|au)\s*[:\-]\s*([^\n]+)/i);
+    if (branchMatch?.[1]) {
+        result.branchId = branchMatch[1].trim() || 'main';
+    }
+
+    const tt = text.match(/\b(time travel|from the future|alternate timeline|changed past|branch)\b/i);
+    if (tt) {
+        result.timeTravelMode = /future/i.test(tt[0]) ? 'visitor_from_future' : 'alternate_branch';
+    }
+
+    return result.sceneDate || result.canonBoundary || result.branchId !== 'main' ? normalizeLoreContext(result) : null;
+}
+
 // ── Lore Context Detection ──────────────────────────────────────────────────────
 
 /**
@@ -376,12 +424,28 @@ export async function runLoreContextDetection(options = {}) {
         const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nDetect the current lore context. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
 
         const response = await quietPrompt(LORE_CONTEXT_DETECTION_SYSTEM_PROMPT, userMessage);
-        if (!response) return null;
+        if (!response) {
+            const fallback = inferContextLocallyFromMessages(messages, state);
+            if (fallback) {
+                setLoreContext({ ...fallback, lastDetectedAt: Date.now() });
+                progress?.('Context inferred locally from message headings.', 100);
+                return fallback;
+            }
+            progress?.('Context detection returned no response.', 100);
+            return null;
+        }
 
         progress?.('Parsing detected context...', 75);
         const parsed = parseJsonResponse(response);
-        if (!parsed || typeof parsed !== 'object') {
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
             console.warn(`${LOG_PREFIX} Could not parse lore context detection response`);
+            const fallback = inferContextLocallyFromMessages(messages, state);
+            if (fallback) {
+                setLoreContext({ ...fallback, lastDetectedAt: Date.now() });
+                progress?.('Context inferred locally from message headings.', 100);
+                return fallback;
+            }
+            progress?.('Context detection returned no usable result.', 100);
             return null;
         }
 
@@ -396,6 +460,8 @@ export async function runLoreContextDetection(options = {}) {
         return normalized;
     } catch (e) {
         console.error(`${LOG_PREFIX} Lore context detection failed:`, e);
+        const progress = typeof options.progress === 'function' ? options.progress : null;
+        progress?.(`Context detection failed: ${e.message || e}`, 100);
         return null;
     } finally {
         _detectionRunning = false;
@@ -495,6 +561,7 @@ export async function runLoreGeneration(options = {}) {
                 console.debug(`${LOG_PREFIX} Auto-detecting lore context before generation…`);
                 const detected = await runLoreContextDetection({ progress });
                 if (!detected) {
+                    progress?.('No story context could be detected. Set context manually or increase Source Messages.', 100);
                     _generationRunning = false;
                     return { status: 'no_context_detected', contextKey };
                 }
@@ -623,6 +690,7 @@ export async function runLoreGeneration(options = {}) {
                 status: 'failed_no_response',
                 lastError: 'Quiet prompt returned empty response',
             }, { increment: false });
+            progress?.('Lore generation returned an empty response.', 100);
             return { status: 'failed_no_response', contextKey };
         }
 
@@ -649,6 +717,7 @@ export async function runLoreGeneration(options = {}) {
             if (settings.debugMode) {
                 console.debug(`${LOG_PREFIX} Lore generation response had no valid entries array`);
             }
+            progress?.('Lore response could not be parsed.', 100);
             return { status: 'failed_parse', contextKey };
         }
 
@@ -672,6 +741,7 @@ export async function runLoreGeneration(options = {}) {
             if (settings.debugMode) {
                 console.debug(`${LOG_PREFIX} Lore generation returned no valid entries after normalization`);
             }
+            progress?.('Lore generation produced no usable non-duplicate entries.', 100);
             return {
                 status: 'empty_valid_entries',
                 contextKey,

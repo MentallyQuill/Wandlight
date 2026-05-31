@@ -22,7 +22,7 @@ import {
     undoLastChange,
     setLoreContext,
 } from './state-manager.js';
-import { buildMemo, buildMemoPreview, getMemoSignature } from './memo-builder.js';
+import { buildMemo, buildMemoPreview, buildContinuityPreview, buildLorePreview, getMemoSignature } from './memo-builder.js';
 import { onExtractionTriggered } from './extractor.js';
 import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
 
@@ -52,6 +52,7 @@ const TAB_LABELS = {
     session: 'Session',
     generate: 'Generate',
     review: 'Review',
+    continuity: 'Continuity',
     lore: 'Lore',
     injection: 'Injection',
 };
@@ -60,8 +61,9 @@ const TAB_TOOLTIPS = {
     session: 'Runtime controls for the current roleplay session: mode, active/paused state, memo injection, and continuity scanning.',
     generate: 'Set story context and create pending lore entries from a configurable recent-message source window.',
     review: 'Approve or dismiss extracted continuity changes and generated lore entries before they affect play.',
+    continuity: 'View and edit the structured continuity state used for continuity injection: scene, characters, emotions, inventory, knowledge, relationships, and flags.',
     lore: 'Search, filter, pin, mute, tag, and inspect accepted or pending lore entries.',
-    injection: 'Choose what Wandlight sends to the model: direct lore, compressed lore, and the live prompt injection preview.',
+    injection: 'Choose what Wandlight sends to the model: continuity state, lore entries, direct/compressed handling, and live split injection previews.',
 };
 
 const WORKFLOW_MODES = {
@@ -255,7 +257,7 @@ function refreshHeader() {
     status.innerHTML = '';
     status.appendChild(createStatusPill(`Mode: ${getWorkflowLabel(settings)}`, getWorkflowTooltip(settings)));
     status.appendChild(createStatusPill(settings.enabled ? 'Wandlight Active' : 'Wandlight Paused', 'Master runtime toggle. When paused, Wandlight does not inject, scan, or generate.'));
-    status.appendChild(createStatusPill(settings.injectMemo ? 'Memo Injected' : 'Memo Not Injected', 'Whether Wandlight prepends its continuity memo to roleplay generation prompts.'));
+    status.appendChild(createStatusPill((settings.injectContinuity !== false && settings.injectMemo !== false) ? 'Continuity Injected' : 'Continuity Not Injected', 'Whether Wandlight includes structured continuity state in roleplay generation prompts.'));
     if (pendingDelta + pendingLore > 0) {
         status.appendChild(createStatusPill(`Pending: ${pendingDelta + pendingLore}`, 'Items waiting in Review: extracted continuity changes plus generated lore entries.'));
     }
@@ -294,6 +296,8 @@ function renderPanelBody(container, state) {
         renderGenerateTab(tabBody, state);
     } else if (activeTab === 'review') {
         renderReviewTab(tabBody, state);
+    } else if (activeTab === 'continuity') {
+        renderContinuityTab(tabBody, state);
     } else if (activeTab === 'lore') {
         renderLoreTab(tabBody, state);
     } else {
@@ -360,30 +364,6 @@ function renderSessionTab(container, state) {
             refreshHeader();
         }
     ));
-    toggles.appendChild(createToggleCard(
-        'Inject Continuity Memo',
-        settings.injectMemo,
-        "Prepends Wandlight\'s compact continuity memo to roleplay generation prompts. This is ephemeral and does not write into chat history.",
-        (checked) => {
-            const next = getSettings();
-            next.injectMemo = checked;
-            saveSettings(next);
-            refreshPanelBody({ preserveScroll: false });
-            refreshHeader();
-        }
-    ));
-    toggles.appendChild(createToggleCard(
-        'Include Lore Entries',
-        settings.injectLore,
-        'Includes accepted active lore entries inside the continuity memo. Turn this off to keep scanning/generation active while preventing lore entries from being injected.',
-        (checked) => {
-            const next = getSettings();
-            next.injectLore = checked;
-            saveSettings(next);
-            refreshPanelBody({ preserveScroll: false });
-            refreshHeader();
-        }
-    ));
     container.appendChild(toggles);
 
     const concepts = document.createElement('div');
@@ -395,7 +375,7 @@ function renderSessionTab(container, state) {
     concepts.appendChild(conceptTitle);
     concepts.appendChild(createKeyValue('Continuity state', 'scene, date, knowledge, secrets, relationships, threads', 'Scanned from chat by the continuity extractor. These are structured state changes reviewed as Pending Continuity Changes.'));
     concepts.appendChild(createKeyValue('Lore entries', 'searchable facts used for future injection', 'Generated from the current context and accepted into the Lore tab after review.'));
-    concepts.appendChild(createKeyValue('Injection', 'what gets sent to the model', 'The Injection tab controls whether accepted lore is inserted directly or compressed before roleplay generation.'));
+    concepts.appendChild(createKeyValue('Injection', 'what gets sent to the model', 'The Injection tab controls Continuity state and Lore entries separately, including direct/compressed handling and previews.'));
     container.appendChild(concepts);
 
     const stats = document.createElement('div');
@@ -408,34 +388,6 @@ function renderSessionTab(container, state) {
     stats.appendChild(createKeyValue('Active lore entries', String(counts.active), 'Accepted entries currently eligible for injection.'));
     stats.appendChild(createKeyValue('Memo estimate', memo ? `${estimateTokens(memo)} tokens` : 'empty', 'Approximate size of the injected continuity memo. The raw preview is in the Injection tab.'));
     container.appendChild(stats);
-
-    const actions = document.createElement('div');
-    actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Scan Continuity State', 'Scans recent chat for structured state changes: scene, date, knowledge, secrets, relationships, threads, and continuity flags. It does not create Lore entries.', async (btn) => {
-        await runBusyAction(btn, 'Scanning...', async () => {
-            await onExtractionTriggered({ force: true });
-            refreshPanelBody({ preserveScroll: false });
-            refreshHeader();
-            const nextState = getState();
-            if (nextState.lastDelta) {
-                setPanelState({ activeTab: 'review' });
-                refreshPanelBody({ preserveScroll: false });
-                toast('Continuity changes found. Review tab opened.');
-            } else {
-                toast('Scan complete. No pending continuity changes were stored.');
-            }
-        });
-    }, 'wandlight-primary-button'));
-    actions.appendChild(createButton('Open Review', 'Opens the Review tab for pending continuity changes and generated lore entries.', () => {
-        setPanelState({ activeTab: 'review' });
-        refreshPanelBody({ preserveScroll: false });
-    }));
-    actions.appendChild(createButton('Open Lore', 'Opens the Lore tab for searching, pinning, muting, tagging, and inspecting lore entries.', () => {
-        setPanelState({ activeTab: 'lore' });
-        refreshPanelBody({ preserveScroll: false });
-    }));
-
-    container.appendChild(actions);
 
     container.appendChild(createStateHistoryCard(state));
     container.appendChild(createDangerZoneCard(state));
@@ -595,7 +547,7 @@ function createDangerZoneCard(state) {
 function renderGenerateTab(container, state) {
     container.appendChild(createSectionHeader(
         'Generate Pending Lore',
-        'This tab creates reviewable Lore entries. Use Scan Continuity State on the Session tab for structured continuity changes; use this tab for searchable lore facts.'
+        'This tab creates reviewable Lore entries. Use the Continuity tab for structured continuity-state scanning and editing; use this tab for searchable lore facts.'
     ));
 
     container.appendChild(createContextEditorCard(state));
@@ -852,50 +804,340 @@ function formatGenerationStatus(result) {
 }
 
 
+
+// Continuity tab --------------------------------------------------------------
+
+const CONTINUITY_SECTION_LABELS = {
+    canon: 'Canon / Date',
+    scene: 'Scene',
+    characters: 'Characters',
+    appearance: 'Appearance',
+    emotionalState: 'Emotional State',
+    knowledge: 'Knowledge',
+    secrets: 'Secrets',
+    relationships: 'Relationships',
+    threads: 'Story Threads',
+    inventory: 'Inventory / Objects',
+    objectives: 'Objectives',
+    flags: 'Continuity Flags',
+};
+
+function renderContinuityTab(container, state) {
+    container.appendChild(createSectionHeader(
+        'Continuity State',
+        'Edit the structured roleplay state Wandlight tracks and injects separately from Lore entries. Each section can be enabled or disabled for this chat.'
+    ));
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Scan Continuity State', 'Scans recent chat for structured continuity changes and sends them to Review instead of directly mutating this state unless Automatic mode is enabled.', async (btn) => {
+        await runBusyAction(btn, 'Scanning...', async () => {
+            setGenerateProgress('Scanning continuity state...', 10);
+            await onExtractionTriggered({ force: true });
+            setGenerateProgress('Continuity scan complete.', 100);
+            refreshHeader();
+            const nextState = getState();
+            if (nextState.lastDelta) {
+                setPanelState({ activeTab: 'review' });
+                refreshPanelBody({ preserveScroll: false });
+                toast('Continuity changes found. Review tab opened.');
+            } else {
+                refreshPanelBody({ preserveScroll: false });
+                toast('Scan complete. No pending continuity changes were stored.', 'info');
+            }
+        });
+    }, 'wandlight-primary-button'));
+    container.appendChild(actions);
+
+    container.appendChild(createContinuitySectionToggleCard(state));
+    container.appendChild(createCanonSceneEditorCard(state));
+    container.appendChild(createCharacterStateEditorCard(state));
+    container.appendChild(createJsonEditorCard('Knowledge', 'Character-keyed facts. Example: { "Harry": ["knows X"] }', 'knowledge', state.knowledge || {}));
+    container.appendChild(createJsonEditorCard('Secrets', 'Non-public facts, who knows them, suspicions, and public versions.', 'secrets', state.secrets || []));
+    container.appendChild(createJsonEditorCard('Relationships', 'Relationship state such as trust, tension, and notes.', 'relationships', state.relationships || []));
+    container.appendChild(createJsonEditorCard('Threads', 'Active, dormant, or resolved story threads and unresolved consequences.', 'threads', state.threads || []));
+    container.appendChild(createJsonEditorCard('Inventory / Objects', 'Tracked items, owners, locations, and object status.', 'inventory', state.inventory || []));
+    container.appendChild(createJsonEditorCard('Objectives', 'Character or story goals, status, and stakes.', 'objectives', state.objectives || []));
+    container.appendChild(createJsonEditorCard('Continuity Flags', 'Contradictions, warnings, uncertainties, and resolved flags.', 'continuityFlags', state.continuityFlags || []));
+}
+
+function createContinuitySectionToggleCard(state) {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card';
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Tracked Sections';
+    addTooltip(title, 'Disabled sections are not updated by Scan Continuity State and are omitted from continuity injection. Existing data is preserved unless you delete it.');
+    card.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'wandlight-runtime-grid wandlight-continuity-toggle-grid';
+    const cfg = state?.continuityConfig || {};
+    for (const [key, label] of Object.entries(CONTINUITY_SECTION_LABELS)) {
+        grid.appendChild(createToggleCard(label, cfg[key] !== false, `${label} tracking. Turn off to preserve existing data but omit it from scans and continuity injection.`, (checked) => {
+            const current = getState();
+            pushStateSnapshot(current, `Toggle continuity section: ${label}`, getSettings().maxSnapshots);
+            current.continuityConfig = { ...(current.continuityConfig || {}), [key]: checked };
+            saveState(current);
+            refreshPanelBody({ preserveScroll: true });
+            refreshHeader();
+        }));
+    }
+    card.appendChild(grid);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'This follows tracker-style design: schema sections are chat-specific and optional, so a simple scene can track only date and scene while a detailed sim can track emotions, clothing, objects, and goals.';
+    card.appendChild(help);
+    return card;
+}
+
+function createCanonSceneEditorCard(state) {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card';
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Canon and Scene';
+    addTooltip(title, 'Frequently edited continuity fields. Changes save into chatMetadata.wandlight_continuity.');
+    card.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'wandlight-runtime-grid wandlight-context-grid';
+    grid.appendChild(createContinuityTextField('Era', state?.canon?.era || '', 'canon', 'era', 'Canon era or broad story period.'));
+    grid.appendChild(createContinuityTextField('In-universe date', state?.canon?.inUniverseDate || '', 'canon', 'inUniverseDate', 'Current in-universe date if known.'));
+    grid.appendChild(createContinuityTextField('Canon boundary', state?.canon?.canonBoundary || '', 'canon', 'canonBoundary', 'Latest canon point treated as established.'));
+    grid.appendChild(createContinuityTextField('Location', state?.scene?.location || '', 'scene', 'location', 'Current scene location.'));
+    grid.appendChild(createContinuityTextField('Time of day', state?.scene?.timeOfDay || '', 'scene', 'timeOfDay', 'Current scene time of day.'));
+    grid.appendChild(createContinuityTextField('Weather', state?.scene?.weather || '', 'scene', 'weather', 'Current weather if relevant.'));
+    grid.appendChild(createContinuityTextField('Ambience', state?.scene?.ambience || '', 'scene', 'ambience', 'Scene mood or ambient conditions.'));
+    grid.appendChild(createContinuityTextField('Current activity', state?.scene?.currentActivity || '', 'scene', 'currentActivity', 'What is currently happening in the scene.'));
+    card.appendChild(grid);
+
+    card.appendChild(createArrayTextField('Present characters', state?.scene?.presentCharacters || [], 'scene', 'presentCharacters', 'Comma-separated characters currently present.'));
+    card.appendChild(createArrayTextField('Nearby characters', state?.scene?.nearbyCharacters || [], 'scene', 'nearbyCharacters', 'Comma-separated characters nearby but not necessarily in the active conversation.'));
+    card.appendChild(createJsonEditorCard('Canon divergences', 'AU or changed-canon facts with optional sinceDate fields.', 'canon.divergences', state?.canon?.divergences || [], true));
+    return card;
+}
+
+function createCharacterStateEditorCard(state) {
+    const card = createJsonEditorCard(
+        'Characters',
+        'Character state supports name, role, location, clothing, posture, physicalState, emotionalState, inventory, goals, and notes. Emotional numeric values are -5 to +5 and cool toward neutral in injection previews unless reinforced.',
+        'characters',
+        state?.characters || []
+    );
+    const schema = document.createElement('div');
+    schema.className = 'wandlight-runtime-help';
+    schema.textContent = 'Recommended character object: { "name": "Harry", "clothing": "school robes", "physicalState": "tired", "emotionalState": { "trust": 2, "fear": 1, "notes": "uneasy but cooperative" }, "goals": ["find the source of the curse"] }';
+    card.appendChild(schema);
+    return card;
+}
+
+function createContinuityTextField(label, value, section, field, tooltip) {
+    return createTextSettingField(label, value, tooltip, (nextValue) => {
+        const current = getState();
+        pushStateSnapshot(current, `Edit continuity: ${label}`, getSettings().maxSnapshots);
+        current[section] = { ...(current[section] || {}), [field]: nextValue };
+        saveState(current);
+        refreshHeader();
+    });
+}
+
+function createArrayTextField(label, values, section, field, tooltip) {
+    const wrap = document.createElement('label');
+    wrap.className = 'wandlight-inline-field wandlight-context-field';
+    addTooltip(wrap, tooltip);
+    const span = document.createElement('span');
+    span.textContent = label;
+    wrap.appendChild(span);
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = Array.isArray(values) ? values.join(', ') : '';
+    input.addEventListener('change', () => {
+        const current = getState();
+        pushStateSnapshot(current, `Edit continuity: ${label}`, getSettings().maxSnapshots);
+        current[section] = { ...(current[section] || {}), [field]: input.value.split(',').map(x => x.trim()).filter(Boolean) };
+        saveState(current);
+        refreshHeader();
+    });
+    wrap.appendChild(input);
+    return wrap;
+}
+
+function createJsonEditorCard(titleText, helpText, path, value, embedded = false) {
+    const card = document.createElement('div');
+    card.className = embedded ? 'wandlight-json-editor-embedded' : 'wandlight-runtime-card wandlight-json-editor-card';
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = titleText;
+    addTooltip(title, helpText);
+    card.appendChild(title);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = helpText;
+    card.appendChild(help);
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'wandlight-continuity-json-editor';
+    textarea.value = JSON.stringify(value ?? null, null, 2);
+    textarea.spellcheck = false;
+    addTooltip(textarea, `Editable JSON for ${titleText}. Save validates JSON before writing to state.`);
+    card.appendChild(textarea);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Save Section', `Save edited ${titleText} JSON into the current chat continuity state.`, () => {
+        try {
+            const parsed = JSON.parse(textarea.value || 'null');
+            const current = getState();
+            pushStateSnapshot(current, `Edit continuity section: ${titleText}`, getSettings().maxSnapshots);
+            setStatePath(current, path, parsed);
+            saveState(current);
+            refreshPanelBody({ preserveScroll: true });
+            refreshHeader();
+            toast(`${titleText} saved.`);
+        } catch (e) {
+            toast(`Invalid JSON in ${titleText}: ${e.message}`, 'error');
+        }
+    }, 'wandlight-primary-button'));
+    actions.appendChild(createButton('Revert', `Reload ${titleText} from saved state.`, () => {
+        refreshPanelBody({ preserveScroll: true });
+    }));
+    card.appendChild(actions);
+    return card;
+}
+
+function setStatePath(state, path, value) {
+    const parts = String(path).split('.');
+    let target = state;
+    for (let i = 0; i < parts.length - 1; i++) {
+        const key = parts[i];
+        if (!target[key] || typeof target[key] !== 'object') target[key] = {};
+        target = target[key];
+    }
+    target[parts[parts.length - 1]] = value;
+}
+
 // Injection tab ---------------------------------------------------------------
 
 function renderInjectionTab(container, state) {
     const settings = getSettings();
     const activeLore = getPanelLoreState(state).counts.active || 0;
-    const memo = buildMemoPreview(state, settings.loreInjectionMode || 'direct');
-    recordCompressionPreview(state, settings.loreInjectionMode || 'direct', memo);
+    const continuityPreview = buildContinuityPreview(state, settings.continuityInjectionMode || 'direct');
+    const lorePreview = buildLorePreview(state, settings.loreInjectionMode || 'direct');
+    recordCompressionPreview(state, settings.loreInjectionMode || 'direct', lorePreview, 'lore');
+    recordCompressionPreview(state, settings.continuityInjectionMode || 'direct', continuityPreview, 'continuity');
 
     container.appendChild(createSectionHeader(
         'Injection',
-        'This is the final step in the workflow: choose what Wandlight sends to the model after entries have been stored and edited in Lore.'
+        'Final workflow step. Decide whether to inject structured Continuity state, Lore entries, or both, and whether each is direct or compressed.'
     ));
 
-    const modeCard = document.createElement('div');
-    modeCard.className = 'wandlight-runtime-card';
-    const title = document.createElement('div');
-    title.className = 'wandlight-runtime-card-title';
-    title.textContent = 'Lore Handling Mode';
-    addTooltip(title, 'Direct sends selected active lore with full facts. Compressed shortens unpinned facts before injection; pinned entries remain more detailed.');
-    modeCard.appendChild(title);
+    const toggles = document.createElement('div');
+    toggles.className = 'wandlight-runtime-grid';
+    toggles.appendChild(createToggleCard(
+        'Inject Continuity',
+        settings.injectContinuity !== false && settings.injectMemo !== false,
+        'Injects the editable Continuity tab state: scene, characters, emotions, knowledge, relationships, threads, objects, objectives, and flags. This is separate from Lore entries.',
+        (checked) => {
+            const next = getSettings();
+            next.injectContinuity = checked;
+            next.injectMemo = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+        }
+    ));
+    toggles.appendChild(createToggleCard(
+        'Inject Lore',
+        settings.injectLore !== false,
+        'Injects accepted active Lore tab entries. Turn this off if you want Wandlight to track/edit lore without sending lore entries to the roleplay model.',
+        (checked) => {
+            const next = getSettings();
+            next.injectLore = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+        }
+    ));
+    container.appendChild(toggles);
 
-    const buttons = document.createElement('div');
-    buttons.className = 'wandlight-mode-buttons';
-    buttons.appendChild(createInjectionModeButton('direct', 'Direct', 'Insert active lore entries mostly verbatim, subject to the active-lore cap.', settings));
-    buttons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Shorten unpinned lore facts during injection so more entries fit into context. Stored lore is not changed.', settings));
-    modeCard.appendChild(buttons);
+    const continuityCard = document.createElement('div');
+    continuityCard.className = 'wandlight-runtime-card';
+    const continuityTitle = document.createElement('div');
+    continuityTitle.className = 'wandlight-runtime-card-title';
+    continuityTitle.textContent = 'Continuity Handling Mode';
+    addTooltip(continuityTitle, 'Direct sends the structured continuity state with detail. Compressed shortens continuity sections and cools heightened emotions toward neutral unless recent chat reinforced them.');
+    continuityCard.appendChild(continuityTitle);
+    const continuityButtons = document.createElement('div');
+    continuityButtons.className = 'wandlight-mode-buttons';
+    continuityButtons.appendChild(createContinuityModeButton('direct', 'Direct', 'Insert editable continuity state with full section detail.', settings));
+    continuityButtons.appendChild(createContinuityModeButton('compressed', 'Compressed', 'Shorten continuity state for lower context cost. Heightened short-term emotions cool toward neutral over time.', settings));
+    continuityCard.appendChild(continuityButtons);
 
-    modeCard.appendChild(createKeyValue('Active lore available', String(activeLore), 'Entries eligible for prompt injection after filters, pinning, and muting.'));
-    modeCard.appendChild(createKeyValue('Prompt preview estimate', memo ? `${estimateTokens(memo)} tokens` : 'empty', 'Approximate size after current injection mode and compression settings.'));
-    modeCard.appendChild(createKeyValue('Pinned protection', 'enabled', 'Pinned entries are prioritized and kept less compressed than ordinary entries.'));
-    container.appendChild(modeCard);
+    const continuityLevel = document.createElement('label');
+    continuityLevel.className = 'wandlight-slider-row';
+    const continuityLevelText = document.createElement('span');
+    continuityLevelText.textContent = `Compression level: ${settings.continuityCompressionLevel || 2}`;
+    addTooltip(continuityLevelText, 'Higher levels shorten continuity-state lines more aggressively. This does not edit stored state.');
+    const continuityRange = document.createElement('input');
+    continuityRange.type = 'range';
+    continuityRange.min = '1';
+    continuityRange.max = '5';
+    continuityRange.value = String(settings.continuityCompressionLevel || 2);
+    continuityRange.addEventListener('input', () => {
+        const next = getSettings();
+        next.continuityCompressionLevel = Number(continuityRange.value) || 2;
+        saveSettings(next);
+        continuityLevelText.textContent = `Compression level: ${next.continuityCompressionLevel}`;
+        refreshInjectionPreviewOnly();
+    });
+    continuityLevel.appendChild(continuityLevelText);
+    continuityLevel.appendChild(continuityRange);
+    continuityCard.appendChild(continuityLevel);
 
-    const compressionCard = document.createElement('div');
-    compressionCard.className = 'wandlight-runtime-card';
-    const compressionTitle = document.createElement('div');
-    compressionTitle.className = 'wandlight-runtime-card-title';
-    compressionTitle.textContent = 'Compression';
-    addTooltip(compressionTitle, 'Deterministic injection compression. This is not model summarization and does not edit the lore matrix.');
-    compressionCard.appendChild(compressionTitle);
+    const decay = document.createElement('label');
+    decay.className = 'wandlight-inline-field';
+    const decayText = document.createElement('span');
+    decayText.textContent = 'Emotion cool-off turns';
+    addTooltip(decayText, 'Number of chat turns before temporary high emotions move one step toward neutral in injection preview. Stored emotional state is not overwritten.');
+    const decayInput = document.createElement('input');
+    decayInput.type = 'number';
+    decayInput.min = '1';
+    decayInput.max = '50';
+    decayInput.value = String(settings.continuityEmotionDecayTurns || 6);
+    decayInput.addEventListener('change', () => {
+        const next = getSettings();
+        next.continuityEmotionDecayTurns = Math.max(1, Math.min(50, parseInt(decayInput.value, 10) || 6));
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: false });
+    });
+    decay.appendChild(decayText);
+    decay.appendChild(decayInput);
+    continuityCard.appendChild(decay);
+    continuityCard.appendChild(createKeyValue('Continuity status', getContinuityCompressionStatusText(getState()), 'Shows when compressed continuity preview was last calculated.'));
+    container.appendChild(continuityCard);
+
+    const loreCard = document.createElement('div');
+    loreCard.className = 'wandlight-runtime-card';
+    const loreTitle = document.createElement('div');
+    loreTitle.className = 'wandlight-runtime-card-title';
+    loreTitle.textContent = 'Lore Handling Mode';
+    addTooltip(loreTitle, 'Direct sends selected active lore with full facts. Compressed shortens unpinned facts before injection; pinned entries remain more detailed.');
+    loreCard.appendChild(loreTitle);
+    const loreButtons = document.createElement('div');
+    loreButtons.className = 'wandlight-mode-buttons';
+    loreButtons.appendChild(createInjectionModeButton('direct', 'Direct', 'Insert active lore entries mostly verbatim, subject to the active-lore cap.', settings));
+    loreButtons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Shorten unpinned lore facts during injection so more entries fit into context. Stored lore is not changed.', settings));
+    loreCard.appendChild(loreButtons);
+    loreCard.appendChild(createKeyValue('Active lore available', String(activeLore), 'Entries eligible for prompt injection after filters, pinning, and muting.'));
+    loreCard.appendChild(createKeyValue('Pinned protection', 'enabled', 'Pinned entries are prioritized and kept less compressed than ordinary entries.'));
 
     const levelLabel = document.createElement('label');
     levelLabel.className = 'wandlight-slider-row';
     const levelText = document.createElement('span');
-    levelText.textContent = `Level: ${settings.loreCompressionLevel || 2}`;
+    levelText.textContent = `Compression level: ${settings.loreCompressionLevel || 2}`;
     addTooltip(levelText, 'Higher levels shorten unpinned entries more aggressively. Pinned entries are preserved with more detail.');
     const level = document.createElement('input');
     level.type = 'range';
@@ -906,16 +1148,12 @@ function renderInjectionTab(container, state) {
         const next = getSettings();
         next.loreCompressionLevel = Number(level.value) || 2;
         saveSettings(next);
-        levelText.textContent = `Level: ${next.loreCompressionLevel}`;
+        levelText.textContent = `Compression level: ${next.loreCompressionLevel}`;
         refreshInjectionPreviewOnly();
-    });
-    level.addEventListener('change', () => {
-        refreshPanelBody({ preserveScroll: false });
-        refreshHeader();
     });
     levelLabel.appendChild(levelText);
     levelLabel.appendChild(level);
-    compressionCard.appendChild(levelLabel);
+    loreCard.appendChild(levelLabel);
 
     const intervalLabel = document.createElement('label');
     intervalLabel.className = 'wandlight-inline-field';
@@ -936,65 +1174,79 @@ function renderInjectionTab(container, state) {
     });
     intervalLabel.appendChild(intervalText);
     intervalLabel.appendChild(interval);
-    compressionCard.appendChild(intervalLabel);
+    loreCard.appendChild(intervalLabel);
+    loreCard.appendChild(createKeyValue('Lore compression status', getCompressionStatusText(getState()), 'Shows when compressed lore preview was last calculated and how many chat turns have elapsed since then.'));
+    container.appendChild(loreCard);
 
-    const compressionStatus = getCompressionStatusText(getState());
-    compressionCard.appendChild(createKeyValue('Compression status', compressionStatus, 'Shows when the compressed preview was last calculated and how many chat turns have elapsed since then.'));
+    container.appendChild(createInjectionPreviewCard('Continuity Injection Preview', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This preview shows only Continuity tab state. It can be placed at a different depth later because it is now separated from Lore.'));
+    container.appendChild(createInjectionPreviewCard('Lore Injection Preview', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'This preview shows only accepted Lore entries, using Direct or Compressed lore handling.'));
+}
 
-    const help = document.createElement('div');
-    help.className = 'wandlight-runtime-help';
-    help.textContent = 'Vector/lorebook retrieval is not exposed yet because this extension does not currently own a reliable SillyTavern vector-store integration path. No inert vector button has been added.';
-    compressionCard.appendChild(help);
-
-    container.appendChild(compressionCard);
-
+function createInjectionPreviewCard(titleText, className, text, enabled, helpText) {
     const previewCard = document.createElement('div');
     previewCard.className = 'wandlight-runtime-card wandlight-injection-preview-card';
     const previewTitle = document.createElement('div');
     previewTitle.className = 'wandlight-runtime-card-title';
-    previewTitle.textContent = 'Prompt Injection Preview';
-    addTooltip(previewTitle, 'Live preview of the exact continuity memo Wandlight would inject with the current Direct/Compressed mode.');
+    previewTitle.textContent = titleText;
+    addTooltip(previewTitle, helpText);
     previewCard.appendChild(previewTitle);
 
     const previewHelp = document.createElement('div');
     previewHelp.className = 'wandlight-runtime-help';
-    previewHelp.textContent = settings.injectMemo
-        ? 'This preview is ephemeral context. It is sent to the model during generation, but it is not written into chat history.'
-        : 'Continuity memo injection is currently off. The preview shows what would be injected if you enable it on the Session tab.';
+    previewHelp.textContent = enabled ? helpText : `${titleText.replace(' Preview', '')} is currently disabled. The preview shows what would be injected if enabled.`;
     previewCard.appendChild(previewHelp);
 
     const pre = document.createElement('pre');
-    pre.className = 'wandlight-injection-preview';
-    pre.textContent = memo && memo.trim() ? memo : '(Injection preview is empty. Add continuity state or accepted lore entries first.)';
-    addTooltip(pre, 'Scrollable preview of the memo block inserted before the latest user message during generation.');
+    pre.className = `wandlight-injection-preview ${className}`;
+    pre.textContent = text && text.trim() ? text : '(Preview is empty.)';
+    addTooltip(pre, 'Scrollable preview of the prompt context block. This text is ephemeral and is not written into chat history.');
     previewCard.appendChild(pre);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Refresh Preview', 'Rebuilds this preview from current state and current injection mode.', () => {
+    actions.appendChild(createButton('Refresh Preview', 'Rebuilds both split injection previews from current state and settings.', () => {
         refreshInjectionPreviewOnly();
-        toast('Injection preview refreshed.', 'info');
+        toast('Injection previews refreshed.', 'info');
     }));
     previewCard.appendChild(actions);
-    container.appendChild(previewCard);
+    return previewCard;
 }
 
 function refreshInjectionPreviewOnly() {
     const state = getState();
     const settings = getSettings();
-    const memo = buildMemoPreview(state, settings.loreInjectionMode || 'direct');
-    recordCompressionPreview(state, settings.loreInjectionMode || 'direct', memo);
-    const pre = panelRoot?.querySelector('.wandlight-injection-preview');
-    if (pre) {
-        pre.textContent = memo && memo.trim() ? memo : '(Injection preview is empty. Add continuity state or accepted lore entries first.)';
+    const continuity = buildContinuityPreview(state, settings.continuityInjectionMode || 'direct');
+    const lore = buildLorePreview(state, settings.loreInjectionMode || 'direct');
+    recordCompressionPreview(state, settings.continuityInjectionMode || 'direct', continuity, 'continuity');
+    recordCompressionPreview(state, settings.loreInjectionMode || 'direct', lore, 'lore');
+
+    const continuityPre = panelRoot?.querySelector('.wandlight-continuity-injection-preview');
+    if (continuityPre) {
+        continuityPre.textContent = continuity && continuity.trim() ? continuity : '(Preview is empty.)';
+    }
+
+    const lorePre = panelRoot?.querySelector('.wandlight-lore-injection-preview');
+    if (lorePre) {
+        lorePre.textContent = lore && lore.trim() ? lore : '(Preview is empty.)';
     }
 }
 
-function recordCompressionPreview(state, mode, memo) {
-    if (!state || !state.loreCompressionStatus) return;
-    const signature = getMemoSignature(state, mode);
+function recordCompressionPreview(state, mode, memo, kind = 'lore') {
+    if (!state) return;
+    const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
+    if (!state[statusKey]) {
+        state[statusKey] = {
+            lastCompressedAt: 0,
+            lastSignature: '',
+            lastMode: 'direct',
+            lastTokenEstimate: 0,
+            turnsSinceCompression: 0,
+            lastChatLength: 0,
+        };
+    }
+    const signature = getMemoSignature(state, mode, kind);
     const chatLength = getChatLength();
-    const status = state.loreCompressionStatus;
+    const status = state[statusKey];
 
     if (mode === 'compressed' && status.lastSignature !== signature) {
         status.lastCompressedAt = Date.now();
@@ -1026,6 +1278,19 @@ function getCompressionStatusText(state) {
     return `last calculated ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens`;
 }
 
+function getContinuityCompressionStatusText(state) {
+    const settings = getSettings();
+    const status = state?.continuityCompressionStatus || {};
+    if ((settings.continuityInjectionMode || 'direct') !== 'compressed') {
+        return 'Direct mode active; continuity compression not used.';
+    }
+    if (!status.lastCompressedAt) {
+        return 'Compressed continuity preview not calculated yet.';
+    }
+    const when = new Date(status.lastCompressedAt).toLocaleTimeString();
+    return `last calculated ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens`;
+}
+
 function getChatLength() {
     try {
         const ctx = SillyTavern.getContext();
@@ -1049,6 +1314,24 @@ function createInjectionModeButton(mode, label, tooltip, settings) {
         refreshPanelBody({ preserveScroll: false });
         refreshHeader();
         toast(`Lore injection mode set to ${label}.`);
+    });
+    return btn;
+}
+
+function createContinuityModeButton(mode, label, tooltip, settings) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'wandlight-mode-button';
+    if ((settings.continuityInjectionMode || 'direct') === mode) btn.classList.add('wandlight-mode-button-active');
+    btn.textContent = label;
+    addTooltip(btn, tooltip);
+    btn.addEventListener('click', () => {
+        const next = getSettings();
+        next.continuityInjectionMode = mode;
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: false });
+        refreshHeader();
+        toast(`Continuity injection mode set to ${label}.`);
     });
     return btn;
 }

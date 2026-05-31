@@ -154,47 +154,8 @@
                         </label>
 
                         <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
-                            Current continuity state. Double-click the summary to edit raw JSON.
+                            Editable continuity state has moved to the floating Wandlight window under the Continuity tab. This menu is reserved for API setup, import/export, and developer logging.
                         </p>
-                        <div id="wandlight_state_display" class="wandlight-state-display"
-                            style="font-family: monospace; font-size: 0.78em;
-                            background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px;
-                            max-height: 400px; overflow-y: auto; margin: 0; color: #e0e0e0;">
-                            <em>No continuity state loaded</em>
-                        </div>
-                        <textarea id="wandlight_state_json" class="wandlight-state-editor"
-                            style="min-height: 200px; font-family: monospace; font-size: 0.78em;
-                            background: rgba(0,0,0,0.3); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.15);
-                            border-radius: 4px; padding: 10px; resize: vertical; width: 100%; box-sizing: border-box;
-                            display: none;"></textarea>
-
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            <button id="wandlight_refresh_state" class="menu_button interactable"
-                                title="Reload state from chat metadata.">
-                                <i class="fa-solid fa-rotate"></i> Refresh
-                            </button>
-                            <button id="wandlight_save_state" class="menu_button interactable"
-                                title="Save edited raw state JSON.">
-                                <i class="fa-solid fa-floppy-disk"></i> Save State
-                            </button>
-                            <button id="wandlight_undo_change" class="menu_button interactable"
-                                title="Undo the last saved continuity state change.">
-                                <i class="fa-solid fa-undo"></i> Undo Last Change
-                            </button>
-                            <button id="wandlight_import_state" class="menu_button interactable"
-                                title="Import Wandlight state from a JSON file.">
-                                <i class="fa-solid fa-file-import"></i> Import
-                            </button>
-                            <button id="wandlight_export_state" class="menu_button interactable"
-                                title="Export current Wandlight state to a JSON file.">
-                                <i class="fa-solid fa-file-export"></i> Export
-                            </button>
-                            <button id="wandlight_reset_state" class="menu_button interactable"
-                                style="color: #ff6666;"
-                                title="Reset all continuity state to defaults. A snapshot is taken first so this can be undone.">
-                                <i class="fa-solid fa-trash"></i> Reset State
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>

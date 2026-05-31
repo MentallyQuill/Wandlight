@@ -52,7 +52,9 @@ function wandlightContinuityInterceptor(chat, contextSize, abort, type) {
         const settings = getSettings();
 
         if (!settings.enabled) return;
-        if (!settings.injectMemo) return;
+        const injectContinuity = settings.injectContinuity !== false && settings.injectMemo !== false;
+        const injectLore = settings.injectLore !== false;
+        if (!injectContinuity && !injectLore) return;
         if (!chat || !Array.isArray(chat) || chat.length === 0) return;
 
         // Get the live continuity state (reacquired from ST context every time)

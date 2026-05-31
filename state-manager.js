@@ -348,11 +348,24 @@ export function migrateState(state) {
         state._version = 4;
     }
 
+    // ── Schema v5: expanded editable continuity state and split injection preview ─────────
+    if (state._version < 5) {
+        const defaults = getDefaultState();
+        state.continuityConfig = { ...defaults.continuityConfig, ...(state.continuityConfig || {}) };
+        state.characters = Array.isArray(state.characters) ? state.characters : [];
+        state.inventory = Array.isArray(state.inventory) ? state.inventory : [];
+        state.objectives = Array.isArray(state.objectives) ? state.objectives : [];
+        state.continuityCompressionStatus = state.continuityCompressionStatus || defaults.continuityCompressionStatus;
+        state._version = 5;
+    }
+
     // ── Always normalize lore fields post-migration ────────────────────────
     // Even v4 states can become malformed through manual editing or old imports.
     state.loreContext = normalizeLoreContext(state.loreContext || {});
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []);
     state.pendingLoreEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
+
+    normalizeContinuityStructure(state);
 
     if (!state.loreCompressionStatus || typeof state.loreCompressionStatus !== 'object') {
         state.loreCompressionStatus = getDefaultState().loreCompressionStatus;
@@ -373,7 +386,7 @@ export function migrateState(state) {
         state.lorePanel.selectedCategory = state.lorePanel.selectedCategory || 'all';
         state.lorePanel.search = state.lorePanel.search || '';
         state.lorePanel.selectedEntryId = state.lorePanel.selectedEntryId || '';
-        state.lorePanel.activeTab = ['session', 'generate', 'review', 'injection', 'lore'].includes(state.lorePanel.activeTab)
+        state.lorePanel.activeTab = ['session', 'generate', 'review', 'continuity', 'lore', 'injection'].includes(state.lorePanel.activeTab)
             ? state.lorePanel.activeTab
             : 'session';
         state.lorePanel.reviewSelectedIds = Array.isArray(state.lorePanel.reviewSelectedIds) ? state.lorePanel.reviewSelectedIds : [];
@@ -413,6 +426,169 @@ export function migrateState(state) {
     return state;
 }
 
+
+// ── Continuity structure helpers ───────────────────────────────────────────────
+
+function normalizeContinuityStructure(state) {
+    const defaults = getDefaultState();
+
+    if (!state.continuityConfig || typeof state.continuityConfig !== 'object' || Array.isArray(state.continuityConfig)) {
+        state.continuityConfig = { ...defaults.continuityConfig };
+    } else {
+        state.continuityConfig = { ...defaults.continuityConfig, ...state.continuityConfig };
+        for (const key of Object.keys(defaults.continuityConfig)) {
+            state.continuityConfig[key] = state.continuityConfig[key] !== false;
+        }
+    }
+
+    if (!state.scene || typeof state.scene !== 'object' || Array.isArray(state.scene)) {
+        state.scene = { ...defaults.scene };
+    } else {
+        state.scene = { ...defaults.scene, ...state.scene };
+        state.scene.presentCharacters = Array.isArray(state.scene.presentCharacters) ? state.scene.presentCharacters.filter(Boolean).map(String) : [];
+        state.scene.nearbyCharacters = Array.isArray(state.scene.nearbyCharacters) ? state.scene.nearbyCharacters.filter(Boolean).map(String) : [];
+    }
+
+    normalizeStateEntries(state);
+
+    if (!state.continuityCompressionStatus || typeof state.continuityCompressionStatus !== 'object') {
+        state.continuityCompressionStatus = getDefaultState().continuityCompressionStatus || {
+            lastCompressedAt: 0,
+            lastSignature: '',
+            lastMode: 'direct',
+            lastTokenEstimate: 0,
+            turnsSinceCompression: 0,
+            lastChatLength: 0,
+        };
+    }
+}
+
+function isSectionEnabled(state, section) {
+    return state?.continuityConfig?.[section] !== false;
+}
+
+function applyArrayDelta(target, patch, identityKey, normalizer) {
+    if (!Array.isArray(target) || !patch || typeof patch !== 'object') return;
+
+    if (Array.isArray(patch.added)) {
+        for (const item of patch.added) {
+            target.push(normalizer(item));
+        }
+    }
+
+    if (Array.isArray(patch.updated)) {
+        for (const upd of patch.updated) {
+            let idx = Number.isInteger(upd.index) ? upd.index : -1;
+            if (idx < 0 && upd[identityKey]) {
+                const wanted = String(upd[identityKey]).toLowerCase();
+                idx = target.findIndex(item => String(item?.[identityKey] || '').toLowerCase() === wanted);
+            }
+            if (idx >= 0 && idx < target.length) {
+                const merged = { ...target[idx], ...(upd.changes || {}) };
+                if (upd.changes?.emotionalState && target[idx]?.emotionalState) {
+                    merged.emotionalState = {
+                        ...target[idx].emotionalState,
+                        ...upd.changes.emotionalState,
+                        lastUpdatedAt: Date.now(),
+                        lastUpdatedChatLength: getCurrentChatLength(),
+                    };
+                }
+                target[idx] = normalizer(merged);
+            }
+        }
+    }
+
+    if (Array.isArray(patch.removed)) {
+        const removals = new Set();
+        for (const raw of patch.removed) {
+            if (Number.isInteger(raw)) {
+                removals.add(raw);
+            } else if (typeof raw === 'string') {
+                const wanted = raw.toLowerCase();
+                const idx = target.findIndex(item => String(item?.[identityKey] || '').toLowerCase() === wanted);
+                if (idx >= 0) removals.add(idx);
+            }
+        }
+        const sorted = [...removals].sort((a, b) => b - a);
+        for (const idx of sorted) {
+            if (idx >= 0 && idx < target.length) target.splice(idx, 1);
+        }
+    }
+}
+
+function clampEmotion(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(-5, Math.min(5, Math.round(n)));
+}
+
+function normalizeEmotionalState(raw = {}) {
+    const src = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+    return {
+        affection: clampEmotion(src.affection),
+        trust: clampEmotion(src.trust),
+        desire: clampEmotion(src.desire),
+        connection: clampEmotion(src.connection),
+        fear: clampEmotion(src.fear),
+        anger: clampEmotion(src.anger),
+        sadness: clampEmotion(src.sadness),
+        joy: clampEmotion(src.joy),
+        notes: typeof src.notes === 'string' ? src.notes : '',
+        lastUpdatedAt: Number.isFinite(Number(src.lastUpdatedAt)) ? Number(src.lastUpdatedAt) : Date.now(),
+        lastUpdatedChatLength: Number.isFinite(Number(src.lastUpdatedChatLength)) ? Number(src.lastUpdatedChatLength) : getCurrentChatLength(),
+    };
+}
+
+function getCurrentChatLength() {
+    try {
+        const ctx = SillyTavern.getContext();
+        return Array.isArray(ctx?.chat) ? ctx.chat.length : 0;
+    } catch (_) {
+        return 0;
+    }
+}
+
+function normalizeCharacter(raw = {}) {
+    const c = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+    const emotionalState = normalizeEmotionalState(c.emotionalState || {});
+    return {
+        name: typeof c.name === 'string' ? c.name.trim() : '',
+        aliases: Array.isArray(c.aliases) ? c.aliases.filter(Boolean).map(String) : [],
+        role: typeof c.role === 'string' ? c.role : '',
+        location: typeof c.location === 'string' ? c.location : '',
+        clothing: typeof c.clothing === 'string' ? c.clothing : '',
+        posture: typeof c.posture === 'string' ? c.posture : '',
+        physicalState: typeof c.physicalState === 'string' ? c.physicalState : '',
+        emotionalState,
+        inventory: Array.isArray(c.inventory) ? c.inventory.filter(Boolean).map(String) : [],
+        goals: Array.isArray(c.goals) ? c.goals.filter(Boolean).map(String) : [],
+        notes: typeof c.notes === 'string' ? c.notes : '',
+    };
+}
+
+function normalizeInventoryItem(raw = {}) {
+    const item = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+    return {
+        owner: typeof item.owner === 'string' ? item.owner : '',
+        item: typeof item.item === 'string' ? item.item : '',
+        status: typeof item.status === 'string' ? item.status : '',
+        location: typeof item.location === 'string' ? item.location : '',
+        notes: typeof item.notes === 'string' ? item.notes : '',
+    };
+}
+
+function normalizeObjective(raw = {}) {
+    const obj = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+    const allowed = new Set(['active', 'blocked', 'completed', 'abandoned']);
+    return {
+        owner: typeof obj.owner === 'string' ? obj.owner : '',
+        goal: typeof obj.goal === 'string' ? obj.goal : '',
+        status: allowed.has(obj.status) ? obj.status : 'active',
+        stakes: typeof obj.stakes === 'string' ? obj.stakes : '',
+        notes: typeof obj.notes === 'string' ? obj.notes : '',
+    };
+}
+
 // ── Delta validation ────────────────────────────────────────────────────────────
 
 /** Valid enum values for validation */
@@ -426,7 +602,7 @@ const VALID_ENUMS = {
 
 /** Known top-level change keys */
 const KNOWN_CHANGE_KEYS = new Set([
-    'canon', 'scene', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags',
+    'canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags',
 ]);
 
 /**
@@ -663,6 +839,10 @@ export function applyDelta(state, delta) {
         ...state,
         canon: { ...state.canon, divergences: [...(state.canon.divergences || [])] },
         scene: { ...state.scene, presentCharacters: [...(state.scene.presentCharacters || [])], nearbyCharacters: [...(state.scene.nearbyCharacters || [])] },
+        continuityConfig: { ...(state.continuityConfig || {}) },
+        characters: [...(state.characters || [])],
+        inventory: [...(state.inventory || [])],
+        objectives: [...(state.objectives || [])],
         knowledge: { ...state.knowledge },
         secrets: [...(state.secrets || [])],
         relationships: [...(state.relationships || [])],
@@ -676,7 +856,7 @@ export function applyDelta(state, delta) {
     const changes = delta.changes;
 
     // Canon block — shallow merge
-    if (changes.canon) {
+    if (isSectionEnabled(next, 'canon') && changes.canon) {
         if (changes.canon.era !== undefined) next.canon.era = changes.canon.era;
         if (changes.canon.inUniverseDate !== undefined) next.canon.inUniverseDate = changes.canon.inUniverseDate;
         if (changes.canon.canonBoundary !== undefined) next.canon.canonBoundary = changes.canon.canonBoundary;
@@ -686,10 +866,11 @@ export function applyDelta(state, delta) {
     }
 
     // Scene block — shallow merge
-    if (changes.scene) {
+    if (isSectionEnabled(next, 'scene') && changes.scene) {
         if (changes.scene.location !== undefined) next.scene.location = changes.scene.location;
         if (changes.scene.timeOfDay !== undefined) next.scene.timeOfDay = changes.scene.timeOfDay;
-        if (changes.scene.weather !== undefined) next.scene.weather = changes.scene.weather;
+        if (isSectionEnabled(next, 'scene') && changes.scene.weather !== undefined) next.scene.weather = changes.scene.weather;
+        if (isSectionEnabled(next, 'scene') && changes.scene.ambience !== undefined) next.scene.ambience = changes.scene.ambience;
         if (Array.isArray(changes.scene.presentCharacters)) {
             next.scene.presentCharacters = changes.scene.presentCharacters;
         }
@@ -699,8 +880,23 @@ export function applyDelta(state, delta) {
         if (changes.scene.currentActivity !== undefined) next.scene.currentActivity = changes.scene.currentActivity;
     }
 
+    // Characters — add/update/remove by name or index
+    if (isSectionEnabled(next, 'characters') && changes.characters) {
+        applyArrayDelta(next.characters, changes.characters, 'name', normalizeCharacter);
+    }
+
+    // Inventory — add/update/remove by index
+    if (isSectionEnabled(next, 'inventory') && changes.inventory) {
+        applyArrayDelta(next.inventory, changes.inventory, 'item', normalizeInventoryItem);
+    }
+
+    // Objectives — add/update/remove by index
+    if (isSectionEnabled(next, 'objectives') && changes.objectives) {
+        applyArrayDelta(next.objectives, changes.objectives, 'goal', normalizeObjective);
+    }
+
     // Knowledge — character-keyed, merge arrays per character
-    if (changes.knowledge) {
+    if (isSectionEnabled(next, 'knowledge') && changes.knowledge) {
         for (const [char, facts] of Object.entries(changes.knowledge)) {
             if (!Array.isArray(facts)) continue;
             const existing = next.knowledge[char] || [];
@@ -713,7 +909,7 @@ export function applyDelta(state, delta) {
     }
 
     // Secrets — add/update/remove pattern
-    if (changes.secrets) {
+    if (isSectionEnabled(next, 'secrets') && changes.secrets) {
         if (Array.isArray(changes.secrets.added)) {
             next.secrets.push(...changes.secrets.added);
         }
@@ -736,7 +932,7 @@ export function applyDelta(state, delta) {
     }
 
     // Relationships — add/update/remove pattern
-    if (changes.relationships) {
+    if (isSectionEnabled(next, 'relationships') && changes.relationships) {
         if (Array.isArray(changes.relationships.added)) {
             next.relationships.push(...changes.relationships.added);
         }
@@ -759,7 +955,7 @@ export function applyDelta(state, delta) {
     }
 
     // Threads — add/update pattern (no removal — threads resolve, not delete)
-    if (changes.threads) {
+    if (isSectionEnabled(next, 'threads') && changes.threads) {
         if (Array.isArray(changes.threads.added)) {
             next.threads.push(...changes.threads.added);
         }
@@ -774,7 +970,7 @@ export function applyDelta(state, delta) {
     }
 
     // Continuity flags — add/resolve pattern
-    if (changes.continuityFlags) {
+    if (isSectionEnabled(next, 'flags') && changes.continuityFlags) {
         if (Array.isArray(changes.continuityFlags.added)) {
             next.continuityFlags.push(...changes.continuityFlags.added);
         }
@@ -855,6 +1051,21 @@ function normalizeFlag(f) {
  * @param {Object} state - WandlightState to normalize
  */
 function normalizeStateEntries(state) {
+    if (Array.isArray(state.characters)) {
+        state.characters = state.characters.map(normalizeCharacter).filter(c => c.name);
+    } else {
+        state.characters = [];
+    }
+    if (Array.isArray(state.inventory)) {
+        state.inventory = state.inventory.map(normalizeInventoryItem).filter(i => i.item || i.owner || i.status);
+    } else {
+        state.inventory = [];
+    }
+    if (Array.isArray(state.objectives)) {
+        state.objectives = state.objectives.map(normalizeObjective).filter(o => o.goal || o.owner);
+    } else {
+        state.objectives = [];
+    }
     if (Array.isArray(state.secrets)) {
         state.secrets = state.secrets.map(normalizeSecret);
     }
@@ -904,6 +1115,10 @@ export function importState(json) {
             ...parsed,
             canon: { ...defaults.canon, ...(parsed.canon || {}) },
             scene: { ...defaults.scene, ...(parsed.scene || {}) },
+            continuityConfig: { ...defaults.continuityConfig, ...(parsed.continuityConfig || {}) },
+            characters: Array.isArray(parsed.characters) ? parsed.characters : [],
+            inventory: Array.isArray(parsed.inventory) ? parsed.inventory : [],
+            objectives: Array.isArray(parsed.objectives) ? parsed.objectives : [],
             knowledge: parsed.knowledge && typeof parsed.knowledge === 'object' && !Array.isArray(parsed.knowledge)
                 ? parsed.knowledge : {},
             secrets: Array.isArray(parsed.secrets) ? parsed.secrets : [],

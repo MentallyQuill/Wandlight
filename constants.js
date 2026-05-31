@@ -45,12 +45,13 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
     enabled: true,
     injectMemo: true,
+    injectContinuity: true,
     autoExtract: true,
     autoApplyDelta: false,
     extractionInterval: 1,
@@ -74,6 +75,9 @@ export const DEFAULT_SETTINGS = {
     loreInjectionMode: 'direct', // 'direct' | 'compressed'
     loreCompressionLevel: 2, // 1=minimal, 5=aggressive
     loreCompressionTurnInterval: 8,
+    continuityInjectionMode: 'direct', // 'direct' | 'compressed'
+    continuityCompressionLevel: 2,
+    continuityEmotionDecayTurns: 6,
 
     // Lore model provider
     loreProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
@@ -106,14 +110,32 @@ export function getDefaultState() {
             canonBoundary: '',
             divergences: [],
         },
+        continuityConfig: {
+            canon: true,
+            scene: true,
+            characters: true,
+            appearance: true,
+            emotionalState: true,
+            knowledge: true,
+            secrets: true,
+            relationships: true,
+            threads: true,
+            inventory: true,
+            objectives: true,
+            flags: true,
+        },
         scene: {
             location: '',
             timeOfDay: '',
             weather: '',
+            ambience: '',
             presentCharacters: [],
             nearbyCharacters: [],
             currentActivity: '',
         },
+        characters: [],
+        inventory: [],
+        objectives: [],
 
         // Lore matrix (schema v2)
         loreContext: {
@@ -144,6 +166,14 @@ export function getDefaultState() {
 
         // Prompt injection/compression preview status
         loreCompressionStatus: {
+            lastCompressedAt: 0,
+            lastSignature: '',
+            lastMode: 'direct',
+            lastTokenEstimate: 0,
+            turnsSinceCompression: 0,
+            lastChatLength: 0,
+        },
+        continuityCompressionStatus: {
             lastCompressedAt: 0,
             lastSignature: '',
             lastMode: 'direct',
@@ -198,6 +228,10 @@ export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State 
 6. For secrets, relationships, and threads: use "added" for new entries, "updated" for changes to existing entries (with index), "removed" for removed entries.
 7. Be conservative — only flag continuity issues when there is a clear contradiction, not just ambiguity.
 8. Canon era, in-universe date, and canon boundary should only change when explicitly established in the narrative.
+9. Track clothing, posture, physical state, carried items, goals, emotional state, trust, affection, desire, and connection when clearly implied.
+10. Emotional state should be current-state, not permanent personality. Avoid feedback loops: reduce or omit heightened emotion unless the latest messages reinforce it.
+11. Numeric emotional values use -5 to +5 where 0 is neutral. Do not jump more than 2 points from the current state unless the scene explicitly justifies it.
+12. Respect optional continuity sections. If a section is disabled in the current state, omit changes for that section.
 </rules>
 
 <delta_schema>
@@ -214,10 +248,18 @@ export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State 
       "location": "string",
       "timeOfDay": "string",
       "weather": "string",
+      "ambience": "string",
       "presentCharacters": ["string"],
       "nearbyCharacters": ["string"],
       "currentActivity": "string"
     },
+    "characters": {
+      "added": [{ "name": "string", "role": "string", "location": "string", "clothing": "string", "posture": "string", "physicalState": "string", "emotionalState": { "affection": 0, "trust": 0, "desire": 0, "connection": 0, "fear": 0, "anger": 0, "sadness": 0, "joy": 0, "notes": "string" }, "inventory": ["string"], "goals": ["string"] }],
+      "updated": [{ "name": "string", "index": 0, "changes": {} }],
+      "removed": ["string or index"]
+    },
+    "inventory": { "added": [{ "owner": "string", "item": "string", "status": "string", "location": "string" }], "updated": [{ "index": 0, "changes": {} }], "removed": [0] },
+    "objectives": { "added": [{ "owner": "string", "goal": "string", "status": "active|blocked|completed|abandoned", "stakes": "string" }], "updated": [{ "index": 0, "changes": {} }], "removed": [0] },
     "knowledge": { "CharacterName": ["fact1", "fact2"] },
     "secrets": {
       "added": [{ "fact": "string", "trueState": "string", "whoKnows": ["string"], "whoSuspects": ["string"], "publicVersion": "string" }],
@@ -241,7 +283,7 @@ export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State 
 }
 </delta_schema>
 
-Current continuity state:
+Current continuity state, including optional section settings:
 {{stateJson}}
 
 Recent roleplay messages:

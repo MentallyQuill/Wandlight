@@ -2671,3 +2671,49 @@
 .wandlight-injection-preview-card .wandlight-runtime-card-title {
     letter-spacing: 0.01em;
 }
+
+/* ── README/instructions polish ───────────────────────────────────────────── */
+.wandlight-instructions-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wandlight-instructions-lede,
+.wandlight-instructions-note {
+    margin: 0;
+    color: rgba(238, 226, 196, 0.84);
+    font-size: 0.86em;
+    line-height: 1.45;
+}
+
+.wandlight-instructions-note {
+    color: rgba(238, 226, 196, 0.7);
+}
+
+.wandlight-instructions-flow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 6px;
+}
+
+.wandlight-instructions-step-card {
+    border: 1px solid rgba(190, 145, 75, 0.24);
+    border-radius: 8px;
+    background: rgba(20, 18, 20, 0.45);
+    padding: 7px 8px;
+    min-width: 0;
+}
+
+.wandlight-instructions-step-title {
+    color: #f3d38b;
+    font-weight: 700;
+    font-size: 0.82em;
+    margin-bottom: 3px;
+}
+
+.wandlight-instructions-step-body {
+    color: rgba(238, 226, 196, 0.78);
+    font-size: 0.78em;
+    line-height: 1.35;
+}

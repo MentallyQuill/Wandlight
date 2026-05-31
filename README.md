@@ -1,12 +1,73 @@
+![Wandlight Continuity](Images/banner.jpg)
+
 # Wandlight Continuity
 
-A lightweight SillyTavern extension for HP roleplay continuity.
+Wandlight Continuity is a SillyTavern extension for long-form Harry Potter roleplay. It keeps track of the things a model tends to blur over time: what date the scene is in, what canon has or has not happened, who knows which secrets, what the current scene state is, and which lore should be sent back into the prompt.
 
-Wandlight handles prose, tone, and style. Wandlight Continuity tracks the story state that prompt text tends to lose: canon boundary, date, location, present characters, character knowledge, secrets, relationships, unresolved threads, and continuity warnings.
+It is built for stories where chronology, secrets, alternate timelines, and character knowledge matter. The extension does not replace your writing preset. It gives the model a cleaner memory surface so the roleplay can stay anchored without turning every prompt into a recap.
 
-## Getting Started
+## Who It Is For
 
-### 1. Install the Extension
+Wandlight Continuity is useful if your SillyTavern roleplay depends on:
+
+- canon dates and school years
+- private character knowledge
+- secrets, reveals, and future-spoiler guards
+- AU divergence from the original timeline
+- persistent scene and relationship state
+- a growing lorebook that needs review, tagging, muting, and injection control
+
+It is designed for users who are comfortable configuring an extension, choosing models, and reviewing generated state before trusting it.
+
+## What It Does
+
+Wandlight separates story memory into four practical layers.
+
+**Context** identifies the story's current date, canon reference point, and branch. This is used to decide which canon constraints are relevant.
+
+**Continuity** tracks live state: scene, characters, appearance, emotions, knowledge, secrets, relationships, objectives, inventory, divergences, and story milestones. This is the state of the roleplay as it currently exists, not a generic summary of canon.
+
+**Lore** stores durable facts and constraints. Lore can come from the local canon database, model-generated story analysis, or manual edits. Accepted lore can be searched, filtered, tagged, pinned, muted, bulk edited, expired, or deleted.
+
+**Injection** controls what is actually sent to the model. Continuity and Lore can be injected separately, placed at configurable prompt depth and role, and sent directly or compressed through a model.
+
+## Key Features
+
+- Date-aware canon lore suggestions from a local database.
+- Story lore generation from recent chat history.
+- Pending lore review before entries become active.
+- Bulk editing for accepted lore entries.
+- Story milestone gates so canon knowledge does not activate just because a calendar date passed.
+- Lifecycle states such as active, blocked, future, expired, canon overdue, and muted.
+- Direct or compressed injection for both Continuity and Lore.
+- Configurable prompt placement, role, and depth.
+- Editable continuity scan prompts by section.
+- State history for undoing Wandlight changes.
+- A local `Lore/` database that can be expanded with new entries, categories, gates, and scoring rules.
+
+## Recommended Workflow
+
+Open the Wandlight Continuity window and work left to right.
+
+Start in **Context**. Detect or set the scene date, canon reference point, and branch. This anchors the rest of the system.
+
+Use **Continuity** to scan the current roleplay state. This captures the live scene, character knowledge, secrets, relationships, milestones, and other details that should persist.
+
+Use **Lore** to suggest canon lore from the local database or generate story lore from recent messages. Review pending entries before accepting them. Accepted lore can be edited, tagged, pinned, muted, expired, or bulk managed.
+
+Use **Injection** to decide what gets sent to the model. Keep it direct when detail matters. Use compression when the lore or continuity block grows too large.
+
+The chat remains the source of truth. Wandlight is a working memory layer that helps the model see the right parts of that truth at the right time.
+
+## Canon Lore Database
+
+The extension includes a local `Lore/` folder for date-aware Harry Potter constraints. It is not meant to be a full encyclopedia. Its purpose is to help Wandlight decide what should be true, blocked, expired, or suggested at a given point in the story.
+
+The database is expandable. Add entries to `Lore/user/custom_entries.json`, or add new files through `Lore/manifest.json`. Categories, gate types, scoring weights, and UI labels are defined by registry files so the database can grow without rewriting the parser.
+
+See `Lore/README.md` for the database schema and authoring guidance.
+
+## Installation
 
 Place the extension folder here:
 
@@ -16,143 +77,13 @@ data/default-user/extensions/third-party/WandlightContinuity
 
 Restart SillyTavern.
 
-The folder name matters. If you rename the folder, update `EXTENSION_FOLDER` in `constants.js`.
+The folder name should remain `WandlightContinuity` unless you also update the extension folder constant in the code.
 
-### 2. Use Wandlight as Your Preset
+## Notes
 
-Wandlight Continuity is built for the Wandlight preset.
+Wandlight Continuity is not a game system. It does not add combat, dice, character sheets, spell slots, or progression mechanics.
 
-Use Wandlight for prose, voice, tense, perspective, and length. Use this extension for state tracking.
-
-### 3. Open the Settings Panel
-
-Open SillyTavern's Extensions panel and find **Wandlight Continuity**.
-
-Recommended starting settings:
-
-- Enable Wandlight Continuity: ON
-- Inject Continuity Memo: ON
-- Auto-Extract State Deltas: ON
-- Auto-Apply Deltas: OFF at first
-- Extraction Interval: 1
-- Max Snapshots: 20
-
-Review extracted deltas until the behavior is predictable for your model.
-
-## Features
-
-### Continuity State
-
-Tracks the current scene and long-running story facts:
-
-- canon era and boundary
-- in-universe date
-- location, time, weather, and activity
-- present and nearby characters
-- character knowledge
-- secrets and public versions
-- relationship tension and trust
-- active story threads
-- continuity warnings
-
-### Continuity Memo
-
-Before generation, the extension injects a compact state block:
-
-```text
-[WANDLIGHT CONTINUITY STATE]
-...
-[/WANDLIGHT CONTINUITY STATE]
-```
-
-The memo is temporary. It is not written into chat history.
-
-### State Extraction
-
-After a reply, the extension can run a background extraction pass and return a JSON delta.
-
-It looks for persistent changes only: movement, time passing, character arrivals, secret reveals, new knowledge, relationship shifts, unresolved consequences, and canon divergence.
-
-### Delta Review
-
-Deltas can be applied automatically or reviewed first.
-
-Manual review is recommended for new stories, new models, or complex canon scenes.
-
-### Undo and Snapshots
-
-The extension snapshots state before changes. Use **Undo Last Change** to restore the previous state.
-
-### State Editor
-
-The settings panel includes a raw JSON editor, import/export controls, a memo preview, and a last-delta preview.
-
-### Lore Matrix
-
-A structured knowledge table for managing which characters know what facts, with support for canonical truth status, private/public reveal policies, scene activation, and manual review.
-
-Each lore entry has:
-- **id / title** — unique identifier and display name
-- **category** — character, event, location, object, relationship, spell, secret, or faction
-- **canonStatus** — canon, fanon, alternate, divergent, or speculative
-- **truthStatus** — what really happened (true / false / ambiguous / unknown)
-- **beliefs** — per-character belief entries with belief value, source, and confidence
-- **revealPolicy** — private (GM-only), public (in-memo), or condition (revealed when…)
-- **status** — active, pinned, archived, or disabled
-- **activation** — array of activation conditions (scene, character, topic, location)
-- **sceneTags** — tags for scene-based activation filtering
-
-#### Context Detection
-
-Click **Detect Lore Context** (or use the extraction system) to snapshot the current scene's canonical anchoring — date range, subjective timeline position, branch ID, time-travel mode — into `loreContext`. This context drives which lore entries are considered active for the current scene.
-
-#### Generation
-
-Click **Generate Lore** to have the LLM analyze recent chat history and produce `sceneTags` and `beliefs` for entries missing either. Results arrive as pending entries (stored in `_pendingLore`). Review them before accepting.
-
-#### Review
-
-Use **Accept All** or **Reject All** to finalize generated entries. Accepted entries are merged into `loreMatrix` and immediately available for memo injection and the state viewer.
-
-## What It Is Not
-
-Wandlight Continuity is not a game system.
-
-It does not add dice, XP, HP bars, spell slots, combat turns, or D&D mechanics. It does not replace Wandlight's prose controls. It does not bundle a Harry Potter encyclopedia.
-
-## Troubleshooting
-
-### Settings Panel Does Not Appear
-
-Check the installed folder name. By default, the extension expects:
-
-```text
-third-party/WandlightContinuity
-```
-
-If the folder name is different, update `EXTENSION_FOLDER` in `constants.js`.
-
-### State Is Not Updating
-
-Check that **Auto-Extract State Deltas** is enabled.
-
-If **Auto-Apply Deltas** is off, extracted changes appear in the Last Delta panel and must be applied manually.
-
-### The Memo Is Empty
-
-Add state manually, run extraction, or continue the story until the extractor has something persistent to track.
-
-### The Memo Stops Injecting
-
-The memo may be over the token cap. Reduce stored state or remove stale entries from the state editor.
-
-## Recommended Workflow
-
-Use Wandlight normally.
-
-Let the extension track continuity in the background. Review deltas when canon knowledge, secrets, or relationships matter. Correct the state manually when the model gets something wrong.
-
-Chat history remains the operative truth. Wandlight Continuity is there to keep that truth visible.
+It is a continuity and lore-control tool for roleplay sessions where memory, chronology, and secrets matter.
 
 ## License
 

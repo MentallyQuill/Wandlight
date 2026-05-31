@@ -550,20 +550,54 @@ function createInstructionsCard() {
     const wrap = document.createElement('div');
     wrap.className = 'wandlight-instructions-card';
 
-    const list = document.createElement('ol');
-    list.className = 'wandlight-workflow-list';
-    const steps = [
-        'Context: detect or manually set the scene date, canon reference point, and story branch.',
-        'Continuity: scan or auto-track scene, characters, emotions, knowledge, relationships, and other live state.',
-        'Lore: suggest canon lore from the local database, generate story/AU lore from chat, review entries, then search/edit/tag/pin/mute accepted lore.',
-        'Injection: choose whether Continuity and Lore are sent to the model, and whether each is direct or compressed.',
+    const intro = document.createElement('p');
+    intro.className = 'wandlight-instructions-lede';
+    intro.textContent = 'Wandlight is a working memory layer for the story. Use it to anchor date, state, lore, and injection without turning the chat itself into a recap.';
+    wrap.appendChild(intro);
+
+    const flow = document.createElement('div');
+    flow.className = 'wandlight-instructions-flow';
+
+    const cards = [
+        {
+            title: 'Context',
+            body: 'Set the scene date, canon reference point, and branch. Canon suggestions depend on this anchor.',
+        },
+        {
+            title: 'Continuity',
+            body: 'Scan the live story state: scene, characters, knowledge, secrets, relationships, objectives, and milestones.',
+        },
+        {
+            title: 'Lore',
+            body: 'Suggest canon lore from the local database or generate story lore from chat. Review before accepting.',
+        },
+        {
+            title: 'Injection',
+            body: 'Choose what is sent to the model. Inject Continuity, Lore, or both, directly or compressed.',
+        },
     ];
-    for (const step of steps) {
-        const li = document.createElement('li');
-        li.textContent = step;
-        list.appendChild(li);
+
+    for (const item of cards) {
+        const card = document.createElement('div');
+        card.className = 'wandlight-instructions-step-card';
+        const title = document.createElement('div');
+        title.className = 'wandlight-instructions-step-title';
+        title.textContent = item.title;
+        const body = document.createElement('div');
+        body.className = 'wandlight-instructions-step-body';
+        body.textContent = item.body;
+        card.appendChild(title);
+        card.appendChild(body);
+        flow.appendChild(card);
     }
-    wrap.appendChild(list);
+
+    wrap.appendChild(flow);
+
+    const close = document.createElement('p');
+    close.className = 'wandlight-instructions-note';
+    close.textContent = 'The chat remains the source of truth. Wandlight keeps the relevant state visible, editable, and ready for injection.';
+    wrap.appendChild(close);
+
     return wrap;
 }
 

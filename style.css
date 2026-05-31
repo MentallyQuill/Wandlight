@@ -2178,3 +2178,122 @@
     border-color: rgba(170, 80, 80, 0.45) !important;
     color: #f0b8b8 !important;
 }
+
+/* ── Lore generation workflow restructure ─────────────────────────────────── */
+.wandlight-lore-generation-card {
+    flex: 0 0 auto;
+}
+
+.wandlight-lore-context-status {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 6px;
+    align-items: center;
+    padding: 5px 6px;
+    margin: 4px 0 6px;
+    border: 1px solid rgba(126, 145, 165, 0.24);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.18);
+}
+
+.wandlight-lore-context-status-label {
+    font-size: 0.72em;
+    font-weight: 700;
+    color: #d7b56d;
+    white-space: nowrap;
+}
+
+.wandlight-lore-context-status-value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.72em;
+    color: #d5dfeb;
+}
+
+.wandlight-warning-text {
+    color: #e9b36b !important;
+}
+
+.wandlight-lore-generation-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+}
+
+.wandlight-lore-generation-panel {
+    min-width: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 7px;
+    background: rgba(0, 0, 0, 0.14);
+}
+
+.wandlight-lore-generation-panel-title {
+    font-size: 0.82em;
+    font-weight: 700;
+    color: #d4c8a8;
+    margin-bottom: 3px;
+}
+
+.wandlight-compact-action-button {
+    padding: 3px 7px !important;
+    font-size: 0.72em !important;
+    white-space: nowrap;
+}
+
+.wandlight-lore-source-filter {
+    max-width: 148px;
+    min-width: 112px;
+    height: 24px;
+    border-radius: 7px;
+    border: 1px solid rgba(126, 145, 165, 0.42);
+    background: rgba(20, 26, 34, 0.88);
+    color: var(--SmartThemeBodyColor, #e8e1d3);
+    font-size: 0.76em;
+    padding: 2px 5px;
+}
+
+.wandlight-lore-accepted-collapsible {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.wandlight-lore-accepted-collapsible[open] {
+    min-height: 160px;
+}
+
+.wandlight-lore-accepted-collapsible > .wandlight-collapsible-content {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.wandlight-accepted-lore-section {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.wandlight-lore-pending-collapsible > .wandlight-collapsible-content {
+    min-height: 0;
+}
+
+.wandlight-lore-pending-collapsible .wandlight-pending-lore-list {
+    max-height: min(320px, 38vh);
+}
+
+@media (max-width: 560px) {
+    .wandlight-lore-generation-grid {
+        grid-template-columns: 1fr;
+    }
+    .wandlight-lore-context-status {
+        grid-template-columns: 1fr;
+    }
+}

@@ -526,7 +526,7 @@ function renderSessionTab(container, state) {
     ));
     container.appendChild(toggles);
 
-    container.appendChild(createInstructionsCard());
+    container.appendChild(createCollapsibleSection('session.instructions', 'Instructions', 'workflow guide', false, createInstructionsCard(), { tooltip: 'Minimal workflow reference for using Wandlight during roleplay.' }));
 
     const stats = document.createElement('div');
     stats.className = 'wandlight-runtime-card';
@@ -547,21 +547,15 @@ function renderSessionTab(container, state) {
 }
 
 function createInstructionsCard() {
-    const details = document.createElement('details');
-    details.className = 'wandlight-runtime-card wandlight-instructions-card';
-
-    const summary = document.createElement('summary');
-    summary.className = 'wandlight-runtime-card-title';
-    summary.textContent = 'Instructions';
-    addTooltip(summary, 'Minimal workflow reference for using Wandlight during roleplay. Expand only when needed.');
-    details.appendChild(summary);
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-instructions-card';
 
     const list = document.createElement('ol');
     list.className = 'wandlight-workflow-list';
     const steps = [
-        'Continuity: scan or auto-track scene, characters, emotions, knowledge, relationships, and other live state.',
         'Context: detect or manually set the scene date, canon reference point, and story branch.',
-        'Lore: generate pending durable facts, review them, then search, edit, tag, pin, or mute accepted entries.',
+        'Continuity: scan or auto-track scene, characters, emotions, knowledge, relationships, and other live state.',
+        'Lore: suggest canon lore from the local database, generate story/AU lore from chat, review entries, then search/edit/tag/pin/mute accepted lore.',
         'Injection: choose whether Continuity and Lore are sent to the model, and whether each is direct or compressed.',
     ];
     for (const step of steps) {
@@ -569,8 +563,8 @@ function createInstructionsCard() {
         li.textContent = step;
         list.appendChild(li);
     }
-    details.appendChild(list);
-    return details;
+    wrap.appendChild(list);
+    return wrap;
 }
 
 function createStateHistoryCard(state) {
@@ -752,9 +746,6 @@ function renderContextTab(container, state) {
 
     container.appendChild(createContextDetectionCard(state));
     container.appendChild(createContextEditorCard(state));
-    const db = state?.canonLoreDatabase || {};
-    const dbSubtitle = db.lastStatus ? String(db.lastStatus).slice(0, 80) : 'Local canon proposal tools';
-    container.appendChild(createCollapsibleSection('context.canonDatabase', 'Local Canon Lore Database', dbSubtitle, false, createCanonLoreDatabaseCard(state), { tooltip: 'Local date-aware canon database proposal controls.' }));
 }
 
 function createContextDetectionCard(state) {
@@ -811,26 +802,184 @@ function createContextDetectionCard(state) {
 
 function createLoreGenerationCard(state) {
     const card = document.createElement('div');
-    card.className = 'wandlight-runtime-card wandlight-generation-progress-card';
+    card.className = 'wandlight-runtime-card wandlight-generation-progress-card wandlight-lore-generation-card';
 
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
     title.textContent = 'Lore Generation';
-    addTooltip(title, 'Generates reviewable lore entries from recent messages. Generated entries stay pending until accepted in Pending Lore Review.');
+    addTooltip(title, 'Create reviewable lore entries either from the local canon database or from model analysis of recent story messages.');
     card.appendChild(title);
 
-    card.appendChild(createAutomationModeCard(
-        'Pending Lore Generation',
+    card.appendChild(createLoreContextStatusCard(state));
+
+    const actionsGrid = document.createElement('div');
+    actionsGrid.className = 'wandlight-lore-generation-grid';
+    actionsGrid.appendChild(createCanonSuggestionPanel(state));
+    actionsGrid.appendChild(createStoryLoreGenerationPanel(state));
+    card.appendChild(actionsGrid);
+
+    return card;
+}
+
+function createLoreContextStatusCard(state) {
+    const context = state?.loreContext || {};
+    const card = document.createElement('div');
+    card.className = 'wandlight-lore-context-status';
+
+    const label = document.createElement('div');
+    label.className = 'wandlight-lore-context-status-label';
+    label.textContent = 'Story Context';
+    addTooltip(label, 'Canon suggestions use Story Context to know the current date, canon boundary, and branch. Detect or edit this in the Context tab.');
+    card.appendChild(label);
+
+    const value = document.createElement('div');
+    value.className = 'wandlight-lore-context-status-value';
+    if (hasUsableStoryContext(context)) {
+        const parts = [context.sceneDate, context.canonBoundary, context.branchId ? `Branch: ${context.branchId}` : '']
+            .map(part => String(part || '').trim())
+            .filter(Boolean);
+        value.textContent = parts.join(' · ') || 'Story Context detected';
+    } else {
+        value.textContent = 'No Story Context';
+        value.classList.add('wandlight-warning-text');
+    }
+    card.appendChild(value);
+
+    const action = createButton('Refresh Context', 'Runs Detect Story Context, then returns here. Useful before suggesting canon lore.', async (btn) => {
+        await handleDetectStoryContext(btn, { stayOnTab: 'lore' });
+    }, 'wandlight-secondary-button wandlight-compact-action-button');
+    card.appendChild(action);
+
+    return card;
+}
+
+function createCanonSuggestionPanel(state) {
+    const settings = getSettings();
+    const db = state?.canonLoreDatabase || {};
+    const panel = document.createElement('div');
+    panel.className = 'wandlight-lore-generation-panel wandlight-canon-suggestion-panel';
+
+    const header = document.createElement('div');
+    header.className = 'wandlight-lore-generation-panel-title';
+    header.textContent = 'Suggest Canon Lore';
+    addTooltip(header, 'Uses the local Lore Database and current Story Context to propose date-aware canon constraints. No model call.');
+    panel.appendChild(header);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Local database lookup. No API/model cost. Requires Story Context so Wandlight knows the date, canon boundary, and branch.';
+    panel.appendChild(help);
+
+    const maxRow = document.createElement('label');
+    maxRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const maxText = document.createElement('span');
+    maxText.textContent = `Max suggestions: ${settings.canonLoreMaxEntries || 10}`;
+    addTooltip(maxText, 'Maximum local canon database entries proposed into Pending Lore Review. This does not accept them automatically.');
+    const maxInput = document.createElement('input');
+    maxInput.type = 'range';
+    maxInput.min = '1';
+    maxInput.max = '200';
+    maxInput.step = '1';
+    maxInput.value = String(settings.canonLoreMaxEntries || 10);
+    maxInput.addEventListener('input', () => {
+        const next = getSettings();
+        next.canonLoreMaxEntries = Math.max(1, Math.min(200, parseInt(maxInput.value, 10) || 10));
+        saveSettings(next);
+        maxText.textContent = `Max suggestions: ${next.canonLoreMaxEntries}`;
+    });
+    maxRow.appendChild(maxText);
+    maxRow.appendChild(maxInput);
+    panel.appendChild(maxRow);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions wandlight-generation-actions';
+    actions.appendChild(createButton('Suggest Canon Lore', 'Queries the local Lore Database with the current Story Context and proposes matching entries into Pending Lore Review.', async (btn) => {
+        await handleSuggestCanonLore(btn);
+    }, 'wandlight-primary-button'));
+    panel.appendChild(actions);
+
+    const advanced = createCollapsibleSection(
+        'lore.canonSuggestionSettings',
+        'Canon Suggestion Settings',
+        settings.canonLoreDatabaseEnabled === false ? 'disabled' : (settings.canonLoreAutoPropose === false ? 'manual' : 'auto after context'),
+        false,
+        createCanonSuggestionSettingsContent(state),
+        { tooltip: 'Low-frequency local canon database settings.' }
+    );
+    panel.appendChild(advanced);
+
+    appendGenerationStatus(panel, state, 'canon');
+    panel.appendChild(createKeyValue('Last query', db.lastQueriedAt ? new Date(db.lastQueriedAt).toLocaleString() : 'never', 'When the local canon database was last queried.'));
+    panel.appendChild(createKeyValue('Last result', db.lastStatus || 'Not queried.', 'Summary of the last local canon lore query.'));
+
+    return panel;
+}
+
+function createCanonSuggestionSettingsContent(state) {
+    const settings = getSettings();
+    const content = document.createElement('div');
+    content.className = 'wandlight-canon-suggestion-settings';
+
+    const grid = document.createElement('div');
+    grid.className = 'wandlight-runtime-grid';
+    grid.appendChild(createToggleCard(
+        'Enable Canon Database',
+        settings.canonLoreDatabaseEnabled !== false,
+        'Allows Wandlight to query local pre-generated canon lore files when Story Context has a parseable date.',
+        (checked) => {
+            const next = getSettings();
+            next.canonLoreDatabaseEnabled = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+        }
+    ));
+    grid.appendChild(createToggleCard(
+        'Auto-suggest after Context detection',
+        settings.canonLoreAutoPropose !== false,
+        'When enabled, Detect Story Context automatically proposes matching local canon entries into Pending Lore Review.',
+        (checked) => {
+            const next = getSettings();
+            next.canonLoreAutoPropose = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+        }
+    ));
+    content.appendChild(grid);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Canon suggestions are proposed for review, not automatically accepted. Duplicate IDs/titles are skipped cheaply before insertion.';
+    content.appendChild(help);
+    return content;
+}
+
+function createStoryLoreGenerationPanel(state) {
+    const panel = document.createElement('div');
+    panel.className = 'wandlight-lore-generation-panel wandlight-story-lore-generation-panel';
+
+    const header = document.createElement('div');
+    header.className = 'wandlight-lore-generation-panel-title';
+    header.textContent = 'Generate Story Lore';
+    addTooltip(header, 'Uses the Lore provider to analyze recent chat messages and create story/AU lore entries for Pending Lore Review. This uses model/API tokens.');
+    panel.appendChild(header);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Model-based generation. Uses the Lore provider, source-message window, and chunk size settings. Output stays pending until accepted.';
+    panel.appendChild(help);
+
+    panel.appendChild(createAutomationModeCard(
+        'Story Lore Generation',
         'loreGenerationMode',
         'loreGenerationAutoInterval',
-        'Only runs when you click Generate Pending Lore.',
+        'Only runs when you click Generate Story Lore.',
         'Runs automatically after roleplay turns on this interval, using the Lore provider. Generated lore still waits in Pending Lore Review.',
-        'Automatic pending-lore generation interval in completed model turns.'
+        'Automatic story-lore generation interval in completed model turns.'
     ));
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
-    const generateBtn = createButton('Generate Pending Lore', 'Generates searchable lore entries in message chunks and places them in Pending Lore Review.', async (btn) => {
+    const generateBtn = createButton('Generate Story Lore', 'Generates searchable story/AU lore entries in message chunks and places them in Pending Lore Review.', async (btn) => {
         await handleGeneratePendingLore(btn);
     }, 'wandlight-primary-button');
     if (loreGenerationUiRunning || activeLoreGenerationController) {
@@ -838,18 +987,20 @@ function createLoreGenerationCard(state) {
         generateBtn.textContent = 'Generation Running...';
     }
     actions.appendChild(generateBtn);
-    const cancelBtn = createButton('Cancel Generation', 'Cancels the current chunked lore generation after the active provider request returns or aborts. OpenAI-compatible endpoints abort immediately; some SillyTavern/profile calls may stop after the current request.', () => {
+    const cancelBtn = createButton('Cancel Generation', 'Cancels the current chunked lore generation after the active provider request returns or aborts.', () => {
         if (activeLoreGenerationController) {
             activeLoreGenerationController.abort();
-            setFeatureProgress('lore', 'Cancelling lore generation...', Math.max(1, Number(getState()?.lorePanel?.loreProgress) || 1));
+            setFeatureProgress('lore', 'Cancelling story lore generation...', Math.max(1, Number(getState()?.lorePanel?.loreProgress) || 1));
         }
     }, 'wandlight-danger-button');
     cancelBtn.disabled = !activeLoreGenerationController;
     actions.appendChild(cancelBtn);
-    card.appendChild(actions);
+    panel.appendChild(actions);
 
-    appendGenerationStatus(card, state, 'lore');
-    return card;
+    panel.appendChild(createCollapsibleSection('lore.storyGenerationSettings', 'Story Lore Settings', 'source, chunks, tags, guards', false, createGenerationSettingsCard(), { tooltip: 'Advanced model-based story lore generation controls.' }));
+    appendGenerationStatus(panel, state, 'lore');
+
+    return panel;
 }
 
 function appendGenerationStatus(card, state, kind = 'lore') {
@@ -872,29 +1023,103 @@ function appendGenerationStatus(card, state, kind = 'lore') {
     card.appendChild(bar);
 }
 
-async function handleDetectStoryContext(btn) {
-    if (!ensureLoreProviderReadyForAction('Detect Story Context', 'context')) return;
-    await runBusyAction(btn, 'Detecting...', async () => {
-        setFeatureProgress('context', 'Reading chat and detecting story context...', 8);
-        const current = getState();
-        pushStateSnapshot(current, 'Detect lore context', getSettings().maxSnapshots);
-        const detected = await runLoreContextDetection({ progress: (message, percent) => setFeatureProgress('context', message, percent) });
-        const after = getState();
-        refreshHeader();
-        refreshPanelBody({ preserveScroll: false });
+async function handleDetectStoryContext(btn, options = {}) {
+    if (!ensureLoreProviderReadyForAction('Detect Story Context', 'context')) return false;
+    if (btn) {
+        let result = false;
+        await runBusyAction(btn, 'Detecting...', async () => { result = await performStoryContextDetection(options); });
+        return result;
+    }
+    return await performStoryContextDetection(options);
+}
 
-        const fields = after?.loreContext || {};
-        const filled = ['sceneDate', 'subjectiveDate', 'canonBoundary', 'branchId', 'timeTravelMode']
-            .filter(key => String(fields[key] || '').trim()).length;
+async function performStoryContextDetection(options = {}) {
+    setFeatureProgress('context', 'Reading chat and detecting story context...', 8);
+    const current = getState();
+    pushStateSnapshot(current, 'Detect lore context', getSettings().maxSnapshots);
+    const detected = await runLoreContextDetection({ progress: (message, percent) => setFeatureProgress('context', message, percent) });
+    const after = getState();
+    if (options.stayOnTab) setPanelState({ activeTab: options.stayOnTab }, { deferSave: true });
+    refreshHeader();
+    refreshPanelBody({ preserveScroll: false });
 
-        if (detected && filled > 0) {
-            setFeatureProgress('context', 'Story context detected and fields updated.', 100);
-            resetFeatureProgress('context');
-            toast('Story context detected and fields updated.');
-        } else if (detected) {
-            toast('Story context detection completed, but it did not find date/canon fields to populate.', 'warning');
+    const fields = after?.loreContext || {};
+    const filled = ['sceneDate', 'subjectiveDate', 'canonBoundary', 'branchId', 'timeTravelMode']
+        .filter(key => String(fields[key] || '').trim()).length;
+
+    if (detected && filled > 0) {
+        setFeatureProgress('context', 'Story context detected and fields updated.', 100);
+        resetFeatureProgress('context');
+        toast('Story context detected and fields updated.');
+        return true;
+    }
+    if (detected) {
+        toast('Story context detection completed, but it did not find date/canon fields to populate.', 'warning');
+        return false;
+    }
+    toast('Story context detection returned no usable result.', 'warning');
+    return false;
+}
+
+function hasUsableStoryContext(context = {}) {
+    return !![
+        context.sceneDate,
+        context.subjectiveDate,
+        context.canonBoundary,
+        context.branchId && context.branchId !== 'main' ? context.branchId : '',
+    ].map(value => String(value || '').trim()).find(Boolean);
+}
+
+async function handleSuggestCanonLore(btn) {
+    await runBusyAction(btn, 'Suggesting...', async () => {
+        let state = getState();
+        if (!hasUsableStoryContext(state?.loreContext || {})) {
+            const proceed = await confirmAction(
+                'No Story Context detected',
+                'Canon lore suggestions need the story date, canon boundary, and branch. Run Detect Story Context now?'
+            );
+            if (!proceed) {
+                setFeatureProgress('canon', 'Canon suggestion cancelled: no Story Context.', 0);
+                return;
+            }
+            const detected = await performStoryContextDetection({ stayOnTab: 'lore' });
+            if (!detected || !hasUsableStoryContext(getState()?.loreContext || {})) {
+                setFeatureProgress('canon', 'No Story Context available. Canon suggestions were not run.', 100);
+                toast('Canon suggestions need Story Context before they can run.', 'warning');
+                return;
+            }
+            state = getState();
+        }
+
+        setFeatureProgress('canon', 'Suggesting canon lore from local database...', 20);
+        const result = await proposeCanonLoreForContext(state?.loreContext || {}, {
+            maxEntries: getSettings().canonLoreMaxEntries || 10,
+            progress: (message, percent) => setFeatureProgress('canon', message, percent),
+        });
+
+        if (result?.status === 'proposed') {
+            setSectionCollapsed('lore.pendingReview', false);
+            setPanelState({ activeTab: 'lore' }, { deferSave: true });
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+            setFeatureProgress('canon', `Suggested ${result.proposedCount || 0} canon lore entries.`, 100);
+            resetFeatureProgress('canon');
+            toast(`Suggested ${result.proposedCount || 0} canon lore entries. Review them in Pending Lore Review.`);
+        } else if (result?.status === 'duplicates_only') {
+            setFeatureProgress('canon', `Matched ${result.matchedCount || 0}, but all selected suggestions already exist.`, 100);
+            resetFeatureProgress('canon');
+            refreshHeader();
+            toast('Canon database matches were already present by id/title.', 'info');
+        } else if (result?.status === 'no_date') {
+            setFeatureProgress('canon', 'No parseable Story Context date. Detect or enter a scene date first.', 100);
+            toast('Canon suggestions need a parseable Scene date first.', 'warning');
+        } else if (result?.status === 'disabled') {
+            setFeatureProgress('canon', 'Canon database is disabled.', 100);
+            toast('Canon database is disabled.', 'warning');
         } else {
-            toast('Story context detection returned no usable result.', 'warning');
+            setFeatureProgress('canon', 'No matching canon suggestions for this context.', 100);
+            resetFeatureProgress('canon');
+            toast('Canon database found no matching entries for this context.', 'info');
         }
     });
 }
@@ -904,7 +1129,7 @@ async function handleGeneratePendingLore(btn) {
         toast('Lore generation is already running. Use Cancel Generation to stop it.', 'warning');
         return;
     }
-    if (!ensureLoreProviderReadyForAction('Generate Pending Lore', 'lore')) return;
+    if (!ensureLoreProviderReadyForAction('Generate Story Lore', 'lore')) return;
     activeLoreGenerationController = new AbortController();
     loreGenerationUiRunning = true;
     refreshPanelBody({ preserveScroll: true });
@@ -920,7 +1145,7 @@ async function handleGeneratePendingLore(btn) {
                 `There are already ${pendingCount} pending lore entries. Generating again will replace that pending batch. Accepted lore entries are not deleted. Continue?`
             );
             if (!proceed) {
-                setFeatureProgress('lore', 'Generation cancelled by user.', 0);
+                setFeatureProgress('lore', 'Story lore generation cancelled by user.', 0);
                 return;
             }
             allowReplacePending = true;
@@ -937,16 +1162,17 @@ async function handleGeneratePendingLore(btn) {
 
         if (result?.status === 'cancelled') {
             refreshPanelBody({ preserveScroll: true });
-            setFeatureProgress('lore', 'Lore generation cancelled.', 0);
-            toast('Lore generation cancelled.', 'warning');
+            setFeatureProgress('lore', 'Story lore generation cancelled.', 0);
+            toast('Story lore generation cancelled.', 'warning');
         } else if (result?.status === 'proposed') {
+            setSectionCollapsed('lore.pendingReview', false);
             setPanelState({ activeTab: 'lore' });
             refreshPanelBody({ preserveScroll: false });
             const duplicateText = result.droppedDuplicateCount ? ` ${result.droppedDuplicateCount} duplicate/similar entries were filtered.` : '';
             const chunkText = result.chunkCount ? ` Processed ${result.chunkCount} chunk${result.chunkCount === 1 ? '' : 's'}.` : '';
-            setFeatureProgress('lore', `${result.validEntryCount || 0} pending lore entries generated.`, 100);
+            setFeatureProgress('lore', `${result.validEntryCount || 0} story lore entries generated.`, 100);
             resetFeatureProgress('lore');
-            toast(`${result.validEntryCount || 0} pending lore entries generated.${duplicateText}${chunkText} Lore tab opened.`);
+            toast(`${result.validEntryCount || 0} story lore entries generated.${duplicateText}${chunkText} Pending Lore Review opened.`);
         } else {
             refreshPanelBody({ preserveScroll: false });
             const details = formatGenerationStatus(result);
@@ -1271,7 +1497,7 @@ function createGenerationProgressCard(state) {
 }
 
 function setFeatureProgress(kind = 'lore', message, percent = 0) {
-    const statusKind = ['context', 'continuity', 'lore'].includes(kind) ? kind : 'lore';
+    const statusKind = ['context', 'continuity', 'lore', 'canon'].includes(kind) ? kind : 'lore';
     const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
     const state = getState();
     if (state?.lorePanel) {
@@ -1294,7 +1520,7 @@ function setFeatureProgress(kind = 'lore', message, percent = 0) {
 const progressResetTimers = new Map();
 
 function resetFeatureProgress(kind = 'lore', delayMs = 1400) {
-    const statusKind = ['context', 'continuity', 'lore'].includes(kind) ? kind : 'lore';
+    const statusKind = ['context', 'continuity', 'lore', 'canon'].includes(kind) ? kind : 'lore';
     const existing = progressResetTimers.get(statusKind);
     if (existing) window.clearTimeout(existing);
     const timer = window.setTimeout(() => {
@@ -1305,7 +1531,7 @@ function resetFeatureProgress(kind = 'lore', delayMs = 1400) {
 }
 
 function resetFeatureProgressNow(kind = 'lore') {
-    const statusKind = ['context', 'continuity', 'lore'].includes(kind) ? kind : 'lore';
+    const statusKind = ['context', 'continuity', 'lore', 'canon'].includes(kind) ? kind : 'lore';
     const existing = progressResetTimers.get(statusKind);
     if (existing) {
         window.clearTimeout(existing);
@@ -1329,7 +1555,7 @@ function resetFeatureProgressNow(kind = 'lore') {
 }
 
 function resetAllFeatureProgressNow() {
-    ['context', 'continuity', 'lore'].forEach(kind => resetFeatureProgressNow(kind));
+    ['context', 'continuity', 'lore', 'canon'].forEach(kind => resetFeatureProgressNow(kind));
 }
 
 function setGenerateProgress(message, percent = 0) {
@@ -2457,17 +2683,8 @@ function createContinuityModeButton(mode, label, tooltip, settings) {
 
 function createPendingLoreReviewSection(state) {
     const pendingLore = normalizeLoreMatrix(state?.pendingLoreEntries || []);
-    const section = document.createElement('details');
+    const section = document.createElement('div');
     section.className = 'wandlight-review-section wandlight-pending-lore-section';
-    section.open = pendingLore.length > 0;
-
-    const summary = document.createElement('summary');
-    summary.className = 'wandlight-runtime-card-title wandlight-pending-lore-summary';
-    summary.textContent = pendingLore.length
-        ? `Pending Lore Review (${pendingLore.length})`
-        : 'Pending Lore Review: none';
-    addTooltip(summary, 'Review generated lore entries before accepting them into the Lore Matrix. This is the review queue for generated lore entries.');
-    section.appendChild(summary);
 
     if (pendingLore.length > 0) {
         const batchInfo = document.createElement('div');
@@ -2494,7 +2711,7 @@ function createPendingLoreReviewSection(state) {
             section.appendChild(more);
         }
     } else {
-        section.appendChild(createEmptyMessage('No generated lore entries are waiting for review. Use Generate Pending Lore above to create a review batch.'));
+        section.appendChild(createEmptyMessage('No lore entries are waiting for review. Use Suggest Canon Lore or Generate Story Lore above.'));
     }
 
     return section;
@@ -3163,20 +3380,39 @@ function createEditableLoreEntryEditor(entry) {
 function renderLoreTab(container, state) {
     container.appendChild(createSectionHeader(
         'Lore',
-        'Generate durable lore entries, review pending entries, then manage accepted lore with search, filters, tags, pinning, and muting.'
+        'Suggest canon lore from the local database, generate story/AU lore with the model, review pending entries, and manage accepted lore.'
     ));
     container.appendChild(createLoreGenerationCard(state));
-    container.appendChild(createCollapsibleSection('lore.generationSettings', 'Lore Generation Settings', 'Source, chunking, tags, and guards', false, createGenerationSettingsCard(), { tooltip: 'Advanced pending-lore generation controls.' }));
+
     const pendingCount = (state?.pendingLoreEntries || []).length;
-    container.appendChild(createCollapsibleSection('lore.pendingReview', 'Pending Lore Review', pendingCount ? `${pendingCount} pending` : 'none', pendingCount > 0, createPendingLoreReviewSection(state), { tooltip: 'Review generated lore entries before accepting them.' }));
+    container.appendChild(createCollapsibleSection(
+        'lore.pendingReview',
+        'Pending Lore Review',
+        pendingCount ? `${pendingCount} pending` : 'none',
+        pendingCount > 0,
+        createPendingLoreReviewSection(state),
+        { tooltip: 'Review suggested/generated lore entries before accepting them.', className: 'wandlight-lore-pending-collapsible' }
+    ));
+
+    const loreState = getPanelLoreState(state);
+    const acceptedCount = Math.max(0, (loreState.counts?.all || 0) - (loreState.counts?.pending || 0));
+    const injectableCount = getSelectedLoreInjectionCount(state, getSettings());
+    container.appendChild(createCollapsibleSection(
+        'lore.acceptedEntries',
+        'Accepted Lore Entries',
+        `${acceptedCount} accepted · ${injectableCount} injectable`,
+        true,
+        createAcceptedLoreEntriesSection(state),
+        { tooltip: 'Search, filter, bulk edit, tag, pin, mute, and edit accepted lore entries.', className: 'wandlight-lore-accepted-collapsible' }
+    ));
+}
+
+function createAcceptedLoreEntriesSection(state) {
+    const section = document.createElement('div');
+    section.className = 'wandlight-accepted-lore-section';
 
     const controls = document.createElement('div');
     controls.className = 'wandlight-lore-controls';
-
-    controls.appendChild(createSectionHeader(
-        'Accepted Lore Entries',
-        'Manage accepted lore. Search checks titles and tags first, then fact text and notes.'
-    ));
 
     const panelState = state?.lorePanel || { selectedCategory: 'all', search: '' };
     const loreState = getPanelLoreState(state);
@@ -3194,7 +3430,7 @@ function renderLoreTab(container, state) {
         tab.textContent = `${label} (${catCount})`;
         addTooltip(tab, getCategoryTooltip(cat));
         tab.addEventListener('click', () => {
-            setPanelState({ selectedCategory: cat });
+            setPanelState({ selectedCategory: cat, acceptedLoreVisibleLimit: ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT });
             refreshPanelBody({ preserveScroll: false });
         });
         tabs.appendChild(tab);
@@ -3212,14 +3448,36 @@ function renderLoreTab(container, state) {
     addTooltip(searchInput, 'Searches lore entry titles and tags first. Fact text, notes, and IDs are searched as fallback.');
     searchInput.addEventListener('input', (e) => {
         setPanelState({ search: e.target.value, acceptedLoreVisibleLimit: ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT }, { deferSave: true });
-        scheduleAcceptedLoreListRender(container);
+        scheduleAcceptedLoreListRender(section);
     });
     filterRow.appendChild(searchInput);
+
+    const sourceSelect = document.createElement('select');
+    sourceSelect.className = 'wandlight-lore-source-filter';
+    addTooltip(sourceSelect, 'Filter accepted lore by origin: canon database, story generation, or manual/user-created entries.');
+    const sourceOptions = [
+        ['all', 'Source: All'],
+        ['canon-db', 'Canon Database'],
+        ['story-generation', 'Story Generation'],
+        ['manual', 'Manual / User'],
+    ];
+    for (const [value, label] of sourceOptions) {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = label;
+        if ((panelState.sourceFilter || 'all') === value) opt.selected = true;
+        sourceSelect.appendChild(opt);
+    }
+    sourceSelect.addEventListener('change', () => {
+        setPanelState({ sourceFilter: sourceSelect.value, acceptedLoreVisibleLimit: ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT });
+        refreshPanelBody({ preserveScroll: false });
+    });
+    filterRow.appendChild(sourceSelect);
     controls.appendChild(filterRow);
 
     const pinHelp = document.createElement('div');
     pinHelp.className = 'wandlight-runtime-help wandlight-pin-help';
-    pinHelp.textContent = 'Pinned = prioritized and protected from aggressive compression. Muted = excluded from injection. Ordinary active entries may still be injected when relevant.';
+    pinHelp.textContent = 'Pinned = prioritized and protected from aggressive compression. Muted = excluded from injection. Lifecycle state controls whether an entry is eligible for injection.';
     addTooltip(pinHelp, 'Pin important facts you always want kept prominent. Mute facts that should stay stored but not be sent to the model.');
     controls.appendChild(pinHelp);
 
@@ -3228,12 +3486,13 @@ function renderLoreTab(container, state) {
     bulkMount.appendChild(createAcceptedLoreBulkControls(state));
     controls.appendChild(bulkMount);
 
-    container.appendChild(controls);
+    section.appendChild(controls);
 
     const list = document.createElement('div');
     list.className = 'wandlight-lore-entry-list';
     renderEntryList(list, state);
-    container.appendChild(list);
+    section.appendChild(list);
+    return section;
 }
 
 function renderEntryList(list, state) {
@@ -3348,6 +3607,11 @@ function getFilteredLoreEntries(state) {
         filtered = filtered.filter(e => e.category === panelState.selectedCategory);
     }
 
+    const sourceFilter = panelState.sourceFilter || 'all';
+    if (sourceFilter && sourceFilter !== 'all') {
+        filtered = filtered.filter(entry => getLoreSourceBucket(entry) === sourceFilter);
+    }
+
     filtered = [...filtered].sort(sortLoreEntriesForPanel);
 
     const query = String(panelState.search || '').trim().toLowerCase();
@@ -3364,6 +3628,16 @@ function getFilteredLoreEntries(state) {
         .map(item => item.entry);
 }
 
+
+function getLoreSourceBucket(entry) {
+    const source = String(entry?.source || entry?.sourceInfo?.id || '').toLowerCase();
+    const id = String(entry?.id || '').toLowerCase();
+    const userEdited = !!entry?.userEdited;
+    if (source.includes('canon-lore-db') || source.includes('canon database') || id.startsWith('canon_db_') || id.includes('_canon_')) return 'canon-db';
+    if (source.includes('model-generated') || source.includes('story') || source.includes('lore-generator')) return 'story-generation';
+    if (userEdited || source === 'user' || source === 'manual') return 'manual';
+    return 'story-generation';
+}
 
 function sortLoreEntriesForPanel(a, b) {
     const pinScore = Number(!!b.isPinned) - Number(!!a.isPinned);

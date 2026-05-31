@@ -1,0 +1,561 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "spell_gate_lumos_nox",
+      "title": "Lumos and Nox basic spell gate",
+      "kind": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 45,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher's Stone"
+      },
+      "scope": {
+        "characters": [],
+        "topics": [
+          "basic spells",
+          "first year"
+        ],
+        "spells": [
+          "Lumos",
+          "Nox"
+        ],
+        "schoolYears": [
+          1
+        ],
+        "books": [
+          "Philosopher's Stone"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Lumos/Nox are basic wand-light spells appropriate for first-year students onward.",
+        "injection": "Lumos and Nox are basic first-year-level spells; they do not imply advanced combat skill.",
+        "constraints": [
+          "Safe for early Hogwarts students."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "spell-gate",
+          "basic-spells",
+          "year-1"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Philosopher's Stone",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "spell_gate_wingardium_leviosa",
+      "title": "Levitation Charm learning gate",
+      "kind": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 50,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-10-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher's Stone"
+      },
+      "scope": {
+        "characters": [
+          "Hermione Granger",
+          "Ron Weasley",
+          "Harry Potter"
+        ],
+        "topics": [
+          "charms",
+          "first year"
+        ],
+        "spells": [
+          "Wingardium Leviosa"
+        ],
+        "schoolYears": [
+          1
+        ],
+        "books": [
+          "Philosopher's Stone"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Levitation Charm is first-year curriculum and is familiar after early Charms lessons.",
+        "injection": "Wingardium Leviosa is plausible for first-years after early Charms instruction.",
+        "constraints": [
+          "Before first-year Charms instruction, do not assume all students have mastered it."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "spell-gate",
+          "charms",
+          "year-1"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Philosopher's Stone",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "spell_gate_expelliarmus",
+      "title": "Disarming Charm learning gate",
+      "kind": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 70,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1992-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter"
+        ],
+        "topics": [
+          "defense",
+          "dueling"
+        ],
+        "spells": [
+          "Expelliarmus"
+        ],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Expelliarmus becomes strongly associated with Harry after early dueling exposure.",
+        "injection": "Expelliarmus is plausible for Harry from Year 2 onward and becomes one of his signature defensive spells.",
+        "constraints": [
+          "Do not make it a universal first-year combat reflex."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "spell-gate",
+          "dueling",
+          "year-2"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Chamber of Secrets",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "spell_gate_riddikulus",
+      "title": "Riddikulus Boggart lesson gate",
+      "kind": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 65,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1993-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "boggarts",
+          "defense"
+        ],
+        "spells": [
+          "Riddikulus"
+        ],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Riddikulus is taught during Lupin\u2019s Year 3 Defense class.",
+        "injection": "Riddikulus is plausible for third-years after Lupin\u2019s Boggart lesson, but not as routine first-/second-year knowledge.",
+        "constraints": [
+          "Date-gate Boggart handling to Year 3 instruction unless AU says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "spell-gate",
+          "defense",
+          "year-3"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Prisoner of Azkaban",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "spell_gate_stupefy",
+      "title": "Stunning Spell practical gate",
+      "kind": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 75,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [],
+        "topics": [
+          "defense",
+          "dueling",
+          "combat"
+        ],
+        "spells": [
+          "Stupefy"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Stupefy is common in later defensive/combat contexts but should not be casual early-year magic.",
+        "injection": "Stupefy is plausible for trained older students and adults; avoid making it routine for younger students without training.",
+        "constraints": [
+          "Treat Stunning as practical combat magic, not casual first-year curriculum."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "spell-gate",
+          "combat",
+          "year-4"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "spell_gate_protego",
+      "title": "Shield Charm learning gate",
+      "kind": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [],
+        "topics": [
+          "defense",
+          "shield charm",
+          "DA"
+        ],
+        "spells": [
+          "Protego"
+        ],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Protego becomes a practical student defense skill around OWL/DA training.",
+        "injection": "Protego is plausible for DA-trained or older students from Year 5 onward; younger students should not casually master shield magic.",
+        "constraints": [
+          "Date-gate practical shield use."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "spell-gate",
+          "defense",
+          "year-5"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "spell_gate_nonverbal_magic",
+      "title": "Nonverbal magic skill gate",
+      "kind": "spell_gate",
+      "category": "skill",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 85,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [],
+        "topics": [
+          "nonverbal magic",
+          "advanced magic"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Nonverbal magic is emphasized as advanced sixth-year work.",
+        "injection": "Nonverbal magic is advanced sixth-year-level work; do not have younger students use it routinely unless exceptional or AU-trained.",
+        "constraints": [
+          "Block casual nonverbal casting before Year 6."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "skill-band",
+          "nonverbal",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "spell_gate_apparition_lessons",
+      "title": "Apparition lesson age gate",
+      "kind": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "sixth-year students"
+        ],
+        "topics": [
+          "apparition",
+          "age"
+        ],
+        "spells": [
+          "Apparition"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Apparition lessons are for eligible older students around Year 6; legal Apparition requires coming of age.",
+        "injection": "Students should not casually Apparate before eligibility and training; Apparition is tightly age- and license-gated.",
+        "constraints": [
+          "Block underage casual Apparition unless AU explicitly changes the rule."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "spell-gate",
+          "apparition",
+          "age-gate"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

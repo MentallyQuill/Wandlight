@@ -520,7 +520,7 @@ export async function queryCanonLoreDatabase(context = null, options = {}) {
     }
 
     const db = await loadCanonLoreDatabase();
-    const max = Math.max(1, Math.min(25, Number(options.maxEntries ?? settings.canonLoreMaxEntries) || 10));
+    const max = Math.max(1, Math.min(200, Number(options.maxEntries ?? settings.canonLoreMaxEntries) || 10));
     const candidates = db.entries
         .filter(entry => dateInRange(sceneIso, entry))
         .map(entry => ({ entry, score: scoreCanonEntry(entry, state, effectiveContext, sceneIso, db.scoring) }))
@@ -592,7 +592,7 @@ export async function proposeCanonLoreForContext(context = null, options = {}) {
     const pending = Array.isArray(state.pendingLoreEntries) ? state.pendingLoreEntries : [];
     // Canon DB proposals are already storage-compact. Avoid another normalize->derive
     // pass here; saveState() will run the final bounded sanitizer.
-    state.pendingLoreEntries = [...pending, ...entries].slice(-50);
+    state.pendingLoreEntries = [...pending, ...entries].slice(-250);
     state.pendingLoreMeta = {
         id: `canon-db-${Date.now()}`,
         contextKey: buildLoreGenerationKey(state),

@@ -1,0 +1,281 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "behavior_hermione_year_6",
+      "title": "Hermione Granger behavior - Year 6",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Hermione Granger"
+        ],
+        "topics": [
+          "behavior",
+          "year 6",
+          "academics",
+          "caution"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Hermione in Year 6 is academically intense, skeptical of unsupported claims, protective of friends, and increasingly aware of wartime danger.",
+        "injection": "Hermione in Year 6 should be competent, skeptical, and protective, with war-aware caution rather than early-year naivety.",
+        "constraints": [
+          "Do not write Hermione as unaware of Voldemort\u2019s return in Year 6."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Hermione",
+          "behavior",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_ron_year_6",
+      "title": "Ron Weasley behavior - Year 6",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Ron Weasley"
+        ],
+        "topics": [
+          "behavior",
+          "year 6",
+          "friendship"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Ron in Year 6 mixes loyalty, insecurity, humor, and sensitivity around relationships and status.",
+        "injection": "Ron in Year 6 should be loyal and funny but vulnerable to insecurity, jealousy, and embarrassment around romance/status.",
+        "constraints": [
+          "Keep behavior age- and year-appropriate."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Ron",
+          "behavior",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_draco_year_6",
+      "title": "Draco Malfoy behavior - Year 6",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 85,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Draco Malfoy"
+        ],
+        "topics": [
+          "behavior",
+          "mission",
+          "stress"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Draco in Year 6 is under severe pressure, secretive, frightened, and increasingly isolated by his mission.",
+        "injection": "Draco in Year 6 should be secretive and strained under pressure; arrogance may mask fear rather than simple school rivalry.",
+        "constraints": [
+          "Do not make Draco\u2019s mission public unless discovered."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Draco",
+          "behavior",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_snape_year_6",
+      "title": "Severus Snape behavior - Year 6",
+      "kind": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 80,
+      "protected": false,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Severus Snape"
+        ],
+        "topics": [
+          "behavior",
+          "DADA professor",
+          "secrecy"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Snape in Year 6 is Defense professor, controlled, cutting, secretive, and operating under hidden obligations.",
+        "injection": "Snape in Year 6 should remain controlled, sharp, and opaque; do not reveal his full motives before late canon.",
+        "constraints": [
+          "Protect hidden loyalty/motivation reveals."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "Snape",
+          "behavior",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

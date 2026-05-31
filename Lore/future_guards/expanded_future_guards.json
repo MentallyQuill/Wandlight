@@ -1,0 +1,353 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_cedric_alive_before_third_task",
+      "title": "Future Guard: Cedric alive before Third Task",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1995-06-23",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Cedric Diggory"
+        ],
+        "topics": [
+          "Triwizard Tournament",
+          "Cedric"
+        ],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Cedric Diggory is alive before the Third Task.",
+        "injection": "Before the Third Task, do not imply Cedric is dead or that characters know he will die.",
+        "constraints": [
+          "Protect Cedric\u2019s death as a future event."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "Cedric",
+          "year-4"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_sirius_alive_before_department_mysteries",
+      "title": "Future Guard: Sirius alive before Department of Mysteries",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-09-01",
+        "validTo": "1996-06-17",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Sirius Black",
+          "Harry Potter"
+        ],
+        "topics": [
+          "Sirius",
+          "Department of Mysteries"
+        ],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Sirius Black is alive before the Department of Mysteries battle.",
+        "injection": "Before the Department of Mysteries battle, do not imply Sirius is dead or that Harry has already suffered that loss.",
+        "constraints": [
+          "Protect Sirius\u2019s death as future canon."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "Sirius",
+          "year-5"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_ministry_not_fallen_before_1997_august",
+      "title": "Future Guard: Ministry not fallen before August 1997",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 95,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-07-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [],
+        "topics": [
+          "Ministry of Magic",
+          "Death Eaters"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Before August 1997, the Ministry has not yet fallen to Death Eater control.",
+        "injection": "Before August 1997, do not write the Ministry as openly Death Eater-controlled unless AU divergence says so.",
+        "constraints": [
+          "Protect the Ministry fall timing."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "Ministry",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_deathly_hallows_not_active_before_year7",
+      "title": "Future Guard: Hallows not active trio quest before Year 7",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 98,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-07-30",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "Deathly Hallows",
+          "Elder Wand",
+          "Resurrection Stone"
+        ],
+        "spells": [],
+        "schoolYears": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Deathly Hallows framework is not an active trio quest before Year 7.",
+        "injection": "Before Year 7, do not frame the trio\u2019s decisions around the Deathly Hallows unless AU has introduced them early.",
+        "constraints": [
+          "Prevent future Year 7 quest leakage."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "Hallows"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "future_guard_battle_of_hogwarts_future",
+      "title": "Future Guard: Battle of Hogwarts future event",
+      "kind": "future_guard",
+      "category": "future_guard",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1998-05-01",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [],
+        "topics": [
+          "Battle of Hogwarts",
+          "war"
+        ],
+        "spells": [],
+        "schoolYears": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Battle of Hogwarts has not happened before May 1998.",
+        "injection": "Before May 1998, do not imply the Battle of Hogwarts has already occurred or that characters know its outcome.",
+        "constraints": [
+          "Protect the final battle as future canon."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "future-guard",
+          "Battle of Hogwarts"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

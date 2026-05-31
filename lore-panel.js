@@ -513,6 +513,7 @@ function createStateHistoryCard(state) {
         if (!proceed) return;
         const result = undoLastChange(getState());
         saveState(result.state);
+        resetAllFeatureProgressNow();
         refreshPanelBody({ preserveScroll: false });
         refreshHeader();
         toast(result.undone ? 'Last Wandlight change undone.' : 'No state-history point is available.', result.undone ? 'success' : 'warning');
@@ -882,12 +883,12 @@ function createCanonLoreDatabaseCard(state) {
     const maxInput = document.createElement('input');
     maxInput.type = 'range';
     maxInput.min = '1';
-    maxInput.max = '25';
+    maxInput.max = '200';
     maxInput.step = '1';
     maxInput.value = String(settings.canonLoreMaxEntries || 12);
     maxInput.addEventListener('input', () => {
         const next = getSettings();
-        next.canonLoreMaxEntries = Math.max(1, Math.min(25, parseInt(maxInput.value, 10) || 12));
+        next.canonLoreMaxEntries = Math.max(1, Math.min(200, parseInt(maxInput.value, 10) || 12));
         saveSettings(next);
         maxText.textContent = `Max canon proposals: ${next.canonLoreMaxEntries}`;
     });
@@ -1156,25 +1157,45 @@ function setFeatureProgress(kind = 'lore', message, percent = 0) {
     if (fill) fill.style.width = `${safePercent}%`;
 }
 
+const progressResetTimers = new Map();
+
 function resetFeatureProgress(kind = 'lore', delayMs = 1400) {
     const statusKind = ['context', 'continuity', 'lore'].includes(kind) ? kind : 'lore';
-    window.setTimeout(() => {
-        const state = getState();
-        if (state?.lorePanel) {
-            state.lorePanel[`${statusKind}Status`] = 'Idle.';
-            state.lorePanel[`${statusKind}Progress`] = 0;
-            if (statusKind === 'lore') {
-                state.lorePanel.generationStatus = 'Idle.';
-                state.lorePanel.generationProgress = 0;
-            }
-            saveState(state);
+    const existing = progressResetTimers.get(statusKind);
+    if (existing) window.clearTimeout(existing);
+    const timer = window.setTimeout(() => {
+        progressResetTimers.delete(statusKind);
+        resetFeatureProgressNow(statusKind);
+    }, Math.max(0, Number(delayMs) || 0));
+    progressResetTimers.set(statusKind, timer);
+}
+
+function resetFeatureProgressNow(kind = 'lore') {
+    const statusKind = ['context', 'continuity', 'lore'].includes(kind) ? kind : 'lore';
+    const existing = progressResetTimers.get(statusKind);
+    if (existing) {
+        window.clearTimeout(existing);
+        progressResetTimers.delete(statusKind);
+    }
+    const state = getState();
+    if (state?.lorePanel) {
+        state.lorePanel[`${statusKind}Status`] = 'Idle.';
+        state.lorePanel[`${statusKind}Progress`] = 0;
+        if (statusKind === 'lore') {
+            state.lorePanel.generationStatus = 'Idle.';
+            state.lorePanel.generationProgress = 0;
         }
-        if (!panelRoot) return;
-        const text = panelRoot.querySelector(`[data-wandlight-status="${statusKind}"]`);
-        const fill = panelRoot.querySelector(`[data-wandlight-progress="${statusKind}"]`);
-        if (text) text.textContent = 'Idle.';
-        if (fill) fill.style.width = '0%';
-    }, delayMs);
+        saveState(state);
+    }
+    if (!panelRoot) return;
+    const text = panelRoot.querySelector(`[data-wandlight-status="${statusKind}"]`);
+    const fill = panelRoot.querySelector(`[data-wandlight-progress="${statusKind}"]`);
+    if (text) text.textContent = 'Idle.';
+    if (fill) fill.style.width = '0%';
+}
+
+function resetAllFeatureProgressNow() {
+    ['context', 'continuity', 'lore'].forEach(kind => resetFeatureProgressNow(kind));
 }
 
 function setGenerateProgress(message, percent = 0) {

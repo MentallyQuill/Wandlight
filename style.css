@@ -1596,3 +1596,47 @@
     font-size: 0.82em;
     padding: 4px 8px;
 }
+
+
+/* ── Live feedback compactness and scroll fixes ───────────────────────────── */
+.wandlight-pending-lore-list {
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.wandlight-lore-meta-select-wrap {
+    gap: 2px;
+    min-height: 18px;
+    padding: 1px 3px 1px 5px;
+    font-size: 0.66em;
+    line-height: 1.05;
+    max-width: 162px;
+}
+
+.wandlight-lore-meta-select-prefix {
+    font-size: 0.88em;
+}
+
+.wandlight-lore-meta-select {
+    min-width: 54px;
+    max-width: 102px;
+    height: 16px;
+    padding: 0 14px 0 4px;
+    font-size: 0.95em;
+    line-height: 1;
+}
+
+.wandlight-lore-meta-select-priority .wandlight-lore-meta-select {
+    min-width: 48px;
+    max-width: 58px;
+}
+
+.wandlight-lore-entry-title {
+    font-size: 1.0em;
+}
+
+.wandlight-review-lore-title {
+    font-size: 1.05em;
+}

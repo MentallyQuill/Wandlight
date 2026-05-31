@@ -1,0 +1,429 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_chamber_secret_before_year2",
+      "title": "Chamber of Secrets knowledge before Year 2",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 85,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1992-08-31",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher's Stone"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "Chamber of Secrets",
+          "Tom Riddle",
+          "basilisk"
+        ],
+        "spells": [],
+        "schoolYears": [
+          1
+        ],
+        "books": [
+          "Philosopher's Stone"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Before Year 2, the trio should not know the Chamber of Secrets plot, basilisk truth, or Tom Riddle diary connection.",
+        "injection": "Before Year 2 events, do not have the trio know about the Chamber, basilisk, or diary unless AU introduced it.",
+        "constraints": [
+          "Prevent Year 1 leakage of Year 2 mystery knowledge."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "knowledge-gate",
+          "future-guard",
+          "year-2"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Philosopher's Stone",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_sirius_truth_before_late_year3",
+      "title": "Sirius Black truth before late Year 3",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1994-06-05",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "Sirius Black",
+          "Peter Pettigrew",
+          "betrayal"
+        ],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Before the Shrieking Shack confrontation, Harry should not know Sirius was innocent or that Peter betrayed his parents.",
+        "injection": "Before late Year 3, characters generally believe Sirius Black betrayed the Potters; Harry does not know Peter Pettigrew is the traitor.",
+        "constraints": [
+          "Block early revelation of Sirius innocence and Peter\u2019s betrayal."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "knowledge-gate",
+          "Sirius",
+          "year-3"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Prisoner of Azkaban",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_barty_crouch_jr_before_year4_end",
+      "title": "Barty Crouch Jr. identity gate",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1994-09-01",
+        "validTo": "1995-06-24",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "Mad-Eye Moody",
+          "Barty Crouch Jr.",
+          "Polyjuice"
+        ],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Before the end of Year 4, students should not know that Moody is Barty Crouch Jr. in disguise.",
+        "injection": "Before the Year 4 reveal, do not have characters know Moody is Barty Crouch Jr. unless AU explicitly reveals it early.",
+        "constraints": [
+          "Protect the Moody impostor reveal."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "knowledge-gate",
+          "year-4",
+          "impostor"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_voldemort_return_public_before_year5_end",
+      "title": "Public Voldemort return knowledge before Ministry battle",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 95,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1995-06-25",
+        "validTo": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [],
+        "topics": [
+          "Voldemort return",
+          "Ministry denial"
+        ],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 5, Voldemort has returned but the Ministry publicly denies it until after the Department of Mysteries.",
+        "injection": "In Year 5 before the Ministry battle aftermath, treat Voldemort\u2019s return as true but publicly denied by the Ministry.",
+        "constraints": [
+          "Do not write public institutions as fully accepting Voldemort\u2019s return too early."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "knowledge-gate",
+          "Ministry",
+          "year-5"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_draco_mission_before_year6_end",
+      "title": "Draco mission secrecy gate",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 92,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-29",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Draco Malfoy",
+          "Harry Potter"
+        ],
+        "topics": [
+          "Draco mission",
+          "Death Eaters",
+          "Vanishing Cabinet"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Year 6, Draco\u2019s specific mission and cabinet plan are not public knowledge.",
+        "injection": "Before the Year 6 climax, Draco\u2019s task and Vanishing Cabinet repair should remain secret unless directly discovered in the AU.",
+        "constraints": [
+          "Harry may suspect Draco, but should not know the full mission without evidence."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "knowledge-gate",
+          "Draco",
+          "year-6"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_snape_loyalty_before_year7_end",
+      "title": "Snape loyalty truth gate",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1998-05-01",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Severus Snape",
+          "Harry Potter"
+        ],
+        "topics": [
+          "Snape loyalty",
+          "Lily Potter",
+          "Dumbledore"
+        ],
+        "spells": [],
+        "schoolYears": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Snape\u2019s full motivations and loyalty are hidden until near the end of Year 7.",
+        "injection": "Do not reveal Snape\u2019s full loyalty, Lily motivation, or Dumbledore plan before late Year 7 unless AU lore explicitly reveals it.",
+        "constraints": [
+          "Protect Snape\u2019s late-canon reveal."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "knowledge-gate",
+          "Snape",
+          "future-guard"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Expanded curated date constraint entry."
+      },
+      "ui": {},
+      "extensions": {}
+    }
+  ]
+}

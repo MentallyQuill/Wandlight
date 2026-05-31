@@ -109,7 +109,7 @@ export const DEFAULT_SETTINGS = {
     continuityOpenAIUseSTProxy: false,
     continuityTemperature: 0.7,
     continuityTopP: 0.98,
-    continuityMaxTokens: 1024,
+    continuityMaxTokens: 4096,
 
     // Lore model provider: used by Detect Story Context / Generate Pending Lore.
     loreProvider: 'st', // 'st' | 'profile' | 'openai_compatible'

@@ -26,6 +26,11 @@
     "behavior_gates/core_behaviors.json",
     "places/hogwarts_and_britain.json",
     "places/institution_states.json",
-    "user/custom_entries.json"
+    "user/custom_entries.json",
+    "spell_gates/expanded_spell_gates.json",
+    "knowledge_gates/expanded_knowledge_gates.json",
+    "future_guards/expanded_future_guards.json",
+    "behavior_gates/expanded_behaviors.json",
+    "ages/expanded_character_ages.json"
   ]
 }

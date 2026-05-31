@@ -2,9 +2,11 @@
  * lore-llm-client.js — Wandlight Continuity
  * Provider abstraction for continuity scanning, lore context detection, and lore generation.
  *
- * Provider kinds:
- *   continuity — Scan Continuity State / automatic continuity tracking
- *   lore       — Detect Story Context / Generate Pending Lore
+ * Provider roles:
+ *   continuity — Utility Provider: frequent, fast/cheap tasks such as compression and continuity scans
+ *   lore       — Reasoning Provider: deeper story context and lore-generation tasks
+ *
+ * Internal kind names are retained for backward-compatible settings storage.
  */
 
 import { getSettings } from './state-manager.js';
@@ -26,7 +28,7 @@ function getProviderSettings(kind = 'lore') {
     const settings = getSettings();
     const k = normalizeProviderKind(kind);
     const prefix = capName(k);
-    const title = k === 'continuity' ? 'Continuity' : 'Lore';
+    const title = k === 'continuity' ? 'Utility' : 'Reasoning';
 
     return {
         kind: k,

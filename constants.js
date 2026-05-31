@@ -210,7 +210,7 @@ Direct injection block:
         flags: 'Track contradictions, warnings, uncertainties, and resolved continuity issues. Be conservative; do not flag ambiguity as contradiction.'
     },
 
-    // Continuity model provider: used by Scan Continuity State / automatic continuity tracking.
+    // Utility provider: used by compression and Scan Continuity State / automatic continuity tracking. Internal key retained for backward compatibility.
     continuityProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
     continuityProfileId: '',
     continuityCompletionPresetId: '',
@@ -226,7 +226,7 @@ Direct injection block:
     continuityTopP: 0.98,
     continuityMaxTokens: 4096,
 
-    // Lore model provider: used by Detect Story Context / Generate Pending Lore.
+    // Reasoning provider: used by Detect Story Context / Generate Pending Lore. Internal key retained for backward compatibility.
     loreProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
     loreProfileId: '',
     loreCompletionPresetId: '',

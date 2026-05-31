@@ -811,7 +811,7 @@ function createContextDetectionCard(state) {
         'contextDetectionMode',
         'contextDetectionAutoInterval',
         'Only runs when you click Detect Story Context.',
-        'Runs automatically after roleplay turns on this interval, using the Lore provider.',
+        'Runs automatically after roleplay turns on this interval, using the Reasoning provider.',
         'Automatic story-context detection interval in completed model turns.'
     ));
 
@@ -1008,12 +1008,12 @@ function createStoryLoreGenerationPanel(state) {
     const header = document.createElement('div');
     header.className = 'wandlight-lore-generation-panel-title';
     header.textContent = 'Generate Story Lore';
-    addTooltip(header, 'Uses the Lore provider to analyze recent chat messages and create story/AU lore entries for Pending Lore Review. This uses model/API tokens.');
+    addTooltip(header, 'Uses the Reasoning provider to analyze recent chat messages and create story/AU lore entries for Pending Lore Review. This uses model/API tokens.');
     panel.appendChild(header);
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Model-based generation. Uses the Lore provider, source-message window, and chunk size settings. Output stays pending until accepted.';
+    help.textContent = 'Model-based generation. Uses the Reasoning provider, source-message window, and chunk size settings. Output stays pending until accepted.';
     panel.appendChild(help);
 
     const actions = document.createElement('div');
@@ -1058,7 +1058,7 @@ function createStoryLoreSettingsContent() {
         'loreGenerationMode',
         'loreGenerationAutoInterval',
         'Only runs when you click Generate Story Lore.',
-        'Runs automatically after roleplay turns on this interval, using the Lore provider. Generated lore still waits in Pending Lore Review.',
+        'Runs automatically after roleplay turns on this interval, using the Reasoning provider. Generated lore still waits in Pending Lore Review.',
         'Automatic story-lore generation interval in completed model turns.'
     ));
     wrap.appendChild(createGenerationSettingsCard());
@@ -1702,7 +1702,7 @@ function createContinuityScanCard(state) {
         'continuityTrackingMode',
         'continuityAutoInterval',
         'Continuity scans only run when you click Scan Continuity State.',
-        'Wandlight automatically scans continuity state every configured number of turns using the Continuity provider.',
+        'Wandlight automatically scans continuity state every configured number of turns using the Utility provider.',
         'Automatic continuity scan interval in completed model turns.'
     ));
 
@@ -2160,7 +2160,7 @@ function createContinuityHandlingCard(state, settings) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Compress Continuity Now', 'Uses the Continuity provider to compress the direct Continuity Injection block and cache it for compressed injection.', async (btn) => {
+    actions.appendChild(createButton('Compress Continuity Now', 'Uses the Utility provider to compress the direct Continuity Injection block and cache it for compressed injection.', async (btn) => {
         await runModelCompression('continuity', btn);
     }, 'wandlight-primary-button'));
     card.appendChild(actions);
@@ -2211,7 +2211,7 @@ function createLoreHandlingCard(state, settings, activeLore) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Compress Lore Now', 'Uses the Lore provider to compress the direct Lore Injection block and cache it for compressed injection.', async (btn) => {
+    actions.appendChild(createButton('Compress Lore Now', 'Uses the Utility provider to compress the direct Lore Injection block and cache it for compressed injection.', async (btn) => {
         await runModelCompression('lore', btn);
     }, 'wandlight-primary-button'));
     card.appendChild(actions);
@@ -2596,10 +2596,13 @@ function updateCompressionTurnStatus(state, kind = 'lore') {
 
 async function runModelCompression(kind = 'lore', btn = null) {
     const settings = getSettings();
-    const providerKind = kind === 'continuity' ? 'continuity' : 'lore';
+    // Compression is a frequent transformation task, so it is routed through the
+    // Utility provider. Internal key remains `continuity` for backward-compatible
+    // settings storage; the UI presents this provider role as Utility.
+    const providerKind = 'continuity';
     const validation = validateLoreProviderConfiguration(providerKind);
     if (!validation.ok) {
-        toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression blocked: ${validation.message}`, 'error');
+        toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression blocked: Utility provider unavailable: ${validation.message}`, 'error');
         return null;
     }
 
@@ -2908,7 +2911,7 @@ function createInjectionModeButton(mode, label, tooltip, settings) {
                 toast('Lore compressed mode selected. No cached compression exists yet; using direct preview until you click Compress Lore Now.', 'warning');
             }
         }
-        refreshPanelBody({ preserveScroll: false });
+        refreshPanelBody({ preserveScroll: true, preserveWindowScroll: true });
         refreshHeader();
         toast(`Lore injection mode set to ${label}.`);
     });
@@ -2936,7 +2939,7 @@ function createContinuityModeButton(mode, label, tooltip, settings) {
                 toast('Continuity compressed mode selected. No cached compression exists yet; using direct preview until you click Compress Continuity Now.', 'warning');
             }
         }
-        refreshPanelBody({ preserveScroll: false });
+        refreshPanelBody({ preserveScroll: true, preserveWindowScroll: true });
         refreshHeader();
         toast(`Continuity injection mode set to ${label}.`);
     });
@@ -4683,6 +4686,14 @@ function refreshPanelBody(options = {}) {
 
     const activeScroll = getActiveScrollElement();
     const scrollTop = options.preserveScroll && activeScroll ? activeScroll.scrollTop : 0;
+    const panelScrollTop = options.preserveScroll ? (panelRoot.scrollTop || 0) : 0;
+    const pageScrollElement = typeof document !== 'undefined' ? document.scrollingElement || document.documentElement : null;
+    const pageScrollTop = (options.preserveScroll || options.preserveWindowScroll) && pageScrollElement
+        ? pageScrollElement.scrollTop
+        : null;
+    const pageScrollLeft = (options.preserveScroll || options.preserveWindowScroll) && pageScrollElement
+        ? pageScrollElement.scrollLeft
+        : null;
 
     const state = getState();
     renderPanelBody(body, state);
@@ -4690,6 +4701,16 @@ function refreshPanelBody(options = {}) {
     if (options.preserveScroll) {
         const newScroll = getActiveScrollElement();
         if (newScroll) newScroll.scrollTop = scrollTop;
+        panelRoot.scrollTop = panelScrollTop;
+    }
+
+    if ((options.preserveScroll || options.preserveWindowScroll) && pageScrollElement && pageScrollTop !== null) {
+        const restorePageScroll = () => {
+            pageScrollElement.scrollTop = pageScrollTop;
+            pageScrollElement.scrollLeft = pageScrollLeft || 0;
+        };
+        restorePageScroll();
+        if (typeof requestAnimationFrame === 'function') requestAnimationFrame(restorePageScroll);
     }
 }
 

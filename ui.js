@@ -336,19 +336,19 @@ export function renderLoreContextPreview() {
 /**
  * Renders the lore matrix preview from current state.
  */
-// ── Lore Model Provider setup ──────────────────────────────────────────────────
+// ── Model Provider Role setup ──────────────────────────────────────────────────
 
 /**
- * Wires the lore model provider UI controls.
+ * Wires the model provider role UI controls.
  * Reads/stores API keys via secure-keyring, populates connection profile dropdowns,
- * and saves lore provider settings.
+ * and saves provider role settings.
  * @param {HTMLElement} container - The settings panel container
  */
 function setupLoreProviderPanel(container) {
     if (!container) return;
 
-    setupProviderControls(container, 'continuity', 'Continuity');
-    setupProviderControls(container, 'lore', 'Lore');
+    setupProviderControls(container, 'continuity', 'Utility');
+    setupProviderControls(container, 'lore', 'Reasoning');
 
     const settings = getSettings();
     const tempInput = container.querySelector('#wandlight_lore_temperature');
@@ -689,14 +689,14 @@ function setupProviderControls(container, kind, label) {
 }
 
 /**
- * Helper: saves lore provider settings via the settings manager.
+ * Helper: saves model provider role settings via the settings manager.
  * @param {Object} settings - Current settings object
  */
 function saveLoreProviderSettings(settings) {
     try {
         saveSettings(settings);
     } catch (e) {
-        console.warn('[Wandlight] Failed to save lore provider settings:', e);
+        console.warn('[Wandlight] Failed to save model provider role settings:', e);
     }
 }
 export function renderLoreMatrixPreview() {

@@ -42,7 +42,7 @@ let _generationRunning = false;
 // ── Helper: quiet LLM prompt ────────────────────────────────────────────────────
 
 /**
- * Sends a controlled JSON task to the LLM via the configured lore provider.
+ * Sends a controlled JSON task to the LLM via the configured Reasoning provider.
  * Uses sendLoreRequest which dispatches to the provider selected in settings
  * (current ST model, connection profile, or OpenAI-compatible endpoint).
  * @param {string} systemPrompt - System message text

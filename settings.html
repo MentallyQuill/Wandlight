@@ -37,10 +37,10 @@
                     <div class="flex-container flexFlowColumn gap-1">
 
                         <div class="wandlight-provider-settings-block" style="border: 1px solid rgba(180,160,100,0.18); border-radius: 8px; padding: 8px; margin-bottom: 8px;">
-                            <label style="font-size: 0.92em; font-weight: bold;">Continuity Provider</label>
-                            <small style="opacity: 0.65; display: block; margin: 2px 0 6px;">Used by Scan Continuity State and automatic continuity tracking. Choose a fast/cheap model if desired.</small>
+                            <label style="font-size: 0.92em; font-weight: bold;">Utility Provider</label>
+                            <small style="opacity: 0.65; display: block; margin: 2px 0 6px;">Used by compression and scene continuity scans. Configure this for fast, inexpensive, frequent model calls.</small>
                             <select id="wandlight_continuity_provider" class="text_pole" style="width: 100%;"
-                                title="Select which model source Wandlight uses for Continuity tab scans.">
+                                title="Select which model source Wandlight uses for utility tasks: compression and scene continuity scans.">
                                 <option value="st">Current SillyTavern Model</option>
                                 <option value="profile">Connection Profile</option>
                                 <option value="openai_compatible">OpenAI-Compatible Endpoint</option>
@@ -48,27 +48,27 @@
 
                             <div id="wandlight_continuity_profile_row" style="display: none;">
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Connection Profile</label>
-                                <select id="wandlight_continuity_profile_id" class="text_pole" style="width: 100%;" title="Connection profile used for Wandlight continuity scans."><option value="">Select Profile</option></select>
+                                <select id="wandlight_continuity_profile_id" class="text_pole" style="width: 100%;" title="Connection profile used for Wandlight utility tasks."><option value="">Select Profile</option></select>
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Completion Preset</label>
-                                <select id="wandlight_continuity_completion_preset_id" class="text_pole" style="width: 100%;" title="Optional completion preset used for Wandlight continuity scans."><option value="">Default</option></select>
+                                <select id="wandlight_continuity_completion_preset_id" class="text_pole" style="width: 100%;" title="Optional completion preset used for Wandlight utility tasks."><option value="">Default</option></select>
                             </div>
 
                             <div id="wandlight_continuity_openai_row" style="display: none;">
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Base URL</label>
-                                <input id="wandlight_continuity_openai_base_url" class="text_pole" type="text" placeholder="https://api.openai.com" title="OpenAI-compatible base URL for continuity scans." style="width: 100%;">
+                                <input id="wandlight_continuity_openai_base_url" class="text_pole" type="text" placeholder="https://api.openai.com" title="OpenAI-compatible base URL for Wandlight utility tasks." style="width: 100%;">
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Model</label>
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <div style="display: flex; gap: 6px; align-items: center;">
                                         <input id="wandlight_continuity_openai_model_search" class="text_pole" type="text" placeholder="Search or type model ID..." title="Type to search fetched models, or type an exact model ID." style="flex: 1;">
-                                        <button id="wandlight_continuity_fetch_models" class="menu_button interactable" style="font-size: 0.78em; padding: 2px 8px; white-space: nowrap;" title="Fetch available models from the continuity API endpoint."><i class="fa-solid fa-cloud-arrow-down"></i> Fetch Models</button>
+                                        <button id="wandlight_continuity_fetch_models" class="menu_button interactable" style="font-size: 0.78em; padding: 2px 8px; white-space: nowrap;" title="Fetch available models from the utility API endpoint."><i class="fa-solid fa-cloud-arrow-down"></i> Fetch Models</button>
                                     </div>
-                                    <select id="wandlight_continuity_openai_model" class="text_pole" title="Filtered fetched model list for continuity scans." style="width: 100%;"><option value="">Fetch models or type a model ID above</option></select>
+                                    <select id="wandlight_continuity_openai_model" class="text_pole" title="Filtered fetched model list for utility tasks." style="width: 100%;"><option value="">Fetch models or type a model ID above</option></select>
                                 </div>
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">API Key</label>
                                 <div style="display: flex; gap: 6px; align-items: center;">
-                                    <input id="wandlight_continuity_openai_key" class="text_pole" type="password" placeholder="Enter API key" title="API key stored encrypted locally for Wandlight continuity scans." style="flex: 1;">
-                                    <button id="wandlight_continuity_openai_key_save" class="menu_button interactable" title="Encrypt and store the entered continuity API key."><i class="fa-solid fa-floppy-disk"></i> Store</button>
-                                    <button id="wandlight_continuity_openai_key_clear" class="menu_button interactable" title="Remove the stored continuity API key."><i class="fa-solid fa-trash"></i> Clear</button>
+                                    <input id="wandlight_continuity_openai_key" class="text_pole" type="password" placeholder="Enter API key" title="API key stored encrypted locally for Wandlight utility tasks." style="flex: 1;">
+                                    <button id="wandlight_continuity_openai_key_save" class="menu_button interactable" title="Encrypt and store the entered utility API key."><i class="fa-solid fa-floppy-disk"></i> Store</button>
+                                    <button id="wandlight_continuity_openai_key_clear" class="menu_button interactable" title="Remove the stored utility API key."><i class="fa-solid fa-trash"></i> Clear</button>
                                 </div>
                                 <small id="wandlight_continuity_openai_key_status" style="opacity: 0.6; margin-top: 2px; display: block;"></small>
                                 <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85em;"><input id="wandlight_continuity_openai_json_mode" type="checkbox"> Use JSON mode (advanced; leave off unless your provider supports response_format)</label>
@@ -76,15 +76,15 @@
                             </div>
 
                             <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
-                                <button id="wandlight_continuity_test_connection" class="menu_button interactable" title="Sends a tiny JSON test request through the selected continuity provider."><i class="fa-solid fa-plug-circle-check"></i> Test Continuity</button>
+                                <button id="wandlight_continuity_test_connection" class="menu_button interactable" title="Sends a tiny JSON test request through the selected Utility provider."><i class="fa-solid fa-plug-circle-check"></i> Test Utility</button>
                                 <small id="wandlight_continuity_connection_status" style="opacity: 0.7;"></small>
                             </div>
                         </div>
 
                         <div class="wandlight-provider-settings-block" style="border: 1px solid rgba(180,160,100,0.18); border-radius: 8px; padding: 8px; margin-bottom: 8px;">
-                            <label style="font-size: 0.92em; font-weight: bold;">Lore Provider</label>
-                            <small style="opacity: 0.65; display: block; margin: 2px 0 6px;">Used by Detect Story Context and Generate Pending Lore. Choose a stronger model for structured lore generation.</small>
-                            <select id="wandlight_lore_provider" class="text_pole" style="width: 100%;" title="Select which model source Wandlight uses for story context and lore generation.">
+                            <label style="font-size: 0.92em; font-weight: bold;">Reasoning Provider</label>
+                            <small style="opacity: 0.65; display: block; margin: 2px 0 6px;">Used by Detect Story Context and Generate Pending Lore. Configure this for stronger reasoning, better structure, and lower error rates.</small>
+                            <select id="wandlight_lore_provider" class="text_pole" style="width: 100%;" title="Select which model source Wandlight uses for reasoning tasks: story context detection and lore generation.">
                                 <option value="st">Current SillyTavern Model</option>
                                 <option value="profile">Connection Profile</option>
                                 <option value="openai_compatible">OpenAI-Compatible Endpoint</option>
@@ -92,28 +92,28 @@
 
                             <div id="wandlight_lore_profile_row" style="display: none;">
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Connection Profile</label>
-                                <select id="wandlight_lore_profile_id" class="text_pole" style="width: 100%;" title="Connection profile used for Wandlight lore tasks."><option value="">Select Profile</option></select>
+                                <select id="wandlight_lore_profile_id" class="text_pole" style="width: 100%;" title="Connection profile used for Wandlight reasoning tasks."><option value="">Select Profile</option></select>
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Completion Preset</label>
-                                <select id="wandlight_lore_completion_preset_id" class="text_pole" style="width: 100%;" title="Optional completion preset used for Wandlight lore tasks."><option value="">Default</option></select>
+                                <select id="wandlight_lore_completion_preset_id" class="text_pole" style="width: 100%;" title="Optional completion preset used for Wandlight reasoning tasks."><option value="">Default</option></select>
                             </div>
 
                             <div id="wandlight_lore_openai_row" style="display: none;">
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Base URL</label>
-                                <input id="wandlight_lore_openai_base_url" class="text_pole" type="text" placeholder="https://api.openai.com" title="OpenAI-compatible base URL for lore tasks." style="width: 100%;">
+                                <input id="wandlight_lore_openai_base_url" class="text_pole" type="text" placeholder="https://api.openai.com" title="OpenAI-compatible base URL for Wandlight reasoning tasks." style="width: 100%;">
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Model</label>
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <div style="display: flex; gap: 6px; align-items: center;">
                                         <input id="wandlight_lore_openai_model_search" class="text_pole" type="text" placeholder="Search or type model ID..." title="Type to search fetched models, or type an exact model ID." style="flex: 1;">
-                                        <button id="wandlight_lore_fetch_models" class="menu_button interactable" style="font-size: 0.78em; padding: 2px 8px; white-space: nowrap;" title="Fetch available models from the lore API endpoint."><i class="fa-solid fa-cloud-arrow-down"></i> Fetch Models</button>
+                                        <button id="wandlight_lore_fetch_models" class="menu_button interactable" style="font-size: 0.78em; padding: 2px 8px; white-space: nowrap;" title="Fetch available models from the reasoning API endpoint."><i class="fa-solid fa-cloud-arrow-down"></i> Fetch Models</button>
                                     </div>
-                                    <select id="wandlight_lore_openai_model" class="text_pole" title="Filtered fetched model list for lore tasks." style="width: 100%;"><option value="">Fetch models or type a model ID above</option></select>
+                                    <select id="wandlight_lore_openai_model" class="text_pole" title="Filtered fetched model list for reasoning tasks." style="width: 100%;"><option value="">Fetch models or type a model ID above</option></select>
                                     <small style="opacity: 0.6; margin-top: -2px;">Typing saves the exact model ID and filters fetched results; the dropdown is optional.</small>
                                 </div>
                                 <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">API Key</label>
                                 <div style="display: flex; gap: 6px; align-items: center;">
-                                    <input id="wandlight_lore_openai_key" class="text_pole" type="password" placeholder="Enter API key" title="API key stored encrypted locally for Wandlight lore tasks." style="flex: 1;">
-                                    <button id="wandlight_lore_openai_key_save" class="menu_button interactable" title="Encrypt and store the entered lore API key."><i class="fa-solid fa-floppy-disk"></i> Store</button>
-                                    <button id="wandlight_lore_openai_key_clear" class="menu_button interactable" title="Remove the stored lore API key."><i class="fa-solid fa-trash"></i> Clear</button>
+                                    <input id="wandlight_lore_openai_key" class="text_pole" type="password" placeholder="Enter API key" title="API key stored encrypted locally for Wandlight reasoning tasks." style="flex: 1;">
+                                    <button id="wandlight_lore_openai_key_save" class="menu_button interactable" title="Encrypt and store the entered reasoning API key."><i class="fa-solid fa-floppy-disk"></i> Store</button>
+                                    <button id="wandlight_lore_openai_key_clear" class="menu_button interactable" title="Remove the stored reasoning API key."><i class="fa-solid fa-trash"></i> Clear</button>
                                 </div>
                                 <small id="wandlight_lore_openai_key_status" style="opacity: 0.6; margin-top: 2px; display: block;"></small>
                                 <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85em;"><input id="wandlight_lore_openai_json_mode" type="checkbox"> Use JSON mode (advanced; leave off unless your provider supports response_format)</label>
@@ -121,7 +121,7 @@
                             </div>
 
                             <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
-                                <button id="wandlight_lore_test_connection" class="menu_button interactable" title="Sends a tiny JSON test request through the selected lore provider."><i class="fa-solid fa-plug-circle-check"></i> Test Lore</button>
+                                <button id="wandlight_lore_test_connection" class="menu_button interactable" title="Sends a tiny JSON test request through the selected Reasoning provider."><i class="fa-solid fa-plug-circle-check"></i> Test Reasoning</button>
                                 <small id="wandlight_lore_connection_status" style="opacity: 0.7;"></small>
                             </div>
                         </div>
@@ -132,14 +132,14 @@
                                 <label style="font-size: 0.78em; opacity: 0.7;">Temperature</label>
                                 <input id="wandlight_lore_temperature" class="text_pole" type="number"
                                     min="0" max="2" step="0.05" value="0.7"
-                                    title="Temperature for Wandlight lore context and lore-generation calls."
+                                    title="Temperature for Wandlight reasoning calls: story context and lore generation."
                                     style="width: 100%;">
                             </div>
                             <div style="flex: 1; min-width: 100px;">
                                 <label style="font-size: 0.78em; opacity: 0.7;">Top P</label>
                                 <input id="wandlight_lore_top_p" class="text_pole" type="number"
                                     min="0" max="1" step="0.05" value="0.98"
-                                    title="Top-p sampling value for Wandlight lore context and lore-generation calls."
+                                    title="Top-p sampling value for Wandlight reasoning calls: story context and lore generation."
                                     style="width: 100%;">
                             </div>
                             <div style="flex: 1; min-width: 100px;">

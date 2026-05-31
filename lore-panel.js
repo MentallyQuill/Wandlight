@@ -539,7 +539,7 @@ function renderSessionTab(container, state) {
     stats.appendChild(createKeyValue('Context-active lore entries', String(counts.active), 'Accepted lore entries whose date, branch, character, location, or scope rules match the current Continuity/Context state. This can be 0 even when fallback priority-based lore is still selected for injection.'));
     stats.appendChild(createKeyValue('Lore selected for injection', String(selectedLoreCount), 'Accepted lore entries that Wandlight is currently selecting for Lore Injection after pin/mute rules, context activation, and fallback priority selection. There is no hidden entry cap; mute entries to exclude them.'));
     stats.appendChild(createKeyValue('Injection token estimate', injectionStats.totalChars ? `${injectionStats.totalTokens} tokens` : 'empty', 'Approximate token count for the combined Continuity + Lore injection previews.'));
-    stats.appendChild(createKeyValue('Total chars injected', `${injectionStats.totalChars} chars`, 'Combined character count of Continuity Injection Preview plus Lore Injection Preview using current Injection tab toggles and handling modes.'));
+    stats.appendChild(createKeyValue('Total chars injected', `${injectionStats.totalChars} chars`, 'Combined character count of Continuity Injection plus Lore Injection using current Injection tab toggles and handling modes.'));
     container.appendChild(stats);
 
     container.appendChild(createCollapsibleSection('session.stateHistory', 'State History', getCountLabel(state?.stateHistory || [], 'undo point'), false, createStateHistoryCard(state), { tooltip: 'Undo history for Wandlight state.' }));
@@ -1096,12 +1096,14 @@ async function handleSuggestCanonLore(btn) {
                 setFeatureProgress('canon', 'Canon suggestion cancelled: no Story Context.', 0);
                 return;
             }
+            setFeatureProgress('canon', 'Detecting Story Context before suggesting canon lore...', 5);
             const detected = await performStoryContextDetection({ stayOnTab: 'lore' });
             if (!detected || !hasUsableStoryContext(getState()?.loreContext || {})) {
                 setFeatureProgress('canon', 'No Story Context available. Canon suggestions were not run.', 100);
                 toast('Canon suggestions need Story Context before they can run.', 'warning');
                 return;
             }
+            setFeatureProgress('canon', 'Story Context detected. Continuing to canon suggestion...', 15);
             state = getState();
         }
 
@@ -2065,8 +2067,8 @@ function renderInjectionTab(container, state) {
         { tooltip: 'Advanced editable prompt templates used by Compress Continuity Now and Compress Lore Now.' }
     ));
 
-    container.appendChild(createInjectionPreviewCard('Continuity Injection Preview', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This preview shows only Continuity tab state. It can be placed at a different depth because it is separated from Lore.'));
-    container.appendChild(createInjectionPreviewCard('Lore Injection Preview', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'This preview shows only accepted Lore entries, using Direct or cached model-compressed handling.'));
+    container.appendChild(createInjectionPreviewCard('Continuity Injection', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This is the actual Continuity block currently configured for prompt injection. It can be placed at a different depth because it is separated from Lore.'));
+    container.appendChild(createInjectionPreviewCard('Lore Injection', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'This is the actual Lore block currently configured for prompt injection, using Direct or cached model-compressed handling.'));
 }
 
 function createContinuityHandlingCard(state, settings) {
@@ -2110,7 +2112,7 @@ function createContinuityHandlingCard(state, settings) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Compress Continuity Now', 'Uses the Continuity provider to compress the direct Continuity Injection Preview and cache it for compressed injection.', async (btn) => {
+    actions.appendChild(createButton('Compress Continuity Now', 'Uses the Continuity provider to compress the direct Continuity Injection block and cache it for compressed injection.', async (btn) => {
         await runModelCompression('continuity', btn);
     }, 'wandlight-primary-button'));
     card.appendChild(actions);
@@ -2161,7 +2163,7 @@ function createLoreHandlingCard(state, settings, activeLore) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Compress Lore Now', 'Uses the Lore provider to compress the direct Lore Injection Preview and cache it for compressed injection.', async (btn) => {
+    actions.appendChild(createButton('Compress Lore Now', 'Uses the Lore provider to compress the direct Lore Injection block and cache it for compressed injection.', async (btn) => {
         await runModelCompression('lore', btn);
     }, 'wandlight-primary-button'));
     card.appendChild(actions);
@@ -2474,23 +2476,34 @@ function createInjectionPreviewCard(titleText, className, text, enabled, helpTex
 
     const previewHelp = document.createElement('div');
     previewHelp.className = 'wandlight-runtime-help';
-    previewHelp.textContent = enabled ? helpText : `${titleText.replace(' Preview', '')} is currently disabled. The preview shows what would be injected if enabled.`;
+    previewHelp.textContent = enabled
+        ? helpText
+        : `${titleText} is currently disabled. This panel shows what would be injected if enabled.`;
     previewCard.appendChild(previewHelp);
 
     const pre = document.createElement('pre');
     pre.className = `wandlight-injection-preview ${className}`;
-    pre.textContent = text && text.trim() ? text : '(Preview is empty.)';
-    addTooltip(pre, 'Scrollable preview of the prompt context block. This text is ephemeral and is not written into chat history.');
+    pre.textContent = getInjectionDisplayText(titleText, text, enabled);
+    addTooltip(pre, 'Scrollable prompt context block. This text is ephemeral and is not written into chat history.');
     previewCard.appendChild(pre);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Refresh Preview', 'Rebuilds both split injection previews from current state and settings.', () => {
+    actions.appendChild(createButton('Refresh Injection Text', 'Rebuilds both split injection blocks from current state and settings.', () => {
         refreshInjectionPreviewOnly();
-        toast('Injection previews refreshed.', 'info');
+        toast('Injection text refreshed.', 'info');
     }));
     previewCard.appendChild(actions);
     return previewCard;
+}
+
+function getInjectionDisplayText(titleText, text, enabled = true) {
+    const clean = String(text || '').trim();
+    if (clean) return clean;
+    const lower = String(titleText || '').toLowerCase();
+    if (lower.includes('lore')) return enabled ? '(No lore data to inject.)' : '(Lore injection is disabled.)';
+    if (lower.includes('continuity')) return enabled ? '(No continuity data to inject.)' : '(Continuity injection is disabled.)';
+    return '(No data to inject.)';
 }
 
 function refreshInjectionPreviewOnly() {
@@ -2503,12 +2516,12 @@ function refreshInjectionPreviewOnly() {
 
     const continuityPre = panelRoot?.querySelector('.wandlight-continuity-injection-preview');
     if (continuityPre) {
-        continuityPre.textContent = continuity && continuity.trim() ? continuity : '(Preview is empty.)';
+        continuityPre.textContent = getInjectionDisplayText('Continuity Injection', continuity, settings.injectContinuity !== false && settings.injectMemo !== false);
     }
 
     const lorePre = panelRoot?.querySelector('.wandlight-lore-injection-preview');
     if (lorePre) {
-        lorePre.textContent = lore && lore.trim() ? lore : '(Preview is empty.)';
+        lorePre.textContent = getInjectionDisplayText('Lore Injection', lore, settings.injectLore !== false);
     }
 
     if (typeof globalThis.wandlightSyncPromptInjection === 'function') {
@@ -2974,7 +2987,7 @@ function createPendingLoreBulkControls(pendingLore, state) {
 function createPendingLoreCheckbox(entry, checked) {
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
-    checkbox.className = 'wandlight-review-lore-checkbox';
+    checkbox.className = 'wandlight-review-lore-checkbox wandlight-lore-entry-select';
     checkbox.checked = checked;
     addTooltip(checkbox, checked ? 'Remove this lore entry from the current bulk selection.' : 'Add this lore entry to the current bulk selection.');
     checkbox.addEventListener('click', e => e.stopPropagation());
@@ -3056,28 +3069,35 @@ function dismissSelectedPendingLore() {
 
 function createPendingLoreReviewCard(entry, index, selected = false) {
     const card = document.createElement('div');
-    card.className = 'wandlight-review-lore-card';
+    card.className = 'wandlight-lore-entry-card wandlight-lore-entry-pending wandlight-pending-review-entry-card';
     if (selected) card.classList.add('wandlight-review-lore-card-selected');
 
-    const header = document.createElement('div');
-    header.className = 'wandlight-review-lore-card-header';
-    header.appendChild(createPendingLoreCheckbox(entry, selected));
+    const headerRow = document.createElement('div');
+    headerRow.className = 'wandlight-lore-entry-header';
+    headerRow.appendChild(createPendingLoreCheckbox(entry, selected));
 
-    const title = document.createElement('div');
-    title.className = 'wandlight-review-lore-title';
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'wandlight-lore-entry-title-wrap';
+    const title = document.createElement('span');
+    title.className = 'wandlight-lore-entry-title';
     title.textContent = entry.title || `Pending lore ${index + 1}`;
-    addTooltip(title, 'Generated lore entry title.');
-    header.appendChild(title);
+    addTooltip(title, 'Generated lore entry title. This entry is pending until accepted.');
+    titleWrap.appendChild(title);
+    headerRow.appendChild(titleWrap);
 
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-lore-entry-actions';
     const status = document.createElement('span');
     status.className = 'wandlight-lore-badge wandlight-lore-badge-pending';
     status.textContent = 'pending';
     addTooltip(status, 'This lore entry has not been accepted into the active lore matrix yet.');
-    header.appendChild(status);
-    card.appendChild(header);
+    actions.appendChild(status);
+    headerRow.appendChild(actions);
+    card.appendChild(headerRow);
 
     const meta = document.createElement('div');
     meta.className = 'wandlight-lore-entry-meta';
+    meta.appendChild(createEditableLifecycleBadge(entry));
     meta.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', null, `Category: ${entry.category || 'canon'}. Use dropdown to change.`));
     meta.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', null, `Canon status: ${entry.canonStatus || 'unknown'}. Use dropdown to change.`));
     meta.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', null, `Truth/reveal status: ${entry.truthStatus || 'true'}. Use dropdown to change.`));
@@ -3088,7 +3108,9 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     card.appendChild(meta);
 
     if (Array.isArray(entry.tags) && entry.tags.length) {
-        card.appendChild(createReadOnlyTags(entry.tags));
+        const tags = createReadOnlyTags(entry.tags);
+        tags.classList.add('wandlight-pending-readonly-tags');
+        card.appendChild(tags);
     }
 
     const fact = document.createElement('div');
@@ -3097,9 +3119,9 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     addTooltip(fact, 'The fact that will be merged into the accepted lore matrix if applied.');
     card.appendChild(fact);
 
-    const actions = document.createElement('div');
-    actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Apply', 'Accepts this single lore entry and merges it into the accepted lore matrix.', () => {
+    const actionsRow = document.createElement('div');
+    actionsRow.className = 'wandlight-primary-actions wandlight-pending-entry-actions';
+    actionsRow.appendChild(createButton('Apply', 'Accepts this single lore entry and merges it into the accepted lore matrix.', () => {
         const current = getState();
         pushStateSnapshot(current, `Accept lore entry: ${entry.title || index + 1}`, getSettings().maxSnapshots);
         acceptPendingLoreEntry(index);
@@ -3108,14 +3130,14 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
         refreshHeader();
         toast('Lore entry accepted.');
     }, 'wandlight-primary-button'));
-    actions.appendChild(createButton('Dismiss', 'Rejects this single lore entry without changing accepted lore.', () => {
+    actionsRow.appendChild(createButton('Dismiss', 'Rejects this single lore entry without changing accepted lore.', () => {
         rejectPendingLoreEntry(index);
         togglePendingReviewSelection(getLoreReviewId(entry), false);
         refreshPanelBody({ preserveScroll: true });
         refreshHeader();
         toast('Lore entry dismissed.', 'info');
     }));
-    card.appendChild(actions);
+    card.appendChild(actionsRow);
 
     return card;
 }
@@ -3194,36 +3216,36 @@ function createAcceptedLoreBulkControls(state) {
     const actionRow = document.createElement('div');
     actionRow.className = 'wandlight-lore-bulk-row';
 
-    const addAction = (label, tooltip, fn, className = 'wandlight-small-button') => {
-        const btn = createButton(label, tooltip, () => {
+    const addAction = (label, tooltip, fn, className = 'wandlight-small-button', detail = '') => {
+        const btn = createButton(label, tooltip, async () => {
             const ids = Array.from(getAcceptedSelectionSet(getState()));
             if (!ids.length) {
                 toast('Select one or more accepted lore entries first.', 'warning');
                 return;
             }
-            fn(ids);
+            const proceed = await confirmBulkAcceptedAction(label, ids, detail || tooltip);
+            if (!proceed) return;
+            await fn(ids);
         }, className);
         btn.disabled = disabled;
         actionRow.appendChild(btn);
         return btn;
     };
 
-    addAction('Pin', 'Pins selected accepted lore entries so they are prioritized for injection.', ids => bulkSetAcceptedPinned(ids, true));
-    addAction('Unpin', 'Removes selected accepted lore entries from pinned lore.', ids => bulkSetAcceptedPinned(ids, false));
-    addAction('Mute', 'Mutes selected accepted lore entries so they are excluded from injection.', ids => bulkSetAcceptedMuted(ids, true));
-    addAction('Unmute', 'Unmutes selected accepted lore entries.', ids => bulkSetAcceptedMuted(ids, false));
-    addAction('Delete', 'Deletes selected accepted lore entries from this chat after confirmation.', async ids => {
-        const proceed = await confirmAction('Delete selected accepted lore?', `This permanently removes ${ids.length} accepted lore entr${ids.length === 1 ? 'y' : 'ies'} from this chat. This cannot be undone unless you use State History. Continue?`);
-        if (!proceed) return;
-        bulkDeleteAcceptedLore(ids);
-    }, 'wandlight-small-button wandlight-danger-button');
+    addAction('Pin', 'Pins selected accepted lore entries so they are prioritized for injection.', ids => bulkSetAcceptedPinned(ids, true), 'wandlight-small-button', 'Selected entries will be pinned and prioritized for lore injection.');
+    addAction('Unpin', 'Removes selected accepted lore entries from pinned lore.', ids => bulkSetAcceptedPinned(ids, false), 'wandlight-small-button', 'Selected entries will no longer be pinned. They may still inject if unmuted and active.');
+    addAction('Mute', 'Mutes selected accepted lore entries so they are excluded from injection.', ids => bulkSetAcceptedMuted(ids, true), 'wandlight-small-button', 'Selected entries will be muted and excluded from injection.');
+    addAction('Unmute', 'Unmutes selected accepted lore entries.', ids => bulkSetAcceptedMuted(ids, false), 'wandlight-small-button', 'Selected entries will be unmuted and may be injected again.');
+    addAction('Delete', 'Deletes selected accepted lore entries from this chat after confirmation.', ids => bulkDeleteAcceptedLore(ids), 'wandlight-small-button wandlight-danger-button', 'Selected entries will be permanently removed from accepted lore for this chat. This cannot be undone unless you use State History.');
     wrap.appendChild(actionRow);
 
     const editRow = document.createElement('div');
     editRow.className = 'wandlight-lore-bulk-row wandlight-lore-bulk-edit-row';
     const selectedIdsNow = () => Array.from(getAcceptedSelectionSet(getState()));
-    editRow.appendChild(createBulkSelect('State', LORE_LIFECYCLE_STATUSES, 'Set lifecycle state for selected entries.', value => {
-        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({
+    editRow.appendChild(createBulkSelect('State', LORE_LIFECYCLE_STATUSES, 'Set lifecycle state for selected entries.', async value => {
+        const ids = selectedIdsNow();
+        if (!(await confirmBulkAcceptedAction('Set State', ids, `Selected entries will have lifecycle state set to ${value}.`))) return;
+        bulkUpdateAcceptedLore(ids, raw => ({
             ...raw,
             lifecycle: {
                 ...(raw.lifecycle || {}),
@@ -3233,20 +3255,30 @@ function createAcceptedLoreBulkControls(state) {
             },
         }));
     }, disabled));
-    editRow.appendChild(createBulkSelect('Category', getLoreRegistryValues('categories', Object.keys(CATEGORY_LABELS)), 'Set category for selected entries.', value => {
-        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, category: value }));
+    editRow.appendChild(createBulkSelect('Category', getLoreRegistryValues('categories', Object.keys(CATEGORY_LABELS)), 'Set category for selected entries.', async value => {
+        const ids = selectedIdsNow();
+        if (!(await confirmBulkAcceptedAction('Set Category', ids, `Selected entries will have category set to ${value}.`))) return;
+        bulkUpdateAcceptedLore(ids, raw => ({ ...raw, category: value }));
     }, disabled));
-    editRow.appendChild(createBulkSelect('Canon', getLoreRegistryValues('canonStatuses', ['canon', 'divergent', 'au', 'fanon', 'contested', 'unknown']), 'Set canon status for selected entries.', value => {
-        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, canonStatus: value }));
+    editRow.appendChild(createBulkSelect('Canon', getLoreRegistryValues('canonStatuses', ['canon', 'divergent', 'au', 'fanon', 'contested', 'unknown']), 'Set canon status for selected entries.', async value => {
+        const ids = selectedIdsNow();
+        if (!(await confirmBulkAcceptedAction('Set Canon Status', ids, `Selected entries will have canon status set to ${value}.`))) return;
+        bulkUpdateAcceptedLore(ids, raw => ({ ...raw, canonStatus: value }));
     }, disabled));
-    editRow.appendChild(createBulkSelect('Truth', getLoreRegistryValues('truthStatuses', ['true', 'false', 'public_belief', 'rumor', 'contested', 'hidden']), 'Set truth status for selected entries.', value => {
-        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, truthStatus: value }));
+    editRow.appendChild(createBulkSelect('Truth', getLoreRegistryValues('truthStatuses', ['true', 'false', 'public_belief', 'rumor', 'contested', 'hidden']), 'Set truth status for selected entries.', async value => {
+        const ids = selectedIdsNow();
+        if (!(await confirmBulkAcceptedAction('Set Truth Status', ids, `Selected entries will have truth status set to ${value}.`))) return;
+        bulkUpdateAcceptedLore(ids, raw => ({ ...raw, truthStatus: value }));
     }, disabled));
-    editRow.appendChild(createBulkSelect('Reveal', getLoreRegistryValues('revealPolicies', ['public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals']), 'Set reveal policy for selected entries.', value => {
-        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, revealPolicy: value }));
+    editRow.appendChild(createBulkSelect('Reveal', getLoreRegistryValues('revealPolicies', ['public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals']), 'Set reveal policy for selected entries.', async value => {
+        const ids = selectedIdsNow();
+        if (!(await confirmBulkAcceptedAction('Set Reveal Policy', ids, `Selected entries will have reveal policy set to ${value}.`))) return;
+        bulkUpdateAcceptedLore(ids, raw => ({ ...raw, revealPolicy: value }));
     }, disabled));
-    editRow.appendChild(createBulkSelect('Priority', LORE_PRIORITY_VALUES.map(String), 'Set priority for selected entries.', value => {
-        bulkUpdateAcceptedLore(selectedIdsNow(), raw => ({ ...raw, priority: Number(value) || 50 }));
+    editRow.appendChild(createBulkSelect('Priority', LORE_PRIORITY_VALUES.map(String), 'Set priority for selected entries.', async value => {
+        const ids = selectedIdsNow();
+        if (!(await confirmBulkAcceptedAction('Set Priority', ids, `Selected entries will have priority set to P${value}.`))) return;
+        bulkUpdateAcceptedLore(ids, raw => ({ ...raw, priority: Number(value) || 50 }));
     }, disabled, value => `P${value}`));
     wrap.appendChild(editRow);
 
@@ -3267,14 +3299,42 @@ function createAcceptedLoreBulkControls(state) {
             toast(ids.length ? 'Enter a tag first.' : 'Select entries first.', 'warning');
             return;
         }
-        bulkAddTagToAcceptedLore(ids, tag);
-        tagInput.value = '';
+        confirmBulkAcceptedAction('Add Tag', ids, `The tag "${tag}" will be added to selected accepted lore entries.`).then(proceed => {
+            if (!proceed) return;
+            bulkAddTagToAcceptedLore(ids, tag);
+            tagInput.value = '';
+        });
     }, 'wandlight-small-button');
     addTagBtn.disabled = disabled;
     tagRow.appendChild(addTagBtn);
     wrap.appendChild(tagRow);
 
     return wrap;
+}
+
+async function confirmBulkAcceptedAction(actionLabel, ids, detail = '') {
+    const safeIds = Array.isArray(ids) ? ids : [];
+    if (!safeIds.length) {
+        toast('Select one or more accepted lore entries first.', 'warning');
+        return false;
+    }
+    const state = getState();
+    const byId = new Map(normalizeLoreMatrix(state?.loreMatrix || []).map(entry => [entry.id, entry]));
+    const names = safeIds
+        .map(id => byId.get(id)?.title || id)
+        .filter(Boolean)
+        .slice(0, 6);
+    const extra = safeIds.length > names.length ? `\n…and ${safeIds.length - names.length} more.` : '';
+    const message = [
+        `You are about to perform this bulk action on ${safeIds.length} accepted lore entr${safeIds.length === 1 ? 'y' : 'ies'}:`,
+        '',
+        actionLabel,
+        detail ? `\n${detail}` : '',
+        names.length ? `\nSelected entries:\n- ${names.join('\n- ')}${extra}` : '',
+        '',
+        'Continue?'
+    ].join('\n');
+    return await confirmAction(`Confirm bulk lore action: ${actionLabel}`, message);
 }
 
 function createBulkSelect(label, values, tooltip, onChange, disabled = false, display = null) {
@@ -3294,10 +3354,11 @@ function createBulkSelect(label, values, tooltip, onChange, disabled = false, di
         select.appendChild(option);
     }
     select.addEventListener('click', e => e.stopPropagation());
-    select.addEventListener('change', () => {
+    select.addEventListener('change', async () => {
         if (!select.value) return;
-        onChange(select.value);
+        const value = select.value;
         select.value = '';
+        await onChange(value);
     });
     return select;
 }

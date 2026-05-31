@@ -2561,3 +2561,113 @@
 .wandlight-section-prompt-actions {
     margin-top: 2px !important;
 }
+
+/* QoL pass: keep pending and accepted lore cards visually aligned. */
+.wandlight-pending-review-entry-card {
+    background: rgba(12, 18, 30, 0.62) !important;
+    border-color: rgba(82, 107, 148, 0.34) !important;
+    padding: 5px 7px !important;
+    margin-bottom: 6px;
+}
+
+.wandlight-pending-review-entry-card .wandlight-lore-entry-header,
+.wandlight-lore-entry-card .wandlight-lore-entry-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+}
+
+.wandlight-pending-review-entry-card .wandlight-review-lore-checkbox,
+.wandlight-lore-entry-card .wandlight-lore-entry-select {
+    flex: 0 0 auto !important;
+    margin: 2px 0 0 0 !important;
+    align-self: flex-start !important;
+}
+
+.wandlight-pending-review-entry-card .wandlight-lore-entry-title-wrap,
+.wandlight-lore-entry-card .wandlight-lore-entry-title-wrap {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    align-items: flex-start !important;
+}
+
+.wandlight-pending-review-entry-card .wandlight-lore-entry-title,
+.wandlight-lore-entry-card .wandlight-lore-entry-title {
+    text-align: left !important;
+}
+
+.wandlight-pending-review-entry-card .wandlight-lore-entry-meta,
+.wandlight-lore-entry-card .wandlight-lore-entry-meta,
+.wandlight-pending-review-entry-card .wandlight-lore-entry-tags,
+.wandlight-lore-entry-card .wandlight-lore-entry-tags,
+.wandlight-pending-review-entry-card .wandlight-lore-entry-fact,
+.wandlight-lore-entry-card .wandlight-lore-entry-fact {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    justify-content: flex-start !important;
+}
+
+.wandlight-pending-entry-actions {
+    margin-top: 6px !important;
+}
+
+/* Restore stable scroll behavior for accepted lore entries; controls remain fixed above. */
+.wandlight-accepted-lore-section {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.wandlight-accepted-lore-section .wandlight-lore-entry-list {
+    flex: 1 1 auto !important;
+    min-height: 160px !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    scrollbar-gutter: stable;
+    padding-right: 6px !important;
+}
+
+.wandlight-pending-lore-list {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-gutter: stable;
+    padding-right: 6px !important;
+}
+
+.wandlight-lore-entry-list,
+.wandlight-pending-lore-list {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(120, 138, 156, 0.78) rgba(10, 12, 16, 0.38) !important;
+}
+
+.wandlight-lore-entry-list::-webkit-scrollbar,
+.wandlight-pending-lore-list::-webkit-scrollbar {
+    width: 8px !important;
+}
+
+.wandlight-lore-entry-list::-webkit-scrollbar-track,
+.wandlight-pending-lore-list::-webkit-scrollbar-track {
+    background: rgba(10, 12, 16, 0.38) !important;
+    border-radius: 8px !important;
+}
+
+.wandlight-lore-entry-list::-webkit-scrollbar-thumb,
+.wandlight-pending-lore-list::-webkit-scrollbar-thumb {
+    background: rgba(120, 138, 156, 0.78) !important;
+    border-radius: 8px !important;
+}
+
+/* Keep empty pending review readable instead of collapsing into a hairline row. */
+.wandlight-lore-pending-collapsible .wandlight-lore-empty {
+    min-height: 48px !important;
+    padding: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Injection panels are actual injected text, not previews. */
+.wandlight-injection-preview-card .wandlight-runtime-card-title {
+    letter-spacing: 0.01em;
+}

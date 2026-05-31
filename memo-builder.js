@@ -302,25 +302,21 @@ function getLoreInjectionText(entry, state = null) {
 }
 
 function formatLoreEntryForInjection(entry, settings, isPinned = false, state = null) {
-    const injectionText = getLoreInjectionText(entry, state);
-    const kind = entry.kind && entry.kind !== 'fact' ? `/${entry.kind}` : '';
-    if ((settings?.loreInjectionMode || 'direct') !== 'compressed') {
-        const parts = [`- <${entry.category}${kind}> **${entry.title}**`];
-        if (injectionText) parts.push(`\n    ${injectionText}`);
-        appendRevealHints(parts, entry);
-        return parts.join('');
-    }
+    const injectionText = normalizeInjectionLine(getLoreInjectionText(entry, state));
+    if (!injectionText) return '';
 
-    const level = Math.max(1, Math.min(5, Number(settings?.loreCompressionLevel) || 2));
-    const regularLimits = [320, 240, 180, 120, 80];
-    const pinnedLimits = [520, 420, 320, 240, 180];
-    const limit = isPinned ? pinnedLimits[level - 1] : regularLimits[level - 1];
-    const tags = Array.isArray(entry.tags) && entry.tags.length ? ` [${entry.tags.slice(0, 4).join(', ')}]` : '';
-    const pin = isPinned ? ' pinned' : '';
-    const fact = truncateForInjection(injectionText, limit);
-    const parts = [`- <${entry.category}${kind}${pin}> ${entry.title}${tags}: ${fact}`];
-    appendRevealHints(parts, entry, true);
-    return parts.join('');
+    // Keep prompt payloads token-efficient: the model needs the resolved lore
+    // content, not the UI/database metadata used to organize that lore. Category,
+    // kind, title, tags, and pin state remain visible in the UI but are not
+    // injected. Compressed mode should receive the same clean direct text as its
+    // source material; model compression is handled separately and cached.
+    return `- ${injectionText}`;
+}
+
+function normalizeInjectionLine(text) {
+    return String(text || '')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 function appendRevealHints(parts, entry, compact = false) {

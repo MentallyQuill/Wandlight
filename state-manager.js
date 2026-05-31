@@ -43,6 +43,21 @@ export function getSettings() {
         ...(DEFAULT_SETTINGS.continuitySectionPrompts || {}),
         ...(stored.continuitySectionPrompts || {}),
     };
+
+    // One-time upgrade from the old conservative story-lore generation defaults.
+    // Previous builds wrote defaults into user settings, so simply changing
+    // DEFAULT_SETTINGS would not affect existing installs that still hold the old
+    // 10-message / 2048-token values.
+    if (stored.loreBootstrapDefaultsMigrated20260531 !== true) {
+        if (stored.loreSourceMessageCount === undefined || Number(stored.loreSourceMessageCount) === 10) {
+            merged.loreSourceMessageCount = 40;
+        }
+        if (stored.loreMaxTokens === undefined || Number(stored.loreMaxTokens) === 2048) {
+            merged.loreMaxTokens = 8192;
+        }
+        merged.loreBootstrapDefaultsMigrated20260531 = true;
+    }
+
     // Write back merged defaults so the object is complete going forward
     extensionSettings[MODULE_KEY] = merged;
     return merged;
@@ -705,6 +720,13 @@ export function migrateState(state) {
         state._version = 7;
     }
 
+    // ── Schema v8: resumable bulk lore scan ledger ─────────────────────────
+    if (state._version < 8) {
+        const defaults = getDefaultState();
+        state.loreBulkGeneration = mergeDefaults(state.loreBulkGeneration, defaults.loreBulkGeneration);
+        state._version = 8;
+    }
+
     // ── Always normalize lore fields post-migration ────────────────────────
     // First compact known-heavy canon DB payloads and oversized pending batches so
     // a poisoned chat can recover instead of freezing during panel render/save.
@@ -787,6 +809,20 @@ export function migrateState(state) {
     }
     if (typeof state.loreGeneration.attempts !== 'object' || Array.isArray(state.loreGeneration.attempts)) {
         state.loreGeneration.attempts = {};
+    }
+
+    if (!state.loreBulkGeneration || typeof state.loreBulkGeneration !== 'object' || Array.isArray(state.loreBulkGeneration)) {
+        state.loreBulkGeneration = getDefaultState().loreBulkGeneration;
+    } else {
+        const defaults = getDefaultState().loreBulkGeneration;
+        state.loreBulkGeneration = mergeDefaults(state.loreBulkGeneration, defaults);
+        for (const key of ['batches', 'chunks', 'candidates']) {
+            if (!state.loreBulkGeneration[key] || typeof state.loreBulkGeneration[key] !== 'object' || Array.isArray(state.loreBulkGeneration[key])) {
+                state.loreBulkGeneration[key] = {};
+            }
+        }
+        state.loreBulkGeneration.activeBatchId = String(state.loreBulkGeneration.activeBatchId || '');
+        state.loreBulkGeneration.lastBatchId = String(state.loreBulkGeneration.lastBatchId || '');
     }
     // Clean up orphaned metadata
     if (state.pendingLoreMeta && state.pendingLoreEntries?.length === 0) {
@@ -1582,6 +1618,19 @@ export function importState(json) {
                 }
                 : { ...getDefaultState().loreGeneration },
 
+            loreBulkGeneration: parsed.loreBulkGeneration && typeof parsed.loreBulkGeneration === 'object' && !Array.isArray(parsed.loreBulkGeneration)
+                ? {
+                    activeBatchId: parsed.loreBulkGeneration.activeBatchId || '',
+                    lastBatchId: parsed.loreBulkGeneration.lastBatchId || '',
+                    batches: parsed.loreBulkGeneration.batches && typeof parsed.loreBulkGeneration.batches === 'object' && !Array.isArray(parsed.loreBulkGeneration.batches)
+                        ? parsed.loreBulkGeneration.batches : {},
+                    chunks: parsed.loreBulkGeneration.chunks && typeof parsed.loreBulkGeneration.chunks === 'object' && !Array.isArray(parsed.loreBulkGeneration.chunks)
+                        ? parsed.loreBulkGeneration.chunks : {},
+                    candidates: parsed.loreBulkGeneration.candidates && typeof parsed.loreBulkGeneration.candidates === 'object' && !Array.isArray(parsed.loreBulkGeneration.candidates)
+                        ? parsed.loreBulkGeneration.candidates : {},
+                }
+                : { ...getDefaultState().loreBulkGeneration },
+
             pendingLoreMeta: parsed.pendingLoreMeta && typeof parsed.pendingLoreMeta === 'object' && !Array.isArray(parsed.pendingLoreMeta)
                 ? parsed.pendingLoreMeta : null,
         };
@@ -1757,6 +1806,7 @@ export function setPendingLoreProposal(entries, meta, options = {}) {
 
     const contextKey = meta.contextKey || buildLoreGenerationKey(state);
     const rawEntryCount = meta.rawEntryCount ?? normalized.length;
+    const normalizedEntryCount = meta.normalizedEntryCount ?? normalized.length;
 
     state.pendingLoreEntries = normalized;
     state.pendingLoreMeta = {
@@ -1767,8 +1817,19 @@ export function setPendingLoreProposal(entries, meta, options = {}) {
         createdAt: Date.now(),
         summary: meta.summary || '',
         rawEntryCount,
+        normalizedEntryCount,
         validEntryCount: normalized.length,
         droppedEntryCount: Math.max(0, rawEntryCount - normalized.length),
+        droppedDuplicateCount: Math.max(0, Number(meta.droppedDuplicateCount) || 0),
+        failedChunkCount: Math.max(0, Number(meta.failedChunkCount) || 0),
+        emptyChunkCount: Math.max(0, Number(meta.emptyChunkCount) || 0),
+        chunkCount: Math.max(0, Number(meta.chunkCount) || 0),
+        sourceMessageCount: Math.max(0, Number(meta.sourceMessageCount) || 0),
+        chunkSize: Math.max(0, Number(meta.chunkSize) || 0),
+        generationMode: meta.generationMode || '',
+        generationConfiguredMode: meta.generationConfiguredMode || '',
+        targetEntryCount: Math.max(0, Number(meta.targetEntryCount) || 0),
+        storyLoreCountBefore: Math.max(0, Number(meta.storyLoreCountBefore) || 0),
     };
 
     // Sync loreContext for backward compatibility
@@ -1787,11 +1848,231 @@ export function setPendingLoreProposal(entries, meta, options = {}) {
         status: 'pending',
         lastProposedAt: Date.now(),
         validEntryCount: normalized.length,
+        rawEntryCount,
+        normalizedEntryCount,
+        droppedDuplicateCount: Math.max(0, Number(meta.droppedDuplicateCount) || 0),
+        generationMode: meta.generationMode || '',
+        targetEntryCount: Math.max(0, Number(meta.targetEntryCount) || 0),
         lastSource: meta.source || 'manual',
     };
 
     saveState(state);
     return { state, changed: true };
+}
+
+
+function ensureLoreBulkGenerationLedger(state = getState()) {
+    if (!state.loreBulkGeneration || typeof state.loreBulkGeneration !== 'object' || Array.isArray(state.loreBulkGeneration)) {
+        state.loreBulkGeneration = getDefaultState().loreBulkGeneration;
+    }
+    for (const key of ['batches', 'chunks', 'candidates']) {
+        if (!state.loreBulkGeneration[key] || typeof state.loreBulkGeneration[key] !== 'object' || Array.isArray(state.loreBulkGeneration[key])) {
+            state.loreBulkGeneration[key] = {};
+        }
+    }
+    state.loreBulkGeneration.activeBatchId = String(state.loreBulkGeneration.activeBatchId || '');
+    state.loreBulkGeneration.lastBatchId = String(state.loreBulkGeneration.lastBatchId || '');
+    return state.loreBulkGeneration;
+}
+
+/**
+ * Creates or updates a resumable bulk lore scan batch.
+ * @param {Object} batch - Batch metadata. Must include id.
+ * @returns {Object} Updated state
+ */
+export function startLoreBulkBatch(batch = {}) {
+    const state = getState();
+    const ledger = ensureLoreBulkGenerationLedger(state);
+    const id = String(batch.id || `lore_bulk_${Date.now()}`);
+    const previous = ledger.batches[id] || {};
+    ledger.batches[id] = {
+        ...previous,
+        ...batch,
+        id,
+        status: batch.status || 'running',
+        createdAt: previous.createdAt || Date.now(),
+        updatedAt: Date.now(),
+        startedAt: batch.startedAt || previous.startedAt || Date.now(),
+    };
+    ledger.activeBatchId = id;
+    ledger.lastBatchId = id;
+    saveState(state);
+    return state;
+}
+
+/**
+ * Patches a bulk lore scan batch.
+ * @param {string} batchId - Batch id
+ * @param {Object} patch - Fields to merge
+ * @returns {Object} Updated state
+ */
+export function updateLoreBulkBatch(batchId, patch = {}) {
+    const state = getState();
+    const ledger = ensureLoreBulkGenerationLedger(state);
+    const id = String(batchId || ledger.activeBatchId || ledger.lastBatchId || '');
+    if (!id) return state;
+    const previous = ledger.batches[id] || { id, createdAt: Date.now() };
+    ledger.batches[id] = {
+        ...previous,
+        ...patch,
+        id,
+        updatedAt: Date.now(),
+    };
+    if (patch.status && !['running', 'queued'].includes(String(patch.status))) {
+        if (ledger.activeBatchId === id) ledger.activeBatchId = '';
+    }
+    saveState(state);
+    return state;
+}
+
+/**
+ * Patches a single chunk in the bulk lore scan ledger.
+ * @param {string} chunkId - Stable chunk id
+ * @param {Object} patch - Fields to merge
+ * @returns {Object} Updated state
+ */
+export function updateLoreBulkChunk(chunkId, patch = {}) {
+    const state = getState();
+    const ledger = ensureLoreBulkGenerationLedger(state);
+    const id = String(chunkId || '');
+    if (!id) return state;
+    const previous = ledger.chunks[id] || { id, attempts: 0, createdAt: Date.now() };
+    ledger.chunks[id] = {
+        ...previous,
+        ...patch,
+        id,
+        updatedAt: Date.now(),
+    };
+    saveState(state);
+    return state;
+}
+
+/**
+ * Stores compact candidate facts for a completed bulk lore chunk.
+ * @param {string} batchId - Batch id
+ * @param {string} chunkId - Chunk id
+ * @param {Object[]} candidates - Candidate fact objects
+ * @returns {Object} Updated state
+ */
+export function storeLoreBulkCandidates(batchId, chunkId, candidates = []) {
+    const state = getState();
+    const ledger = ensureLoreBulkGenerationLedger(state);
+    const id = String(chunkId || '');
+    if (!id) return state;
+    ledger.candidates[id] = {
+        batchId: String(batchId || ''),
+        chunkId: id,
+        candidates: Array.isArray(candidates) ? candidates : [],
+        updatedAt: Date.now(),
+    };
+    saveState(state);
+    return state;
+}
+
+/**
+ * Appends generated lore into Pending Lore Review without replacing existing pending entries.
+ * Used by bulk lore scans so successful chunks commit partial progress immediately.
+ * @param {Object[]} entries - Raw lore entries to append/merge
+ * @param {Object} meta - Pending/batch metadata
+ * @param {Object} options - { snapshot?: boolean, snapshotLabel?: string }
+ * @returns {{ state: Object, changed: boolean, appendedCount: number, pendingCount: number }}
+ */
+export function appendPendingLoreEntries(entries, meta = {}, options = {}) {
+    const { snapshot = false, snapshotLabel = 'Append bulk pending lore entries' } = options;
+    const state = getState();
+    const settings = getSettings();
+    const incoming = normalizeLoreMatrix(entries || []);
+    if (incoming.length === 0) {
+        return { state, changed: false, appendedCount: 0, pendingCount: (state.pendingLoreEntries || []).length };
+    }
+
+    if (snapshot) {
+        pushStateSnapshot(state, snapshotLabel, settings.maxSnapshots);
+    }
+
+    const before = normalizeLoreMatrix(state.pendingLoreEntries || []);
+    const merged = mergeLoreEntries(before, incoming);
+    state.pendingLoreEntries = merged;
+
+    const contextKey = meta.contextKey || state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
+    const oldMeta = state.pendingLoreMeta && typeof state.pendingLoreMeta === 'object' ? state.pendingLoreMeta : {};
+    const rawEntryCount = Math.max(0, Number(oldMeta.rawEntryCount) || 0) + Math.max(0, Number(meta.rawEntryCount ?? incoming.length) || incoming.length);
+    const normalizedEntryCount = Math.max(0, Number(oldMeta.normalizedEntryCount) || 0) + Math.max(0, Number(meta.normalizedEntryCount ?? incoming.length) || incoming.length);
+    const duplicateCount = Math.max(0, Number(oldMeta.droppedDuplicateCount) || 0) + Math.max(0, Number(meta.droppedDuplicateCount) || 0);
+    const failedChunkCount = Math.max(0, Number(meta.failedChunkCount ?? oldMeta.failedChunkCount) || 0);
+    const completedChunkCount = Math.max(0, Number(meta.completedChunkCount ?? oldMeta.completedChunkCount) || 0);
+    const chunkCount = Math.max(0, Number(meta.chunkCount ?? oldMeta.chunkCount) || 0);
+
+    state.pendingLoreMeta = {
+        ...oldMeta,
+        id: oldMeta.id || meta.id || `lore_batch_${Date.now()}`,
+        contextKey,
+        source: meta.source || oldMeta.source || 'manual_bulk',
+        status: 'pending',
+        createdAt: oldMeta.createdAt || Date.now(),
+        updatedAt: Date.now(),
+        summary: meta.summary || oldMeta.summary || '',
+        rawEntryCount,
+        normalizedEntryCount,
+        validEntryCount: merged.length,
+        droppedEntryCount: Math.max(0, rawEntryCount - merged.length),
+        droppedDuplicateCount: duplicateCount,
+        failedChunkCount,
+        emptyChunkCount: Math.max(0, Number(meta.emptyChunkCount ?? oldMeta.emptyChunkCount) || 0),
+        chunkCount,
+        completedChunkCount,
+        sourceMessageCount: Math.max(0, Number(meta.sourceMessageCount ?? oldMeta.sourceMessageCount) || 0),
+        chunkSize: Math.max(0, Number(meta.chunkSize ?? oldMeta.chunkSize) || 0),
+        generationMode: meta.generationMode || oldMeta.generationMode || '',
+        generationConfiguredMode: meta.generationConfiguredMode || oldMeta.generationConfiguredMode || '',
+        targetEntryCount: Math.max(0, Number(meta.targetEntryCount ?? oldMeta.targetEntryCount) || 0),
+        storyLoreCountBefore: Math.max(0, Number(meta.storyLoreCountBefore ?? oldMeta.storyLoreCountBefore) || 0),
+        bulkBatchId: meta.bulkBatchId || oldMeta.bulkBatchId || '',
+        bulkChunkId: meta.bulkChunkId || oldMeta.bulkChunkId || '',
+        bulk: meta.bulk === undefined ? (oldMeta.bulk || false) : !!meta.bulk,
+    };
+
+    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
+        state.loreGeneration = getDefaultState().loreGeneration;
+    }
+    state.loreGeneration.lastProposedFor = contextKey;
+    state.loreGeneration.attempts[contextKey] = {
+        ...(state.loreGeneration.attempts[contextKey] || {}),
+        status: 'pending',
+        lastProposedAt: Date.now(),
+        validEntryCount: merged.length,
+        rawEntryCount,
+        normalizedEntryCount,
+        droppedDuplicateCount: duplicateCount,
+        generationMode: state.pendingLoreMeta.generationMode,
+        targetEntryCount: state.pendingLoreMeta.targetEntryCount,
+        lastSource: state.pendingLoreMeta.source,
+    };
+
+    saveState(state);
+    return { state, changed: true, appendedCount: Math.max(0, merged.length - before.length), pendingCount: merged.length };
+}
+
+
+/**
+ * Patches pending lore metadata without changing pending entries.
+ * Used by bulk scans to update final chunk/duplicate diagnostics even when later chunks add no new entries.
+ * @param {Object} patch - Metadata fields to merge
+ * @returns {Object} Updated state
+ */
+export function patchPendingLoreMeta(patch = {}) {
+    const state = getState();
+    if (!state.pendingLoreMeta || typeof state.pendingLoreMeta !== 'object') {
+        return state;
+    }
+    state.pendingLoreMeta = {
+        ...state.pendingLoreMeta,
+        ...patch,
+        updatedAt: Date.now(),
+        validEntryCount: Array.isArray(state.pendingLoreEntries) ? state.pendingLoreEntries.length : 0,
+    };
+    saveState(state);
+    return state;
 }
 
 /**

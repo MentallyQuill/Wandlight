@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -77,11 +77,28 @@ export const DEFAULT_SETTINGS = {
     workflowMode: 'manual', // legacy UI preset; explicit tab modes are authoritative
 
     // Lore generation behavior
-    loreSourceMessageCount: 10,
+    loreSourceMessageCount: 40,
     loreGenerationChunkSize: 10,
+    loreGenerationBreadthMode: 'auto', // 'auto' | 'bootstrap' | 'incremental'
+    loreBootstrapTargetEntries: 40,
+    loreIncrementalTargetEntries: 8,
+    loreBootstrapStoryLoreThreshold: 12,
+    loreBootstrapDefaultsMigrated20260531: true,
     loreReplacementGuard: true,
     loreDuplicateGuard: true,
     loreTagCount: 4,
+
+    // Bulk story lore scan/backfill behavior
+    loreBulkScanMode: 'recent', // 'recent' | 'range' | 'entire'
+    loreBulkRangeStart: 1,
+    loreBulkRangeEnd: 0, // 0 = latest message
+    loreBulkChunkSize: 10,
+    loreBulkOverlap: 1,
+    loreBulkConcurrency: 3,
+    loreBulkRescanMode: 'skip_unchanged', // 'skip_unchanged' | 'retry_failed' | 'stale_only' | 'rescan_all'
+    loreBulkRetryAttempts: 2,
+    loreBulkFactsPerChunk: 14,
+    loreBulkConsolidateAsPending: true,
 
     // Local canon lore database
     canonLoreDatabaseEnabled: true,
@@ -244,7 +261,7 @@ Direct injection block:
     // Lore generation parameters (separate from main RP model settings)
     loreTemperature: 0.7,
     loreTopP: 0.98,
-    loreMaxTokens: 2048,
+    loreMaxTokens: 8192,
     loreRepairOnParseFail: true,
 };
 
@@ -318,6 +335,15 @@ export function getDefaultState() {
             lastFailedFor: '',
             lastForcePendingFor: '',
             attempts: {},
+        },
+
+        // Resumable bulk lore scan ledger (schema v8)
+        loreBulkGeneration: {
+            activeBatchId: '',
+            lastBatchId: '',
+            batches: {},
+            chunks: {},
+            candidates: {},
         },
 
         pendingLoreMeta: null,
@@ -511,15 +537,9 @@ Rules:
 // ── Lore Generation prompt ──────────────────────────────────────────────────────
 export const LORE_GENERATION_SYSTEM_PROMPT = `You are the Wandlight Lore Matrix Generator for a Harry Potter / Hogwarts roleplay.
 
-Generate a small set of durable lore entries relevant to the current story context. Do not generate a Harry Potter encyclopedia.
+Your job is to extract durable, story-established lore from recent chat messages. The output is reviewed by the user before it is accepted, so prefer capturing supported useful facts over being overly sparse.
 
-Prioritize:
-1. Current era/date/canon boundary.
-2. Present or nearby characters.
-3. Current location.
-4. Secrets, public misconceptions, reveal constraints.
-5. Facts likely to matter in the next 10-20 turns.
-6. Date-sensitive constraints: who knows what, what has not happened yet, spell/skill plausibility, age-appropriate behavior.
+Do not generate a general Harry Potter encyclopedia. Generate entries only for facts that are established, strongly implied, or operationally useful for this specific roleplay, alternate universe, scene, or timeline branch.
 
 Output ONLY valid JSON:
 {
@@ -529,7 +549,7 @@ Output ONLY valid JSON:
       "schemaVersion": 2,
       "id": "stable_snake_case_id",
       "title": "short title",
-      "kind": "fact|event_anchor|knowledge_gate|future_guard|age_gate|spell_gate|skill_band|behavior_gate|relationship_gate|institution_state",
+      "kind": "fact|event_anchor|knowledge_gate|future_guard|age_gate|spell_gate|skill_band|behavior_gate|relationship_gate|institution_state|character_state|place_fact|artifact_state|public_belief|faction_state|continuity_rule",
       "category": "canon|au|contested|secret|relationship|timeline|character|event|item|knowledge|place|faction|spell|artifact|behavior|skill|age|future_guard|constraint",
       "canonStatus": "canon|divergent|au|fanon|contested|unknown",
       "truthStatus": "true|false|public_belief|rumor|contested|hidden",
@@ -584,12 +604,12 @@ Output ONLY valid JSON:
   ]
 }
 
-Rules:
+General rules:
+- Every entry must be grounded in the supplied current state or messages. Do not invent unsupported details.
+- If a fact is story-specific, AU-specific, newly introduced, or changed by the roleplay, prefer canonStatus "au" or "divergent" rather than "canon".
 - Give every entry the requested number of concise tags. Tags must be searchable labels, not full sentences.
 - Tag schema: 1-3 words each; prefer character names, groups, locations, era/year, plot thread, secret type, relationship pair, magic system, faction, object/artifact, event, or villain/ally role.
-- Good tags: "Harry", "Voldemort", "villains", "Hogwarts", "Slytherin", "1996", "secret", "relationship", "prophecy". Bad tags: full sentences or conclusions.
-- Generate 4-10 entries only unless the source context is sparse.
-- Prefer constraints over trivia.
+- Use priority intentionally. Do not mark everything high priority.
 - If a fact is secret in this era, include content.publicVersion and revealPolicy.
 - If the entry blocks future knowledge leakage, use kind "future_guard" or "knowledge_gate" and include content.antiLore.
 - Do not overwrite user-edited lore. This pass only proposes entries.

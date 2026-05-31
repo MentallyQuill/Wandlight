@@ -357,7 +357,7 @@ function setupLoreProviderPanel(container) {
 
     if (tempInput) tempInput.value = settings.loreTemperature ?? 0.7;
     if (topPInput) topPInput.value = settings.loreTopP ?? 0.98;
-    if (maxTokensInput) maxTokensInput.value = settings.loreMaxTokens ?? 2048;
+    if (maxTokensInput) maxTokensInput.value = settings.loreMaxTokens ?? 8192;
 
     if (tempInput) {
         tempInput.addEventListener('change', () => {
@@ -376,7 +376,7 @@ function setupLoreProviderPanel(container) {
     if (maxTokensInput) {
         maxTokensInput.addEventListener('change', () => {
             const next = getSettings();
-            next.loreMaxTokens = parseInt(maxTokensInput.value, 10) || 2048;
+            next.loreMaxTokens = parseInt(maxTokensInput.value, 10) || 8192;
             saveLoreProviderSettings(next);
         });
     }

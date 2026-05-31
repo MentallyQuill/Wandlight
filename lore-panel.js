@@ -24,7 +24,7 @@ import {
 } from './state-manager.js';
 import { buildMemo, buildMemoPreview, buildContinuityPreview, buildLorePreview, getCompressionSourceSignature } from './memo-builder.js';
 import { onExtractionTriggered } from './extractor.js';
-import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
+import { runLoreContextDetection, runLoreGeneration, runBulkLoreGeneration } from './lore-generator.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
 import { proposeCanonLoreForContext, getLoreTaxonomySync } from './canon-lore-db.js';
 
@@ -1013,12 +1013,12 @@ function createStoryLoreGenerationPanel(state) {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Model-based generation. Uses the Reasoning provider, source-message window, and chunk size settings. Output stays pending until accepted.';
+    help.textContent = 'Model-based generation. Uses the Reasoning provider, source-message window, generation breadth mode, and chunk size settings. Manual first runs default to bootstrap behavior when accepted story lore is sparse. Output stays pending until accepted.';
     panel.appendChild(help);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
-    const generateBtn = createButton('Generate Story Lore', 'Generates searchable story/AU lore entries in message chunks and places them in Pending Lore Review.', async (btn) => {
+    const generateBtn = createButton('Generate Story Lore', 'Generates searchable story/AU lore entries from the configured recent source window and places them in Pending Lore Review.', async (btn) => {
         await handleGeneratePendingLore(btn);
     }, 'wandlight-primary-button');
     if (loreGenerationUiRunning || activeLoreGenerationController) {
@@ -1026,7 +1026,17 @@ function createStoryLoreGenerationPanel(state) {
         generateBtn.textContent = 'Generation Running...';
     }
     actions.appendChild(generateBtn);
-    const cancelBtn = createButton('Cancel Generation', 'Cancels the current chunked lore generation after the active provider request returns or aborts.', () => {
+
+    const bulkBtn = createButton('Bulk Scan Story Lore', 'Runs a resumable, range-based bulk scan. Chunks are processed in parallel, saved to the bulk ledger, and appended to Pending Lore Review as each chunk completes.', async (btn) => {
+        await handleBulkGeneratePendingLore(btn);
+    }, 'wandlight-primary-button');
+    if (loreGenerationUiRunning || activeLoreGenerationController) {
+        bulkBtn.disabled = true;
+        bulkBtn.textContent = 'Generation Running...';
+    }
+    actions.appendChild(bulkBtn);
+
+    const cancelBtn = createButton('Cancel Generation', 'Cancels the current lore generation after active provider requests return or abort.', () => {
         if (activeLoreGenerationController) {
             activeLoreGenerationController.abort();
             setFeatureProgress('lore', 'Cancelling story lore generation...', Math.max(1, Number(getState()?.lorePanel?.loreProgress) || 1));
@@ -1037,6 +1047,7 @@ function createStoryLoreGenerationPanel(state) {
     panel.appendChild(actions);
 
     appendGenerationStatus(panel, state, 'lore');
+    panel.appendChild(createBulkLoreLedgerStatusCard(state));
 
     panel.appendChild(createCollapsibleSection(
         'lore.storyGenerationSettings',
@@ -1188,6 +1199,87 @@ async function handleSuggestCanonLore(btn) {
     });
 }
 
+
+function createBulkLoreLedgerStatusCard(state) {
+    const ledger = state?.loreBulkGeneration || {};
+    const batchId = ledger.activeBatchId || ledger.lastBatchId || '';
+    const batch = batchId ? ledger.batches?.[batchId] : null;
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-bulk-lore-status-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Bulk Lore Scan Ledger';
+    addTooltip(title, 'Tracks range-based bulk story-lore scans by chunk so large backfills can be resumed, retried, and partially committed.');
+    card.appendChild(title);
+
+    if (!batch) {
+        const help = document.createElement('div');
+        help.className = 'wandlight-runtime-help';
+        help.textContent = 'No bulk scan has been run for this chat yet.';
+        card.appendChild(help);
+        return card;
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'wandlight-runtime-grid';
+    grid.appendChild(createKeyValue('Status', String(batch.status || 'unknown'), 'Current status for the latest bulk scan batch.'));
+    grid.appendChild(createKeyValue('Range', `${batch.rangeStart || '?'}-${batch.rangeEnd || '?'}`, 'Message index range scanned.'));
+    grid.appendChild(createKeyValue('Chunks', `${batch.completedChunks || 0}/${batch.queuedChunks || batch.totalChunks || 0} complete`, 'Completed queued chunks over total queued chunks.'));
+    grid.appendChild(createKeyValue('Failed', String(batch.failedChunks || 0), 'Chunks that failed after retry attempts and can be retried with Rescan mode: Failed only.'));
+    grid.appendChild(createKeyValue('Candidates', String(batch.candidateCount || 0), 'Compact extracted candidate facts stored in the ledger.'));
+    grid.appendChild(createKeyValue('Pending lore', String(batch.pendingEntryCount || (state?.pendingLoreEntries || []).length || 0), 'Pending Lore Review entries after bulk commits.'));
+    card.appendChild(grid);
+    return card;
+}
+
+async function handleBulkGeneratePendingLore(btn) {
+    if (loreGenerationUiRunning || activeLoreGenerationController) {
+        toast('Lore generation is already running. Use Cancel Generation to stop it.', 'warning');
+        return;
+    }
+    if (!ensureLoreProviderReadyForAction('Bulk Scan Story Lore', 'lore')) return;
+    activeLoreGenerationController = new AbortController();
+    loreGenerationUiRunning = true;
+    refreshPanelBody({ preserveScroll: true });
+    await runBusyAction(btn, 'Bulk scanning...', async () => {
+        setFeatureProgress('lore', 'Starting bulk story lore scan...', 5);
+        const result = await runBulkLoreGeneration({
+            force: true,
+            signal: activeLoreGenerationController?.signal,
+            progress: (message, percent) => setFeatureProgress('lore', message, percent),
+        });
+        refreshHeader();
+
+        if (result?.status === 'cancelled') {
+            refreshPanelBody({ preserveScroll: true });
+            setFeatureProgress('lore', 'Bulk story lore scan cancelled.', 0);
+            toast('Bulk story lore scan cancelled.', 'warning');
+        } else if (['complete', 'partial'].includes(result?.status)) {
+            setSectionCollapsed('lore.pendingReview', false);
+            setPanelState({ activeTab: 'lore' });
+            refreshPanelBody({ preserveScroll: false });
+            const failedText = result.failedChunkCount ? ` ${result.failedChunkCount} chunk${result.failedChunkCount === 1 ? '' : 's'} failed and can be retried.` : '';
+            const skippedText = result.skippedChunks ? ` ${result.skippedChunks} unchanged chunk${result.skippedChunks === 1 ? '' : 's'} skipped.` : '';
+            setFeatureProgress('lore', `Bulk scan ${result.status}: ${result.completedChunkCount || 0} chunks, ${result.candidateCount || 0} candidate facts, ${result.pendingEntryCount || 0} pending entries.`, 100);
+            resetFeatureProgress('lore');
+            toast(`Bulk scan ${result.status}. ${result.candidateCount || 0} candidate facts extracted; ${result.pendingEntryCount || 0} pending lore entries now available.${failedText}${skippedText}`);
+        } else if (result?.status === 'skipped_unchanged') {
+            refreshPanelBody({ preserveScroll: true });
+            setFeatureProgress('lore', `Bulk scan skipped ${result.skippedChunks || 0} unchanged chunks.`, 100);
+            resetFeatureProgress('lore');
+            toast('Bulk scan found no changed chunks to process.', 'info');
+        } else {
+            refreshPanelBody({ preserveScroll: true });
+            const details = formatGenerationStatus(result);
+            toast(details, 'warning');
+        }
+    });
+    activeLoreGenerationController = null;
+    loreGenerationUiRunning = false;
+    refreshPanelBody({ preserveScroll: true });
+}
+
 async function handleGeneratePendingLore(btn) {
     if (loreGenerationUiRunning || activeLoreGenerationController) {
         toast('Lore generation is already running. Use Cancel Generation to stop it.', 'warning');
@@ -1232,11 +1324,14 @@ async function handleGeneratePendingLore(btn) {
             setSectionCollapsed('lore.pendingReview', false);
             setPanelState({ activeTab: 'lore' });
             refreshPanelBody({ preserveScroll: false });
+            const modeText = result.generationMode ? `${result.generationMode} mode` : 'story lore';
+            const targetText = result.targetEntryCount ? ` Target: ${result.targetEntryCount}.` : '';
             const duplicateText = result.droppedDuplicateCount ? ` ${result.droppedDuplicateCount} duplicate/similar entries were filtered.` : '';
             const chunkText = result.chunkCount ? ` Processed ${result.chunkCount} chunk${result.chunkCount === 1 ? '' : 's'}.` : '';
-            setFeatureProgress('lore', `${result.validEntryCount || 0} story lore entries generated.`, 100);
+            const rawText = result.rawEntryCount !== undefined ? ` Raw: ${result.rawEntryCount}.` : '';
+            setFeatureProgress('lore', `${result.validEntryCount || 0} story lore entries generated (${modeText}).${targetText}${rawText}`, 100);
             resetFeatureProgress('lore');
-            toast(`${result.validEntryCount || 0} story lore entries generated.${duplicateText}${chunkText} Pending Lore Review opened.`);
+            toast(`${result.validEntryCount || 0} story lore entries generated (${modeText}).${targetText}${rawText}${duplicateText}${chunkText} Pending Lore Review opened.`);
         } else {
             refreshPanelBody({ preserveScroll: false });
             const details = formatGenerationStatus(result);
@@ -1384,6 +1479,86 @@ function createContextEditorCard(state) {
     return card;
 }
 
+
+function createSelectSettingRow(labelText, tooltip, settingKey, options, onChange = null) {
+    const settings = getSettings();
+    const row = document.createElement('label');
+    row.className = 'wandlight-setting-row';
+    const label = document.createElement('span');
+    label.textContent = labelText;
+    addTooltip(label, tooltip);
+    const select = document.createElement('select');
+    select.className = 'text_pole';
+    for (const [value, text] of options) {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = text;
+        if (String(settings[settingKey]) === String(value)) option.selected = true;
+        select.appendChild(option);
+    }
+    select.addEventListener('change', () => {
+        const next = getSettings();
+        next[settingKey] = select.value;
+        saveSettings(next);
+        if (typeof onChange === 'function') onChange(select.value);
+        refreshPanelBody({ preserveScroll: true });
+    });
+    row.appendChild(label);
+    row.appendChild(select);
+    return row;
+}
+
+function createNumberSettingRow(labelText, tooltip, settingKey, { min = 0, max = 9999, fallback = 0 } = {}) {
+    const settings = getSettings();
+    const row = document.createElement('label');
+    row.className = 'wandlight-setting-row';
+    const label = document.createElement('span');
+    label.textContent = labelText;
+    addTooltip(label, tooltip);
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'text_pole';
+    input.min = String(min);
+    input.max = String(max);
+    input.step = '1';
+    input.value = String(settings[settingKey] ?? fallback);
+    input.addEventListener('change', () => {
+        const next = getSettings();
+        const parsed = parseInt(input.value, 10);
+        next[settingKey] = Math.max(min, Math.min(max, Number.isFinite(parsed) ? parsed : fallback));
+        input.value = String(next[settingKey]);
+        saveSettings(next);
+    });
+    row.appendChild(label);
+    row.appendChild(input);
+    return row;
+}
+
+function createRangeSettingRow(labelPrefix, tooltip, settingKey, { min = 0, max = 100, fallback = 0, suffix = '' } = {}) {
+    const settings = getSettings();
+    const row = document.createElement('label');
+    row.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const text = document.createElement('span');
+    const currentValue = Math.max(min, Math.min(max, Number(settings[settingKey]) || fallback));
+    text.textContent = `${labelPrefix}: ${currentValue}${suffix}`;
+    addTooltip(text, tooltip);
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = String(min);
+    input.max = String(max);
+    input.step = '1';
+    input.value = String(currentValue);
+    input.addEventListener('input', () => {
+        const next = getSettings();
+        next[settingKey] = Math.max(min, Math.min(max, parseInt(input.value, 10) || fallback));
+        saveSettings(next);
+        text.textContent = `${labelPrefix}: ${next[settingKey]}${suffix}`;
+    });
+    row.appendChild(text);
+    row.appendChild(input);
+    return row;
+}
+
 function createGenerationSettingsCard() {
     const settings = getSettings();
     const card = document.createElement('div');
@@ -1398,17 +1573,17 @@ function createGenerationSettingsCard() {
     const sourceRow = document.createElement('label');
     sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
     const sourceText = document.createElement('span');
-    sourceText.textContent = `Lore source messages: ${settings.loreSourceMessageCount || 10}`;
+    sourceText.textContent = `Lore source messages: ${settings.loreSourceMessageCount || 40}`;
     addTooltip(sourceText, 'How many recent chat messages are sent to lore generation. Lower values are faster; higher values provide more context.');
     const sourceInput = document.createElement('input');
     sourceInput.type = 'range';
     sourceInput.min = '4';
     sourceInput.max = '200';
     sourceInput.step = '1';
-    sourceInput.value = String(settings.loreSourceMessageCount || 10);
+    sourceInput.value = String(settings.loreSourceMessageCount || 40);
     sourceInput.addEventListener('input', () => {
         const next = getSettings();
-        next.loreSourceMessageCount = Math.max(4, Math.min(200, parseInt(sourceInput.value, 10) || 10));
+        next.loreSourceMessageCount = Math.max(4, Math.min(200, parseInt(sourceInput.value, 10) || 40));
         saveSettings(next);
         sourceText.textContent = `Lore source messages: ${next.loreSourceMessageCount}`;
     });
@@ -1441,6 +1616,119 @@ function createGenerationSettingsCard() {
     chunkHelp.className = 'wandlight-runtime-help';
     chunkHelp.textContent = 'Lore generation processes Source Messages in chunks, so 100 source messages at chunk size 10 means 10 smaller model requests instead of one huge prompt.';
     card.appendChild(chunkHelp);
+
+    const bulkTitle = document.createElement('div');
+    bulkTitle.className = 'wandlight-runtime-subtitle';
+    bulkTitle.textContent = 'Bulk Scan Range and Throughput';
+    card.appendChild(bulkTitle);
+
+    const bulkGrid = document.createElement('div');
+    bulkGrid.className = 'wandlight-runtime-grid';
+    bulkGrid.appendChild(createSelectSettingRow(
+        'Bulk scan range',
+        'Controls which message range Bulk Scan Story Lore processes. Recent uses Lore source messages; range uses explicit 1-based message indexes; entire scans the whole chat.',
+        'loreBulkScanMode',
+        [
+            ['recent', 'Recent source window'],
+            ['range', 'Custom message range'],
+            ['entire', 'Entire chat'],
+        ]
+    ));
+    bulkGrid.appendChild(createNumberSettingRow('Range start', 'First 1-based message index used when Bulk scan range is Custom message range.', 'loreBulkRangeStart', { min: 1, max: 100000, fallback: 1 }));
+    bulkGrid.appendChild(createNumberSettingRow('Range end', 'Last 1-based message index used when Bulk scan range is Custom message range. Use 0 to mean latest message.', 'loreBulkRangeEnd', { min: 0, max: 100000, fallback: 0 }));
+    bulkGrid.appendChild(createSelectSettingRow(
+        'Rescan mode',
+        'Controls whether bulk scan skips unchanged completed chunks, retries failed chunks, rescans stale edited chunks, or rescans all chunks.',
+        'loreBulkRescanMode',
+        [
+            ['skip_unchanged', 'Skip unchanged completed chunks'],
+            ['retry_failed', 'Retry failed chunks only'],
+            ['stale_only', 'Rescan edited/stale chunks only'],
+            ['rescan_all', 'Rescan all chunks'],
+        ]
+    ));
+    card.appendChild(bulkGrid);
+
+    card.appendChild(createRangeSettingRow('Bulk chunk size', 'Messages per bulk lore scan chunk. Smaller chunks are easier to parse; larger chunks reduce provider calls.', 'loreBulkChunkSize', { min: 3, max: 50, fallback: 10 }));
+    card.appendChild(createRangeSettingRow('Bulk overlap', 'Messages repeated at chunk boundaries to preserve facts that span two intervals. Must be lower than chunk size.', 'loreBulkOverlap', { min: 0, max: 10, fallback: 1 }));
+    card.appendChild(createRangeSettingRow('Parallel requests', 'Maximum number of bulk lore chunks submitted to the Reasoning provider simultaneously.', 'loreBulkConcurrency', { min: 1, max: 8, fallback: 3 }));
+    card.appendChild(createRangeSettingRow('Retry attempts', 'Chunk-level retry attempts after empty, malformed, or failed extraction responses.', 'loreBulkRetryAttempts', { min: 0, max: 4, fallback: 2 }));
+    card.appendChild(createRangeSettingRow('Candidate facts per chunk', 'Upper target for compact facts extracted per bulk chunk before conversion into Pending Lore entries.', 'loreBulkFactsPerChunk', { min: 4, max: 30, fallback: 14 }));
+
+    const bulkHelp = document.createElement('div');
+    bulkHelp.className = 'wandlight-runtime-help';
+    bulkHelp.textContent = 'Bulk Scan Story Lore stores per-chunk hashes and candidate facts, appends usable Pending Lore entries as chunks complete, and lets unchanged/failed/stale chunks be skipped or rescanned later.';
+    card.appendChild(bulkHelp);
+
+    const modeRow = document.createElement('label');
+    modeRow.className = 'wandlight-setting-row';
+    const modeLabel = document.createElement('span');
+    modeLabel.textContent = 'Generation breadth';
+    addTooltip(modeLabel, 'Auto uses bootstrap mode for manual first-runs when accepted story/AU lore is sparse, then incremental mode for maintenance. Bootstrap targets broad story coverage; incremental targets only new or changed facts.');
+    const modeSelect = document.createElement('select');
+    modeSelect.className = 'text_pole';
+    [
+        ['auto', 'Auto: bootstrap first, then incremental'],
+        ['bootstrap', 'Bootstrap: broad first-run coverage'],
+        ['incremental', 'Incremental: selective updates'],
+    ].forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        if ((settings.loreGenerationBreadthMode || 'auto') === value) option.selected = true;
+        modeSelect.appendChild(option);
+    });
+    modeSelect.addEventListener('change', () => {
+        const next = getSettings();
+        next.loreGenerationBreadthMode = modeSelect.value;
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: true });
+    });
+    modeRow.appendChild(modeLabel);
+    modeRow.appendChild(modeSelect);
+    card.appendChild(modeRow);
+
+    const bootstrapTargetRow = document.createElement('label');
+    bootstrapTargetRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const bootstrapTargetText = document.createElement('span');
+    bootstrapTargetText.textContent = `Bootstrap target entries: ${settings.loreBootstrapTargetEntries || 40}`;
+    addTooltip(bootstrapTargetText, 'Approximate total pending entries to request across all chunks during bootstrap story-lore generation. The model may return fewer when the source is sparse.');
+    const bootstrapTargetInput = document.createElement('input');
+    bootstrapTargetInput.type = 'range';
+    bootstrapTargetInput.min = '12';
+    bootstrapTargetInput.max = '120';
+    bootstrapTargetInput.step = '1';
+    bootstrapTargetInput.value = String(settings.loreBootstrapTargetEntries || 40);
+    bootstrapTargetInput.addEventListener('input', () => {
+        const next = getSettings();
+        next.loreBootstrapTargetEntries = Math.max(12, Math.min(120, parseInt(bootstrapTargetInput.value, 10) || 40));
+        saveSettings(next);
+        bootstrapTargetText.textContent = `Bootstrap target entries: ${next.loreBootstrapTargetEntries}`;
+    });
+    bootstrapTargetRow.appendChild(bootstrapTargetText);
+    bootstrapTargetRow.appendChild(bootstrapTargetInput);
+    card.appendChild(bootstrapTargetRow);
+
+    const incrementalTargetRow = document.createElement('label');
+    incrementalTargetRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const incrementalTargetText = document.createElement('span');
+    incrementalTargetText.textContent = `Incremental target entries: ${settings.loreIncrementalTargetEntries || 8}`;
+    addTooltip(incrementalTargetText, 'Approximate total pending entries to request across all chunks during incremental story-lore generation.');
+    const incrementalTargetInput = document.createElement('input');
+    incrementalTargetInput.type = 'range';
+    incrementalTargetInput.min = '3';
+    incrementalTargetInput.max = '30';
+    incrementalTargetInput.step = '1';
+    incrementalTargetInput.value = String(settings.loreIncrementalTargetEntries || 8);
+    incrementalTargetInput.addEventListener('input', () => {
+        const next = getSettings();
+        next.loreIncrementalTargetEntries = Math.max(3, Math.min(30, parseInt(incrementalTargetInput.value, 10) || 8));
+        saveSettings(next);
+        incrementalTargetText.textContent = `Incremental target entries: ${next.loreIncrementalTargetEntries}`;
+    });
+    incrementalTargetRow.appendChild(incrementalTargetText);
+    incrementalTargetRow.appendChild(incrementalTargetInput);
+    card.appendChild(incrementalTargetRow);
 
     const tagRow = document.createElement('label');
     tagRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
@@ -1652,14 +1940,16 @@ function createTextSettingField(label, value, tooltip, onChange) {
 
 function formatGenerationStatus(result) {
     if (!result) return 'Lore generation ended without a result.';
+    const modeText = result.generationMode ? `${result.generationMode} mode` : 'story-lore generation';
+    const targetText = result.targetEntryCount ? ` Target: ${result.targetEntryCount}.` : '';
     if (result.status === 'empty_valid_entries') {
         if (result.droppedDuplicateCount) {
-            return `Generation produced only duplicate/similar entries (${result.droppedDuplicateCount} filtered). Try disabling Duplicate Guard or broadening Source Messages.`;
+            return `Generation in ${modeText} produced ${result.normalizedEntryCount || result.rawEntryCount || 0} normalized entries, but all were duplicate/similar (${result.droppedDuplicateCount} filtered). Try disabling Duplicate Guard or broadening Source Messages.`;
         }
-        return `Generation returned ${result.rawEntryCount || 0} raw entries, but none matched the Wandlight lore schema. The parser now accepts common aliases, but the model may still have returned unusable fields.`;
+        return `Generation in ${modeText} returned ${result.rawEntryCount || 0} raw entries, but none matched the Wandlight lore schema after normalization.${targetText}`;
     }
     if (result.status === 'failed_parse') return 'Lore generation returned malformed JSON that could not be repaired.';
-    if (result.status === 'failed_no_response') return result.chunkCount ? `Lore generation returned no usable responses across ${result.chunkCount} chunk(s). Check provider connection, model output format, or reduce chunk size.` : 'Lore generation returned an empty response from the selected model/provider.';
+    if (result.status === 'failed_no_response') return result.chunkCount ? `Lore generation in ${modeText} returned no usable responses across ${result.chunkCount} chunk(s). Check provider connection, model output format, max tokens, or reduce chunk size.${targetText}` : 'Lore generation returned an empty response from the selected model/provider.';
     if (result.status === 'api_not_configured') return `API/model settings incomplete: ${result.error || 'missing provider settings'}`;
     if (result.status === 'no_context_detected') return 'No story context could be detected. Set Story Context manually or increase Source Messages.';
     return `Lore generation ended with status: ${result.status || 'unknown'}`;
@@ -1719,7 +2009,7 @@ function createContinuityScanCard(state) {
     sourceInput.value = String(settings.continuitySourceMessageCount || 10);
     sourceInput.addEventListener('input', () => {
         const next = getSettings();
-        next.continuitySourceMessageCount = Math.max(1, Math.min(200, parseInt(sourceInput.value, 10) || 10));
+        next.continuitySourceMessageCount = Math.max(1, Math.min(200, parseInt(sourceInput.value, 10) || 40));
         saveSettings(next);
         sourceText.textContent = `Continuity source messages: ${next.continuitySourceMessageCount}`;
     });
@@ -5172,9 +5462,15 @@ function getPendingLoreBatchLabel(state) {
     const parts = [];
     if (meta.createdAt) parts.push(`Generated ${new Date(meta.createdAt).toLocaleString()}`);
     if (meta.status) parts.push(`status: ${meta.status}`);
+    if (meta.generationMode) parts.push(`${meta.generationMode} mode`);
+    if (meta.targetEntryCount) parts.push(`target ${meta.targetEntryCount}`);
     if (meta.validEntryCount !== undefined) parts.push(`${meta.validEntryCount} valid`);
     if (meta.rawEntryCount !== undefined) parts.push(`${meta.rawEntryCount} raw`);
+    if (meta.normalizedEntryCount !== undefined) parts.push(`${meta.normalizedEntryCount} normalized`);
+    if (meta.droppedDuplicateCount) parts.push(`${meta.droppedDuplicateCount} duplicates filtered`);
     if (meta.droppedEntryCount) parts.push(`${meta.droppedEntryCount} dropped`);
+    if (meta.chunkCount) parts.push(`${meta.chunkCount} chunks`);
+    if (meta.sourceMessageCount) parts.push(`${meta.sourceMessageCount} source messages`);
     return parts.length ? parts.join(' | ') : 'Pending lore batch awaiting review.';
 }
 

@@ -43,7 +43,7 @@ function getProviderSettings(kind = 'lore') {
         openAIUseSTProxy: !!settings[`${prefix}OpenAIUseSTProxy`],
         temperature: Number(settings[`${prefix}Temperature`] ?? 0.7),
         topP: Number(settings[`${prefix}TopP`] ?? 0.98),
-        maxTokens: Number(settings[`${prefix}MaxTokens`] || (k === 'continuity' ? 1024 : 2048)),
+        maxTokens: Number(settings[`${prefix}MaxTokens`] || (k === 'continuity' ? 4096 : 8192)),
         secretName: `${prefix}OpenAI`,
     };
 }
@@ -354,7 +354,7 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
         ],
         temperature: Number(cfg.temperature ?? 0.7),
         top_p: Number(cfg.topP ?? 0.98),
-        max_tokens: Number(options.maxTokens || cfg.maxTokens || 2048),
+        max_tokens: Number(options.maxTokens || cfg.maxTokens || (cfg.kind === 'continuity' ? 4096 : 8192)),
         stream: false,
     };
 
@@ -417,8 +417,8 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
                 // the request is retried again without this field below.
                 reasoning_effort: 'low',
             };
-            const originalMax = Number(requestBody.max_tokens || requestBody.max_completion_tokens || options.maxTokens || cfg.maxTokens || 2048);
-            const expandedMax = Math.max(originalMax * 2, cfg.kind === 'continuity' ? 4096 : 2048);
+            const originalMax = Number(requestBody.max_tokens || requestBody.max_completion_tokens || options.maxTokens || cfg.maxTokens || (cfg.kind === 'continuity' ? 4096 : 8192));
+            const expandedMax = Math.max(originalMax * 2, cfg.kind === 'continuity' ? 4096 : 8192);
             if (requestBody.max_completion_tokens !== undefined) retryBody.max_completion_tokens = Math.min(8192, expandedMax);
             else retryBody.max_tokens = Math.min(8192, expandedMax);
 
@@ -457,7 +457,7 @@ async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}
             systemPrompt: sp,
             prompt: up,
             prefill: options.prefill || '',
-            responseLength: Math.max(128, Math.min(8192, Math.ceil(Number(responseLength || 2048) * lengthMultiplier))),
+            responseLength: Math.max(128, Math.min(8192, Math.ceil(Number(responseLength || (cfg.kind === 'continuity' ? 4096 : 8192)) * lengthMultiplier))),
             bypassAll: true,
         });
         const content = typeof result === 'string' ? result : extractChatCompletionText(result);
@@ -511,7 +511,7 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
         return await service.sendRequest(
             cfg.profileId,
             messages,
-            Math.max(128, Math.min(8192, Math.ceil(Number(options.maxTokens || cfg.maxTokens || 2048) * lengthMultiplier))),
+            Math.max(128, Math.min(8192, Math.ceil(Number(options.maxTokens || cfg.maxTokens || (cfg.kind === 'continuity' ? 4096 : 8192)) * lengthMultiplier))),
             {
                 stream: false,
                 extractData: true,

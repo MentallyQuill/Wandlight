@@ -812,7 +812,49 @@ function jaccardSimilarity(a, b) {
     return union > 0 ? intersection / union : 0;
 }
 
-export function getLoreDuplicateReason(entry, existingEntries = []) {
+function duplicateSourceText(entry = {}) {
+    const source = entry?.source;
+    const info = entry?.sourceInfo || {};
+    if (typeof source === 'string') return source.toLowerCase();
+    if (source && typeof source === 'object') {
+        return [source.id, source.work, source.book, source.chapter, source.notes].filter(Boolean).join(' ').toLowerCase();
+    }
+    return [info.id, info.work, info.book, info.chapter, info.notes].filter(Boolean).join(' ').toLowerCase();
+}
+
+function isCanonicalReferenceLore(entry = {}) {
+    const e = entry || {};
+    const source = duplicateSourceText(e);
+    const sourceInfo = e.sourceInfo || {};
+    const sourceBook = sourceInfo.book || sourceInfo.work || e?.date?.book || '';
+    const category = String(e.category || '').toLowerCase();
+    const canonStatus = String(e.canonStatus || '').toLowerCase();
+    const generated = /model-generated|story-generation|lore-generator|manual|user/.test(source);
+    if (generated) return false;
+    if (canonStatus === 'canon' && (category === 'canon' || sourceBook || /canon|lore\//.test(source))) return true;
+    if (canonStatus === 'canon' && Array.isArray(e?.scope?.books) && e.scope.books.length) return true;
+    return false;
+}
+
+function isStoryGeneratedLore(entry = {}) {
+    const e = entry || {};
+    const source = duplicateSourceText(e);
+    const canonStatus = String(e.canonStatus || '').toLowerCase();
+    if (/model-generated|story-generation|lore-generator|manual|user|au|divergent/.test(source)) return true;
+    if (['au', 'divergent', 'fanon', 'contested', 'unknown'].includes(canonStatus)) return true;
+    return false;
+}
+
+function shouldSkipCanonicalSimilarity(candidate, current, options = {}) {
+    return Boolean(
+        options.storyGeneration &&
+        options.ignoreCanonicalSourceSimilarity &&
+        isStoryGeneratedLore(candidate) &&
+        isCanonicalReferenceLore(current)
+    );
+}
+
+export function getLoreDuplicateReason(entry, existingEntries = [], options = {}) {
     const candidate = normalizeLoreEntry(entry);
     const existing = normalizeLoreMatrix(existingEntries);
     const candidateId = candidate.id.toLowerCase();
@@ -822,6 +864,15 @@ export function getLoreDuplicateReason(entry, existingEntries = []) {
         if (current.id.toLowerCase() === candidateId) {
             return `duplicate id: ${current.id}`;
         }
+
+        // For story-lore bootstrapping, accepted canon-database entries should not
+        // suppress story-specific pending lore merely because the title/fact is
+        // similar. A canon fact like "Harry owns a wand" and a story fact like
+        // "Harry currently carries Draco's wand" must both survive review.
+        if (shouldSkipCanonicalSimilarity(candidate, current, options)) {
+            continue;
+        }
+
         if (current.title.toLowerCase() === candidateTitle) {
             return `duplicate title: ${current.title}`;
         }
@@ -838,14 +889,14 @@ export function getLoreDuplicateReason(entry, existingEntries = []) {
     return '';
 }
 
-export function filterDuplicateLoreEntries(entries = [], existingEntries = []) {
+export function filterDuplicateLoreEntries(entries = [], existingEntries = [], options = {}) {
     const accepted = [];
     const dropped = [];
     const comparison = normalizeLoreMatrix(existingEntries);
 
     for (const raw of entries) {
         const entry = normalizeLoreEntry(raw);
-        const reason = getLoreDuplicateReason(entry, comparison.concat(accepted));
+        const reason = getLoreDuplicateReason(entry, comparison.concat(accepted), options);
         if (reason) {
             dropped.push({ entry, reason });
         } else if (entry.id && entry.title && entry.fact) {

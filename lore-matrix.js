@@ -303,12 +303,16 @@ function normalizeUiBlock(input) {
 }
 
 function deriveActiveWhen(scope, input) {
+    // Important: activeWhen is a legacy compatibility block. Do NOT mirror scope
+    // back into activeWhen here. Mirroring scope <-> activeWhen caused exponential
+    // chatMetadata growth in older builds because each normalization pass copied
+    // one block into the other. Activation now checks scope directly at runtime.
     const activeWhen = asPlainObject(input.activeWhen);
     return {
-        erasAny: uniqueLimitedStringArray([activeWhen.erasAny, scope.eras, scope.books], 32),
-        locationsAny: uniqueLimitedStringArray([activeWhen.locationsAny, scope.locations], 32),
-        charactersPresentAny: uniqueLimitedStringArray([activeWhen.charactersPresentAny, scope.characters], 32),
-        tagsAny: uniqueLimitedStringArray([activeWhen.tagsAny, scope.topics, scope.spells, scope.objects], 40),
+        erasAny: uniqueLimitedStringArray(activeWhen.erasAny, 16),
+        locationsAny: uniqueLimitedStringArray(activeWhen.locationsAny, 16),
+        charactersPresentAny: uniqueLimitedStringArray(activeWhen.charactersPresentAny, 16),
+        tagsAny: uniqueLimitedStringArray(activeWhen.tagsAny, 24),
     };
 }
 
@@ -467,13 +471,21 @@ function entryBranchMatches(entry, state) {
 
 function activeWhenMatches(entry, state) {
     const activeWhen = entry.activeWhen || {};
+    const scope = entry.scope || {};
     const era = state?.canon?.era ? [state.canon.era] : [];
+    const canonBoundary = state?.canon?.canonBoundary ? [state.canon.canonBoundary] : [];
     const location = state?.scene?.location ? [state.scene.location] : [];
     const present = state?.scene?.presentCharacters || [];
 
-    if (activeWhen.erasAny?.length && !anyOverlap(activeWhen.erasAny, era)) return false;
-    if (activeWhen.locationsAny?.length && !anyOverlap(activeWhen.locationsAny, location)) return false;
-    if (activeWhen.charactersPresentAny?.length && !anyOverlap(activeWhen.charactersPresentAny, present)) return false;
+    // Runtime activation reads both legacy activeWhen and schema-v2 scope, but
+    // normalization/storage no longer mirrors them into each other.
+    const erasAny = uniqueLimitedStringArray([activeWhen.erasAny, scope.eras, scope.books], 32);
+    const locationsAny = uniqueLimitedStringArray([activeWhen.locationsAny, scope.locations], 32);
+    const charactersPresentAny = uniqueLimitedStringArray([activeWhen.charactersPresentAny, scope.characters], 32);
+
+    if (erasAny.length && !anyOverlap(erasAny, era.concat(canonBoundary))) return false;
+    if (locationsAny.length && !anyOverlap(locationsAny, location)) return false;
+    if (charactersPresentAny.length && !anyOverlap(charactersPresentAny, present)) return false;
 
     return true;
 }

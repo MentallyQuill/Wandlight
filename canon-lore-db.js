@@ -529,7 +529,7 @@ export async function queryCanonLoreDatabase(context = null, options = {}) {
 
     return {
         status: candidates.length ? 'matched' : 'empty',
-        entries: candidates.slice(0, max).map(item => compactCanonLoreEntryForPending({
+        entries: candidates.slice(0, max).map(item => compactPendingCanonEntryForStorage({
             ...item.entry,
             source: item.entry.source || CANON_DB_SOURCE,
         })),
@@ -589,8 +589,10 @@ export async function proposeCanonLoreForContext(context = null, options = {}) {
         pushStateSnapshot(state, 'Propose canon lore from local database', settings.maxSnapshots);
     }
 
-    const pending = normalizeLoreMatrix(state.pendingLoreEntries || []);
-    state.pendingLoreEntries = normalizeLoreMatrix([...pending, ...entries]);
+    const pending = Array.isArray(state.pendingLoreEntries) ? state.pendingLoreEntries : [];
+    // Canon DB proposals are already storage-compact. Avoid another normalize->derive
+    // pass here; saveState() will run the final bounded sanitizer.
+    state.pendingLoreEntries = [...pending, ...entries].slice(-50);
     state.pendingLoreMeta = {
         id: `canon-db-${Date.now()}`,
         contextKey: buildLoreGenerationKey(state),

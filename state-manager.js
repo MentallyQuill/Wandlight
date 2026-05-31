@@ -10,6 +10,8 @@
 import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
 import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey } from './lore-matrix.js';
 
+const MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST = 200000;
+
 // ── Settings I/O ────────────────────────────────────────────────────────────────
 
 /**
@@ -71,13 +73,27 @@ export function getState() {
         chatMetadata[MODULE_KEY] = state;
         return state;
     }
-    // Always run migration on read
+    // Always run migration on read. If migration/compaction shrinks an oversized
+    // Wandlight block, persist immediately so a poisoned chat does not keep
+    // rehydrating the same megabyte-scale pending lore payload.
+    const beforeSize = safeJsonSize(state);
     state = migrateState(state);
+    state = sanitizeLoreArraysForStorage(state);
     // Ensure arrays exist post-migration
     if (!Array.isArray(state.memoHistory)) state.memoHistory = [];
     if (!Array.isArray(state.stateHistory)) state.stateHistory = [];
     if (state.lastDelta === undefined) state.lastDelta = null;
     chatMetadata[MODULE_KEY] = state;
+
+    const afterSize = safeJsonSize(state);
+    if (typeof ctx.saveMetadata === 'function' && beforeSize > 0 && (afterSize < beforeSize || beforeSize > MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST)) {
+        try {
+            ctx.saveMetadata();
+        } catch (e) {
+            console.warn(`${LOG_PREFIX} Failed to persist compacted Wandlight state on read`, e);
+        }
+    }
+
     return state;
 }
 
@@ -232,6 +248,81 @@ export function saveStateWithSnapshot(state, maxSnapshots) {
 const MAX_PENDING_LORE_ENTRIES = 100;
 const MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE = 500;
 
+
+function safeJsonSize(value) {
+    try {
+        return JSON.stringify(value || {}).length;
+    } catch (_e) {
+        return 0;
+    }
+}
+
+function prePruneStringArray(values, limit = 32, textLimit = 160) {
+    const rawValues = Array.isArray(values) ? values : [];
+    const seen = new Set();
+    const out = [];
+
+    for (const raw of rawValues) {
+        const text = truncateText(raw, textLimit).trim();
+        if (!text) continue;
+        const key = text.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(text);
+        if (out.length >= limit) break;
+    }
+
+    return out;
+}
+
+function prePruneLoreEntryForNormalization(entry) {
+    if (!entry || typeof entry !== 'object') return entry;
+
+    const pruned = { ...entry };
+
+    if (entry.scope && typeof entry.scope === 'object' && !Array.isArray(entry.scope)) {
+        pruned.scope = {
+            ...entry.scope,
+            characters: prePruneStringArray(entry.scope.characters, 16, 100),
+            locations: prePruneStringArray(entry.scope.locations, 12, 100),
+            factions: prePruneStringArray(entry.scope.factions, 12, 100),
+            topics: prePruneStringArray(entry.scope.topics, 18, 100),
+            objects: prePruneStringArray(entry.scope.objects, 12, 100),
+            spells: prePruneStringArray(entry.scope.spells, 12, 100),
+            schoolYears: prePruneStringArray(entry.scope.schoolYears, 8, 32),
+            books: prePruneStringArray(entry.scope.books, 8, 100),
+            eras: prePruneStringArray(entry.scope.eras, 8, 100),
+        };
+    }
+
+    // ActiveWhen is derived/legacy compatibility only. Never preserve massive
+    // activeWhen arrays in storage; they can be reconstructed for activation from
+    // scope at runtime.
+    if (entry.activeWhen && typeof entry.activeWhen === 'object' && !Array.isArray(entry.activeWhen)) {
+        pruned.activeWhen = {
+            erasAny: prePruneStringArray(entry.activeWhen.erasAny, 8, 100),
+            locationsAny: prePruneStringArray(entry.activeWhen.locationsAny, 8, 100),
+            charactersPresentAny: prePruneStringArray(entry.activeWhen.charactersPresentAny, 12, 100),
+            tagsAny: prePruneStringArray(entry.activeWhen.tagsAny, 12, 100),
+        };
+    }
+
+    if (entry.content && typeof entry.content === 'object' && !Array.isArray(entry.content)) {
+        pruned.content = {
+            ...entry.content,
+            fact: truncateText(entry.content.fact, 1200),
+            injection: truncateText(entry.content.injection, 1200),
+            constraints: prePruneStringArray(entry.content.constraints, 8, 260),
+            antiLore: prePruneStringArray(entry.content.antiLore, 8, 260),
+            notes: truncateText(entry.content.notes, 400),
+        };
+    }
+
+    pruned.tags = prePruneStringArray(entry.tags, 10, 40);
+    pruned.extensions = {};
+    return pruned;
+}
+
 function truncateText(value, limit = 1000) {
     return String(value || '').slice(0, limit);
 }
@@ -266,7 +357,7 @@ function compactStringMapForStorage(value, limit = 16, textLimit = 120) {
 }
 
 function compactLoreEntryForStorage(entry) {
-    const normalized = normalizeLoreEntry(entry || {});
+    const normalized = normalizeLoreEntry(prePruneLoreEntryForNormalization(entry || {}));
     return {
         schemaVersion: normalized.schemaVersion || 2,
         id: truncateText(normalized.id, 140),

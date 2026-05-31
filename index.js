@@ -26,7 +26,7 @@ import {
 } from './state-manager.js';
 import { buildMemo } from './memo-builder.js';
 import { installInterceptor } from './prompt-injector.js';
-import { onExtractionTriggered, resetExtractionCounter } from './extractor.js';
+import { onExtractionTriggered, onGenerationEndedAutomation, resetExtractionCounter } from './extractor.js';
 import {
     renderSettingsPanel,
     renderStatePanel,
@@ -94,7 +94,7 @@ function wireEvents(ctx) {
     if (ctx.eventSource && ctx.event_types) {
         ctx.eventSource.on(ctx.event_types.GENERATION_ENDED, () => {
             try {
-                onExtractionTriggered();
+                onGenerationEndedAutomation();
             } catch (e) {
                 console.error(`${LOG_PREFIX} Error in GENERATION_ENDED handler:`, e);
             }
@@ -122,7 +122,7 @@ function wireEvents(ctx) {
     const bus = ctx.eventBus || (typeof eventBus !== 'undefined' ? eventBus : null);
     if (bus && bus.on) {
         bus.on('GENERATION_ENDED', () => {
-            try { onExtractionTriggered(); } catch (e) { console.error(e); }
+            try { onGenerationEndedAutomation(); } catch (e) { console.error(e); }
         });
         bus.on('CHAT_CHANGED', () => {
             try { resetExtractionCounter(); } catch (e) { console.error(e); }
@@ -135,7 +135,7 @@ function wireEvents(ctx) {
     if (ctx.eventTypes) {
         ctx.eventTypes['GENERATION_ENDED'] = ctx.eventTypes['GENERATION_ENDED'] || [];
         ctx.eventTypes['GENERATION_ENDED'].push(() => {
-            try { onExtractionTriggered(); } catch (e) { console.error(e); }
+            try { onGenerationEndedAutomation(); } catch (e) { console.error(e); }
         });
         ctx.eventTypes['CHAT_CHANGED'] = ctx.eventTypes['CHAT_CHANGED'] || [];
         ctx.eventTypes['CHAT_CHANGED'].push(() => {

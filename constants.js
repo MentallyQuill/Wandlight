@@ -45,25 +45,33 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
     enabled: true,
     injectMemo: true,
     injectContinuity: true,
-    autoExtract: true,
+    autoExtract: false,
     autoApplyDelta: false,
     extractionInterval: 1,
     maxSnapshots: 20,
     debugMode: false,
+
+    // Runtime automation modes. These replace the old single workflow preset for new behavior.
+    continuityTrackingMode: 'manual', // 'manual' | 'automatic'
+    continuityAutoInterval: 5, // turns between automatic continuity scans
+    contextDetectionMode: 'manual', // 'manual' | 'automatic'
+    contextDetectionAutoInterval: 5,
+    loreGenerationMode: 'manual', // 'manual' | 'automatic'
+    loreGenerationAutoInterval: 10,
 
     // Lore matrix
     injectLore: true,
     maxLoreEntriesInMemo: 6,
     maxLoreEntriesInMatrix: 50,
     autoGenerateLore: false,
-    workflowMode: 'assisted', // 'manual' | 'assisted' | 'automatic'
+    workflowMode: 'manual', // legacy UI preset; explicit tab modes are authoritative
 
     // Lore generation behavior
     loreSourceMessageCount: 20,
@@ -80,7 +88,23 @@ export const DEFAULT_SETTINGS = {
     continuityCompressionLevel: 2,
     continuityEmotionDecayTurns: 6,
 
-    // Lore model provider
+    // Continuity model provider: used by Scan Continuity State / automatic continuity tracking.
+    continuityProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
+    continuityProfileId: '',
+    continuityCompletionPresetId: '',
+    continuityOpenAIBaseUrl: '',
+    continuityOpenAIModel: '',
+    continuityOpenAIKeyEncrypted: null,
+    continuityOpenAIKeySalt: '',
+    continuityOpenAIKeyIv: '',
+    continuityOpenAIKeySet: false,
+    continuityOpenAIUseJsonMode: true,
+    continuityOpenAIUseSTProxy: false,
+    continuityTemperature: 0.7,
+    continuityTopP: 0.98,
+    continuityMaxTokens: 1024,
+
+    // Lore model provider: used by Detect Story Context / Generate Pending Lore.
     loreProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
     loreProfileId: '',
     loreCompletionPresetId: '',

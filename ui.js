@@ -13,8 +13,8 @@ import {
     normalizeLoreContext,
     getActiveLoreEntries,
 } from './lore-matrix.js';
-import { storeApiKey, deleteApiKey } from './secure-keyring.js';
-import { loadApiKey, fetchLoreModels, testLoreConnection, validateLoreProviderConfiguration } from './lore-llm-client.js';
+import { storeNamedApiKey, deleteNamedApiKey } from './secure-keyring.js';
+import { loadApiKey, fetchLoreModels, testLoreConnection, validateLoreProviderConfiguration, getAvailableConnectionProfiles, getAvailableCompletionPresets } from './lore-llm-client.js';
 
 /**
  * Renders the settings panel HTML into the container.
@@ -347,39 +347,83 @@ export function renderLoreContextPreview() {
 function setupLoreProviderPanel(container) {
     if (!container) return;
 
-    const settings = getSettings();
+    setupProviderControls(container, 'continuity', 'Continuity');
+    setupProviderControls(container, 'lore', 'Lore');
 
-    // ── Elements ─────────────────────────────────────────────────────
-    const providerSelect = container.querySelector('#wandlight_lore_provider');
-    const profileRow = container.querySelector('#wandlight_lore_profile_row');
-    const profileIdSelect = container.querySelector('#wandlight_lore_profile_id');
-    const completionPresetSelect = container.querySelector('#wandlight_lore_completion_preset_id');
-    const openaiRow = container.querySelector('#wandlight_lore_openai_row');
-    const openaiBaseUrl = container.querySelector('#wandlight_lore_openai_base_url');
-    const openaiModel = container.querySelector('#wandlight_lore_openai_model');
-    const openaiModelSearch = container.querySelector('#wandlight_lore_openai_model_search');
-    const openaiKey = container.querySelector('#wandlight_lore_openai_key');
-    const openaiKeySaveBtn = container.querySelector('#wandlight_lore_openai_key_save');
-    const openaiKeyClearBtn = container.querySelector('#wandlight_lore_openai_key_clear');
-    const openaiKeyStatus = container.querySelector('#wandlight_lore_openai_key_status');
-    const openaiJsonMode = container.querySelector('#wandlight_lore_openai_json_mode');
+    const settings = getSettings();
     const tempInput = container.querySelector('#wandlight_lore_temperature');
     const topPInput = container.querySelector('#wandlight_lore_top_p');
     const maxTokensInput = container.querySelector('#wandlight_lore_max_tokens');
-    const testConnectionBtn = container.querySelector('#wandlight_lore_test_connection');
-    const connectionStatus = container.querySelector('#wandlight_lore_connection_status');
 
-    // ── Set initial values ────────────────────────────────────────────
-    if (providerSelect) providerSelect.value = settings.loreProvider || 'st';
-    if (openaiBaseUrl) openaiBaseUrl.value = settings.loreOpenAIBaseUrl || '';
-    if (openaiModelSearch) openaiModelSearch.value = settings.loreOpenAIModel || '';
-    if (openaiModel) openaiModel.value = settings.loreOpenAIModel || '';
-    if (openaiJsonMode) openaiJsonMode.checked = !!settings.loreOpenAIUseJsonMode;
     if (tempInput) tempInput.value = settings.loreTemperature ?? 0.7;
     if (topPInput) topPInput.value = settings.loreTopP ?? 0.98;
     if (maxTokensInput) maxTokensInput.value = settings.loreMaxTokens ?? 2048;
 
-    // ── Show/hide provider-specific rows ──────────────────────────────
+    if (tempInput) {
+        tempInput.addEventListener('change', () => {
+            const next = getSettings();
+            next.loreTemperature = parseFloat(tempInput.value) || 0.7;
+            saveLoreProviderSettings(next);
+        });
+    }
+    if (topPInput) {
+        topPInput.addEventListener('change', () => {
+            const next = getSettings();
+            next.loreTopP = parseFloat(topPInput.value) || 0.98;
+            saveLoreProviderSettings(next);
+        });
+    }
+    if (maxTokensInput) {
+        maxTokensInput.addEventListener('change', () => {
+            const next = getSettings();
+            next.loreMaxTokens = parseInt(maxTokensInput.value, 10) || 2048;
+            saveLoreProviderSettings(next);
+        });
+    }
+}
+
+function settingPrefix(kind) {
+    return kind === 'continuity' ? 'continuity' : 'lore';
+}
+
+function secretNameForProvider(kind) {
+    return `${settingPrefix(kind)}OpenAI`;
+}
+
+function setupProviderControls(container, kind, label) {
+    const prefix = settingPrefix(kind);
+    const settings = getSettings();
+
+    const providerSelect = container.querySelector(`#wandlight_${prefix}_provider`);
+    const profileRow = container.querySelector(`#wandlight_${prefix}_profile_row`);
+    const profileIdSelect = container.querySelector(`#wandlight_${prefix}_profile_id`);
+    const completionPresetSelect = container.querySelector(`#wandlight_${prefix}_completion_preset_id`);
+    const openaiRow = container.querySelector(`#wandlight_${prefix}_openai_row`);
+    const openaiBaseUrl = container.querySelector(`#wandlight_${prefix}_openai_base_url`);
+    const openaiModel = container.querySelector(`#wandlight_${prefix}_openai_model`);
+    const openaiModelSearch = container.querySelector(`#wandlight_${prefix}_openai_model_search`);
+    const openaiKey = container.querySelector(`#wandlight_${prefix}_openai_key`);
+    const openaiKeySaveBtn = container.querySelector(`#wandlight_${prefix}_openai_key_save`);
+    const openaiKeyClearBtn = container.querySelector(`#wandlight_${prefix}_openai_key_clear`);
+    const openaiKeyStatus = container.querySelector(`#wandlight_${prefix}_openai_key_status`);
+    const openaiJsonMode = container.querySelector(`#wandlight_${prefix}_openai_json_mode`);
+    const fetchModelsBtn = container.querySelector(`#wandlight_${prefix}_fetch_models`);
+    const testConnectionBtn = container.querySelector(`#wandlight_${prefix}_test_connection`);
+    const connectionStatus = container.querySelector(`#wandlight_${prefix}_connection_status`);
+
+    const providerKey = `${prefix}Provider`;
+    const profileKey = `${prefix}ProfileId`;
+    const presetKey = `${prefix}CompletionPresetId`;
+    const baseUrlKey = `${prefix}OpenAIBaseUrl`;
+    const modelKey = `${prefix}OpenAIModel`;
+    const jsonModeKey = `${prefix}OpenAIUseJsonMode`;
+
+    if (providerSelect) providerSelect.value = settings[providerKey] || 'st';
+    if (openaiBaseUrl) openaiBaseUrl.value = settings[baseUrlKey] || '';
+    if (openaiModelSearch) openaiModelSearch.value = settings[modelKey] || '';
+    if (openaiModel) openaiModel.value = settings[modelKey] || '';
+    if (openaiJsonMode) openaiJsonMode.checked = settings[jsonModeKey] !== false;
+
     function refreshProviderRows() {
         const provider = providerSelect?.value || 'st';
         if (profileRow) profileRow.style.display = provider === 'profile' ? '' : 'none';
@@ -388,111 +432,112 @@ function setupLoreProviderPanel(container) {
 
     if (providerSelect) {
         providerSelect.addEventListener('change', () => {
-            const val = providerSelect.value;
-            settings.loreProvider = val;
-            saveLoreProviderSettings(settings);
+            const next = getSettings();
+            next[providerKey] = providerSelect.value;
+            saveLoreProviderSettings(next);
             if (connectionStatus) connectionStatus.textContent = '';
             refreshProviderRows();
         });
     }
 
-    // ── Populate connection profiles from ST ─────────────────────────
     function populateProfiles() {
-        if (!profileIdSelect) return;
-        try {
-            const ctx = SillyTavern?.getContext();
-            const profiles = ctx?.connectionProfiles || [];
-            // Preserve current selection
-            const currentVal = profileIdSelect.value;
+        if (profileIdSelect) {
+            const current = profileIdSelect.value || getSettings()[profileKey] || '';
             profileIdSelect.innerHTML = '<option value="">— Select Profile —</option>';
-            for (const p of profiles) {
+            const profiles = getAvailableConnectionProfiles();
+            if (!profiles.length) {
                 const opt = document.createElement('option');
-                opt.value = p.id || p.name || '';
-                opt.textContent = p.name || p.id || 'Unknown';
+                opt.value = '';
+                opt.textContent = 'No profiles found in this SillyTavern session';
                 profileIdSelect.appendChild(opt);
             }
-            if (currentVal) profileIdSelect.value = currentVal;
-
-            // Populate completion presets
-            if (completionPresetSelect) {
-                const presets = ctx?.completionPresets || [];
-                const curPreset = completionPresetSelect.value;
-                completionPresetSelect.innerHTML = '<option value="">— Default —</option>';
-                for (const pr of presets) {
-                    const opt = document.createElement('option');
-                    opt.value = pr.name || pr.id || '';
-                    opt.textContent = pr.name || pr.id || 'Unknown';
-                    completionPresetSelect.appendChild(opt);
-                }
-                if (curPreset) completionPresetSelect.value = curPreset;
+            for (const p of profiles) {
+                const id = p.id || p.name || p.profileId || p.uuid || '';
+                if (!id) continue;
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = p.name || p.id || p.profileId || id;
+                profileIdSelect.appendChild(opt);
             }
-        } catch (_) {}
+            profileIdSelect.value = current;
+        }
+
+        if (completionPresetSelect) {
+            const current = completionPresetSelect.value || getSettings()[presetKey] || '';
+            completionPresetSelect.innerHTML = '<option value="">— Default —</option>';
+            const presets = getAvailableCompletionPresets();
+            if (!presets.length) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'No completion presets found';
+                completionPresetSelect.appendChild(opt);
+            }
+            for (const pr of presets) {
+                const id = pr.name || pr.id || pr.presetId || '';
+                if (!id) continue;
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = pr.name || pr.id || pr.presetId || id;
+                completionPresetSelect.appendChild(opt);
+            }
+            completionPresetSelect.value = current;
+        }
     }
 
     populateProfiles();
-    // Re-populate on focus since user may have added profiles since panel opened
     if (profileIdSelect) {
         profileIdSelect.addEventListener('focus', populateProfiles);
-    }
-
-    if (profileIdSelect) profileIdSelect.value = settings.loreProfileId || '';
-    if (completionPresetSelect) completionPresetSelect.value = settings.loreCompletionPresetId || '';
-
-    // ── Profile save handlers ────────────────────────────────────────
-    if (profileIdSelect) {
+        profileIdSelect.addEventListener('click', populateProfiles);
         profileIdSelect.addEventListener('change', () => {
-            settings.loreProfileId = profileIdSelect.value;
-            saveLoreProviderSettings(settings);
+            const next = getSettings();
+            next[profileKey] = profileIdSelect.value;
+            saveLoreProviderSettings(next);
         });
     }
     if (completionPresetSelect) {
+        completionPresetSelect.addEventListener('focus', populateProfiles);
+        completionPresetSelect.addEventListener('click', populateProfiles);
         completionPresetSelect.addEventListener('change', () => {
-            settings.loreCompletionPresetId = completionPresetSelect.value;
-            saveLoreProviderSettings(settings);
+            const next = getSettings();
+            next[presetKey] = completionPresetSelect.value;
+            saveLoreProviderSettings(next);
         });
     }
 
-    // ── OpenAI-compatible save handlers ───────────────────────────────
     if (openaiBaseUrl) {
         openaiBaseUrl.addEventListener('change', () => {
-            settings.loreOpenAIBaseUrl = openaiBaseUrl.value.trim();
-            saveLoreProviderSettings(settings);
+            const next = getSettings();
+            next[baseUrlKey] = openaiBaseUrl.value.trim();
+            saveLoreProviderSettings(next);
         });
     }
-    let fetchedLoreModels = [];
 
-    function saveLoreModel(value) {
-        settings.loreOpenAIModel = String(value || '').trim();
-        saveLoreProviderSettings(settings);
+    let fetchedModels = [];
+    function saveModel(value) {
+        const next = getSettings();
+        next[modelKey] = String(value || '').trim();
+        saveLoreProviderSettings(next);
     }
 
-    function renderLoreModelOptions(filter = '') {
+    function renderModelOptions(filter = '') {
         if (!openaiModel) return;
+        const currentSettings = getSettings();
         const query = String(filter || '').trim().toLowerCase();
-        const current = settings.loreOpenAIModel || '';
-        const matches = fetchedLoreModels
+        const current = currentSettings[modelKey] || '';
+        const matches = fetchedModels
             .filter(m => {
                 const id = String(m.id || '');
                 const name = String(m.name || m.id || '');
-                if (!query) return true;
-                return id.toLowerCase().includes(query) || name.toLowerCase().includes(query);
+                return !query || id.toLowerCase().includes(query) || name.toLowerCase().includes(query);
             })
             .slice(0, 200);
 
         openaiModel.innerHTML = '';
-
         const typed = String(openaiModelSearch?.value || current || '').trim();
-        if (typed) {
-            const opt = document.createElement('option');
-            opt.value = typed;
-            opt.textContent = `Use typed model: ${typed}`;
-            openaiModel.appendChild(opt);
-        } else {
-            const opt = document.createElement('option');
-            opt.value = '';
-            opt.textContent = fetchedLoreModels.length ? 'Select a fetched model' : 'Fetch models or type a model ID above';
-            openaiModel.appendChild(opt);
-        }
+        const first = document.createElement('option');
+        first.value = typed || '';
+        first.textContent = typed ? `Use typed model: ${typed}` : (fetchedModels.length ? 'Select a fetched model' : 'Fetch models or type a model ID above');
+        openaiModel.appendChild(first);
 
         for (const m of matches) {
             const opt = document.createElement('option');
@@ -507,56 +552,33 @@ function setupLoreProviderPanel(container) {
     if (openaiModelSearch) {
         openaiModelSearch.addEventListener('input', () => {
             const typed = openaiModelSearch.value.trim();
-            saveLoreModel(typed);
-            renderLoreModelOptions(typed);
+            saveModel(typed);
+            renderModelOptions(typed);
         });
-        openaiModelSearch.addEventListener('change', () => {
-            saveLoreModel(openaiModelSearch.value.trim());
-        });
+        openaiModelSearch.addEventListener('change', () => saveModel(openaiModelSearch.value.trim()));
     }
 
     if (openaiModel) {
         openaiModel.addEventListener('change', () => {
             const selected = openaiModel.value.trim();
             if (openaiModelSearch) openaiModelSearch.value = selected;
-            saveLoreModel(selected);
-            renderLoreModelOptions(selected);
+            saveModel(selected);
+            renderModelOptions(selected);
         });
     }
+
     if (openaiJsonMode) {
         openaiJsonMode.addEventListener('change', () => {
-            settings.loreOpenAIUseJsonMode = openaiJsonMode.checked;
-            saveLoreProviderSettings(settings);
+            const next = getSettings();
+            next[jsonModeKey] = openaiJsonMode.checked;
+            saveLoreProviderSettings(next);
         });
     }
 
-    // ── Generation parameter handlers ─────────────────────────────────
-    if (tempInput) {
-        tempInput.addEventListener('change', () => {
-            settings.loreTemperature = parseFloat(tempInput.value) || 0.7;
-            saveLoreProviderSettings(settings);
-        });
-    }
-    if (topPInput) {
-        topPInput.addEventListener('change', () => {
-            settings.loreTopP = parseFloat(topPInput.value) || 0.98;
-            saveLoreProviderSettings(settings);
-        });
-    }
-    if (maxTokensInput) {
-        maxTokensInput.addEventListener('change', () => {
-            settings.loreMaxTokens = parseInt(maxTokensInput.value, 10) || 2048;
-            saveLoreProviderSettings(settings);
-        });
-    }
-
-    // ── API key: load status ─────────────────────────────────────────
-    // Never put the decrypted key in the DOM. The input is only for
-    // entering a new key; stored keys are never revealed.
     async function refreshKeyStatus() {
         if (!openaiKeyStatus) return;
         try {
-            const key = await loadApiKey();
+            const key = await loadApiKey(kind);
             if (key) {
                 openaiKeyStatus.textContent = 'Key stored (encrypted at rest)';
                 openaiKeyStatus.style.color = '#88cc88';
@@ -570,7 +592,6 @@ function setupLoreProviderPanel(container) {
         }
     }
 
-    // ── Key save/clear handlers ──────────────────────────────────────
     if (openaiKeySaveBtn && openaiKey) {
         openaiKeySaveBtn.addEventListener('click', async () => {
             const raw = openaiKey.value.trim();
@@ -579,21 +600,22 @@ function setupLoreProviderPanel(container) {
                 return;
             }
             try {
-                await storeApiKey(raw);
+                await storeNamedApiKey(secretNameForProvider(kind), raw);
                 openaiKey.value = '';
-                if (typeof toastr !== 'undefined') toastr.success('API key encrypted and stored.');
+                if (typeof toastr !== 'undefined') toastr.success(`${label} API key encrypted and stored.`);
                 await refreshKeyStatus();
             } catch (e) {
                 if (typeof toastr !== 'undefined') toastr.error('Failed to store key: ' + e.message);
             }
         });
     }
+
     if (openaiKeyClearBtn) {
         openaiKeyClearBtn.addEventListener('click', async () => {
             try {
-                await deleteApiKey();
+                await deleteNamedApiKey(secretNameForProvider(kind));
                 if (openaiKey) openaiKey.value = '';
-                if (typeof toastr !== 'undefined') toastr.success('API key removed.');
+                if (typeof toastr !== 'undefined') toastr.success(`${label} API key removed.`);
                 await refreshKeyStatus();
             } catch (e) {
                 if (typeof toastr !== 'undefined') toastr.error('Failed to clear key: ' + e.message);
@@ -601,23 +623,20 @@ function setupLoreProviderPanel(container) {
         });
     }
 
-    // ── Fetch Models button ──────────────────────────────────────────
-    const fetchModelsBtn = container.querySelector('#wandlight_lore_fetch_models');
     if (fetchModelsBtn) {
         fetchModelsBtn.addEventListener('click', async () => {
             fetchModelsBtn.disabled = true;
-            const origText = fetchModelsBtn.textContent;
+            const original = fetchModelsBtn.textContent;
             fetchModelsBtn.textContent = 'Fetching...';
             try {
-                const models = await fetchLoreModels();
-                fetchedLoreModels = Array.isArray(models) ? models : [];
-                renderLoreModelOptions(openaiModelSearch?.value || settings.loreOpenAIModel || '');
-                if (typeof toastr !== 'undefined') toastr.success(`${fetchedLoreModels.length} model(s) fetched; showing up to 200 matching results.`);
+                fetchedModels = await fetchLoreModels(kind);
+                renderModelOptions(openaiModelSearch?.value || getSettings()[modelKey] || '');
+                if (typeof toastr !== 'undefined') toastr.success(`${fetchedModels.length} ${label.toLowerCase()} model(s) fetched; showing up to 200 matching results.`);
             } catch (e) {
-                if (typeof toastr !== 'undefined') toastr.error('Fetch failed: ' + e.message);
+                if (typeof toastr !== 'undefined') toastr.error(`${label} model fetch failed: ` + e.message);
             } finally {
                 fetchModelsBtn.disabled = false;
-                fetchModelsBtn.textContent = origText;
+                fetchModelsBtn.textContent = original;
             }
         });
     }
@@ -628,24 +647,24 @@ function setupLoreProviderPanel(container) {
             testConnectionBtn.disabled = true;
             testConnectionBtn.textContent = 'Testing...';
             if (connectionStatus) {
-                connectionStatus.textContent = 'Testing selected provider...';
+                connectionStatus.textContent = `Testing ${label.toLowerCase()} provider...`;
                 connectionStatus.style.color = '';
             }
             try {
-                const validation = validateLoreProviderConfiguration();
+                const validation = validateLoreProviderConfiguration(kind);
                 if (!validation.ok) throw new Error(validation.message);
-                const result = await testLoreConnection();
+                const result = await testLoreConnection(kind);
                 if (connectionStatus) {
                     connectionStatus.textContent = `Connected via ${result.provider}.`;
                     connectionStatus.style.color = '#88cc88';
                 }
-                if (typeof toastr !== 'undefined') toastr.success('Wandlight lore provider connection succeeded.');
+                if (typeof toastr !== 'undefined') toastr.success(`${label} provider connection succeeded.`);
             } catch (e) {
                 if (connectionStatus) {
                     connectionStatus.textContent = e?.message || String(e);
                     connectionStatus.style.color = '#cc8888';
                 }
-                if (typeof toastr !== 'undefined') toastr.error('Connection test failed: ' + (e?.message || e));
+                if (typeof toastr !== 'undefined') toastr.error(`${label} connection test failed: ` + (e?.message || e));
             } finally {
                 testConnectionBtn.disabled = false;
                 testConnectionBtn.textContent = original;
@@ -653,9 +672,7 @@ function setupLoreProviderPanel(container) {
         });
     }
 
-    renderLoreModelOptions(settings.loreOpenAIModel || '');
-
-    // ── Initial state ─────────────────────────────────────────────────
+    renderModelOptions(settings[modelKey] || '');
     refreshProviderRows();
     refreshKeyStatus();
 }

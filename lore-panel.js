@@ -75,24 +75,33 @@ const WORKFLOW_MODES = {
             autoExtract: false,
             autoApplyDelta: false,
             autoGenerateLore: false,
+            continuityTrackingMode: 'manual',
+            contextDetectionMode: 'manual',
+            loreGenerationMode: 'manual',
         },
     },
     assisted: {
         label: 'Assisted',
-        description: 'Extracts continuity changes after turns, but stores them for review instead of applying automatically.',
+        description: 'Automatically scans continuity state after turns. Story context and lore generation stay manual.',
         settings: {
             autoExtract: true,
-            autoApplyDelta: false,
+            autoApplyDelta: true,
             autoGenerateLore: false,
+            continuityTrackingMode: 'automatic',
+            contextDetectionMode: 'manual',
+            loreGenerationMode: 'manual',
         },
     },
     automatic: {
         label: 'Automatic',
-        description: 'Extracts and applies continuity changes automatically. Story-lore generation can run automatically, but generated lore still remains pending review.',
+        description: 'Automatically scans continuity, detects story context, and generates pending lore on their configured intervals. Generated lore still goes to Review.',
         settings: {
             autoExtract: true,
             autoApplyDelta: true,
             autoGenerateLore: true,
+            continuityTrackingMode: 'automatic',
+            contextDetectionMode: 'automatic',
+            loreGenerationMode: 'automatic',
         },
     },
 };
@@ -367,17 +376,7 @@ function renderSessionTab(container, state) {
     ));
     container.appendChild(toggles);
 
-    const concepts = document.createElement('div');
-    concepts.className = 'wandlight-runtime-card';
-    const conceptTitle = document.createElement('div');
-    conceptTitle.className = 'wandlight-runtime-card-title';
-    conceptTitle.textContent = 'What Wandlight Tracks';
-    addTooltip(conceptTitle, 'Continuity state and lore entries are related but separate. This card explains the workflow without requiring tooltip discovery.');
-    concepts.appendChild(conceptTitle);
-    concepts.appendChild(createKeyValue('Continuity state', 'scene, date, knowledge, secrets, relationships, threads', 'Scanned from chat by the continuity extractor. These are structured state changes reviewed as Pending Continuity Changes.'));
-    concepts.appendChild(createKeyValue('Lore entries', 'searchable facts used for future injection', 'Generated from the current context and accepted into the Lore tab after review.'));
-    concepts.appendChild(createKeyValue('Injection', 'what gets sent to the model', 'The Injection tab controls Continuity state and Lore entries separately, including direct/compressed handling and previews.'));
-    container.appendChild(concepts);
+    container.appendChild(createInstructionsCard());
 
     const stats = document.createElement('div');
     stats.className = 'wandlight-runtime-card';
@@ -392,6 +391,34 @@ function renderSessionTab(container, state) {
 
     container.appendChild(createStateHistoryCard(state));
     container.appendChild(createDangerZoneCard(state));
+}
+
+function createInstructionsCard() {
+    const details = document.createElement('details');
+    details.className = 'wandlight-runtime-card wandlight-instructions-card';
+
+    const summary = document.createElement('summary');
+    summary.className = 'wandlight-runtime-card-title';
+    summary.textContent = 'Instructions';
+    addTooltip(summary, 'Minimal workflow reference for using Wandlight during roleplay. Expand only when needed.');
+    details.appendChild(summary);
+
+    const list = document.createElement('ol');
+    list.className = 'wandlight-workflow-list';
+    const steps = [
+        'Continuity: scan or auto-track scene/date/characters/emotions/state.',
+        'Generate: detect story context, then generate pending lore entries when needed.',
+        'Review: accept or dismiss generated lore before it becomes active.',
+        'Lore: search, edit, tag, pin, or mute stored lore entries.',
+        'Injection: choose whether Continuity and Lore are sent to the model, and whether each is direct or compressed.',
+    ];
+    for (const step of steps) {
+        const li = document.createElement('li');
+        li.textContent = step;
+        list.appendChild(li);
+    }
+    details.appendChild(list);
+    return details;
 }
 
 function createStateHistoryCard(state) {
@@ -468,7 +495,7 @@ function createDangerZoneCard(state) {
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title wandlight-danger-zone-title';
     title.textContent = 'Danger Zone';
-    addTooltip(title, 'Destructive cleanup actions for the current chat. Each action takes a state-history snapshot first where possible.');
+    addTooltip(title, 'Destructive cleanup actions for the current chat. Delete All Lore and Reset Generation are undoable through State History. Total Reset clears State History and is not undoable.');
     card.appendChild(title);
 
     card.appendChild(createKeyValue('Accepted lore', String((state?.loreMatrix || []).length), 'Lore entries currently stored in the accepted lore matrix.'));
@@ -515,13 +542,13 @@ function createDangerZoneCard(state) {
         toast('Generation state reset.', 'info');
     }, 'wandlight-danger-button'));
 
-    actions.appendChild(createButton('Total Reset', 'Resets Wandlight continuity state for this chat to defaults. Panel size and position are preserved.', async () => {
-        const proceed = await confirmAction('Are you sure? Total reset?', 'You are about to reset all Wandlight continuity data for this chat: canon/scene state, knowledge, secrets, relationships, threads, flags, accepted lore, pending lore, and generation state. Window position and size are preserved. A state-history snapshot will be saved first. Continue?');
+    actions.appendChild(createButton('Total Reset', 'Resets Wandlight continuity state for this chat to defaults and clears State History. Panel size and position are preserved.', async () => {
+        const proceed = await confirmAction('Are you sure? Total reset?', 'You are about to reset all Wandlight continuity data for this chat: canon/scene state, knowledge, secrets, relationships, threads, flags, accepted lore, pending lore, generation state, and State History. Window position and size are preserved. Because State History will also be cleared, this action cannot be undone. Continue?');
         if (!proceed) return;
         const current = getState();
-        pushStateSnapshot(current, 'Total Wandlight reset', getSettings().maxSnapshots);
         const defaults = getDefaultState();
-        defaults.stateHistory = current.stateHistory || [];
+        defaults.stateHistory = [];
+        defaults.memoHistory = [];
         if (current.lorePanel) {
             defaults.lorePanel = {
                 ...defaults.lorePanel,
@@ -536,21 +563,29 @@ function createDangerZoneCard(state) {
         saveState(defaults);
         refreshPanelBody({ preserveScroll: false });
         refreshHeader();
-        toast('Wandlight state reset.', 'info');
+        toast('Wandlight state reset. State History cleared.', 'info');
     }, 'wandlight-danger-button'));
 
     card.appendChild(actions);
     return card;
 }
 
-function ensureLoreProviderReadyForAction(actionLabel = 'this action') {
-    const validation = validateLoreProviderConfiguration();
+function ensureProviderReadyForAction(kind = 'lore', actionLabel = 'this action') {
+    const validation = validateLoreProviderConfiguration(kind);
     if (validation.ok) return true;
 
     const message = `API/model settings incomplete for ${actionLabel}: ${validation.message}`;
     setGenerateProgress(message, 100);
     toast(message, 'error');
     return false;
+}
+
+function ensureLoreProviderReadyForAction(actionLabel = 'this action') {
+    return ensureProviderReadyForAction('lore', actionLabel);
+}
+
+function ensureContinuityProviderReadyForAction(actionLabel = 'this action') {
+    return ensureProviderReadyForAction('continuity', actionLabel);
 }
 
 // Generate tab ----------------------------------------------------------------
@@ -705,6 +740,64 @@ function createGenerationSettingsCard() {
     return card;
 }
 
+function createAutomationModeCard(titleText, modeKey, intervalKey, manualTooltip, automaticTooltip, intervalTooltip) {
+    const settings = getSettings();
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-automation-mode-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = titleText;
+    addTooltip(title, `${titleText} can run manually from its button or automatically every configured number of turns.`);
+    card.appendChild(title);
+
+    const buttons = document.createElement('div');
+    buttons.className = 'wandlight-mode-buttons';
+    for (const [mode, label, tip] of [
+        ['manual', 'Manual', manualTooltip],
+        ['automatic', 'Automatic', automaticTooltip],
+    ]) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'wandlight-mode-button';
+        if ((settings[modeKey] || 'manual') === mode) btn.classList.add('wandlight-mode-button-active');
+        btn.textContent = label;
+        addTooltip(btn, tip);
+        btn.addEventListener('click', () => {
+            const next = getSettings();
+            next[modeKey] = mode;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+            toast(`${titleText} mode set to ${label}.`, 'info');
+        });
+        buttons.appendChild(btn);
+    }
+    card.appendChild(buttons);
+
+    const row = document.createElement('label');
+    row.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const label = document.createElement('span');
+    label.textContent = `Every ${settings[intervalKey] || 5} turns`;
+    addTooltip(label, intervalTooltip);
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = '1';
+    input.max = '20';
+    input.step = '1';
+    input.value = String(settings[intervalKey] || 5);
+    input.addEventListener('input', () => {
+        const next = getSettings();
+        next[intervalKey] = Math.max(1, Math.min(20, parseInt(input.value, 10) || 5));
+        saveSettings(next);
+        label.textContent = `Every ${next[intervalKey]} turns`;
+    });
+    row.appendChild(label);
+    row.appendChild(input);
+    card.appendChild(row);
+
+    return card;
+}
+
 function createGenerationProgressCard(state) {
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-generation-progress-card';
@@ -714,6 +807,26 @@ function createGenerationProgressCard(state) {
     title.textContent = 'Detection & Generation';
     addTooltip(title, 'Run story-context detection or generate pending lore entries. Status and progress for long-running requests appear below the buttons.');
     card.appendChild(title);
+
+    const modeGrid = document.createElement('div');
+    modeGrid.className = 'wandlight-runtime-grid wandlight-generation-mode-grid';
+    modeGrid.appendChild(createAutomationModeCard(
+        'Story Context Detection',
+        'contextDetectionMode',
+        'contextDetectionAutoInterval',
+        'Only runs when you click Detect Story Context.',
+        'Runs automatically after roleplay turns on this interval, using the Lore provider.',
+        'Automatic story-context detection interval in completed model turns.'
+    ));
+    modeGrid.appendChild(createAutomationModeCard(
+        'Pending Lore Generation',
+        'loreGenerationMode',
+        'loreGenerationAutoInterval',
+        'Only runs when you click Generate Pending Lore.',
+        'Runs automatically after roleplay turns on this interval, using the Lore provider. Generated lore still goes to Review.',
+        'Automatic pending-lore generation interval in completed model turns.'
+    ));
+    card.appendChild(modeGrid);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
@@ -882,9 +995,19 @@ function renderContinuityTab(container, state) {
         'Edit the structured roleplay state Wandlight tracks and injects separately from Lore entries. Each section can be enabled or disabled for this chat.'
     ));
 
+    container.appendChild(createAutomationModeCard(
+        'Continuity Tracking',
+        'continuityTrackingMode',
+        'continuityAutoInterval',
+        'Continuity scans only run when you click Scan Continuity State.',
+        'Wandlight automatically scans continuity state every configured number of turns using the Continuity provider.',
+        'Automatic continuity scan interval in completed model turns.'
+    ));
+
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
     actions.appendChild(createButton('Scan Continuity State', 'Scans recent chat and applies structured state updates directly into the editable Continuity sections below. Use State History to undo the scan if needed.', async (btn) => {
+        if (!ensureContinuityProviderReadyForAction('Scan Continuity State')) return;
         await runBusyAction(btn, 'Scanning...', async () => {
             setGenerateProgress('Scanning continuity state...', 10);
             const result = await onExtractionTriggered({ force: true, applyImmediately: true });

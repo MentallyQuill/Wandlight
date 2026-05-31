@@ -21,6 +21,7 @@ import {
     validateDelta,
 } from './state-manager.js';
 import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
+import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
 
 /** Guard flag to prevent concurrent extraction passes. */
 let _extractionRunning = false;
@@ -140,57 +141,31 @@ function parseDeltaResponse(response) {
  * @returns {Promise<Object|null>} Parsed + validated WandlightDelta or null on failure
  */
 async function runExtractionCall(stateJson, messages) {
-    const ctx = SillyTavern.getContext();
     const settings = getSettings();
+    const validation = validateLoreProviderConfiguration('continuity');
+    if (!validation.ok) {
+        throw new Error(validation.message);
+    }
 
-    // Build the system prompt with state and messages interpolated
     const systemPrompt = EXTRACTION_SYSTEM_PROMPT
         .replace('{{stateJson}}', stateJson)
         .replace('{{messages}}', messages);
 
-    // Prepare the user-side prompt (what the extraction LLM sees as "the task")
     const userPrompt = EXTRACTION_USER_PROMPT;
 
     let response = null;
-
     try {
-        // ── Primary: generateRaw (full prompt control, object-style) ────────
-        // Extraction requires both the state+message context (systemPrompt)
-        // and the extraction task instruction (userPrompt) to reach the model.
-        // generateRaw passes both fields reliably; generateQuietPrompt may not
-        // forward systemPromptOverride, so we use it only as a fallback.
-        if (ctx && typeof ctx.generateRaw === 'function') {
-            if (settings.debugMode) {
-                console.log(`${LOG_PREFIX} Calling generateRaw for extraction...`);
-            }
-            response = await ctx.generateRaw({
-                systemPrompt: systemPrompt,
-                prompt: userPrompt,
-                prefill: '',
-            });
+        if (settings.debugMode) {
+            console.log(`${LOG_PREFIX} Calling ${validation.provider} for continuity extraction...`);
         }
-        // ── Fallback: generateQuietPrompt with combined prompt ───────────────
-        else if (ctx && typeof ctx.generateQuietPrompt === 'function') {
-            if (settings.debugMode) {
-                console.log(`${LOG_PREFIX} generateRaw unavailable, falling back to generateQuietPrompt`);
-            }
-            // Combine system+user into quietPrompt so state context is not lost
-            const combinedPrompt = `${systemPrompt}\n\n${userPrompt}`;
-            response = await ctx.generateQuietPrompt({
-                quietPrompt: combinedPrompt,
-            });
-        }
-        // ── Hard fallback: ctx.generate() ───────────────────────────────────
-        else if (ctx && typeof ctx.generate === 'function') {
-            console.log(`${LOG_PREFIX} Falling back to ctx.generate() for extraction`);
-            response = await ctx.generate(systemPrompt + '\n\n' + userPrompt);
-        } else {
-            console.warn(`${LOG_PREFIX} No generation function available for extraction`);
-            return null;
-        }
+        response = await sendLoreRequest(systemPrompt, userPrompt, {
+            providerKind: 'continuity',
+            maxTokens: settings.continuityMaxTokens || 1024,
+            prefill: '',
+        });
     } catch (e) {
-        console.error(`${LOG_PREFIX} Extraction call failed:`, e);
-        return null;
+        console.error(`${LOG_PREFIX} Continuity extraction provider call failed:`, e);
+        throw e;
     }
 
     if (!response || typeof response !== 'string') {
@@ -228,17 +203,23 @@ export async function onExtractionTriggered(options = {}) {
 
     const settings = getSettings();
     if (!settings.enabled) return { status: 'disabled' };
-    if (!force && !settings.autoExtract) return { status: 'skipped_auto_extract_off' };
 
-    // Throttle: only run every N generations (skip if forced)
     if (!force) {
+        const mode = settings.continuityTrackingMode || (settings.autoExtract ? 'automatic' : 'manual');
+        if (mode !== 'automatic') return { status: 'skipped_continuity_manual' };
+
         if (typeof onExtractionTriggered._counter === 'undefined') {
             onExtractionTriggered._counter = 0;
         }
         onExtractionTriggered._counter++;
-        const interval = settings.extractionInterval || 1;
+        const interval = Math.max(1, Math.min(20, Number(settings.continuityAutoInterval || settings.extractionInterval) || 1));
         if (onExtractionTriggered._counter < interval) return { status: 'skipped_interval' };
         onExtractionTriggered._counter = 0;
+    }
+
+    const validation = validateLoreProviderConfiguration('continuity');
+    if (!validation.ok) {
+        return { status: 'api_not_configured', error: validation.message };
     }
 
     _extractionRunning = true;
@@ -334,21 +315,6 @@ export async function onExtractionTriggered(options = {}) {
             console.log(`${LOG_PREFIX} Extraction returned no valid delta`);
         }
 
-        // ── Auto-run lore context detection + generation after extraction ──
-        // Runs independently of whether the continuity delta produced changes.
-        if (settings.autoGenerateLore) {
-            try {
-                const detected = await runLoreContextDetection();
-                if (detected) {
-                    await runLoreGeneration({ force: false });
-                }
-            } catch (loreErr) {
-                if (settings.debugMode) {
-                    console.warn(`${LOG_PREFIX} Lore generation after extraction failed:`, loreErr);
-                }
-            }
-        }
-
         // Trigger UI refresh if available
         if (typeof globalThis._wandlightRefreshUI === 'function') {
             globalThis._wandlightRefreshUI();
@@ -363,6 +329,66 @@ export async function onExtractionTriggered(options = {}) {
     }
 }
 
+
+function shouldRunTurnInterval(counterName, interval) {
+    const key = `_${counterName}Counter`;
+    if (typeof onGenerationEndedAutomation[key] === 'undefined') {
+        onGenerationEndedAutomation[key] = 0;
+    }
+    onGenerationEndedAutomation[key]++;
+    const threshold = Math.max(1, Math.min(20, Number(interval) || 1));
+    if (onGenerationEndedAutomation[key] < threshold) return false;
+    onGenerationEndedAutomation[key] = 0;
+    return true;
+}
+
+export async function onGenerationEndedAutomation() {
+    const settings = getSettings();
+    if (!settings.enabled) return { status: 'disabled' };
+
+    const results = {};
+
+    try {
+        results.continuity = await onExtractionTriggered({ force: false });
+    } catch (e) {
+        results.continuity = { status: 'failed_exception', error: e?.message || String(e) };
+    }
+
+    if ((settings.contextDetectionMode || 'manual') === 'automatic'
+        && shouldRunTurnInterval('contextDetection', settings.contextDetectionAutoInterval || 5)) {
+        try {
+            const validation = validateLoreProviderConfiguration('lore');
+            if (!validation.ok) {
+                results.context = { status: 'api_not_configured', error: validation.message };
+            } else {
+                results.context = await runLoreContextDetection({ force: false });
+            }
+        } catch (e) {
+            results.context = { status: 'failed_exception', error: e?.message || String(e) };
+        }
+    }
+
+    if ((settings.loreGenerationMode || 'manual') === 'automatic'
+        && shouldRunTurnInterval('loreGeneration', settings.loreGenerationAutoInterval || 10)) {
+        try {
+            const validation = validateLoreProviderConfiguration('lore');
+            if (!validation.ok) {
+                results.lore = { status: 'api_not_configured', error: validation.message };
+            } else {
+                results.lore = await runLoreGeneration({ force: false });
+            }
+        } catch (e) {
+            results.lore = { status: 'failed_exception', error: e?.message || String(e) };
+        }
+    }
+
+    if (typeof globalThis._wandlightRefreshUI === 'function') {
+        globalThis._wandlightRefreshUI();
+    }
+
+    return { status: 'complete', results };
+}
+
 // ── Expose guard and handler on globalThis for external access ──
 
 /**
@@ -374,6 +400,7 @@ export function isExtractionRunning() {
 }
 
 globalThis._wandlightRunExtraction = onExtractionTriggered;
+globalThis._wandlightRunAutomation = onGenerationEndedAutomation;
 globalThis._wandlightIsExtractionRunning = isExtractionRunning;
 
 /**

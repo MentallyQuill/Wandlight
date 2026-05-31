@@ -1463,3 +1463,44 @@
     min-height: 150px;
     max-height: 320px;
 }
+
+.wandlight-instructions-card summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.wandlight-instructions-card summary::-webkit-details-marker {
+    display: none;
+}
+
+.wandlight-instructions-card summary::after {
+    content: '▸';
+    float: right;
+    opacity: 0.65;
+    font-size: 0.85em;
+}
+
+.wandlight-instructions-card[open] summary::after {
+    content: '▾';
+}
+
+.wandlight-workflow-list {
+    margin: 8px 0 0 18px;
+    padding: 0;
+    color: rgba(238, 226, 196, 0.82);
+    font-size: 0.86em;
+    line-height: 1.45;
+}
+
+.wandlight-workflow-list li {
+    margin: 3px 0;
+}
+
+.wandlight-automation-mode-card {
+    padding: 8px;
+}
+
+.wandlight-generation-mode-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-bottom: 8px;
+}

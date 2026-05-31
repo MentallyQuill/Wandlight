@@ -177,9 +177,10 @@ export function clearStoredSecret(secretName) {
     saveSettings(settings);
 }
 
-// ── Convenience wrappers for lore API key ────────────────────────────────────────
+// ── Convenience wrappers for Wandlight OpenAI-compatible API keys ───────────────
 
 const LORE_KEY_NAME = 'loreOpenAI';
+const CONTINUITY_KEY_NAME = 'continuityOpenAI';
 
 /**
  * Derives a browser-session-scoped passphrase from the SillyTavern context.
@@ -204,28 +205,38 @@ function deriveSessionPassphrase() {
     }
 }
 
+
+export async function loadNamedApiKey(secretName) {
+    const settings = getSettings();
+    const isStored = settings[`${secretName}KeySet`];
+    if (!isStored) return '';
+
+    const cached = await decryptSecretIfAvailable(secretName);
+    if (cached) return cached;
+
+    try {
+        await unlockSecret(secretName, deriveSessionPassphrase());
+        return await decryptSecretIfAvailable(secretName);
+    } catch (_) {
+        return '';
+    }
+}
+
+export async function storeNamedApiKey(secretName, plaintext) {
+    return await encryptAndStoreSecret(secretName, plaintext, deriveSessionPassphrase());
+}
+
+export async function deleteNamedApiKey(secretName) {
+    clearStoredSecret(secretName);
+}
+
 /**
  * Retrieves the decrypted lore API key, auto-unlocking with the session
  * passphrase if stored but not yet in memory.
  * @returns {Promise<string>} decrypted key or ''
  */
 export async function loadApiKey() {
-    const settings = getSettings();
-    const isStored = settings[`${LORE_KEY_NAME}KeySet`];
-    if (!isStored) return '';
-
-    // Already in memory
-    const cached = await decryptSecretIfAvailable(LORE_KEY_NAME);
-    if (cached) return cached;
-
-    // Try auto-unlock with session passphrase
-    try {
-        await unlockSecret(LORE_KEY_NAME, deriveSessionPassphrase());
-        return await decryptSecretIfAvailable(LORE_KEY_NAME);
-    } catch (_) {
-        // If auto-unlock fails, the user may need to import a new key
-        return '';
-    }
+    return await loadNamedApiKey(LORE_KEY_NAME);
 }
 
 /**
@@ -234,12 +245,24 @@ export async function loadApiKey() {
  * @returns {Promise<boolean>}
  */
 export async function storeApiKey(plaintext) {
-    return await encryptAndStoreSecret(LORE_KEY_NAME, plaintext, deriveSessionPassphrase());
+    return await storeNamedApiKey(LORE_KEY_NAME, plaintext);
 }
 
 /**
  * Permanently removes the stored lore API key (both encrypted settings and memory).
  */
 export async function deleteApiKey() {
-    clearStoredSecret(LORE_KEY_NAME);
+    await deleteNamedApiKey(LORE_KEY_NAME);
+}
+
+export async function loadContinuityApiKey() {
+    return await loadNamedApiKey(CONTINUITY_KEY_NAME);
+}
+
+export async function storeContinuityApiKey(plaintext) {
+    return await storeNamedApiKey(CONTINUITY_KEY_NAME, plaintext);
+}
+
+export async function deleteContinuityApiKey() {
+    await deleteNamedApiKey(CONTINUITY_KEY_NAME);
 }

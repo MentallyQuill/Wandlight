@@ -1,7 +1,7 @@
 /**
  * state-manager.js — Wandlight Continuity
  * State CRUD, settings I/O, migration, delta merging, snapshot history, and undo.
- * All reads reacquire from SillyTavern's context — nothing is cached.
+ * Reads reacquire from SillyTavern's context, with one-session migration caching so UI clicks do not repeatedly normalize the full lore matrix.
  *
  * Imports: constants.js
  * Imported by: index.js, memo-builder.js, extractor.js, ui.js
@@ -11,6 +11,8 @@ import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREF
 import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey } from './lore-matrix.js';
 
 const MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST = 200000;
+const migratedStateRefs = new WeakSet();
+
 
 // ── Settings I/O ────────────────────────────────────────────────────────────────
 
@@ -50,6 +52,24 @@ export function saveSettings(settings) {
     if (typeof saveSettingsDebounced === 'function') {
         saveSettingsDebounced();
     }
+    queuePromptInjectionSync();
+}
+
+
+function queuePromptInjectionSync() {
+    try {
+        if (typeof globalThis.wandlightSyncPromptInjection === 'function') {
+            queueMicrotask(() => {
+                try {
+                    globalThis.wandlightSyncPromptInjection();
+                } catch (e) {
+                    console.warn(`${LOG_PREFIX} Failed to sync prompt injection after state/settings save`, e);
+                }
+            });
+        }
+    } catch (_) {
+        // Never let prompt-sync bookkeeping break persistence.
+    }
 }
 
 // ── State I/O ───────────────────────────────────────────────────────────────────
@@ -71,9 +91,19 @@ export function getState() {
     if (!state || typeof state !== 'object') {
         state = getDefaultState();
         chatMetadata[MODULE_KEY] = state;
+        migratedStateRefs.add(state);
         return state;
     }
-    // Always run migration on read. If migration/compaction shrinks an oversized
+
+    // Fast path: once a state object has been migrated/sanitized in this browser
+    // session, do not repeat full migration/normalization on every UI click.
+    // saveState() still sanitizes before persistence, and a new chat/state object
+    // naturally misses this WeakSet and gets migrated once.
+    if (migratedStateRefs.has(state)) {
+        return state;
+    }
+
+    // Always run migration on first read. If migration/compaction shrinks an oversized
     // Wandlight block, persist immediately so a poisoned chat does not keep
     // rehydrating the same megabyte-scale pending lore payload.
     const beforeSize = safeJsonSize(state);
@@ -94,6 +124,7 @@ export function getState() {
         }
     }
 
+    migratedStateRefs.add(state);
     return state;
 }
 
@@ -113,9 +144,11 @@ export function saveState(state) {
     }
     state = sanitizeLoreArraysForStorage(state);
     chatMetadata[MODULE_KEY] = state;
+    migratedStateRefs.add(state);
     if (typeof saveMetadata === 'function') {
         saveMetadata();
     }
+    queuePromptInjectionSync();
 }
 
 // ── Snapshot History (real state undo) ──────────────────────────────────────────

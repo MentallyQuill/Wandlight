@@ -25,7 +25,7 @@ import {
     rejectPendingLoreEntries,
 } from './state-manager.js';
 import { buildMemo } from './memo-builder.js';
-import { installInterceptor } from './prompt-injector.js';
+import { installInterceptor, syncPromptInjection, clearExtensionPrompts } from './prompt-injector.js';
 import { onExtractionTriggered, onGenerationEndedAutomation, resetExtractionCounter } from './extractor.js';
 import {
     renderSettingsPanel,
@@ -92,9 +92,24 @@ $(document).ready(async () => {
 function wireEvents(ctx) {
     // ── Primary API: eventSource.on(event_types.EVENT_NAME, handler) ─────
     if (ctx.eventSource && ctx.event_types) {
+        const syncBeforePrompt = () => {
+            try {
+                syncPromptInjection();
+            } catch (e) {
+                console.error(`${LOG_PREFIX} Error syncing Wandlight prompt injection before prompt assembly:`, e);
+            }
+        };
+
+        if (ctx.event_types.GENERATE_BEFORE_COMBINE_PROMPTS) {
+            ctx.eventSource.on(ctx.event_types.GENERATE_BEFORE_COMBINE_PROMPTS, syncBeforePrompt);
+        } else if (ctx.event_types.GENERATION_STARTED) {
+            ctx.eventSource.on(ctx.event_types.GENERATION_STARTED, syncBeforePrompt);
+        }
+
         ctx.eventSource.on(ctx.event_types.GENERATION_ENDED, () => {
             try {
                 onGenerationEndedAutomation();
+                syncPromptInjection();
             } catch (e) {
                 console.error(`${LOG_PREFIX} Error in GENERATION_ENDED handler:`, e);
             }
@@ -103,12 +118,14 @@ function wireEvents(ctx) {
         ctx.eventSource.on(ctx.event_types.CHAT_CHANGED, () => {
             try {
                 resetExtractionCounter();
+                clearExtensionPrompts();
                 // Refresh lore panel if open
                 refreshLorePanel();
                 // Refresh state panel if visible
                 if (typeof globalThis._wandlightRefreshUI === 'function') {
                     globalThis._wandlightRefreshUI();
                 }
+                syncPromptInjection();
             } catch (e) {
                 console.error(`${LOG_PREFIX} Error in CHAT_CHANGED handler:`, e);
             }

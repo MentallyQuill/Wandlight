@@ -87,6 +87,18 @@ export const DEFAULT_SETTINGS = {
     canonLoreAutoPropose: true,
     canonLoreMaxEntries: 10,
 
+    // Prompt injection transport / placement
+    // 'extension_prompt' uses SillyTavern setExtensionPrompt with role/depth.
+    // 'interceptor' preserves the legacy behavior: prepend combined memo to the last user message.
+    injectionTransport: 'extension_prompt',
+    continuityInjectionPosition: 1, // SillyTavern extension_prompt_types.IN_CHAT
+    continuityInjectionDepth: 4,
+    continuityInjectionRole: 0, // SillyTavern extension_prompt_roles.SYSTEM
+    loreInjectionPosition: 1,
+    loreInjectionDepth: 4,
+    loreInjectionRole: 0,
+    injectionPromptScan: false,
+
     // Lore injection / compression
     loreInjectionMode: 'direct', // 'direct' | 'compressed'
     loreCompressionLevel: 2, // 1=minimal, 5=aggressive

@@ -78,6 +78,15 @@ const TAB_TOOLTIPS = {
 const LORE_PRIORITY_VALUES = [10, 25, 50, 75, 90, 100];
 
 let activeLoreGenerationController = null;
+
+const ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT = 40;
+const ACCEPTED_LORE_PAGE_INCREMENT = 40;
+const SEARCH_RENDER_DEBOUNCE_MS = 160;
+const MINOR_STATE_SAVE_DEBOUNCE_MS = 350;
+
+let searchRenderTimer = null;
+let deferredStateSaveTimer = null;
+let deferredStateSaveRef = null;
 let loreGenerationUiRunning = false;
 
 function getLoreRegistry(registryName) {
@@ -1597,6 +1606,7 @@ function renderInjectionTab(container, state) {
         }
     ));
     container.appendChild(toggles);
+    container.appendChild(createInjectionPlacementCard(settings));
 
     const continuityCard = document.createElement('div');
     continuityCard.className = 'wandlight-runtime-card';
@@ -1729,6 +1739,135 @@ function renderInjectionTab(container, state) {
     container.appendChild(createInjectionPreviewCard('Lore Injection Preview', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'This preview shows only accepted Lore entries, using Direct or Compressed lore handling.'));
 }
 
+
+function createInjectionPlacementCard(settings) {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Prompt Placement';
+    addTooltip(title, 'Controls how Wandlight injects Continuity and Lore into SillyTavern prompts. Extension Prompt mode uses SillyTavern role/depth injection; Legacy mode prepends a combined block to the last user message.');
+    card.appendChild(title);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Recommended: Extension Prompt, System role, In-chat depth 4. This should appear in Prompt Inspector / F12 payload as separate Wandlight prompt blocks.';
+    card.appendChild(help);
+
+    const grid = document.createElement('div');
+    grid.className = 'wandlight-runtime-grid';
+
+    grid.appendChild(createPlacementSelect('Injection method', 'injectionTransport', settings.injectionTransport || 'extension_prompt', [
+        ['extension_prompt', 'Extension Prompt: role/depth'],
+        ['interceptor', 'Legacy: prepend to last user message'],
+    ], 'Extension Prompt uses SillyTavern setExtensionPrompt and supports role/depth. Legacy mode has no true depth and appears as part of the last user message.'));
+
+    grid.appendChild(createPlacementSelect('Continuity position', 'continuityInjectionPosition', String(settings.continuityInjectionPosition ?? 1), [
+        ['1', 'In-chat @ depth'],
+        ['0', 'After main prompt / story string'],
+        ['2', 'Before main prompt'],
+    ], 'Where the Continuity Injection block is inserted. Depth only applies to In-chat.'));
+
+    grid.appendChild(createPlacementNumber('Continuity depth', 'continuityInjectionDepth', settings.continuityInjectionDepth ?? 4, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.'));
+
+    grid.appendChild(createPlacementSelect('Continuity role', 'continuityInjectionRole', String(settings.continuityInjectionRole ?? 0), [
+        ['0', 'System'],
+        ['1', 'User'],
+        ['2', 'Assistant'],
+    ], 'Role used for the injected Continuity block when using In-chat extension prompt placement.'));
+
+    grid.appendChild(createPlacementSelect('Lore position', 'loreInjectionPosition', String(settings.loreInjectionPosition ?? 1), [
+        ['1', 'In-chat @ depth'],
+        ['0', 'After main prompt / story string'],
+        ['2', 'Before main prompt'],
+    ], 'Where the Lore Injection block is inserted. Depth only applies to In-chat.'));
+
+    grid.appendChild(createPlacementNumber('Lore depth', 'loreInjectionDepth', settings.loreInjectionDepth ?? 4, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.'));
+
+    grid.appendChild(createPlacementSelect('Lore role', 'loreInjectionRole', String(settings.loreInjectionRole ?? 0), [
+        ['0', 'System'],
+        ['1', 'User'],
+        ['2', 'Assistant'],
+    ], 'Role used for the injected Lore block when using In-chat extension prompt placement.'));
+
+    card.appendChild(grid);
+
+    const status = typeof globalThis.wandlightGetInjectionStatus === 'function'
+        ? globalThis.wandlightGetInjectionStatus()
+        : null;
+    const statusText = status
+        ? `${status.transport || 'unknown'} | continuity ${status.continuityChars || 0} chars | lore ${status.loreChars || 0} chars`
+        : 'Prompt sync status unavailable until extension initialization completes.';
+    card.appendChild(createKeyValue('Current sync', statusText, 'Shows the last Wandlight prompt sync result.'));
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Sync Injection Now', 'Immediately updates SillyTavern extension prompts from the current Continuity and Lore previews.', () => {
+        if (typeof globalThis.wandlightSyncPromptInjection === 'function') {
+            const info = globalThis.wandlightSyncPromptInjection();
+            toast(`Synced injection: ${info.transport}, continuity ${info.continuityChars || 0} chars, lore ${info.loreChars || 0} chars.`, 'info');
+        } else {
+            toast('Wandlight prompt sync function is not available.', 'error');
+        }
+    }));
+    card.appendChild(actions);
+
+    return card;
+}
+
+function createPlacementSelect(labelText, settingKey, value, options, tooltip) {
+    const label = document.createElement('label');
+    label.className = 'wandlight-inline-field';
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    addTooltip(span, tooltip);
+    const select = document.createElement('select');
+    select.value = String(value);
+    for (const [optionValue, optionLabel] of options) {
+        const option = document.createElement('option');
+        option.value = optionValue;
+        option.textContent = optionLabel;
+        select.appendChild(option);
+    }
+    select.value = String(value);
+    select.addEventListener('change', () => {
+        const next = getSettings();
+        if (settingKey.endsWith('Position') || settingKey.endsWith('Role')) {
+            next[settingKey] = Number(select.value);
+        } else {
+            next[settingKey] = select.value;
+        }
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: false });
+    });
+    label.appendChild(span);
+    label.appendChild(select);
+    return label;
+}
+
+function createPlacementNumber(labelText, settingKey, value, min, max, tooltip) {
+    const label = document.createElement('label');
+    label.className = 'wandlight-inline-field';
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    addTooltip(span, tooltip);
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = String(min);
+    input.max = String(max);
+    input.value = String(value);
+    input.addEventListener('change', () => {
+        const next = getSettings();
+        next[settingKey] = Math.max(min, Math.min(max, parseInt(input.value, 10) || Number(value) || 0));
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: false });
+    });
+    label.appendChild(span);
+    label.appendChild(input);
+    return label;
+}
+
 function createInjectionPreviewCard(titleText, className, text, enabled, helpText) {
     const previewCard = document.createElement('div');
     previewCard.className = 'wandlight-runtime-card wandlight-injection-preview-card';
@@ -1775,6 +1914,10 @@ function refreshInjectionPreviewOnly() {
     const lorePre = panelRoot?.querySelector('.wandlight-lore-injection-preview');
     if (lorePre) {
         lorePre.textContent = lore && lore.trim() ? lore : '(Preview is empty.)';
+    }
+
+    if (typeof globalThis.wandlightSyncPromptInjection === 'function') {
+        globalThis.wandlightSyncPromptInjection();
     }
 }
 
@@ -2447,9 +2590,8 @@ function renderLoreTab(container, state) {
     searchInput.value = panelState.search || '';
     addTooltip(searchInput, 'Searches lore entry titles and tags first. Fact text, notes, and IDs are searched as fallback.');
     searchInput.addEventListener('input', (e) => {
-        setPanelState({ search: e.target.value });
-        const list = container.querySelector('.wandlight-lore-entry-list');
-        if (list) renderEntryList(list, getState());
+        setPanelState({ search: e.target.value, acceptedLoreVisibleLimit: ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT }, { deferSave: true });
+        scheduleAcceptedLoreListRender(container);
     });
     filterRow.appendChild(searchInput);
     controls.appendChild(filterRow);
@@ -2470,7 +2612,7 @@ function renderLoreTab(container, state) {
 
 function renderEntryList(list, state) {
     if (!list) return;
-    list.innerHTML = '';
+    list.replaceChildren();
 
     const filtered = getFilteredLoreEntries(state);
     if (filtered.length === 0) {
@@ -2478,9 +2620,80 @@ function renderEntryList(list, state) {
         return;
     }
 
-    for (const entry of filtered) {
-        list.appendChild(createEntryCard(entry, state));
+    const panelState = state?.lorePanel || {};
+    const visibleLimit = Math.max(10, Math.min(
+        filtered.length,
+        Number(panelState.acceptedLoreVisibleLimit) || ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT
+    ));
+    const visible = filtered.slice(0, visibleLimit);
+    const fragment = document.createDocumentFragment();
+
+    const summary = document.createElement('div');
+    summary.className = 'wandlight-lore-list-summary';
+    summary.textContent = filtered.length > visible.length
+        ? `Showing ${visible.length} of ${filtered.length} accepted lore entries.`
+        : `Showing ${filtered.length} accepted lore entr${filtered.length === 1 ? 'y' : 'ies'}.`;
+    fragment.appendChild(summary);
+
+    for (const entry of visible) {
+        fragment.appendChild(createEntryCard(entry, state));
     }
+
+    if (filtered.length > visible.length) {
+        const more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'wandlight-secondary-button wandlight-lore-show-more';
+        const nextCount = Math.min(ACCEPTED_LORE_PAGE_INCREMENT, filtered.length - visible.length);
+        more.textContent = `Show ${nextCount} more`;
+        addTooltip(more, 'Renders more accepted lore entries. Keeping the list paged prevents large lore matrices from slowing the browser.');
+        more.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setPanelState({ acceptedLoreVisibleLimit: visible.length + ACCEPTED_LORE_PAGE_INCREMENT }, { deferSave: true });
+            refreshAcceptedLoreList({ preserveScroll: true });
+        });
+        fragment.appendChild(more);
+    }
+
+    list.appendChild(fragment);
+}
+
+function scheduleAcceptedLoreListRender(container) {
+    if (searchRenderTimer) clearTimeout(searchRenderTimer);
+    searchRenderTimer = setTimeout(() => {
+        const root = container || panelRoot;
+        const list = root?.querySelector?.('.wandlight-lore-entry-list');
+        if (list) renderEntryList(list, getState());
+    }, SEARCH_RENDER_DEBOUNCE_MS);
+}
+
+function refreshAcceptedLoreList(options = {}) {
+    if (!panelRoot) return;
+    const list = panelRoot.querySelector('.wandlight-lore-entry-list');
+    if (!list) return;
+    const scrollTop = options.preserveScroll ? list.scrollTop : 0;
+    renderEntryList(list, getState());
+    if (options.preserveScroll) list.scrollTop = scrollTop;
+}
+
+function refreshAcceptedLoreRow(entryId) {
+    if (!panelRoot || !entryId) return false;
+    const list = panelRoot.querySelector('.wandlight-lore-entry-list');
+    const existing = list?.querySelector?.(`[data-entry-id="${cssEscape(entryId)}"]`);
+    if (!existing) return false;
+    const state = getState();
+    const entry = getFilteredLoreEntries(state).find(item => item.id === entryId);
+    if (!entry) {
+        existing.remove();
+        return true;
+    }
+    existing.replaceWith(createEntryCard(entry, state));
+    return true;
+}
+
+function cssEscape(value) {
+    if (window.CSS?.escape) return window.CSS.escape(String(value));
+    return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
 }
 
 function getFilteredLoreEntries(state) {
@@ -2538,6 +2751,14 @@ function getLoreCategoryRank(category) {
     const order = ['event', 'timeline', 'character', 'relationship', 'place', 'location', 'faction', 'knowledge', 'secret', 'item', 'artifact', 'spell', 'rule', 'canon', 'au', 'rumor', 'lie'];
     const idx = order.indexOf(category || '');
     return idx >= 0 ? idx : 99;
+}
+
+function createRegistryBadge(field, value, tooltip = '') {
+    const label = getLoreDisplayLabel(field, value);
+    const badge = createBadge(label, tooltip || `${field}: ${label}. Expand the entry to edit.`);
+    badge.classList.add('wandlight-lore-registry-badge');
+    applyLoreRegistryStyle(badge, field, value);
+    return badge;
 }
 
 function createEditableLoreMetaBadge(entry, field, value, values = null, tooltip = '') {
@@ -2601,8 +2822,8 @@ function createEditableLoreMetaBadge(entry, field, value, values = null, tooltip
         e.preventDefault();
         e.stopPropagation();
         const nextValue = select.value;
-        updateLoreEntryById(entry.id, raw => ({ ...raw, [field]: nextValue }));
-        refreshPanelBody({ preserveScroll: true });
+        updateLoreEntryById(entry.id, raw => ({ ...raw, [field]: nextValue }), { deferSave: true });
+        if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
         refreshHeader();
         toast(`${entry.title || 'Lore entry'} ${prefix.textContent.toLowerCase()} set to ${getLoreDisplayLabel(field, nextValue)}.`, 'info');
     });
@@ -2640,8 +2861,8 @@ function createEditablePriorityBadge(entry) {
         e.preventDefault();
         e.stopPropagation();
         const nextValue = Math.max(0, Math.min(100, Number(select.value) || 50));
-        updateLoreEntryById(entry.id, raw => ({ ...raw, priority: nextValue }));
-        refreshPanelBody({ preserveScroll: true });
+        updateLoreEntryById(entry.id, raw => ({ ...raw, priority: nextValue }), { deferSave: true });
+        if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
         refreshHeader();
         toast(`${entry.title || 'Lore entry'} priority set to P${nextValue}.`, 'info');
     });
@@ -2690,6 +2911,7 @@ function scoreSearchEntry(entry, query) {
 function createEntryCard(entry, state) {
     const card = document.createElement('div');
     card.className = 'wandlight-lore-entry-card';
+    if (entry.id) card.dataset.entryId = entry.id;
 
     if (entry.isPending) card.classList.add('wandlight-lore-entry-pending');
     if (entry.isActive) card.classList.add('wandlight-lore-entry-active');
@@ -2723,8 +2945,8 @@ function createEntryCard(entry, state) {
         'wandlight-lore-entry-btn',
         (e) => {
             e.stopPropagation();
-            togglePinEntry(entry.id);
-            refreshPanelBody({ preserveScroll: true });
+            togglePinEntry(entry.id, { deferSave: true });
+            if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
             refreshHeader();
         }
     );
@@ -2736,8 +2958,8 @@ function createEntryCard(entry, state) {
         'wandlight-lore-entry-btn',
         (e) => {
             e.stopPropagation();
-            toggleSuppressEntry(entry.id);
-            refreshPanelBody({ preserveScroll: true });
+            toggleSuppressEntry(entry.id, { deferSave: true });
+            if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
             refreshHeader();
         }
     );
@@ -2748,11 +2970,17 @@ function createEntryCard(entry, state) {
 
     const metaRow = document.createElement('div');
     metaRow.className = 'wandlight-lore-entry-meta';
-    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', null, `Category: ${entry.category || 'canon'}. Use dropdown to change.`));
-    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', null, `Canon status: ${entry.canonStatus || 'unknown'}. Use dropdown to change.`));
-    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', null, `Truth/reveal status: ${entry.truthStatus || 'true'}. Use dropdown to change.`));
-    metaRow.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', null, `Reveal policy: ${entry.revealPolicy || 'private'}. Use dropdown to change.`));
-    metaRow.appendChild(createEditablePriorityBadge(entry));
+    if (isExpanded) {
+        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', null, `Category: ${entry.category || 'canon'}. Use dropdown to change.`));
+        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', null, `Canon status: ${entry.canonStatus || 'unknown'}. Use dropdown to change.`));
+        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', null, `Truth/reveal status: ${entry.truthStatus || 'true'}. Use dropdown to change.`));
+        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', null, `Reveal policy: ${entry.revealPolicy || 'private'}. Use dropdown to change.`));
+        metaRow.appendChild(createEditablePriorityBadge(entry));
+    } else {
+        metaRow.appendChild(createRegistryBadge('category', entry.category || 'canon', `Category: ${entry.category || 'canon'}. Expand the entry to edit.`));
+        metaRow.appendChild(createRegistryBadge('canonStatus', entry.canonStatus || 'unknown', `Canon status: ${entry.canonStatus || 'unknown'}. Expand the entry to edit.`));
+        metaRow.appendChild(createBadge(`P${Number(entry.priority || 50)}`, 'Priority. Expand the entry to edit.'));
+    }
     metaRow.appendChild(createSpellMetadataBadges(entry));
     if (entry.isPending) metaRow.appendChild(createBadge('pending', 'This entry is pending review.'));
     if (entry.isPinned) metaRow.appendChild(createBadge('pinned', 'Pinned entries are prioritized for injection.'));
@@ -2768,8 +2996,8 @@ function createEntryCard(entry, state) {
     card.addEventListener('click', () => {
         const currentPanelState = getState()?.lorePanel || {};
         const newId = currentPanelState.selectedEntryId === entry.id ? '' : entry.id;
-        setPanelState({ selectedEntryId: newId });
-        refreshPanelBody({ preserveScroll: true });
+        setPanelState({ selectedEntryId: newId }, { deferSave: true });
+        if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
     });
 
     if (isExpanded) {
@@ -2867,8 +3095,8 @@ function createTagsRow(entry) {
         removeBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            removeLoreTag(entry.id, tag);
-            refreshPanelBody({ preserveScroll: true });
+            removeLoreTag(entry.id, tag, { deferSave: true });
+            if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
         });
         chip.appendChild(removeBtn);
 
@@ -2952,15 +3180,15 @@ function commitInlineTagInput(entryId, rawTag) {
         refreshPanelBody({ preserveScroll: true });
         return;
     }
-    addLoreTag(entryId, tag);
-    refreshPanelBody({ preserveScroll: true });
+    addLoreTag(entryId, tag, { deferSave: true });
+    if (!refreshAcceptedLoreRow(entryId)) refreshAcceptedLoreList({ preserveScroll: true });
 }
 
 function normalizeTag(value) {
     return normalizeLoreTag(value);
 }
 
-function updateLoreEntryById(entryId, updater) {
+function updateLoreEntryById(entryId, updater, options = {}) {
     const state = getState();
     if (!entryId || typeof updater !== 'function') return false;
 
@@ -2972,39 +3200,59 @@ function updateLoreEntryById(entryId, updater) {
             updated.userEdited = true;
             list[idx] = updated;
             state[key] = list;
-            saveState(state);
+            if (options.deferSave) scheduleStateSave(state);
+            else saveState(state);
             return true;
         }
     }
     return false;
 }
 
-function addLoreTag(entryId, tag) {
+function addLoreTag(entryId, tag, options = {}) {
     const clean = normalizeTag(tag);
     if (!clean) return false;
     return updateLoreEntryById(entryId, (entry) => {
         const tags = Array.isArray(entry.tags) ? entry.tags.map(normalizeTag).filter(Boolean) : [];
         const exists = tags.some(t => t.toLowerCase() === clean.toLowerCase());
         return { ...entry, tags: exists ? tags : [...tags, clean] };
-    });
+    }, options);
 }
 
-function removeLoreTag(entryId, tag) {
+function removeLoreTag(entryId, tag, options = {}) {
     const clean = normalizeTag(tag).toLowerCase();
     return updateLoreEntryById(entryId, (entry) => ({
         ...entry,
         tags: (Array.isArray(entry.tags) ? entry.tags : [])
             .map(normalizeTag)
             .filter(t => t && t.toLowerCase() !== clean),
-    }));
+    }), options);
+}
+
+function scheduleStateSave(state, delay = MINOR_STATE_SAVE_DEBOUNCE_MS) {
+    deferredStateSaveRef = state || deferredStateSaveRef;
+    if (deferredStateSaveTimer) clearTimeout(deferredStateSaveTimer);
+    deferredStateSaveTimer = setTimeout(() => {
+        if (deferredStateSaveRef) saveState(deferredStateSaveRef);
+        deferredStateSaveRef = null;
+        deferredStateSaveTimer = null;
+    }, delay);
+}
+
+function flushScheduledStateSave() {
+    if (deferredStateSaveTimer) clearTimeout(deferredStateSaveTimer);
+    if (deferredStateSaveRef) saveState(deferredStateSaveRef);
+    deferredStateSaveRef = null;
+    deferredStateSaveTimer = null;
 }
 
 // Mutations -------------------------------------------------------------------
 
-function togglePinEntry(entryId) {
+function togglePinEntry(entryId, options = {}) {
     const state = getState();
     if (!state?.loreSelection) return;
     const sel = state.loreSelection;
+    sel.pinnedIds = Array.isArray(sel.pinnedIds) ? sel.pinnedIds : [];
+    sel.suppressedIds = Array.isArray(sel.suppressedIds) ? sel.suppressedIds : [];
     const idx = sel.pinnedIds.indexOf(entryId);
     if (idx >= 0) {
         sel.pinnedIds.splice(idx, 1);
@@ -3013,13 +3261,16 @@ function togglePinEntry(entryId) {
         const supIdx = sel.suppressedIds.indexOf(entryId);
         if (supIdx >= 0) sel.suppressedIds.splice(supIdx, 1);
     }
-    saveState(state);
+    if (options.deferSave) scheduleStateSave(state);
+    else saveState(state);
 }
 
-function toggleSuppressEntry(entryId) {
+function toggleSuppressEntry(entryId, options = {}) {
     const state = getState();
     if (!state?.loreSelection) return;
     const sel = state.loreSelection;
+    sel.pinnedIds = Array.isArray(sel.pinnedIds) ? sel.pinnedIds : [];
+    sel.suppressedIds = Array.isArray(sel.suppressedIds) ? sel.suppressedIds : [];
     const idx = sel.suppressedIds.indexOf(entryId);
     if (idx >= 0) {
         sel.suppressedIds.splice(idx, 1);
@@ -3028,7 +3279,8 @@ function toggleSuppressEntry(entryId) {
         const pinIdx = sel.pinnedIds.indexOf(entryId);
         if (pinIdx >= 0) sel.pinnedIds.splice(pinIdx, 1);
     }
-    saveState(state);
+    if (options.deferSave) scheduleStateSave(state);
+    else saveState(state);
 }
 
 function setWorkflowMode(mode) {
@@ -3039,11 +3291,12 @@ function setWorkflowMode(mode) {
     saveSettings(settings);
 }
 
-function setPanelState(patch) {
+function setPanelState(patch, options = {}) {
     const state = getState();
     if (!state?.lorePanel) return;
     Object.assign(state.lorePanel, patch || {});
-    saveState(state);
+    if (options.deferSave) scheduleStateSave(state);
+    else saveState(state);
 }
 
 function toggleCollapse() {

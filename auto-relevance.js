@@ -155,9 +155,19 @@ function buildScoredCandidates(entries, state, settings, suppressed, pinned) {
             const current = normalizeLoreRelevance(entry.relevance || 'normal');
             const next = normalizeLoreRelevance(local.relevance || 'normal');
             const delta = relevanceWeight(next) - relevanceWeight(current);
-            const confidence = delta < 0
-                ? Math.max(0, Math.min(1, (70 - local.score) / 70))
-                : Math.max(0, Math.min(1, Math.abs(local.score) / 100));
+            let confidence;
+            if (delta < 0) {
+                // Demotion confidence must not be so conservative that high/normal
+                // entries only ever move upward. Use distance below the current
+                // tier threshold rather than raw score/70.
+                const threshold = current === 'high' ? 70 : current === 'normal' ? 28 : 0;
+                const denominator = current === 'high' ? 70 : current === 'normal' ? 28 : 1;
+                const distance = Math.max(0, threshold - local.score);
+                confidence = Math.max(0, Math.min(0.98, 0.62 + Math.min(0.36, (distance / denominator) * 0.36)));
+                if (!local.recentHit) confidence = Math.min(0.98, confidence + 0.08);
+            } else {
+                confidence = Math.max(0, Math.min(1, Math.abs(local.score) / 100));
+            }
             return { entry, current, next, local, confidence, delta, pinned: pinned.has(entry.id) };
         });
 }
@@ -306,6 +316,8 @@ export async function runAutoRelevance(options = {}) {
         source: item.modelSource || 'local',
         reason: item.modelReason || undefined,
     }));
+    const promotionCount = actionable.filter(item => relevanceWeight(item.next) > relevanceWeight(item.current)).length;
+    const demotionCount = actionable.filter(item => relevanceWeight(item.next) < relevanceWeight(item.current)).length;
 
     if (mode === 'suggest') {
         state.autoRelevanceSuggestions = suggestions;
@@ -313,13 +325,15 @@ export async function runAutoRelevance(options = {}) {
             status: suggestions.length ? 'suggested' : 'unchanged',
             considered: candidates.length,
             suggested: suggestions.length,
+            promotions: promotionCount,
+            demotions: demotionCount,
             modelStatus: adjudicated.status,
             modelError: adjudicated.error || '',
             recentMessageChars: recentText.length,
             ranAt: Date.now(),
         };
         saveState(state, { syncPrompt: false });
-        return { status: suggestions.length ? 'suggested' : 'unchanged', suggested: suggestions.length, changed: 0, considered: candidates.length, modelStatus: adjudicated.status };
+        return { status: suggestions.length ? 'suggested' : 'unchanged', suggested: suggestions.length, changed: 0, promotions: promotionCount, demotions: demotionCount, considered: candidates.length, modelStatus: adjudicated.status };
     }
 
     let changed = 0;
@@ -348,13 +362,15 @@ export async function runAutoRelevance(options = {}) {
         status: changed ? 'changed' : 'unchanged',
         considered: candidates.length,
         changed,
+        promotions: promotionCount,
+        demotions: demotionCount,
         modelStatus: adjudicated.status,
         modelError: adjudicated.error || '',
         recentMessageChars: recentText.length,
         ranAt: Date.now(),
     };
     if (changed || options.force) saveState(state, { syncPrompt: changed > 0 });
-    return { status: changed ? 'changed' : 'unchanged', changed, suggested: 0, considered: candidates.length, modelStatus: adjudicated.status };
+    return { status: changed ? 'changed' : 'unchanged', changed, suggested: 0, promotions: promotionCount, demotions: demotionCount, considered: candidates.length, modelStatus: adjudicated.status };
 }
 
 export function onGenerationEndedAutoRelevance() {

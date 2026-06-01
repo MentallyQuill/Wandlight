@@ -141,7 +141,7 @@ export const DEFAULT_SETTINGS = {
     autoMuteExpiredLore: false,
     includeCanonOverdueLore: false,
     autoRelevanceEnabled: false,
-    autoRelevanceMode: 'suggest', // 'off' | 'suggest' | 'apply_high_confidence'
+    autoRelevanceMode: 'suggest', // 'suggest' | 'apply_high_confidence' (legacy 'off' is normalized to disabled settings)
     autoRelevanceEveryTurns: 5,
     autoRelevanceRecentMessages: 20,
     autoRelevanceCandidateCap: 40,
@@ -160,19 +160,19 @@ export const DEFAULT_SETTINGS = {
     // 'interceptor' preserves the legacy behavior: prepend combined memo to the last user message.
     injectionTransport: 'extension_prompt',
     continuityInjectionPosition: 1, // SillyTavern extension_prompt_types.IN_CHAT
-    continuityInjectionDepth: 4,
+    continuityInjectionDepth: 3,
     continuityInjectionRole: 0, // SillyTavern extension_prompt_roles.SYSTEM
     loreInjectionPosition: 1,
-    loreInjectionDepth: 4,
+    loreInjectionDepth: 3,
     loreInjectionRole: 0,
     loreHighInjectionPosition: 1,
-    loreHighInjectionDepth: 3,
+    loreHighInjectionDepth: 2,
     loreHighInjectionRole: 0,
     loreNormalInjectionPosition: 1,
-    loreNormalInjectionDepth: 6,
+    loreNormalInjectionDepth: 5,
     loreNormalInjectionRole: 0,
     loreLowInjectionPosition: 1,
-    loreLowInjectionDepth: 10,
+    loreLowInjectionDepth: 9,
     loreLowInjectionRole: 0,
     injectionPromptScan: false,
 
@@ -197,7 +197,6 @@ export const DEFAULT_SETTINGS = {
     loreCompressionTurnInterval: 8,
     continuityInjectionMode: 'direct', // 'direct' | 'compressed'
     continuityCompressionLevel: 2,
-    continuityEmotionDecayTurns: 6,
 
     // Advanced compression prompt templates. Variables: {{kind}}, {{compressionLevel}},
     // {{compressionLabel}}, {{directTokens}}, {{targetTokens}}, {{hardTokenLimit}},

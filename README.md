@@ -77,11 +77,10 @@ Story Lore Scan uses the Reasoning Provider to extract durable story/AU facts fr
 
 Auto-Relevance periodically scans recent chat messages and accepted lore. It does not mutate Mute or Pin. It promotes/demotes accepted entries between High, Normal, and Low relevance.
 
-Modes:
+When enabled, Auto-Relevance has these actions:
 
-| Mode | Behavior |
+| Action | Behavior |
 |---|---|
-| Off | Does nothing. |
 | Suggest changes | Stores reviewable relevance suggestions. Users can apply or reject each one. |
 | Apply high confidence | Applies changes above the configured confidence threshold. |
 
@@ -101,7 +100,7 @@ Wandlight now has separate injection groups:
 - Normal-Relevance Lore
 - Low-Relevance Lore
 
-Each lore relevance tier has independent settings:
+Each lore relevance tier has independent settings inside that tier's preview section:
 
 - enabled/disabled
 - prompt position/depth/role
@@ -111,6 +110,8 @@ Each lore relevance tier has independent settings:
 - max entries
 - compression level
 - injection preview
+
+Compression Prompts live below the preview sections.
 
 Muted entries are excluded before tier grouping. Priority sorts entries inside a tier. Pin gives extra protection and sorting boost.
 

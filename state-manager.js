@@ -128,6 +128,25 @@ export function getSettings() {
         merged.loreBootstrapDefaultsMigrated20260531 = true;
     }
 
+    // One-time prompt-depth default migration for the relevance-tiered injection UI.
+    // Preserve user-customized values; only move old defaults one layer closer.
+    if (stored.relevancePromptDepthDefaultsMigrated20260602 !== true) {
+        const migrateDepth = (key, oldValue, newValue) => {
+            if (stored[key] === undefined || Number(stored[key]) === oldValue) merged[key] = newValue;
+        };
+        migrateDepth('continuityInjectionDepth', 4, 3);
+        migrateDepth('loreInjectionDepth', 4, 3);
+        migrateDepth('loreHighInjectionDepth', 3, 2);
+        migrateDepth('loreNormalInjectionDepth', 6, 5);
+        migrateDepth('loreLowInjectionDepth', 10, 9);
+        merged.relevancePromptDepthDefaultsMigrated20260602 = true;
+    }
+
+    if (merged.autoRelevanceMode === 'off') {
+        merged.autoRelevanceEnabled = false;
+        merged.autoRelevanceMode = 'suggest';
+    }
+
     // Write back merged defaults so the object is complete going forward
     extensionSettings[MODULE_KEY] = merged;
     return merged;

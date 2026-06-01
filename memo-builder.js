@@ -254,37 +254,15 @@ function buildLoreDirectMemo(state, settingsOverride = {}) {
 }
 
 
-function formatEmotionalState(raw = {}, settings = getSettings()) {
-    const turns = getChatLength() - Number(raw.lastUpdatedChatLength || getChatLength());
-    const decayWindow = Math.max(1, Number(settings.continuityEmotionDecayTurns || 6));
-    const decaySteps = Math.max(0, Math.floor(turns / decayWindow));
+function formatEmotionalState(raw = {}) {
     const keys = ['affection', 'trust', 'desire', 'connection', 'fear', 'anger', 'sadness', 'joy'];
     const labels = [];
     for (const key of keys) {
-        let val = Number(raw[key] || 0);
-        if (['fear', 'anger', 'sadness', 'joy', 'desire'].includes(key)) {
-            val = coolTowardZero(val, decaySteps);
-        }
+        const val = Number(raw[key] || 0);
         if (Math.abs(val) >= 2) labels.push(`${key} ${val > 0 ? '+' : ''}${val}`);
     }
     if (raw.notes) labels.push(String(raw.notes));
     return labels.join(', ');
-}
-
-function coolTowardZero(value, steps) {
-    if (!steps) return value;
-    if (value > 0) return Math.max(0, value - steps);
-    if (value < 0) return Math.min(0, value + steps);
-    return value;
-}
-
-function getChatLength() {
-    try {
-        const ctx = SillyTavern.getContext();
-        return Array.isArray(ctx?.chat) ? ctx.chat.length : 0;
-    } catch (_) {
-        return 0;
-    }
 }
 
 function compressLine(text, settings, kind) {

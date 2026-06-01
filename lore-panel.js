@@ -2163,10 +2163,6 @@ function createContinuitySectionToggleCard(state) {
     addTooltip(title, 'Disabled sections are not updated by Scan Continuity State and are omitted from continuity injection. Existing data is preserved unless you delete it.');
     card.appendChild(title);
 
-    const help = document.createElement('div');
-    help.className = 'wandlight-runtime-help';
-    help.textContent = 'Continuity now tracks only live operational state. Knowledge, secrets, milestones, relationship history, and continuity issues should be captured by Story Lore Scan instead.';
-    card.appendChild(help);
 
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid wandlight-continuity-toggle-grid';
@@ -2183,10 +2179,6 @@ function createContinuitySectionToggleCard(state) {
     }
     card.appendChild(grid);
 
-    const sectionHelp = document.createElement('div');
-    sectionHelp.className = 'wandlight-runtime-help';
-    sectionHelp.textContent = 'This follows tracker-style design: schema sections are chat-specific and optional, so a simple scene can track only date and scene while a detailed sim can track emotions, clothing, objects, and goals.';
-    card.appendChild(sectionHelp);
     return card;
 }
 
@@ -2417,7 +2409,6 @@ function setStatePath(state, path, value) {
 
 function renderInjectionTab(container, state) {
     const settings = getSettings();
-    const activeLore = getInjectableLoreEntries(state, 0).length;
     const continuityPreview = buildContinuityPreview(state, settings.continuityInjectionMode || 'direct');
     const lorePreview = buildLorePreview(state, settings.loreInjectionMode || 'direct');
     const loreHighPreview = buildLorePreview(state, getLoreTierMode(settings, 'high'), 'high');
@@ -2474,29 +2465,20 @@ function renderInjectionTab(container, state) {
         { tooltip: 'Direct or model-compressed handling for Continuity injection.' }
     ));
 
-    container.appendChild(createCollapsibleSection(
-        'injection.loreHandling',
-        'Relevance-Tiered Lore Handling',
-        `${activeLore} entries · H ${getLoreTierMode(settings, 'high')} · N ${getLoreTierMode(settings, 'normal')} · L ${getLoreTierMode(settings, 'low')}`,
-        false,
-        createLoreHandlingCard(state, settings, activeLore),
-        { tooltip: 'Direct or model-compressed handling for Lore injection.' }
-    ));
+    container.appendChild(createInjectionPreviewCard('Continuity Injection', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This is the actual Continuity block currently configured for prompt injection. It can be placed at a different depth because it is separated from Lore.'));
+    container.appendChild(createInjectionPreviewCard('High-Relevance Lore Injection', 'wandlight-lore-high-injection-preview', loreHighPreview, settings.injectLore !== false && settings.loreHighInjectionEnabled !== false, 'Lore injected in the high-relevance prompt group.', createLoreTierHandlingDropdown('high', state, settings)));
+    container.appendChild(createInjectionPreviewCard('Normal-Relevance Lore Injection', 'wandlight-lore-normal-injection-preview', loreNormalPreview, settings.injectLore !== false && settings.loreNormalInjectionEnabled !== false, 'Lore injected in the normal-relevance prompt group.', createLoreTierHandlingDropdown('normal', state, settings)));
+    container.appendChild(createInjectionPreviewCard('Low-Relevance Lore Injection', 'wandlight-lore-low-injection-preview', loreLowPreview, settings.injectLore !== false && settings.loreLowInjectionEnabled !== false, 'Lore injected in the low-relevance prompt group.', createLoreTierHandlingDropdown('low', state, settings)));
+    container.appendChild(createInjectionPreviewCard('Combined Lore Preview', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'Combined read-only preview of all relevance-tiered lore blocks.'));
 
     container.appendChild(createCollapsibleSection(
         'injection.compressionPrompts',
-        'Advanced Compression Prompts',
+        'Compression Prompts',
         'Editable templates for model compression',
         false,
         createCompressionPromptEditorCard(),
-        { tooltip: 'Advanced editable prompt templates used by Compress Continuity Now and Compress Lore Now.' }
+        { tooltip: 'Editable prompt templates used by Compress Continuity Now and tiered Compress Lore actions.' }
     ));
-
-    container.appendChild(createInjectionPreviewCard('Continuity Injection', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This is the actual Continuity block currently configured for prompt injection. It can be placed at a different depth because it is separated from Lore.'));
-    container.appendChild(createInjectionPreviewCard('High-Relevance Lore Injection', 'wandlight-lore-high-injection-preview', loreHighPreview, settings.injectLore !== false && settings.loreHighInjectionEnabled !== false, 'Lore injected in the high-relevance prompt group.'));
-    container.appendChild(createInjectionPreviewCard('Normal-Relevance Lore Injection', 'wandlight-lore-normal-injection-preview', loreNormalPreview, settings.injectLore !== false && settings.loreNormalInjectionEnabled !== false, 'Lore injected in the normal-relevance prompt group.'));
-    container.appendChild(createInjectionPreviewCard('Low-Relevance Lore Injection', 'wandlight-lore-low-injection-preview', loreLowPreview, settings.injectLore !== false && settings.loreLowInjectionEnabled !== false, 'Lore injected in the low-relevance prompt group.'));
-    container.appendChild(createInjectionPreviewCard('Combined Lore Preview', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'Combined read-only preview of all relevance-tiered lore blocks.')); 
 }
 
 function createContinuityHandlingCard(state, settings) {
@@ -2518,26 +2500,6 @@ function createContinuityHandlingCard(state, settings) {
     card.appendChild(createKeyValue('Target budget', getCompressionBudgetSummary('continuity', state), 'Compression levels set an explicit target token budget for the model request.'));
     card.appendChild(createKeyValue('Continuity status', getContinuityCompressionStatusText(getState()), 'Shows whether cached model-compressed continuity is current, stale, missing, or failed.'));
 
-    const decay = document.createElement('label');
-    decay.className = 'wandlight-inline-field';
-    const decayText = document.createElement('span');
-    decayText.textContent = 'Emotion cool-off turns';
-    addTooltip(decayText, 'Number of chat turns before temporary high emotions move one step toward neutral in injection preview. Stored emotional state is not overwritten.');
-    const decayInput = document.createElement('input');
-    decayInput.type = 'number';
-    decayInput.min = '1';
-    decayInput.max = '50';
-    decayInput.value = String(settings.continuityEmotionDecayTurns || 6);
-    decayInput.addEventListener('change', () => {
-        const next = getSettings();
-        next.continuityEmotionDecayTurns = Math.max(1, Math.min(50, parseInt(decayInput.value, 10) || 6));
-        saveSettings(next);
-        refreshPanelBody({ preserveScroll: false });
-    });
-    decay.appendChild(decayText);
-    decay.appendChild(decayInput);
-    card.appendChild(decay);
-
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
     actions.appendChild(createButton('Compress Continuity Now', 'Uses the Utility provider to compress the direct Continuity Injection block and cache it for compressed injection.', async (btn) => {
@@ -2547,60 +2509,58 @@ function createContinuityHandlingCard(state, settings) {
     return card;
 }
 
-function createLoreHandlingCard(state, settings, activeLore) {
+function createLoreTierHandlingDropdown(tier, state, settings) {
+    const label = RELEVANCE_META[tier]?.label || tier;
+    const entries = getInjectableLoreEntries(getState(), 0, tier).length;
+    return createCollapsibleSection(
+        `injection.lore${capTier(tier)}Handling`,
+        `${label}-Relevance Lore Handling`,
+        `${entries} entries · ${getLoreTierMode(settings, tier)} · ${getCompressionStatusTextForSummary(state, `lore-${tier}`)}`,
+        false,
+        createLoreTierHandlingCard(tier, state, settings),
+        { tooltip: `Direct/compressed handling, compression level, and cache status for ${label}-Relevance Lore.` }
+    );
+}
+
+function createLoreTierHandlingCard(tier, state, settings) {
     const card = document.createElement('div');
-    card.className = 'wandlight-runtime-card wandlight-compression-handling-card';
-    const title = document.createElement('div');
-    title.className = 'wandlight-runtime-card-title';
-    title.textContent = 'Relevance-Tiered Lore Handling';
-    addTooltip(title, 'Lore is split into High, Normal, and Low relevance injection groups. Each tier has independent Direct/Compressed handling and cache status.');
-    card.appendChild(title);
-
+    card.className = 'wandlight-runtime-card wandlight-compression-handling-card wandlight-lore-tier-injection-card';
+    const label = RELEVANCE_META[tier]?.label || tier;
     const counts = getLoreRelevanceCounts(state);
-    card.appendChild(createKeyValue('Lore available', `High ${counts.high} · Normal ${counts.normal} · Low ${counts.low} · Muted ${counts.muted}`, 'Accepted lore grouped by relevance. Muted entries are excluded before injection/compression.'));
+    card.appendChild(createKeyValue('Lore available', `${counts[tier] || 0} ${label} · ${counts.muted || 0} muted total`, 'Accepted lore grouped by relevance. Muted entries are excluded before injection/compression.'));
 
-    for (const tier of ['high', 'normal', 'low']) {
-        const wrap = document.createElement('div');
-        wrap.className = 'wandlight-runtime-subcard wandlight-lore-tier-injection-card';
-        const tierTitle = document.createElement('div');
-        tierTitle.className = 'wandlight-runtime-card-subtitle';
-        tierTitle.textContent = `${RELEVANCE_META[tier]?.label || tier} Relevance Lore`;
-        wrap.appendChild(tierTitle);
+    const enabledLabel = document.createElement('label');
+    enabledLabel.className = 'wandlight-inline-toggle';
+    const enabled = document.createElement('input');
+    enabled.type = 'checkbox';
+    enabled.checked = settings[tierSettingKey(tier, 'InjectionEnabled')] !== false;
+    enabled.addEventListener('change', () => {
+        const next = getSettings();
+        next[tierSettingKey(tier, 'InjectionEnabled')] = enabled.checked;
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: true, preserveWindowScroll: true });
+    });
+    enabledLabel.appendChild(enabled);
+    enabledLabel.appendChild(document.createTextNode(' Enable this lore injection'));
+    card.appendChild(enabledLabel);
 
-        const enabledLabel = document.createElement('label');
-        enabledLabel.className = 'wandlight-inline-toggle';
-        const enabled = document.createElement('input');
-        enabled.type = 'checkbox';
-        enabled.checked = settings[tierSettingKey(tier, 'InjectionEnabled')] !== false;
-        enabled.addEventListener('change', () => {
-            const next = getSettings();
-            next[tierSettingKey(tier, 'InjectionEnabled')] = enabled.checked;
-            saveSettings(next);
-            refreshPanelBody({ preserveScroll: true, preserveWindowScroll: true });
-        });
-        enabledLabel.appendChild(enabled);
-        enabledLabel.appendChild(document.createTextNode(' Enable injection'));
-        wrap.appendChild(enabledLabel);
+    const buttons = document.createElement('div');
+    buttons.className = 'wandlight-mode-buttons';
+    buttons.appendChild(createLoreTierModeButton(tier, 'direct', 'Direct', 'Inject this tier as resolved lore text.'));
+    buttons.appendChild(createLoreTierModeButton(tier, 'compressed', 'Compressed', 'Inject this tier from its own cached model compression.'));
+    card.appendChild(buttons);
 
-        const buttons = document.createElement('div');
-        buttons.className = 'wandlight-mode-buttons';
-        buttons.appendChild(createLoreTierModeButton(tier, 'direct', 'Direct', 'Inject this tier as resolved lore text.'));
-        buttons.appendChild(createLoreTierModeButton(tier, 'compressed', 'Compressed', 'Inject this tier from its own cached model compression.'));
-        wrap.appendChild(buttons);
+    card.appendChild(createKeyValue('Entries', String(getInjectableLoreEntries(getState(), 0, tier).length), 'Accepted, unmuted entries in this relevance tier.'));
+    card.appendChild(createCompressionLevelControl(`lore-${tier}`, settings));
+    card.appendChild(createKeyValue('Target budget', getCompressionBudgetSummary(`lore-${tier}`, state), 'Compression budget for this relevance tier.'));
+    card.appendChild(createKeyValue('Compression status', getCompressionStatusTextForKind(getState(), `lore-${tier}`), 'Tier-specific compression cache status.'));
 
-        wrap.appendChild(createKeyValue('Entries', String(getInjectableLoreEntries(getState(), 0, tier).length), 'Accepted, unmuted entries in this relevance tier.'));
-        wrap.appendChild(createCompressionLevelControl(`lore-${tier}`, settings));
-        wrap.appendChild(createKeyValue('Target budget', getCompressionBudgetSummary(`lore-${tier}`, state), 'Compression budget for this relevance tier.'));
-        wrap.appendChild(createKeyValue('Compression status', getCompressionStatusTextForKind(getState(), `lore-${tier}`), 'Tier-specific compression cache status.'));
-
-        const actions = document.createElement('div');
-        actions.className = 'wandlight-primary-actions';
-        actions.appendChild(createButton(`Compress ${RELEVANCE_META[tier]?.label || tier} Now`, `Compresses only ${tier} relevance lore.`, async (btn) => {
-            await runModelCompression(`lore-${tier}`, btn);
-        }, tier === 'high' ? 'wandlight-primary-button' : ''));
-        wrap.appendChild(actions);
-        card.appendChild(wrap);
-    }
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton(`Compress ${label} Now`, `Compresses only ${tier} relevance lore.`, async (btn) => {
+        await runModelCompression(`lore-${tier}`, btn);
+    }, tier === 'high' ? 'wandlight-primary-button' : ''));
+    card.appendChild(actions);
     return card;
 }
 
@@ -2656,7 +2616,7 @@ function createCompressionPromptEditorCard() {
     card.className = 'wandlight-runtime-card wandlight-compression-prompt-card';
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
-    title.textContent = 'Compression Prompt Templates';
+    title.textContent = 'Compression Prompts';
     card.appendChild(title);
 
     const help = document.createElement('div');
@@ -2769,7 +2729,8 @@ function getCompressionBudgetSummary(kind, state) {
 }
 
 function getCompressionStatusTextForSummary(state, kind) {
-    const status = kind === 'continuity' ? getContinuityCompressionStatusText(state) : getCompressionStatusText(state);
+    const parsed = parseLoreCompressionKind(kind);
+    const status = parsed.base === 'continuity' ? getContinuityCompressionStatusText(state) : getCompressionStatusTextForKind(state, kind);
     if (/Direct mode active/i.test(status)) return 'direct';
     if (/current/i.test(status) || /model-compressed/i.test(status)) return 'current cache';
     if (/stale/i.test(status)) return 'stale cache';
@@ -2790,7 +2751,7 @@ function createInjectionPlacementCard(settings) {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Recommended: Extension Prompt, System role, In-chat depth 4. Depth is relative to the final prompt stack, so the visible payload message index can vary.';
+    help.textContent = 'Recommended: Extension Prompt, System role, with Continuity depth 3, High-Relevance Lore depth 2, Normal depth 5, and Low depth 9. Depth 0 is closest to the latest message.';
     card.appendChild(help);
 
     const placement = document.createElement('div');
@@ -2810,7 +2771,7 @@ function createInjectionPlacementCard(settings) {
             ['0', 'After prompt'],
             ['2', 'Before prompt'],
         ], 'Where the Continuity Injection block is inserted. Depth only applies to In-chat.', 'wandlight-placement-position'),
-        createPlacementNumber('Depth', 'continuityInjectionDepth', settings.continuityInjectionDepth ?? 4, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.', 'wandlight-placement-depth'),
+        createPlacementNumber('Depth', 'continuityInjectionDepth', settings.continuityInjectionDepth ?? 3, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.', 'wandlight-placement-depth'),
         createPlacementSelect('Role', 'continuityInjectionRole', String(settings.continuityInjectionRole ?? 0), [
             ['0', 'System'],
             ['1', 'User'],
@@ -2818,7 +2779,7 @@ function createInjectionPlacementCard(settings) {
         ], 'Role used for the injected Continuity block when using In-chat extension prompt placement.', 'wandlight-placement-role'),
     ]));
 
-    for (const [tier, label, depth] of [['high', 'High-Relevance Lore', 3], ['normal', 'Normal-Relevance Lore', 6], ['low', 'Low-Relevance Lore', 10]]) {
+    for (const [tier, label, depth] of [['high', 'High-Relevance Lore', 2], ['normal', 'Normal-Relevance Lore', 5], ['low', 'Low-Relevance Lore', 9]]) {
         placement.appendChild(createPromptPlacementLine(label, [
             createPlacementSelect('Position', tierSettingKey(tier, 'InjectionPosition'), String(settings[tierSettingKey(tier, 'InjectionPosition')] ?? 1), [
                 ['1', 'In-chat'],
@@ -2931,7 +2892,7 @@ function createPlacementNumber(labelText, settingKey, value, min, max, tooltip, 
     return label;
 }
 
-function createInjectionPreviewCard(titleText, className, text, enabled, helpText) {
+function createInjectionPreviewCard(titleText, className, text, enabled, helpText, extraContent = null) {
     const previewCard = document.createElement('div');
     previewCard.className = 'wandlight-runtime-card wandlight-injection-preview-card';
     const previewTitle = document.createElement('div');
@@ -2952,6 +2913,8 @@ function createInjectionPreviewCard(titleText, className, text, enabled, helpTex
     pre.textContent = getInjectionDisplayText(titleText, text, enabled);
     addTooltip(pre, 'Scrollable prompt context block. This text is ephemeral and is not written into chat history.');
     previewCard.appendChild(pre);
+
+    if (extraContent) previewCard.appendChild(extraContent);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
@@ -4181,7 +4144,7 @@ function createAutoRelevanceCard(state) {
     card.appendChild(title);
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Auto-Relevance uses local scoring for performance. It changes High/Normal/Low relevance, not mute or pin.';
+    help.textContent = 'Auto-Relevance uses local scoring for performance. It can promote or demote High/Normal/Low relevance, but it does not change mute or pin.';
     card.appendChild(help);
 
     const enabled = document.createElement('label');
@@ -4205,19 +4168,20 @@ function createAutoRelevanceCard(state) {
     const modeLabel = document.createElement('label');
     modeLabel.className = 'wandlight-inline-field';
     const modeSpan = document.createElement('span');
-    modeSpan.textContent = 'Mode';
+    modeSpan.textContent = 'Action when enabled';
+    addTooltip(modeSpan, 'The checkbox turns Auto-Relevance on or off. This selector controls what Auto-Relevance does when it runs.');
     const modeSelect = document.createElement('select');
-    for (const [value, label] of [['suggest', 'Suggest changes'], ['apply_high_confidence', 'Apply high confidence'], ['off', 'Off']]) {
+    const selectedMode = (settings.autoRelevanceMode || 'suggest') === 'off' ? 'suggest' : (settings.autoRelevanceMode || 'suggest');
+    for (const [value, label] of [['suggest', 'Suggest changes for review'], ['apply_high_confidence', 'Apply high-confidence changes']]) {
         const option = document.createElement('option');
         option.value = value;
         option.textContent = label;
-        if ((settings.autoRelevanceMode || 'suggest') === value) option.selected = true;
+        if (selectedMode === value) option.selected = true;
         modeSelect.appendChild(option);
     }
     modeSelect.addEventListener('change', () => {
         const next = getSettings();
         next.autoRelevanceMode = modeSelect.value;
-        next.autoRelevanceEnabled = modeSelect.value !== 'off';
         saveSettings(next);
         refreshPanelBody({ preserveScroll: true });
     });

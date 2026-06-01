@@ -19,7 +19,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-07-21",
-        "validTo": "1998-08-31",
+        "validTo": "1997-07-26",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -86,7 +86,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-07-21:malfoy_manor_meeting_burbage"
+      "source": "hp-lexicon-day-by-day:dh:1997-07-21:malfoy_manor_meeting_burbage",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -104,7 +112,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-07-27",
-        "validTo": "1998-08-31",
+        "validTo": "1997-07-30",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -174,7 +182,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-07-27:seven_potters"
+      "source": "hp-lexicon-day-by-day:dh:1997-07-27:seven_potters",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -192,7 +208,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-07-31",
-        "validTo": "1998-08-31",
+        "validTo": "1997-07-31",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -263,7 +279,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-07-31:dumbledore_will_birthday"
+      "source": "hp-lexicon-day-by-day:dh:1997-07-31:dumbledore_will_birthday",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -281,7 +305,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-08-01",
-        "validTo": "1998-08-31",
+        "validTo": "1997-08-01",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -350,7 +374,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-08-01:wedding_ministry_falls"
+      "source": "hp-lexicon-day-by-day:dh:1997-08-01:wedding_ministry_falls",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -368,7 +400,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-08-02",
-        "validTo": "1998-08-31",
+        "validTo": "1997-08-09",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -439,7 +471,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-08-02:rab_kreacher_locket"
+      "source": "hp-lexicon-day-by-day:dh:1997-08-02:rab_kreacher_locket",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -457,7 +497,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-09-02",
-        "validTo": "1998-08-31",
+        "validTo": "1997-09-02",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -525,7 +565,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-09-02:ministry_locket_retrieval"
+      "source": "hp-lexicon-day-by-day:dh:1997-09-02:ministry_locket_retrieval",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -543,7 +591,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-09-03",
-        "validTo": "1998-08-31",
+        "validTo": "1997-10-18",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -610,7 +658,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-09-03:camping_horcrux_effects"
+      "source": "hp-lexicon-day-by-day:dh:1997-09-03:camping_horcrux_effects",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -628,7 +684,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-10-31",
-        "validTo": "1998-08-31",
+        "validTo": "1997-12-15",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -694,7 +750,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-10-31:ron_leaves"
+      "source": "hp-lexicon-day-by-day:dh:1997-10-31:ron_leaves",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -712,7 +776,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-12-24",
-        "validTo": "1998-08-31",
+        "validTo": "1997-12-25",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -781,7 +845,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-12-24:godrics_hollow"
+      "source": "hp-lexicon-day-by-day:dh:1997-12-24:godrics_hollow",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -799,7 +871,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-12-26",
-        "validTo": "1998-08-31",
+        "validTo": "1997-12-27",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -869,7 +941,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-12-26:silver_doe_locket_destroyed"
+      "source": "hp-lexicon-day-by-day:dh:1997-12-26:silver_doe_locket_destroyed",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -887,7 +967,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-12-28",
-        "validTo": "1998-08-31",
+        "validTo": "1998-01-04",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -955,7 +1035,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1997-12-28:xenophilius_hallows"
+      "source": "hp-lexicon-day-by-day:dh:1997-12-28:xenophilius_hallows",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -973,7 +1061,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1998-04-08",
-        "validTo": "1998-08-31",
+        "validTo": "1998-04-08",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1043,7 +1131,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1998-04-08:malfoy_manor_escape"
+      "source": "hp-lexicon-day-by-day:dh:1998-04-08:malfoy_manor_escape",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1061,7 +1157,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1998-04-09",
-        "validTo": "1998-08-31",
+        "validTo": "1998-04-17",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1130,7 +1226,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1998-04-09:shell_cottage_planning"
+      "source": "hp-lexicon-day-by-day:dh:1998-04-09:shell_cottage_planning",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1148,7 +1252,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1998-04-18",
-        "validTo": "1998-08-31",
+        "validTo": "1998-04-25",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1215,7 +1319,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1998-04-18:teddy_birth"
+      "source": "hp-lexicon-day-by-day:dh:1998-04-18:teddy_birth",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1233,7 +1345,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1998-05-01",
-        "validTo": "1998-08-31",
+        "validTo": "1998-05-01",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1306,7 +1418,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1998-05-01:gringotts_hogwarts_return"
+      "source": "hp-lexicon-day-by-day:dh:1998-05-01:gringotts_hogwarts_return",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1324,7 +1444,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1998-05-02",
-        "validTo": "1998-08-31",
+        "validTo": "1998-05-09",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1400,7 +1520,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:dh:1998-05-02:battle_hogwarts_final"
+      "source": "hp-lexicon-day-by-day:dh:1998-05-02:battle_hogwarts_final",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     }
   ]
 }

@@ -19,7 +19,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-08-23",
-        "validTo": "1995-08-31",
+        "validTo": "1994-08-23",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -87,7 +87,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-08-23:frank_bryce_dream"
+      "source": "hp-lexicon-day-by-day:gof:1994-08-23:frank_bryce_dream",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -105,7 +113,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-08-24",
-        "validTo": "1995-08-31",
+        "validTo": "1994-08-24",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -173,7 +181,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-08-24:world_cup_pickup"
+      "source": "hp-lexicon-day-by-day:gof:1994-08-24:world_cup_pickup",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -191,7 +207,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-08-25",
-        "validTo": "1995-08-31",
+        "validTo": "1994-08-30",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -259,7 +275,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-08-25:world_cup_riot"
+      "source": "hp-lexicon-day-by-day:gof:1994-08-25:world_cup_riot",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -277,7 +301,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-08-31",
-        "validTo": "1995-08-31",
+        "validTo": "1994-09-03",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -341,7 +365,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-08-31:moody_kidnapped"
+      "source": "hp-lexicon-day-by-day:gof:1994-08-31:moody_kidnapped",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -359,7 +391,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-09-04",
-        "validTo": "1995-08-31",
+        "validTo": "1994-09-11",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -428,7 +460,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-09-04:unforgivables_first_dada"
+      "source": "hp-lexicon-day-by-day:gof:1994-09-04:unforgivables_first_dada",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -446,7 +486,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-10-25",
-        "validTo": "1995-08-31",
+        "validTo": "1994-10-29",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -512,7 +552,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-10-25:summoning_charms_preparation"
+      "source": "hp-lexicon-day-by-day:gof:1994-10-25:summoning_charms_preparation",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -530,7 +578,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-10-30",
-        "validTo": "1995-08-31",
+        "validTo": "1994-10-30",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -597,7 +645,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-10-30:foreign_schools_arrival"
+      "source": "hp-lexicon-day-by-day:gof:1994-10-30:foreign_schools_arrival",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -615,7 +671,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-10-31",
-        "validTo": "1995-08-31",
+        "validTo": "1994-11-07",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -686,7 +742,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-10-31:goblet_names_harry_selected"
+      "source": "hp-lexicon-day-by-day:gof:1994-10-31:goblet_names_harry_selected",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -704,7 +768,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-11-13",
-        "validTo": "1995-08-31",
+        "validTo": "1994-11-21",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -771,7 +835,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-11-13:wand_weighing_skeeter"
+      "source": "hp-lexicon-day-by-day:gof:1994-11-13:wand_weighing_skeeter",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -789,7 +861,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-11-22",
-        "validTo": "1995-08-31",
+        "validTo": "1994-11-23",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -857,7 +929,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-11-22:hagrid_dragons_sirius_fire"
+      "source": "hp-lexicon-day-by-day:gof:1994-11-22:hagrid_dragons_sirius_fire",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -875,7 +955,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-11-24",
-        "validTo": "1995-08-31",
+        "validTo": "1994-12-01",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -948,7 +1028,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-11-24:first_task_dragon"
+      "source": "hp-lexicon-day-by-day:gof:1994-11-24:first_task_dragon",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -966,7 +1054,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-12-25",
-        "validTo": "1995-08-31",
+        "validTo": "1995-01-01",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -1035,7 +1123,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1994-12-25:yule_ball"
+      "source": "hp-lexicon-day-by-day:gof:1994-12-25:yule_ball",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1053,7 +1149,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-01-21",
-        "validTo": "1995-08-31",
+        "validTo": "1995-01-28",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -1121,7 +1217,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1995-01-21:egg_clue_bath"
+      "source": "hp-lexicon-day-by-day:gof:1995-01-21:egg_clue_bath",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1139,7 +1243,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-02-24",
-        "validTo": "1995-08-31",
+        "validTo": "1995-03-05",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -1209,7 +1313,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1995-02-24:second_task_lake"
+      "source": "hp-lexicon-day-by-day:gof:1995-02-24:second_task_lake",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1227,7 +1339,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-03-06",
-        "validTo": "1995-08-31",
+        "validTo": "1995-04-20",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -1294,7 +1406,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1995-03-06:sirius_cave_meeting"
+      "source": "hp-lexicon-day-by-day:gof:1995-03-06:sirius_cave_meeting",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1312,7 +1432,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-05-27",
-        "validTo": "1995-08-31",
+        "validTo": "1995-06-03",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -1379,7 +1499,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1995-05-27:crouch_sr_escape"
+      "source": "hp-lexicon-day-by-day:gof:1995-05-27:crouch_sr_escape",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1397,7 +1525,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-06-24",
-        "validTo": "1995-08-31",
+        "validTo": "1995-07-01",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -1468,7 +1596,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:gof:1995-06-24:third_task_graveyard_return"
+      "source": "hp-lexicon-day-by-day:gof:1995-06-24:third_task_graveyard_return",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     }
   ]
 }

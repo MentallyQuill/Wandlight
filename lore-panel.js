@@ -3565,6 +3565,7 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-lore-entry-actions';
+    actions.appendChild(createEditableLifecycleBadge(entry, { pending: true }));
     const status = document.createElement('span');
     status.className = 'wandlight-lore-badge wandlight-lore-badge-pending';
     status.textContent = 'pending';
@@ -3578,6 +3579,7 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     meta.appendChild(createRegistryBadge('category', entry.category || 'canon', `Category: ${entry.category || 'canon'}. Pending cards use the same compact metadata style as accepted cards.`));
     meta.appendChild(createRegistryBadge('canonStatus', entry.canonStatus || 'unknown', `Canon status: ${entry.canonStatus || 'unknown'}.`));
     meta.appendChild(createBadge(`P${Number(entry.priority || 50)}`, 'Priority used for sorting, injection preference, and canon-lore suggestion limits.'));
+    meta.appendChild(createPendingReviewMetadataBadges(entry));
     meta.appendChild(createSpellMetadataBadges(entry));
     if (entry.confidence !== undefined) meta.appendChild(createBadge(`confidence ${entry.confidence}`, 'Model-provided confidence for this entry.'));
     card.appendChild(meta);
@@ -4371,18 +4373,45 @@ function getLifecycleStatus(entry) {
     return entry.lifecycleStatus || entry.lifecycle?.status || entry.lifecycle?.computedStatus || 'active';
 }
 
-function createEditableLifecycleBadge(entry) {
+function titleCaseLabel(value) {
+    return String(value || '')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, ch => ch.toUpperCase());
+}
+
+function getPendingReviewInfo(entry) {
+    return entry?.extensions?.wandlightPendingReview && typeof entry.extensions.wandlightPendingReview === 'object'
+        ? entry.extensions.wandlightPendingReview
+        : {};
+}
+
+function createPendingReviewMetadataBadges(entry) {
+    const info = getPendingReviewInfo(entry);
+    const frag = document.createDocumentFragment();
+    if (info.sourceAlignment) frag.appendChild(createBadge(titleCaseLabel(info.sourceAlignment), `Source alignment: ${titleCaseLabel(info.sourceAlignment)}.`));
+    if (info.branchApplicability) frag.appendChild(createBadge(titleCaseLabel(info.branchApplicability), `Branch applicability: ${titleCaseLabel(info.branchApplicability)}.`));
+    if (info.temporalRole) frag.appendChild(createBadge(titleCaseLabel(info.temporalRole), `Temporal role: ${titleCaseLabel(info.temporalRole)}.`));
+    if (info.originalTemporalBounds && Object.values(info.originalTemporalBounds).some(Boolean)) {
+        frag.appendChild(createBadge('Open Ended', info.temporalNote || 'Far-future sentinel dates are treated as open-ended lookup horizons.'));
+    }
+    return frag;
+}
+
+function createEditableLifecycleBadge(entry, options = {}) {
     const value = getLifecycleStatus(entry);
     const meta = LIFECYCLE_META[value] || LIFECYCLE_META.active;
     const wrap = document.createElement('label');
     wrap.className = 'wandlight-lore-lifecycle-select-wrap';
+    if (options.pending) wrap.classList.add('wandlight-pending-lore-state-select-wrap');
     wrap.style.setProperty('--wandlight-chip-bg', meta.color);
     wrap.style.setProperty('--wandlight-chip-fg', meta.textColor);
-    addTooltip(wrap, `${meta.label}: ${entry.lifecycle?.reason || meta.tooltip} Use the dropdown to override this computed state.`);
+    addTooltip(wrap, `${meta.label}: ${entry.lifecycle?.reason || meta.tooltip} Use the dropdown to override this ${options.pending ? 'pending ' : ''}entry state.`);
 
     const select = document.createElement('select');
     select.className = 'wandlight-lore-lifecycle-select';
-    select.setAttribute('aria-label', 'Lore lifecycle status');
+    select.setAttribute('aria-label', options.pending ? 'Pending lore state' : 'Lore lifecycle status');
     select.addEventListener('click', e => e.stopPropagation());
     select.addEventListener('mousedown', e => e.stopPropagation());
 
@@ -4403,15 +4432,29 @@ function createEditableLifecycleBadge(entry) {
             lifecycle: {
                 ...(raw.lifecycle || {}),
                 status: nextStatus,
+                computedStatus: nextStatus,
                 manualOverride: true,
                 reason: `Manually set to ${nextStatus}.`,
                 lastEvaluatedAt: Date.now(),
             },
+            extensions: {
+                ...(raw.extensions || {}),
+                wandlightPendingReview: raw.extensions?.wandlightPendingReview ? {
+                    ...(raw.extensions.wandlightPendingReview || {}),
+                    recommendedStatus: nextStatus,
+                    lifecycleRecommendation: LIFECYCLE_META[nextStatus]?.label || nextStatus,
+                    recommendationReason: `Manually set to ${nextStatus} before acceptance.`,
+                } : raw.extensions?.wandlightPendingReview,
+            },
         }), { deferSave: true });
-        if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
-        refreshAcceptedLoreBulkToolbar();
+        if (options.pending) {
+            refreshPanelBody({ preserveScroll: true });
+        } else {
+            if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
+            refreshAcceptedLoreBulkToolbar();
+        }
         refreshHeader();
-        toast(`${entry.title || 'Lore entry'} status set to ${LIFECYCLE_META[nextStatus]?.label || nextStatus}.`, 'info');
+        toast(`${entry.title || 'Lore entry'} state set to ${LIFECYCLE_META[nextStatus]?.label || nextStatus}.`, 'info');
     });
 
     wrap.appendChild(select);

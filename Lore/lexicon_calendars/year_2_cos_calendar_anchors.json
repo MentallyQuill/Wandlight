@@ -19,7 +19,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-07-31",
-        "validTo": "1993-08-31",
+        "validTo": "1992-08-02",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -85,7 +85,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-07-31:birthday_dobby_warning"
+      "source": "hp-lexicon-day-by-day:cos:1992-07-31:birthday_dobby_warning",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -103,7 +111,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-08-03",
-        "validTo": "1993-08-31",
+        "validTo": "1992-08-10",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -172,7 +180,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-08-03:flying_car_rescue"
+      "source": "hp-lexicon-day-by-day:cos:1992-08-03:flying_car_rescue",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -190,7 +206,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-08-19",
-        "validTo": "1993-08-31",
+        "validTo": "1992-08-26",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -260,7 +276,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-08-19:knockturn_lockhart_diagon"
+      "source": "hp-lexicon-day-by-day:cos:1992-08-19:knockturn_lockhart_diagon",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -278,7 +302,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-09-01",
-        "validTo": "1993-08-31",
+        "validTo": "1992-09-02",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -346,7 +370,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-09-01:barrier_closed_car_crash"
+      "source": "hp-lexicon-day-by-day:cos:1992-09-01:barrier_closed_car_crash",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -364,7 +396,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-09-01",
-        "validTo": "1993-08-31",
+        "validTo": "1992-09-02",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -428,7 +460,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-09-01:ginny_sorted"
+      "source": "hp-lexicon-day-by-day:cos:1992-09-01:ginny_sorted",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -446,7 +486,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-09-03",
-        "validTo": "1993-08-31",
+        "validTo": "1992-09-04",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -513,7 +553,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-09-03:lockhart_pixies"
+      "source": "hp-lexicon-day-by-day:cos:1992-09-03:lockhart_pixies",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -531,7 +579,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-09-05",
-        "validTo": "1993-08-31",
+        "validTo": "1992-09-12",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -594,7 +642,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-09-05:basilisk_voice_first"
+      "source": "hp-lexicon-day-by-day:cos:1992-09-05:basilisk_voice_first",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -612,7 +668,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-10-31",
-        "validTo": "1993-08-31",
+        "validTo": "1992-11-03",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -680,7 +736,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-10-31:deathday_mrs_norris"
+      "source": "hp-lexicon-day-by-day:cos:1992-10-31:deathday_mrs_norris",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -698,7 +762,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-11-04",
-        "validTo": "1993-08-31",
+        "validTo": "1992-11-06",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -767,7 +831,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-11-04:chamber_legend_library"
+      "source": "hp-lexicon-day-by-day:cos:1992-11-04:chamber_legend_library",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -785,7 +857,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-11-07",
-        "validTo": "1993-08-31",
+        "validTo": "1992-11-14",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -853,7 +925,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-11-07:rogue_bludger_colin"
+      "source": "hp-lexicon-day-by-day:cos:1992-11-07:rogue_bludger_colin",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -871,7 +951,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-12-17",
-        "validTo": "1993-08-31",
+        "validTo": "1992-12-24",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -938,7 +1018,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-12-17:dueling_club_parseltongue"
+      "source": "hp-lexicon-day-by-day:cos:1992-12-17:dueling_club_parseltongue",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -956,7 +1044,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-12-25",
-        "validTo": "1993-08-31",
+        "validTo": "1993-01-01",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -1024,7 +1112,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1992-12-25:polyjuice_christmas"
+      "source": "hp-lexicon-day-by-day:cos:1992-12-25:polyjuice_christmas",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1042,7 +1138,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-02-14",
-        "validTo": "1993-08-31",
+        "validTo": "1993-02-21",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -1110,7 +1206,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1993-02-14:riddle_diary_valentine"
+      "source": "hp-lexicon-day-by-day:cos:1993-02-14:riddle_diary_valentine",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1128,7 +1232,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-05-08",
-        "validTo": "1993-08-31",
+        "validTo": "1993-05-15",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -1195,7 +1299,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1993-05-08:hermione_penelope_petrified"
+      "source": "hp-lexicon-day-by-day:cos:1993-05-08:hermione_penelope_petrified",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1213,7 +1325,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-05-24",
-        "validTo": "1993-08-31",
+        "validTo": "1993-05-28",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -1279,7 +1391,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1993-05-24:aragog_clue"
+      "source": "hp-lexicon-day-by-day:cos:1993-05-24:aragog_clue",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1297,7 +1417,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-05-29",
-        "validTo": "1993-08-31",
+        "validTo": "1993-07-13",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -1371,7 +1491,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:cos:1993-05-29:chamber_resolution_feast"
+      "source": "hp-lexicon-day-by-day:cos:1993-05-29:chamber_resolution_feast",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1993-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     }
   ]
 }

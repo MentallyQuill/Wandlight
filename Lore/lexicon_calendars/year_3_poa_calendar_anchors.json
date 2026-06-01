@@ -19,7 +19,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-08-06",
-        "validTo": "1994-08-31",
+        "validTo": "1993-08-06",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -87,7 +87,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-08-06:marge_knight_bus"
+      "source": "hp-lexicon-day-by-day:poa:1993-08-06:marge_knight_bus",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -105,7 +113,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-08-07",
-        "validTo": "1994-08-31",
+        "validTo": "1993-08-30",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -170,7 +178,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-08-07:diagon_alley_wait"
+      "source": "hp-lexicon-day-by-day:poa:1993-08-07:diagon_alley_wait",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -188,7 +204,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-08-31",
-        "validTo": "1994-08-31",
+        "validTo": "1993-08-31",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -257,7 +273,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-08-31:crookshanks_firebolt_display"
+      "source": "hp-lexicon-day-by-day:poa:1993-08-31:crookshanks_firebolt_display",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -275,7 +299,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-09-01",
-        "validTo": "1994-08-31",
+        "validTo": "1993-09-01",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -341,7 +365,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-09-01:dementor_train_lupin"
+      "source": "hp-lexicon-day-by-day:poa:1993-09-01:dementor_train_lupin",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -359,7 +391,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-09-02",
-        "validTo": "1994-08-31",
+        "validTo": "1993-09-09",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -425,7 +457,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-09-02:buckbeak_injury"
+      "source": "hp-lexicon-day-by-day:poa:1993-09-02:buckbeak_injury",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -443,7 +483,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-09-10",
-        "validTo": "1994-08-31",
+        "validTo": "1993-09-17",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -509,7 +549,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-09-10:boggart_lesson"
+      "source": "hp-lexicon-day-by-day:poa:1993-09-10:boggart_lesson",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -527,7 +575,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-10-31",
-        "validTo": "1994-08-31",
+        "validTo": "1993-11-05",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -594,7 +642,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-10-31:fat_lady_attack"
+      "source": "hp-lexicon-day-by-day:poa:1993-10-31:fat_lady_attack",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -612,7 +668,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-11-06",
-        "validTo": "1994-08-31",
+        "validTo": "1993-11-13",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -681,7 +737,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-11-06:first_dementor_match"
+      "source": "hp-lexicon-day-by-day:poa:1993-11-06:first_dementor_match",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -699,7 +763,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-12-18",
-        "validTo": "1994-08-31",
+        "validTo": "1993-12-24",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -769,7 +833,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-12-18:marauders_map_hogsmeade"
+      "source": "hp-lexicon-day-by-day:poa:1993-12-18:marauders_map_hogsmeade",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -787,7 +859,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1993-12-25",
-        "validTo": "1994-08-31",
+        "validTo": "1994-01-01",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -855,7 +927,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1993-12-25:firebolt_confiscated"
+      "source": "hp-lexicon-day-by-day:poa:1993-12-25:firebolt_confiscated",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -873,7 +953,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-01-06",
-        "validTo": "1994-08-31",
+        "validTo": "1994-02-04",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -939,7 +1019,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1994-01-06:patronus_lessons_start"
+      "source": "hp-lexicon-day-by-day:poa:1994-01-06:patronus_lessons_start",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -957,7 +1045,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-02-05",
-        "validTo": "1994-08-31",
+        "validTo": "1994-02-11",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -1022,7 +1110,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1994-02-05:ron_curtains_sirius"
+      "source": "hp-lexicon-day-by-day:poa:1994-02-05:ron_curtains_sirius",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1040,7 +1136,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-02-12",
-        "validTo": "1994-08-31",
+        "validTo": "1994-02-19",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -1107,7 +1203,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1994-02-12:buckbeak_execution_notice"
+      "source": "hp-lexicon-day-by-day:poa:1994-02-12:buckbeak_execution_notice",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1125,7 +1229,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-06-06",
-        "validTo": "1994-08-31",
+        "validTo": "1994-06-13",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -1195,7 +1299,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1994-06-06:shrieking_shack_reveal"
+      "source": "hp-lexicon-day-by-day:poa:1994-06-06:shrieking_shack_reveal",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1213,7 +1325,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-06-06",
-        "validTo": "1994-08-31",
+        "validTo": "1994-06-13",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -1282,7 +1394,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:poa:1994-06-06:time_turner_rescue"
+      "source": "hp-lexicon-day-by-day:poa:1994-06-06:time_turner_rescue",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1994-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     }
   ]
 }

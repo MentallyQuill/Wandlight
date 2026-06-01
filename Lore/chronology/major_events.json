@@ -87,7 +87,7 @@
       "locked": true,
       "date": {
         "validFrom": "1992-06-04",
-        "validTo": "1998-08-31",
+        "validTo": "1992-06-14",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -135,10 +135,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1992-06-04",
-        "hardValidTo": "1998-08-31",
+        "hardValidTo": "1992-06-14",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -238,7 +245,7 @@
       "locked": true,
       "date": {
         "validFrom": "1993-05-29",
-        "validTo": "1998-08-31",
+        "validTo": "1993-06-08",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -286,10 +293,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1993-05-29",
-        "hardValidTo": "1998-08-31",
+        "hardValidTo": "1993-06-08",
         "precision": "date",
         "schoolYear": 2,
         "book": "Chamber of Secrets"
@@ -389,7 +403,7 @@
       "locked": true,
       "date": {
         "validFrom": "1994-06-06",
-        "validTo": "1996-06-18",
+        "validTo": "1994-06-16",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -437,10 +451,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-06-18",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1994-06-06",
-        "hardValidTo": "1996-06-18",
+        "hardValidTo": "1994-06-16",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -766,7 +787,7 @@
       "locked": true,
       "date": {
         "validFrom": "1996-06-18",
-        "validTo": "1998-08-31",
+        "validTo": "1996-06-28",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -814,10 +835,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1996-06-18",
-        "hardValidTo": "1998-08-31",
+        "hardValidTo": "1996-06-28",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -839,7 +867,7 @@
       "locked": true,
       "date": {
         "validFrom": "1996-06-18",
-        "validTo": "1998-08-31",
+        "validTo": "1996-06-28",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -887,10 +915,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1996-06-18",
-        "hardValidTo": "1998-08-31",
+        "hardValidTo": "1996-06-28",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -990,7 +1025,7 @@
       "locked": true,
       "date": {
         "validFrom": "1996-09-01",
-        "validTo": "1997-06-30",
+        "validTo": "1996-09-11",
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
@@ -1038,10 +1073,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1997-06-30",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1996-09-01",
-        "hardValidTo": "1997-06-30",
+        "hardValidTo": "1996-09-11",
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
@@ -1152,7 +1194,7 @@
       "locked": true,
       "date": {
         "validFrom": "1997-06-30",
-        "validTo": "1998-08-31",
+        "validTo": "1997-07-10",
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
@@ -1200,10 +1242,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1997-06-30",
-        "hardValidTo": "1998-08-31",
+        "hardValidTo": "1997-07-10",
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
@@ -1230,7 +1279,7 @@
       "locked": true,
       "date": {
         "validFrom": "1997-08-01",
-        "validTo": "1998-05-02",
+        "validTo": "1997-08-11",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1278,10 +1327,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-05-02",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1997-08-01",
-        "hardValidTo": "1998-05-02",
+        "hardValidTo": "1997-08-11",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1308,7 +1364,7 @@
       "locked": true,
       "date": {
         "validFrom": "1997-08-01",
-        "validTo": "1998-05-02",
+        "validTo": "1997-08-11",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1356,10 +1412,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-05-02",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1997-08-01",
-        "hardValidTo": "1998-05-02",
+        "hardValidTo": "1997-08-11",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1386,7 +1449,7 @@
       "locked": true,
       "date": {
         "validFrom": "1998-05-02",
-        "validTo": "1998-08-31",
+        "validTo": "1998-05-12",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1434,10 +1497,17 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "curated chronology point event: validFrom plus 10 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1998-05-02",
-        "hardValidTo": "1998-08-31",
+        "hardValidTo": "1998-05-12",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"

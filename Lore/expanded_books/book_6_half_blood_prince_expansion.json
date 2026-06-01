@@ -764,7 +764,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-06-30",
-        "validTo": "1997-08-31",
+        "validTo": "1997-08-14",
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
@@ -830,7 +830,15 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Half-Blood Prince:aftermath"
+      "source": "wandlight-expanded-lore-v1:Half-Blood Prince:aftermath",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1997-08-31",
+          "method": "expanded book event cluster: approximate 45-day review window",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     }
   ]
 }

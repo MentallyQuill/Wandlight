@@ -19,7 +19,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-06-22",
-        "validTo": "1992-08-31",
+        "validTo": "1991-07-23",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -87,7 +87,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-06-22:zoo_cupboard_punishment"
+      "source": "hp-lexicon-day-by-day:ps:1991-06-22:zoo_cupboard_punishment",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -105,7 +113,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-07-24",
-        "validTo": "1992-08-31",
+        "validTo": "1991-07-30",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -170,7 +178,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-07-24:letter_bedroom_move"
+      "source": "hp-lexicon-day-by-day:ps:1991-07-24:letter_bedroom_move",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -188,7 +204,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-07-31",
-        "validTo": "1992-08-31",
+        "validTo": "1991-08-07",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -253,7 +269,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-07-31:hut_birthday_revelation"
+      "source": "hp-lexicon-day-by-day:ps:1991-07-31:hut_birthday_revelation",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -271,7 +295,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-07-31",
-        "validTo": "1992-08-31",
+        "validTo": "1991-08-07",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -339,7 +363,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-07-31:ollivander_wand_link"
+      "source": "hp-lexicon-day-by-day:ps:1991-07-31:ollivander_wand_link",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -357,7 +389,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-07-31",
-        "validTo": "1992-08-31",
+        "validTo": "1991-08-07",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -426,7 +458,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-07-31:stone_moved_from_gringotts"
+      "source": "hp-lexicon-day-by-day:ps:1991-07-31:stone_moved_from_gringotts",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -444,7 +484,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-09-01",
-        "validTo": "1992-08-31",
+        "validTo": "1991-09-05",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -510,7 +550,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-09-01:platform_weasley_intro"
+      "source": "hp-lexicon-day-by-day:ps:1991-09-01:platform_weasley_intro",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -528,7 +576,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-09-01",
-        "validTo": "1992-08-31",
+        "validTo": "1991-09-05",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -596,7 +644,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-09-01:hogwarts_arrival_sorting"
+      "source": "hp-lexicon-day-by-day:ps:1991-09-01:hogwarts_arrival_sorting",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -614,7 +670,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-09-06",
-        "validTo": "1992-08-31",
+        "validTo": "1991-09-11",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -679,7 +735,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-09-06:snape_first_potions"
+      "source": "hp-lexicon-day-by-day:ps:1991-09-06:snape_first_potions",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -697,7 +761,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-09-12",
-        "validTo": "1992-08-31",
+        "validTo": "1991-09-19",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -765,7 +829,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-09-12:flying_lesson_seeker"
+      "source": "hp-lexicon-day-by-day:ps:1991-09-12:flying_lesson_seeker",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -783,7 +855,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-09-12",
-        "validTo": "1992-08-31",
+        "validTo": "1991-09-19",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -851,7 +923,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-09-12:fluffy_discovery"
+      "source": "hp-lexicon-day-by-day:ps:1991-09-12:fluffy_discovery",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -869,7 +949,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-09-20",
-        "validTo": "1992-08-31",
+        "validTo": "1991-10-30",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -937,7 +1017,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-09-20:nimbus_first_practice"
+      "source": "hp-lexicon-day-by-day:ps:1991-09-20:nimbus_first_practice",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -955,7 +1043,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-10-31",
-        "validTo": "1992-08-31",
+        "validTo": "1991-11-08",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -1021,7 +1109,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-10-31:halloween_troll_trio"
+      "source": "hp-lexicon-day-by-day:ps:1991-10-31:halloween_troll_trio",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1039,7 +1135,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-11-09",
-        "validTo": "1992-08-31",
+        "validTo": "1991-11-16",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -1105,7 +1201,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-11-09:first_quidditch_snape_counterjinx"
+      "source": "hp-lexicon-day-by-day:ps:1991-11-09:first_quidditch_snape_counterjinx",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1123,7 +1227,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1991-12-25",
-        "validTo": "1992-08-31",
+        "validTo": "1992-01-01",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -1192,7 +1296,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1991-12-25:christmas_cloak_mirror"
+      "source": "hp-lexicon-day-by-day:ps:1991-12-25:christmas_cloak_mirror",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1210,7 +1322,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-05-09",
-        "validTo": "1992-08-31",
+        "validTo": "1992-05-16",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -1277,7 +1389,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1992-05-09:norbert_removal_points"
+      "source": "hp-lexicon-day-by-day:ps:1992-05-09:norbert_removal_points",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1295,7 +1415,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-05-26",
-        "validTo": "1992-08-31",
+        "validTo": "1992-06-03",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -1362,7 +1482,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1992-05-26:forest_detention_unicorn"
+      "source": "hp-lexicon-day-by-day:ps:1992-05-26:forest_detention_unicorn",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1380,7 +1508,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1992-06-04",
-        "validTo": "1992-08-31",
+        "validTo": "1992-06-11",
         "precision": "date",
         "schoolYear": 1,
         "book": "Philosopher's Stone"
@@ -1451,7 +1579,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-first-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ps:1992-06-04:stone_chambers_hospital"
+      "source": "hp-lexicon-day-by-day:ps:1992-06-04:stone_chambers_hospital",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1992-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     }
   ]
 }

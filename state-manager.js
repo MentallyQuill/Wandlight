@@ -9,6 +9,7 @@
 
 import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
 import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey, applyLoreLifecycleEvaluation } from './lore-matrix.js';
+import { preprocessPendingLoreEntries } from './pending-lore-preprocessor.js';
 
 const MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST = 200000;
 const migratedStateRefs = new WeakSet();
@@ -396,8 +397,10 @@ function prePruneLoreEntryForNormalization(entry) {
 
     pruned.tags = prePruneStringArray(entry.tags, 10, 40);
     const generation = entry.extensions?.wandlightGeneration;
-    pruned.extensions = generation && typeof generation === 'object' ? {
-        wandlightGeneration: {
+    const pendingReview = entry.extensions?.wandlightPendingReview;
+    const extensions = {};
+    if (generation && typeof generation === 'object') {
+        extensions.wandlightGeneration = {
             mode: truncateText(generation.mode, 40),
             batchId: truncateText(generation.batchId, 120),
             chunkId: truncateText(generation.chunkId, 180),
@@ -408,8 +411,28 @@ function prePruneLoreEntryForNormalization(entry) {
             candidateCategory: truncateText(generation.candidateCategory, 60),
             generatedAt: Number.isFinite(Number(generation.generatedAt)) ? Number(generation.generatedAt) : 0,
             targetTotal: Number.isFinite(Number(generation.targetTotal)) ? Number(generation.targetTotal) : 0,
-        },
-    } : {};
+        };
+    }
+    if (pendingReview && typeof pendingReview === 'object' && !Array.isArray(pendingReview)) {
+        extensions.wandlightPendingReview = {
+            sourceAlignment: truncateText(pendingReview.sourceAlignment, 40),
+            branchApplicability: truncateText(pendingReview.branchApplicability, 40),
+            temporalRole: truncateText(pendingReview.temporalRole, 40),
+            lifecycleRecommendation: truncateText(pendingReview.lifecycleRecommendation, 80),
+            recommendedStatus: truncateText(pendingReview.recommendedStatus, 40),
+            recommendationReason: truncateText(pendingReview.recommendationReason, 240),
+            currentBranchId: truncateText(pendingReview.currentBranchId, 80),
+            strictCanon: !!pendingReview.strictCanon,
+            preprocessedAt: Number.isFinite(Number(pendingReview.preprocessedAt)) ? Number(pendingReview.preprocessedAt) : 0,
+            originalTemporalBounds: pendingReview.originalTemporalBounds && typeof pendingReview.originalTemporalBounds === 'object' ? {
+                dateValidTo: truncateText(pendingReview.originalTemporalBounds.dateValidTo, 32),
+                hardValidTo: truncateText(pendingReview.originalTemporalBounds.hardValidTo, 32),
+                canonExpectedUntil: truncateText(pendingReview.originalTemporalBounds.canonExpectedUntil, 32),
+            } : {},
+            temporalNote: truncateText(pendingReview.temporalNote, 180),
+        };
+    }
+    pruned.extensions = extensions;
     return pruned;
 }
 
@@ -448,10 +471,10 @@ function compactStringMapForStorage(value, limit = 16, textLimit = 120) {
 
 
 function compactLoreExtensionsForStorage(normalized) {
+    const extensions = {};
     const generation = normalized?.extensions?.wandlightGeneration;
-    if (!generation || typeof generation !== 'object') return undefined;
-    return {
-        wandlightGeneration: {
+    if (generation && typeof generation === 'object') {
+        extensions.wandlightGeneration = {
             mode: truncateText(generation.mode, 40),
             batchId: truncateText(generation.batchId, 120),
             chunkId: truncateText(generation.chunkId, 180),
@@ -462,8 +485,29 @@ function compactLoreExtensionsForStorage(normalized) {
             candidateCategory: truncateText(generation.candidateCategory, 60),
             generatedAt: Number.isFinite(Number(generation.generatedAt)) ? Number(generation.generatedAt) : 0,
             targetTotal: Number.isFinite(Number(generation.targetTotal)) ? Number(generation.targetTotal) : 0,
-        },
-    };
+        };
+    }
+    const pendingReview = normalized?.extensions?.wandlightPendingReview;
+    if (pendingReview && typeof pendingReview === 'object') {
+        extensions.wandlightPendingReview = {
+            sourceAlignment: truncateText(pendingReview.sourceAlignment, 40),
+            branchApplicability: truncateText(pendingReview.branchApplicability, 40),
+            temporalRole: truncateText(pendingReview.temporalRole, 40),
+            lifecycleRecommendation: truncateText(pendingReview.lifecycleRecommendation, 80),
+            recommendedStatus: truncateText(pendingReview.recommendedStatus, 40),
+            recommendationReason: truncateText(pendingReview.recommendationReason, 240),
+            currentBranchId: truncateText(pendingReview.currentBranchId, 80),
+            strictCanon: !!pendingReview.strictCanon,
+            preprocessedAt: Number.isFinite(Number(pendingReview.preprocessedAt)) ? Number(pendingReview.preprocessedAt) : 0,
+            originalTemporalBounds: pendingReview.originalTemporalBounds && typeof pendingReview.originalTemporalBounds === 'object' ? {
+                dateValidTo: truncateText(pendingReview.originalTemporalBounds.dateValidTo, 32),
+                hardValidTo: truncateText(pendingReview.originalTemporalBounds.hardValidTo, 32),
+                canonExpectedUntil: truncateText(pendingReview.originalTemporalBounds.canonExpectedUntil, 32),
+            } : {},
+            temporalNote: truncateText(pendingReview.temporalNote, 180),
+        };
+    }
+    return Object.keys(extensions).length ? extensions : undefined;
 }
 
 function compactLoreEntryForStorage(entry) {
@@ -485,6 +529,7 @@ function compactLoreEntryForStorage(entry) {
         locked: !!normalized.locked,
         userEditable: normalized.userEditable !== false,
         userEdited: !!normalized.userEdited,
+        branchId: truncateText(normalized.branchId, 100) || 'main',
         date: {
             validFrom: truncateText(normalized.date?.validFrom || normalized.validFrom, 32),
             validTo: truncateText(normalized.date?.validTo || normalized.validTo, 32),
@@ -792,6 +837,14 @@ export function migrateState(state) {
     if (state._version < 10) {
         disableRetiredContinuitySections(state);
         state._version = 10;
+    }
+
+    // ── Schema v11: pending lore preprocessing metadata and branch-safe defaults ──
+    if (state._version < 11) {
+        if (Array.isArray(state.pendingLoreEntries) && state.pendingLoreEntries.length) {
+            state.pendingLoreEntries = preprocessPendingLoreEntries(state.pendingLoreEntries, state, getSettings());
+        }
+        state._version = 11;
     }
 
     // ── Always normalize lore fields post-migration ────────────────────────
@@ -2154,7 +2207,7 @@ export function appendPendingLoreEntries(entries, meta = {}, options = {}) {
     const { snapshot = false, snapshotLabel = 'Append bulk pending lore entries', syncPrompt = true, full = true } = options;
     const state = getState();
     const settings = getSettings();
-    const incoming = normalizeLoreMatrix(entries || []);
+    const incoming = preprocessPendingLoreEntries(entries || [], state, settings);
     if (incoming.length === 0) {
         return { state, changed: false, appendedCount: 0, pendingCount: (state.pendingLoreEntries || []).length };
     }

@@ -678,7 +678,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1994-12-21",
-        "validTo": "1995-02-28",
+        "validTo": "1995-02-04",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -744,7 +744,15 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:winter"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:winter",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-02-28",
+          "method": "expanded book event cluster: approximate 45-day review window",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -930,7 +938,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-06-24",
-        "validTo": "1995-08-31",
+        "validTo": "1995-08-08",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -995,7 +1003,15 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:aftermath"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:aftermath",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1995-08-31",
+          "method": "expanded book event cluster: approximate 45-day review window",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,

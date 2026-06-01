@@ -529,7 +529,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1997-12-01",
-        "validTo": "1998-02-28",
+        "validTo": "1998-01-15",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -594,7 +594,15 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:winter"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:winter",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-02-28",
+          "method": "expanded book event cluster: approximate 45-day review window",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1549,7 +1557,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1998-05-02",
-        "validTo": "1998-08-31",
+        "validTo": "1998-06-16",
         "precision": "date",
         "schoolYear": 7,
         "book": "Deathly Hallows"
@@ -1614,7 +1622,15 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:aftermath"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:aftermath",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1998-08-31",
+          "method": "expanded book event cluster: approximate 45-day review window",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,

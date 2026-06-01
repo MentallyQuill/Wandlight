@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {

@@ -15,6 +15,7 @@
 import { LOG_PREFIX } from './constants.js';
 import { getState, getSettings, saveState, pushStateSnapshot } from './state-manager.js';
 import { normalizeLoreMatrix, buildLoreGenerationKey } from './lore-matrix.js';
+import { preprocessPendingLoreEntries } from './pending-lore-preprocessor.js';
 
 const MANIFEST_URL = new URL('./Lore/manifest.json', import.meta.url);
 const LEGACY_INDEX_URL = new URL('./Lore/index.json', import.meta.url);
@@ -436,6 +437,7 @@ function compactCanonLoreEntryForPending(entry) {
         priority: normalized.priority || 50,
         protected: !!normalized.protected,
         userEditable: normalized.userEditable !== false,
+        branchId: normalized.branchId || 'main',
         date: normalized.date || {},
         scope: normalized.scope || {},
         visibility: normalized.visibility || {},
@@ -499,6 +501,7 @@ function compactPendingCanonEntryForStorage(entry) {
         priority: Number.isFinite(Number(normalized.priority)) ? Number(normalized.priority) : 50,
         protected: !!normalized.protected,
         userEditable: normalized.userEditable !== false,
+        branchId: trim(normalized.branchId, 100) || 'main',
         date: {
             validFrom: trim(normalized.date?.validFrom || normalized.validFrom, 32),
             validTo: trim(normalized.date?.validTo || normalized.validTo, 32),
@@ -696,9 +699,11 @@ export async function proposeCanonLoreForContext(context = null, options = {}) {
     }
 
     const pending = Array.isArray(state.pendingLoreEntries) ? state.pendingLoreEntries : [];
-    // Canon DB proposals are already storage-compact. Avoid another normalize->derive
-    // pass here; saveState() will run the final bounded sanitizer.
-    state.pendingLoreEntries = [...pending, ...entries].slice(-250);
+    const preprocessedEntries = preprocessPendingLoreEntries(entries, state, settings);
+    // Canon DB proposals are already storage-compact. The pending preprocessor adds
+    // branch-safe lifecycle defaults and review metadata before the final bounded
+    // sanitizer runs in saveState().
+    state.pendingLoreEntries = [...pending, ...preprocessedEntries].slice(-250);
     state.pendingLoreMeta = {
         id: `canon-db-${Date.now()}`,
         contextKey: buildLoreGenerationKey(state),
@@ -706,15 +711,15 @@ export async function proposeCanonLoreForContext(context = null, options = {}) {
         status: 'pending',
         summary: `Local canon database proposed ${entries.length} entries for ${query.sceneIso}.`,
         rawEntryCount: query.entries.length,
-        validEntryCount: entries.length,
+        validEntryCount: preprocessedEntries.length,
         createdAt: Date.now(),
     };
 
-    dbState.lastProposedCount = entries.length;
-    dbState.lastStatus = `Matched ${query.matchedCount} canon entries; proposed ${entries.length} new pending entries.`;
+    dbState.lastProposedCount = preprocessedEntries.length;
+    dbState.lastStatus = `Matched ${query.matchedCount} canon entries; proposed ${preprocessedEntries.length} new pending entries.`;
     state.canonLoreDatabase = dbState;
     saveState(state);
 
-    progress?.(`Canon database proposed ${entries.length} pending lore entries.`, 100);
-    return { ...query, status: 'proposed', entries, proposedCount: entries.length, dropped: filtered.dropped };
+    progress?.(`Canon database proposed ${preprocessedEntries.length} pending lore entries.`, 100);
+    return { ...query, status: 'proposed', entries: preprocessedEntries, proposedCount: preprocessedEntries.length, dropped: filtered.dropped };
 }

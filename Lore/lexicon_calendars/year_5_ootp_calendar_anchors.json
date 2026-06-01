@@ -19,7 +19,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-08-02",
-        "validTo": "1996-08-31",
+        "validTo": "1995-08-05",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -85,7 +85,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1995-08-02:dementor_attack_privet"
+      "source": "hp-lexicon-day-by-day:ootp:1995-08-02:dementor_attack_privet",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -103,7 +111,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-08-06",
-        "validTo": "1996-08-31",
+        "validTo": "1995-08-11",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -170,7 +178,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1995-08-06:grimmauld_housecleaning"
+      "source": "hp-lexicon-day-by-day:ootp:1995-08-06:grimmauld_housecleaning",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -188,7 +204,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-08-12",
-        "validTo": "1996-08-31",
+        "validTo": "1995-08-19",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -255,7 +271,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1995-08-12:hearing_acquittal"
+      "source": "hp-lexicon-day-by-day:ootp:1995-08-12:hearing_acquittal",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -273,7 +297,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-08-31",
-        "validTo": "1996-08-31",
+        "validTo": "1995-09-02",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -339,7 +363,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1995-08-31:prefect_badges_decree22"
+      "source": "hp-lexicon-day-by-day:ootp:1995-08-31:prefect_badges_decree22",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -357,7 +389,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-09-03",
-        "validTo": "1996-08-31",
+        "validTo": "1995-09-07",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -424,7 +456,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1995-09-03:umbridge_first_detentions"
+      "source": "hp-lexicon-day-by-day:ootp:1995-09-03:umbridge_first_detentions",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -442,7 +482,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-09-08",
-        "validTo": "1996-08-31",
+        "validTo": "1995-09-15",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -506,7 +546,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1995-09-08:high_inquisitor_decree23"
+      "source": "hp-lexicon-day-by-day:ootp:1995-09-08:high_inquisitor_decree23",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -524,7 +572,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-10-09",
-        "validTo": "1996-08-31",
+        "validTo": "1995-11-01",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -591,7 +639,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1995-10-09:da_first_meeting"
+      "source": "hp-lexicon-day-by-day:ootp:1995-10-09:da_first_meeting",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -609,7 +665,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-11-02",
-        "validTo": "1996-08-31",
+        "validTo": "1995-11-09",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -678,7 +734,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1995-11-02:quidditch_bans_hagrid_return"
+      "source": "hp-lexicon-day-by-day:ootp:1995-11-02:quidditch_bans_hagrid_return",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -696,7 +760,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1995-12-18",
-        "validTo": "1996-08-31",
+        "validTo": "1995-12-25",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -765,7 +829,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1995-12-18:arthur_vision_st_mungos"
+      "source": "hp-lexicon-day-by-day:ootp:1995-12-18:arthur_vision_st_mungos",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -783,7 +855,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1996-01-13",
-        "validTo": "1996-08-31",
+        "validTo": "1996-02-22",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -848,7 +920,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1996-01-13:occlumency_deaths_escape"
+      "source": "hp-lexicon-day-by-day:ootp:1996-01-13:occlumency_deaths_escape",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -866,7 +946,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1996-02-23",
-        "validTo": "1996-08-31",
+        "validTo": "1996-03-01",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -934,7 +1014,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1996-02-23:quibbler_interview_decree27"
+      "source": "hp-lexicon-day-by-day:ootp:1996-02-23:quibbler_interview_decree27",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -952,7 +1040,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1996-03-08",
-        "validTo": "1996-08-31",
+        "validTo": "1996-03-15",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -1018,7 +1106,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1996-03-08:trelawney_firenze"
+      "source": "hp-lexicon-day-by-day:ootp:1996-03-08:trelawney_firenze",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1036,7 +1132,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1996-04-01",
-        "validTo": "1996-08-31",
+        "validTo": "1996-04-08",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -1104,7 +1200,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1996-04-01:da_caught_dumbledore_flees"
+      "source": "hp-lexicon-day-by-day:ootp:1996-04-01:da_caught_dumbledore_flees",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1122,7 +1226,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1996-04-21",
-        "validTo": "1996-08-31",
+        "validTo": "1996-04-28",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -1188,7 +1292,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1996-04-21:twins_leave_swamp"
+      "source": "hp-lexicon-day-by-day:ootp:1996-04-21:twins_leave_swamp",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1206,7 +1318,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1996-06-19",
-        "validTo": "1996-08-31",
+        "validTo": "1996-06-19",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -1273,7 +1385,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1996-06-19:owls_hagrid_mcgonagall"
+      "source": "hp-lexicon-day-by-day:ootp:1996-06-19:owls_hagrid_mcgonagall",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1291,7 +1411,7 @@
       "userEditable": true,
       "date": {
         "validFrom": "1996-06-20",
-        "validTo": "1996-08-31",
+        "validTo": "1996-06-27",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -1360,7 +1480,15 @@
         "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
-      "source": "hp-lexicon-day-by-day:ootp:1996-06-20:department_mysteries_public_return"
+      "source": "hp-lexicon-day-by-day:ootp:1996-06-20:department_mysteries_public_return",
+      "extensions": {
+        "temporalTightening": {
+          "previousValidTo": "1996-08-31",
+          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
+          "appliedIn": "Wandlight lore date tightening pass",
+          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+        }
+      }
     }
   ]
 }

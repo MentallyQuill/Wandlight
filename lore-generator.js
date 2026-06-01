@@ -23,8 +23,9 @@ import {
     appendPendingLoreEntries,
     startLoreBulkBatch,
     updateLoreBulkBatch,
-    updateLoreBulkChunk,
-    storeLoreBulkCandidates,
+    checkpointLoreBulkChunk,
+    flushLoreBulkFullCheckpoint,
+    markInterruptedLoreBulkChunks,
     patchPendingLoreMeta,
     markPendingLoreStale,
     markPendingLoreReplaced,
@@ -921,6 +922,31 @@ function shouldQueueBulkChunk(chunk, settings = getSettings()) {
     return prior.status !== 'complete';
 }
 
+function buildEffectiveBulkSettings(baseSettings = getSettings(), options = {}) {
+    const effective = { ...(baseSettings || {}) };
+    if (options.scanModeOverride) effective.loreBulkScanMode = String(options.scanModeOverride).toLowerCase();
+    if (options.rescanModeOverride) effective.loreBulkRescanMode = String(options.rescanModeOverride).toLowerCase();
+    if (Number.isFinite(Number(options.rangeStart))) effective.loreBulkRangeStart = Number(options.rangeStart);
+    if (Number.isFinite(Number(options.rangeEnd))) effective.loreBulkRangeEnd = Number(options.rangeEnd);
+    if (Number.isFinite(Number(options.sourceMessageCount))) effective.loreSourceMessageCount = Number(options.sourceMessageCount);
+    if (Number.isFinite(Number(options.chunkSize))) effective.loreBulkChunkSize = Number(options.chunkSize);
+    if (Number.isFinite(Number(options.overlap))) effective.loreBulkOverlap = Number(options.overlap);
+    if (Number.isFinite(Number(options.concurrency))) effective.loreBulkConcurrency = Number(options.concurrency);
+    if (Number.isFinite(Number(options.retryAttempts))) effective.loreBulkRetryAttempts = Number(options.retryAttempts);
+    if (Number.isFinite(Number(options.factsPerChunk))) effective.loreBulkFactsPerChunk = Number(options.factsPerChunk);
+
+    // Automatic maintenance must not unexpectedly launch an entire-chat backfill
+    // just because the manual scan UI was left on "entire chat".
+    if (options.automationSafe) {
+        effective.loreBulkScanMode = String(options.scanModeOverride || 'recent').toLowerCase();
+        effective.loreBulkRescanMode = String(options.rescanModeOverride || 'skip_unchanged').toLowerCase();
+        effective.loreBulkConcurrency = clampInt(effective.loreBulkConcurrency, 1, 3, 2);
+        effective.loreBulkFactsPerChunk = clampInt(effective.loreBulkFactsPerChunk, 3, 12, 8);
+    }
+
+    return effective;
+}
+
 function buildBulkCandidateSystemPrompt(settings = getSettings(), profile = {}) {
     const factsPerChunk = clampInt(settings.loreBulkFactsPerChunk, 4, 30, 14);
     return `You are Wandlight Continuity's bulk story-lore extractor.
@@ -1008,13 +1034,17 @@ function parseJsonLinesAsFacts(text) {
 
 function parseBulkCandidateResponse(text, chunk = {}) {
     if (!text || typeof text !== 'string') return null;
+    const jsonl = parseJsonLinesAsFacts(text);
     const parsed = parseJsonResponse(text);
     const shaped = coerceBulkFactsShape(parsed);
     if (shaped) {
-        const facts = shaped.facts.map(f => normalizeCandidateFact(f, chunk)).filter(Boolean);
-        return { chunkSummary: shaped.chunkSummary || '', facts };
+        const shapedFacts = shaped.facts.map(f => normalizeCandidateFact(f, chunk)).filter(Boolean);
+        if (jsonl && jsonl.facts.length > shapedFacts.length) {
+            const lineFacts = jsonl.facts.map(f => normalizeCandidateFact(f, chunk)).filter(Boolean);
+            return { chunkSummary: jsonl.chunkSummary || shaped.chunkSummary || '', facts: lineFacts };
+        }
+        return { chunkSummary: shaped.chunkSummary || '', facts: shapedFacts };
     }
-    const jsonl = parseJsonLinesAsFacts(text);
     if (jsonl) {
         const facts = jsonl.facts.map(f => normalizeCandidateFact(f, chunk)).filter(Boolean);
         return { chunkSummary: jsonl.chunkSummary || '', facts };
@@ -1069,6 +1099,7 @@ function categoryToLoreCategory(category = '') {
 }
 
 function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, profile = {} } = {}) {
+    const generationMode = profile.mode === 'incremental' ? 'bulk-incremental' : 'bulk-bootstrap';
     const category = categoryToLoreCategory(candidate.category);
     const subject = String(candidate.subject || 'Story fact').trim();
     const fact = String(candidate.fact || '').trim();
@@ -1104,7 +1135,7 @@ function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, pr
         },
         extensions: {
             wandlightGeneration: {
-                mode: 'bulk-bootstrap',
+                mode: generationMode,
                 batchId,
                 chunkId: chunk?.chunkId || '',
                 startIndex: chunk?.startIndex || 0,
@@ -1149,15 +1180,20 @@ async function extractBulkChunkCandidates({ chunk, plan, batchId, profile, setti
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         throwIfAborted(signal);
-        updateLoreBulkChunk(chunk.chunkId, {
+        checkpointLoreBulkChunk(chunk.chunkId, {
             batchId,
-            status: attempt === 1 ? 'running' : 'retrying',
-            attempts: attempt,
-            startIndex: chunk.startIndex,
-            endIndex: chunk.endIndex,
-            messageHash: chunk.messageHash,
-            messageCount: chunk.messageCount,
-        });
+            chunkPatch: {
+                batchId,
+                status: attempt === 1 ? 'running' : 'retrying',
+                attempts: attempt,
+                startIndex: chunk.startIndex,
+                endIndex: chunk.endIndex,
+                messageHash: chunk.messageHash,
+                messageCount: chunk.messageCount,
+                startedAt: attempt === 1 ? Date.now() : undefined,
+                error: '',
+            },
+        }, { full: false, syncPrompt: false });
 
         try {
             rawResponse = await quietPrompt(systemPrompt, userMessage, { signal, maxTokens: profile.maxTokens, expectedOutput: 'json' });
@@ -1176,21 +1212,26 @@ async function extractBulkChunkCandidates({ chunk, plan, batchId, profile, setti
             }
 
             const candidates = parsed.facts || [];
-            storeLoreBulkCandidates(batchId, chunk.chunkId, candidates);
-            updateLoreBulkChunk(chunk.chunkId, {
+            checkpointLoreBulkChunk(chunk.chunkId, {
                 batchId,
-                status: 'complete',
-                attempts: attempt,
-                startIndex: chunk.startIndex,
-                endIndex: chunk.endIndex,
-                messageHash: chunk.messageHash,
-                messageCount: chunk.messageCount,
-                candidateCount: candidates.length,
-                chunkSummary: parsed.chunkSummary || '',
-                rawResponse: settings.debugMode ? String(rawResponse || '').slice(0, 20000) : '',
-                error: '',
-                lastScannedAt: Date.now(),
-            });
+                candidates,
+                rawResponse,
+                chunkPatch: {
+                    batchId,
+                    status: 'complete',
+                    attempts: attempt,
+                    startIndex: chunk.startIndex,
+                    endIndex: chunk.endIndex,
+                    messageHash: chunk.messageHash,
+                    messageCount: chunk.messageCount,
+                    candidateCount: candidates.length,
+                    chunkSummary: parsed.chunkSummary || '',
+                    rawResponse: settings.debugMode || settings.loreBulkRetainRawResponses ? String(rawResponse || '').slice(0, 20000) : '',
+                    error: '',
+                    lastScannedAt: Date.now(),
+                    completedAt: Date.now(),
+                },
+            }, { full: false, syncPrompt: false });
             return { status: 'complete', chunk, candidates, summary: parsed.chunkSummary || '', attempts: attempt };
         } catch (e) {
             if (isAbortError(e)) throw e;
@@ -1198,17 +1239,22 @@ async function extractBulkChunkCandidates({ chunk, plan, batchId, profile, setti
         }
     }
 
-    updateLoreBulkChunk(chunk.chunkId, {
+    checkpointLoreBulkChunk(chunk.chunkId, {
         batchId,
-        status: 'failed',
-        startIndex: chunk.startIndex,
-        endIndex: chunk.endIndex,
-        messageHash: chunk.messageHash,
-        messageCount: chunk.messageCount,
-        error: lastError || 'Bulk extraction failed.',
-        rawResponse: settings.debugMode ? String(rawResponse || '').slice(0, 20000) : '',
-        lastScannedAt: Date.now(),
-    });
+        rawResponse,
+        chunkPatch: {
+            batchId,
+            status: 'failed',
+            startIndex: chunk.startIndex,
+            endIndex: chunk.endIndex,
+            messageHash: chunk.messageHash,
+            messageCount: chunk.messageCount,
+            error: lastError || 'Bulk extraction failed.',
+            rawResponse: settings.debugMode || settings.loreBulkRetainRawResponses ? String(rawResponse || '').slice(0, 20000) : '',
+            lastScannedAt: Date.now(),
+            failedAt: Date.now(),
+        },
+    }, { full: false, syncPrompt: false });
     return { status: 'failed', chunk, candidates: [], summary: '', error: lastError || 'Bulk extraction failed.' };
 }
 
@@ -1224,6 +1270,8 @@ async function extractBulkChunkCandidates({ chunk, plan, batchId, profile, setti
 export async function runBulkLoreGeneration(options = {}) {
     const { force = true, signal = null } = options;
     const progress = typeof options.progress === 'function' ? options.progress : null;
+    const source = options.source || (force ? 'manual' : 'auto');
+    const automationSafe = !!options.automationSafe || source === 'auto' || !force;
 
     if (_generationRunning) {
         return { status: 'skipped_running' };
@@ -1233,22 +1281,63 @@ export async function runBulkLoreGeneration(options = {}) {
     try {
         throwIfAborted(signal);
         let state = getState();
-        const settings = getSettings();
+        const settings = buildEffectiveBulkSettings(getSettings(), options);
+        markInterruptedLoreBulkChunks(settings.loreBulkRunningCheckpointStaleMs || 10 * 60 * 1000);
+
         const validation = validateLoreProviderConfiguration();
         if (!validation.ok) {
             progress?.(`API/model settings incomplete: ${validation.message}`, 100);
             return { status: 'api_not_configured', error: validation.message };
         }
 
-        if (!state.loreContext?.lastDetectedAt && force) {
-            progress?.('Detecting story context before bulk lore scan...', 4);
-            const detected = await runLoreContextDetection({ progress, signal });
-            if (!detected) {
-                progress?.('No story context could be detected. Bulk lore scan cancelled.', 100);
-                return { status: 'no_context_detected' };
+        if (!state.loreContext?.lastDetectedAt) {
+            if (force) {
+                progress?.('Detecting story context before lore scan...', 4);
+                const detected = await runLoreContextDetection({ progress, signal });
+                if (!detected) {
+                    progress?.('No story context could be detected. Lore scan cancelled.', 100);
+                    return { status: 'no_context_detected' };
+                }
+                state = getState();
+            } else {
+                if (settings.debugMode) console.debug(`${LOG_PREFIX} Skipping lore scan — no lore context detected yet`);
+                return { status: 'no_context_detected', contextKey: buildLoreGenerationKey(state) };
             }
-            state = getState();
         }
+
+        const contextKey = buildLoreGenerationKey(state);
+        const pending = state.pendingLoreEntries || [];
+        const pendingMeta = state.pendingLoreMeta || null;
+        if (pending.length > 0 && automationSafe) {
+            const pendingKey = pendingMeta?.contextKey || '';
+            if (pendingKey && pendingKey !== contextKey) {
+                markPendingLoreStale(`Current context changed to ${contextKey}`);
+                return { status: 'skipped_stale_pending_exists', contextKey, pendingContextKey: pendingKey };
+            }
+            return { status: 'skipped_same_context_pending', contextKey, pendingContextKey: pendingKey };
+        }
+
+        const ledger = state.loreGeneration || {};
+        const attempt = ledger.attempts?.[contextKey];
+        if (automationSafe && attempt?.status === 'accepted') {
+            return { status: 'skipped_already_accepted', contextKey };
+        }
+        if (automationSafe && attempt?.status === 'rejected') {
+            return { status: 'skipped_previously_rejected', contextKey };
+        }
+        if (automationSafe && attempt && FAILED_STATUSES.includes(attempt.status)) {
+            const last = attempt.lastAttemptAt || 0;
+            if (Date.now() - last < FAILED_RETRY_COOLDOWN_MS) {
+                return { status: 'skipped_recent_failure', contextKey };
+            }
+        }
+
+        recordLoreAttempt(contextKey, {
+            status: 'running',
+            lastSource: source,
+            lastError: '',
+            generationMode: automationSafe ? 'bulk-incremental' : 'bulk-bootstrap',
+        }, { syncPrompt: false });
 
         const plan = buildLoreBulkScanPlan(settings, state);
         if (!plan.sourceMessageCount || !plan.chunks.length) {
@@ -1259,18 +1348,26 @@ export async function runBulkLoreGeneration(options = {}) {
         const allChunks = plan.chunks;
         const queuedChunks = allChunks.filter(chunk => shouldQueueBulkChunk(chunk, settings));
         const skippedChunks = allChunks.length - queuedChunks.length;
-        const contextKey = plan.contextKey || buildLoreGenerationKey(state);
         const batchId = `bulk_lore_${Date.now()}_${stableStringHash(`${contextKey}|${plan.startIndex}|${plan.endIndex}|${plan.chunkSize}|${plan.overlap}`)}`;
         const profile = determineLoreGenerationProfile(settings, state, {
             force,
             sourceCount: plan.sourceMessageCount,
             chunkCount: Math.max(1, queuedChunks.length || allChunks.length),
         });
-        profile.mode = 'bootstrap';
+        const bulkMode = options.generationModeOverride || (automationSafe ? 'incremental' : 'bootstrap');
+        profile.mode = bulkMode;
         profile.bulk = true;
-        profile.targetTotal = Math.max(profile.targetTotal, Math.ceil(plan.sourceMessageCount / Math.max(1, plan.chunkSize)) * 6);
+        if (bulkMode === 'bootstrap') {
+            profile.targetTotal = Math.max(profile.targetTotal, Math.ceil(plan.sourceMessageCount / Math.max(1, plan.chunkSize)) * 6);
+        } else {
+            profile.targetTotal = Math.max(1, Math.min(profile.targetTotal, Math.ceil(plan.sourceMessageCount / Math.max(1, plan.chunkSize)) * 3));
+        }
 
         const concurrency = clampInt(settings.loreBulkConcurrency, 1, 8, 3);
+        const consolidationChunkWindow = clampInt(settings.loreBulkConsolidationChunkWindow, 1, 25, 5);
+        const consolidationFactWindow = clampInt(settings.loreBulkConsolidationFactWindow, 10, 500, 80);
+        const fullCheckpointEveryChunks = clampInt(settings.loreBulkFullCheckpointEveryChunks, 1, 25, 5);
+        const fullCheckpointEveryMs = clampInt(settings.loreBulkFullCheckpointEveryMs, 1000, 60000, 12000);
         const stateSummary = JSON.stringify({
             canon: state.canon,
             scene: state.scene,
@@ -1282,7 +1379,9 @@ export async function runBulkLoreGeneration(options = {}) {
             id: batchId,
             contextKey,
             status: 'running',
-            mode: 'bulk-bootstrap',
+            mode: profile.mode === 'bootstrap' ? 'bulk-bootstrap' : 'bulk-incremental',
+            source,
+            automationSafe,
             scanMode: plan.scanMode,
             rangeStart: plan.startIndex,
             rangeEnd: plan.endIndex,
@@ -1298,101 +1397,182 @@ export async function runBulkLoreGeneration(options = {}) {
             failedChunks: 0,
             candidateCount: 0,
             pendingEntryCount: (state.pendingLoreEntries || []).length,
+            checkpointPolicy: {
+                chunkCheckpoint: 'immediate',
+                fullCheckpointEveryChunks,
+                fullCheckpointEveryMs,
+                consolidationChunkWindow,
+                consolidationFactWindow,
+            },
         });
 
         if (!queuedChunks.length) {
-            updateLoreBulkBatch(batchId, { status: 'complete', completedAt: Date.now(), skippedChunks, completedChunks: 0 });
-            progress?.(`Bulk lore scan found no changed chunks. Skipped ${skippedChunks} unchanged chunk${skippedChunks === 1 ? '' : 's'}.`, 100);
+            flushLoreBulkFullCheckpoint(batchId, { status: 'complete', completedAt: Date.now(), skippedChunks, completedChunks: 0 });
+            recordLoreAttempt(contextKey, {
+                status: 'skipped_unchanged',
+                lastSource: source,
+                generationMode: profile.mode === 'bootstrap' ? 'bulk-bootstrap' : 'bulk-incremental',
+                lastError: '',
+            }, { increment: false, syncPrompt: false });
+            progress?.(`Lore scan found no changed chunks. Skipped ${skippedChunks} unchanged chunk${skippedChunks === 1 ? '' : 's'}.`, 100);
             return { status: 'skipped_unchanged', batchId, plan, skippedChunks };
         }
 
-        progress?.(`Bulk lore scan queued ${queuedChunks.length}/${allChunks.length} chunks from messages ${plan.startIndex}-${plan.endIndex}. Running ${concurrency} in parallel.`, 8);
+        progress?.(`Story lore scan queued ${queuedChunks.length}/${allChunks.length} chunks from messages ${plan.startIndex}-${plan.endIndex}. Running ${concurrency} in parallel.`, 8);
 
         let completed = 0;
         let failed = 0;
         let candidateCount = 0;
         let pendingEntryCount = (state.pendingLoreEntries || []).length;
         let duplicateDrops = 0;
+        let snapshotTaken = false;
+        let dirtyChunksSinceFullCheckpoint = 0;
+        let lastFullCheckpointAt = Date.now();
         const summaries = [];
+        const pendingCandidateRecords = [];
+        let consolidationChain = Promise.resolve();
 
-        const results = await runWithConcurrency(queuedChunks, concurrency, async (chunk, index) => {
+        const currentBatchPatch = (extra = {}) => ({
+            completedChunks: completed,
+            failedChunks: failed,
+            candidateCount,
+            pendingEntryCount,
+            droppedDuplicateCount: duplicateDrops,
+            lastProgressAt: Date.now(),
+            ...extra,
+        });
+
+        function queuedFactCount() {
+            return pendingCandidateRecords.reduce((sum, record) => sum + (Array.isArray(record.candidates) ? record.candidates.length : 0), 0);
+        }
+
+        async function flushConsolidationWindow(forceFlush = false) {
+            const factsWaiting = queuedFactCount();
+            if (!pendingCandidateRecords.length) return { changed: false, entryCount: 0, duplicateDrops: 0 };
+            if (!forceFlush && pendingCandidateRecords.length < consolidationChunkWindow && factsWaiting < consolidationFactWindow) {
+                return { changed: false, entryCount: 0, duplicateDrops: 0 };
+            }
+
+            const records = pendingCandidateRecords.splice(0, pendingCandidateRecords.length);
+            const rawEntries = [];
+            for (const record of records) {
+                for (const candidate of record.candidates || []) {
+                    rawEntries.push(candidateFactToLoreEntry(candidate, { batchId, chunk: record.chunk, profile }));
+                }
+            }
+            const entries = normalizeLoreMatrix(rawEntries);
+            let filteredEntries = entries;
+            let drops = [];
+            if (settings.loreDuplicateGuard !== false && filteredEntries.length) {
+                const current = getState();
+                const guardBase = [ ...(current.loreMatrix || []), ...(current.pendingLoreEntries || []) ];
+                const filtered = filterDuplicateLoreEntries(filteredEntries, guardBase, {
+                    storyGeneration: true,
+                    ignoreCanonicalSourceSimilarity: true,
+                });
+                filteredEntries = filtered.entries;
+                drops = filtered.dropped || [];
+            }
+            duplicateDrops += drops.length;
+
+            if (settings.loreBulkConsolidateAsPending !== false && filteredEntries.length) {
+                const append = appendPendingLoreEntries(filteredEntries, {
+                    id: batchId,
+                    contextKey,
+                    source: source === 'auto' ? 'auto_bulk' : 'manual_bulk',
+                    summary: `${profile.mode === 'bootstrap' ? 'Bootstrap' : 'Incremental'} story lore scan messages ${plan.startIndex}-${plan.endIndex}`,
+                    rawEntryCount: entries.length,
+                    normalizedEntryCount: entries.length,
+                    droppedDuplicateCount: drops.length,
+                    sourceMessageCount: plan.sourceMessageCount,
+                    chunkSize: plan.chunkSize,
+                    chunkCount: allChunks.length,
+                    completedChunkCount: completed,
+                    failedChunkCount: failed,
+                    generationMode: profile.mode === 'bootstrap' ? 'bulk-bootstrap' : 'bulk-incremental',
+                    generationConfiguredMode: settings.loreGenerationBreadthMode || 'auto',
+                    targetEntryCount: profile.targetTotal,
+                    storyLoreCountBefore: profile.storyLoreCount,
+                    bulkBatchId: batchId,
+                    bulkChunkId: records.map(r => r.chunk?.chunkId).filter(Boolean).slice(-1)[0] || '',
+                    bulk: true,
+                }, {
+                    snapshot: !snapshotTaken,
+                    snapshotLabel: 'Bulk Generate pending lore entries',
+                    syncPrompt: false,
+                    full: true,
+                });
+                snapshotTaken = true;
+                pendingEntryCount = append.pendingCount;
+            }
+
+            flushLoreBulkFullCheckpoint(batchId, currentBatchPatch({
+                lastConsolidatedAt: Date.now(),
+                lastConsolidatedChunkCount: records.length,
+                lastConsolidatedFactCount: factsWaiting,
+            }));
+            dirtyChunksSinceFullCheckpoint = 0;
+            lastFullCheckpointAt = Date.now();
+            return { changed: true, entryCount: filteredEntries.length, duplicateDrops: drops.length };
+        }
+
+        async function scheduleConsolidation(forceFlush = false) {
+            consolidationChain = consolidationChain.then(() => flushConsolidationWindow(forceFlush));
+            return consolidationChain;
+        }
+
+        function maybeFullCheckpoint(forceFlush = false) {
+            const now = Date.now();
+            if (!forceFlush && dirtyChunksSinceFullCheckpoint < fullCheckpointEveryChunks && now - lastFullCheckpointAt < fullCheckpointEveryMs) {
+                return;
+            }
+            flushLoreBulkFullCheckpoint(batchId, currentBatchPatch({
+                lastCheckpointReason: forceFlush ? 'forced' : dirtyChunksSinceFullCheckpoint >= fullCheckpointEveryChunks ? 'chunk_window' : 'time_window',
+            }));
+            dirtyChunksSinceFullCheckpoint = 0;
+            lastFullCheckpointAt = now;
+        }
+
+        const results = await runWithConcurrency(queuedChunks, concurrency, async (chunk) => {
             throwIfAborted(signal);
-            progress?.(`Bulk lore scan running: ${completed + failed}/${queuedChunks.length} chunks complete, ${Math.min(concurrency, queuedChunks.length - completed - failed)} active.`, Math.min(95, 8 + Math.round(((completed + failed) / queuedChunks.length) * 85)));
+            progress?.(`Story lore scan running: ${completed + failed}/${queuedChunks.length} chunks complete, ${Math.min(concurrency, queuedChunks.length - completed - failed)} active.`, Math.min(95, 8 + Math.round(((completed + failed) / queuedChunks.length) * 85)));
             const result = await extractBulkChunkCandidates({ chunk, plan, batchId, profile, settings, stateSummary, signal });
 
             if (result.status === 'complete') {
-                const entries = normalizeLoreMatrix(result.candidates.map(candidate => candidateFactToLoreEntry(candidate, { batchId, chunk, profile })));
-                let filteredEntries = entries;
-                let drops = [];
-                if (settings.loreDuplicateGuard !== false && filteredEntries.length) {
-                    const current = getState();
-                    const guardBase = [ ...(current.loreMatrix || []) ];
-                    const filtered = filterDuplicateLoreEntries(filteredEntries, guardBase, {
-                        storyGeneration: true,
-                        ignoreCanonicalSourceSimilarity: true,
-                    });
-                    filteredEntries = filtered.entries;
-                    drops = filtered.dropped || [];
-                }
-                duplicateDrops += drops.length;
-                if (settings.loreBulkConsolidateAsPending !== false && filteredEntries.length) {
-                    const append = appendPendingLoreEntries(filteredEntries, {
-                        id: batchId,
-                        contextKey,
-                        source: 'manual_bulk',
-                        summary: `Bulk story lore scan messages ${plan.startIndex}-${plan.endIndex}`,
-                        rawEntryCount: entries.length,
-                        normalizedEntryCount: entries.length,
-                        droppedDuplicateCount: drops.length,
-                        sourceMessageCount: plan.sourceMessageCount,
-                        chunkSize: plan.chunkSize,
-                        chunkCount: allChunks.length,
-                        completedChunkCount: completed + 1,
-                        failedChunkCount: failed,
-                        generationMode: 'bulk-bootstrap',
-                        generationConfiguredMode: settings.loreGenerationBreadthMode || 'auto',
-                        targetEntryCount: profile.targetTotal,
-                        storyLoreCountBefore: profile.storyLoreCount,
-                        bulkBatchId: batchId,
-                        bulkChunkId: chunk.chunkId,
-                        bulk: true,
-                    }, { snapshot: completed === 0, snapshotLabel: 'Bulk Generate pending lore entries' });
-                    pendingEntryCount = append.pendingCount;
-                }
                 candidateCount += result.candidates.length;
+                pendingCandidateRecords.push({ chunk, candidates: result.candidates || [], summary: result.summary || '' });
                 if (result.summary) summaries.push(result.summary);
                 completed++;
             } else {
                 failed++;
             }
 
-            updateLoreBulkBatch(batchId, {
-                completedChunks: completed,
-                failedChunks: failed,
-                candidateCount,
-                pendingEntryCount,
-                lastChunkId: chunk.chunkId,
-            });
-            progress?.(`Bulk lore scan: ${completed} complete, ${failed} failed, ${candidateCount} candidate facts, ${pendingEntryCount} pending entries.`, Math.min(98, 8 + Math.round(((completed + failed) / queuedChunks.length) * 88)));
+            dirtyChunksSinceFullCheckpoint++;
+            if (pendingCandidateRecords.length >= consolidationChunkWindow || queuedFactCount() >= consolidationFactWindow) {
+                await scheduleConsolidation(false);
+            } else {
+                maybeFullCheckpoint(false);
+            }
+            progress?.(`Story lore scan: ${completed} complete, ${failed} failed, ${candidateCount} candidate facts, ${pendingEntryCount} pending entries.`, Math.min(98, 8 + Math.round(((completed + failed) / queuedChunks.length) * 88)));
             return result;
         });
 
-        const status = failed === queuedChunks.length ? 'failed' : failed > 0 ? 'partial' : 'complete';
-        updateLoreBulkBatch(batchId, {
+        await consolidationChain;
+        await scheduleConsolidation(true);
+
+        const rejected = results.filter(r => r.status === 'rejected').length;
+        const totalFailed = failed + rejected;
+        const status = totalFailed === queuedChunks.length ? 'failed' : totalFailed > 0 ? 'partial' : 'complete';
+        flushLoreBulkFullCheckpoint(batchId, currentBatchPatch({
             status,
             completedAt: Date.now(),
-            completedChunks: completed,
-            failedChunks: failed,
-            candidateCount,
-            pendingEntryCount,
-            droppedDuplicateCount: duplicateDrops,
             summaries: summaries.slice(-20),
-        });
+        }));
         patchPendingLoreMeta({
             bulkBatchId: batchId,
-            generationMode: 'bulk-bootstrap',
+            generationMode: profile.mode === 'bootstrap' ? 'bulk-bootstrap' : 'bulk-incremental',
             completedChunkCount: completed,
-            failedChunkCount: failed,
+            failedChunkCount: totalFailed,
             chunkCount: allChunks.length,
             rawEntryCount: candidateCount,
             normalizedEntryCount: candidateCount,
@@ -1400,11 +1580,19 @@ export async function runBulkLoreGeneration(options = {}) {
             sourceMessageCount: plan.sourceMessageCount,
             chunkSize: plan.chunkSize,
             targetEntryCount: profile.targetTotal,
-            summary: `Bulk story lore scan messages ${plan.startIndex}-${plan.endIndex}`,
-        });
+            summary: `${profile.mode === 'bootstrap' ? 'Bootstrap' : 'Incremental'} story lore scan messages ${plan.startIndex}-${plan.endIndex}`,
+        }, { syncPrompt: false, full: true });
 
-        const rejected = results.filter(r => r.status === 'rejected').length;
-        progress?.(`Bulk lore scan ${status}: ${completed} chunks complete, ${failed + rejected} failed, ${candidateCount} candidate facts, ${pendingEntryCount} pending lore entries.`, 100);
+        recordLoreAttempt(contextKey, {
+            status: status === 'failed' ? 'failed_bulk_scan' : 'pending',
+            lastSource: source,
+            validEntryCount: pendingEntryCount,
+            rawEntryCount: candidateCount,
+            generationMode: profile.mode === 'bootstrap' ? 'bulk-bootstrap' : 'bulk-incremental',
+            targetEntryCount: profile.targetTotal,
+            lastError: status === 'failed' ? `All queued chunks failed (${totalFailed})` : '',
+        }, { increment: false, syncPrompt: false });
+        progress?.(`Story lore scan ${status}: ${completed} chunks complete, ${totalFailed} failed, ${candidateCount} candidate facts, ${pendingEntryCount} pending lore entries.`, 100);
         return {
             status,
             batchId,
@@ -1414,24 +1602,49 @@ export async function runBulkLoreGeneration(options = {}) {
             queuedChunks: queuedChunks.length,
             skippedChunks,
             completedChunkCount: completed,
-            failedChunkCount: failed + rejected,
+            failedChunkCount: totalFailed,
             candidateCount,
             pendingEntryCount,
             droppedDuplicateCount: duplicateDrops,
         };
     } catch (e) {
         const batchId = getState()?.loreBulkGeneration?.activeBatchId || '';
-        if (batchId) updateLoreBulkBatch(batchId, { status: isAbortError(e) ? 'cancelled' : 'failed', error: e?.message || String(e || '') });
+        if (batchId) flushLoreBulkFullCheckpoint(batchId, { status: isAbortError(e) ? 'cancelled' : 'failed', error: e?.message || String(e || '') });
         if (isAbortError(e)) {
-            progress?.('Bulk lore scan cancelled by user.', 0);
+            progress?.('Story lore scan cancelled by user.', 0);
             return { status: 'cancelled', error: 'Cancelled by user' };
         }
         console.error(`${LOG_PREFIX} Bulk lore generation failed:`, e);
-        progress?.(`Bulk lore scan failed: ${e.message || e}`, 100);
+        progress?.(`Story lore scan failed: ${e.message || e}`, 100);
         return { status: 'failed_exception', error: e.message || String(e || '') };
     } finally {
         _generationRunning = false;
     }
+}
+
+/**
+ * Compatibility entrypoint for every story-lore generation caller.
+ * Manual callers use the user's scan UI configuration. Automatic callers are
+ * constrained to recent, stale-only incremental scans so they cannot start a
+ * large backfill unexpectedly.
+ *
+ * @param {Object} [options={}]
+ * @returns {Promise<Object>} Structured lore scan result
+ */
+export async function runStoryLoreScan(options = {}) {
+    const force = options.force !== undefined ? !!options.force : options.source !== 'auto';
+    const source = options.source || (force ? 'manual' : 'auto');
+    const automationSafe = options.automationSafe !== undefined ? !!options.automationSafe : source === 'auto' || !force;
+
+    return await runBulkLoreGeneration({
+        ...options,
+        force,
+        source,
+        automationSafe,
+        scanModeOverride: options.scanModeOverride || (automationSafe ? 'recent' : undefined),
+        rescanModeOverride: options.rescanModeOverride || (automationSafe ? 'skip_unchanged' : undefined),
+        generationModeOverride: options.generationModeOverride || (automationSafe ? 'incremental' : undefined),
+    });
 }
 
 export const __bulkLoreTestHooks = {
@@ -1869,9 +2082,11 @@ export async function runLoreGeneration(options = {}) {
  * Both steps are guarded. Skips generation if detection fails.
  * @returns {Promise<{ detected: Object|null, generated: Object[] }>}
  */
-export async function runLorePipeline() {
-    const detected = await runLoreContextDetection();
-    const generated = detected ? await runLoreGeneration({ force: false }) : [];
+export async function runLorePipeline(options = {}) {
+    const detected = await runLoreContextDetection(options);
+    const generated = detected
+        ? await runStoryLoreScan({ ...options, force: false, source: 'auto', automationSafe: true })
+        : null;
     return { detected, generated };
 }
 

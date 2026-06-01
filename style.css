@@ -2976,3 +2976,100 @@
 .wandlight-bulk-lore-status-card .wandlight-runtime-grid {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
+
+/* Lore tab scan UI consolidation */
+.wandlight-lore-generation-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+    gap: 8px;
+}
+
+.wandlight-lore-generation-panel .wandlight-runtime-help,
+.wandlight-lore-scan-settings-block .wandlight-runtime-help,
+.wandlight-lore-scan-help {
+    font-size: 0.74em;
+    line-height: 1.28;
+}
+
+.wandlight-story-lore-settings-content {
+    gap: 6px;
+}
+
+.wandlight-compact-subsection {
+    margin-bottom: 6px !important;
+    border-radius: 7px !important;
+    background: rgba(0, 0, 0, 0.12) !important;
+}
+
+.wandlight-compact-subsection > .wandlight-collapsible-summary {
+    min-height: 24px !important;
+    padding: 4px 6px !important;
+}
+
+.wandlight-compact-subsection > .wandlight-collapsible-summary .wandlight-collapsible-title {
+    font-size: 0.8em;
+}
+
+.wandlight-compact-subsection > .wandlight-collapsible-summary .wandlight-collapsible-subtitle {
+    font-size: 0.68em;
+    max-width: 50%;
+}
+
+.wandlight-compact-subsection > .wandlight-collapsible-content {
+    padding: 0 6px 6px !important;
+}
+
+.wandlight-lore-scan-settings-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wandlight-lore-scan-settings-block .wandlight-setting-row,
+.wandlight-lore-scan-setting-row,
+.wandlight-lore-scan-settings-block .wandlight-slider-row {
+    margin: 3px 0;
+    font-size: 0.76em;
+    gap: 6px;
+}
+
+.wandlight-lore-scan-settings-block .wandlight-compact-slider-row span {
+    min-width: 108px;
+}
+
+.wandlight-lore-scan-settings-block input[type="number"],
+.wandlight-lore-scan-settings-block select,
+.wandlight-lore-scan-settings-block .text_pole {
+    min-height: 22px;
+    font-size: 0.76em;
+}
+
+.wandlight-lore-scan-compact-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.wandlight-lore-scan-results-summary {
+    margin-bottom: 5px;
+    color: #d7b56d;
+    opacity: 0.9;
+}
+
+.wandlight-lore-scan-results-grid {
+    grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)) !important;
+    margin-bottom: 0;
+}
+
+.wandlight-bulk-lore-status-card {
+    padding: 7px;
+}
+
+.wandlight-bulk-lore-status-card .wandlight-runtime-card-title {
+    margin-bottom: 3px;
+}
+
+@media (max-width: 560px) {
+    .wandlight-lore-generation-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

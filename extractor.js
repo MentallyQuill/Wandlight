@@ -20,7 +20,7 @@ import {
     pushStateSnapshot,
     validateDelta,
 } from './state-manager.js';
-import { runLoreContextDetection, runLoreGeneration } from './lore-generator.js';
+import { runLoreContextDetection, runStoryLoreScan } from './lore-generator.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
 
 /** Guard flag to prevent concurrent extraction passes. */
@@ -527,7 +527,7 @@ export async function onGenerationEndedAutomation() {
             if (!validation.ok) {
                 results.lore = { status: 'api_not_configured', error: validation.message };
             } else {
-                results.lore = await runLoreGeneration({ force: false });
+                results.lore = await runStoryLoreScan({ force: false, source: 'auto', automationSafe: true });
             }
         } catch (e) {
             results.lore = { status: 'failed_exception', error: e?.message || String(e) };

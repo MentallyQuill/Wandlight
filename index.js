@@ -36,7 +36,7 @@ import {
 } from './ui.js';
 import {
     runLoreContextDetection,
-    runLoreGeneration,
+    runStoryLoreScan,
 } from './lore-generator.js';
 import { showLorePanel, hideLorePanel, refreshLorePanel } from './lore-panel.js';
 
@@ -226,18 +226,23 @@ function registerSlashCommands(ctx) {
         }
     }, undefined, '\uD83D\uDD0D Re-run lore context detection', 'Wandlight Lore');
 
-    // /wandlight-lore-generate — trigger lore matrix generation
-    register('wandlight-lore-generate', async () => {
+    const runManualLoreScanCommand = async () => {
         try {
-            if (typeof toastr !== 'undefined') toastr.info('Generating lore matrix entries…');
-            await runLoreGeneration({ force: true, allowReplacePending: true });
+            if (typeof toastr !== 'undefined') toastr.info('Scanning story lore…');
+            await runStoryLoreScan({ force: true, source: 'manual' });
             refreshLorePanel();
-            if (typeof toastr !== 'undefined') toastr.success('Lore matrix generation completed');
+            if (typeof toastr !== 'undefined') toastr.success('Story lore scan completed');
         } catch (e) {
-            console.error(`${LOG_PREFIX} Lore generation failed:`, e);
-            if (typeof toastr !== 'undefined') toastr.error(`Lore generation failed: ${e.message}`);
+            console.error(`${LOG_PREFIX} Lore scan failed:`, e);
+            if (typeof toastr !== 'undefined') toastr.error(`Lore scan failed: ${e.message}`);
         }
-    }, undefined, '\u2728 Generate lore matrix entries', 'Wandlight Lore');
+    };
+
+    // /wandlight-lore-scan — scan story lore with the bulk scan engine
+    register('wandlight-lore-scan', runManualLoreScanCommand, undefined, '\u2728 Scan story lore entries', 'Wandlight Lore');
+
+    // /wandlight-lore-generate — deprecated alias retained for user macros/workflows
+    register('wandlight-lore-generate', runManualLoreScanCommand, undefined, '\u2728 Scan story lore entries', 'Wandlight Lore');
 
     // /wandlight-lore-accept — accept all pending lore entries
     register('wandlight-lore-accept', async () => {
@@ -660,29 +665,29 @@ function wireSettingsPanel(container) {
             const origHTML = generateLoreBtn.innerHTML;
             generateLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
             try {
-                const result = await runLoreGeneration({ force: true, allowReplacePending: true });
+                const result = await runStoryLoreScan({ force: true, source: 'manual' });
 
-                if (result.status === 'proposed') {
-                    if (typeof toastr !== 'undefined') toastr.success(`${result.validEntryCount} lore entries generated (pending review)`);
+                if (result.status === 'complete' || result.status === 'partial') {
+                    if (typeof toastr !== 'undefined') toastr.success(`${result.pendingEntryCount || 0} pending lore entries available after scan`);
                     if (result.droppedEntryCount > 0 && typeof toastr !== 'undefined') {
                         toastr.warning(`${result.droppedEntryCount} entry(s) dropped during normalization`);
                     }
-                } else if (result.status === 'empty_valid_entries') {
+                } else if (result.status === 'empty_valid_entries' || result.status === 'empty_range') {
                     if (typeof toastr !== 'undefined') toastr.warning('Lore generation produced no valid entries');
                 } else if (result.status === 'failed_parse') {
-                    if (typeof toastr !== 'undefined') toastr.error('Could not parse lore generation response');
+                    if (typeof toastr !== 'undefined') toastr.error('Could not parse lore scan response');
                 } else if (result.status === 'failed_no_response') {
-                    if (typeof toastr !== 'undefined') toastr.error('Lore generation returned no response');
+                    if (typeof toastr !== 'undefined') toastr.error('Lore scan returned no response');
                 } else if (result.status === 'failed_exception') {
                     if (typeof toastr !== 'undefined') toastr.error('Lore generation error: ' + (result.error || 'Unknown'));
                 } else {
-                    if (typeof toastr !== 'undefined') toastr.info('Lore generation: ' + result.status);
+                    if (typeof toastr !== 'undefined') toastr.info('Lore scan: ' + result.status);
                 }
 
                 renderLoreContextPreview();
                 renderLoreMatrixPreview();
             } catch (e2) {
-                if (typeof toastr !== 'undefined') toastr.error('Lore generation failed: ' + e2.message);
+                if (typeof toastr !== 'undefined') toastr.error('Lore scan failed: ' + e2.message);
             } finally {
                 generateLoreBtn.disabled = false;
                 generateLoreBtn.innerHTML = origHTML;

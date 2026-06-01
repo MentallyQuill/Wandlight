@@ -156,7 +156,8 @@ export function getState() {
  * Writes state to chatMetadata.wandlight_continuity and persists via saveMetadata().
  * @param {Object} state - WandlightState to save
  */
-export function saveState(state) {
+export function saveState(state, options = {}) {
+    const { syncPrompt = true, sanitize = true } = options || {};
     const ctx = SillyTavern.getContext();
     if (!ctx || !ctx.chatMetadata) {
         console.warn(`${LOG_PREFIX} chatMetadata not available, cannot save state`);
@@ -166,13 +167,17 @@ export function saveState(state) {
     if (!state._version) {
         state._version = SCHEMA_VERSION;
     }
-    state = sanitizeLoreArraysForStorage(state);
+    if (sanitize !== false) {
+        state = sanitizeLoreArraysForStorage(state);
+    }
     chatMetadata[MODULE_KEY] = state;
     migratedStateRefs.add(state);
     if (typeof saveMetadata === 'function') {
         saveMetadata();
     }
-    queuePromptInjectionSync();
+    if (syncPrompt !== false) {
+        queuePromptInjectionSync();
+    }
 }
 
 // ── Snapshot History (real state undo) ──────────────────────────────────────────
@@ -302,7 +307,7 @@ export function saveStateWithSnapshot(state, maxSnapshots) {
 
 // ── Storage safety / recovery helpers ─────────────────────────────────────────
 
-const MAX_PENDING_LORE_ENTRIES = 100;
+const MAX_PENDING_LORE_ENTRIES = 300;
 const MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE = 0; // 0 = uncapped; never drop accepted lore during storage sanitization
 
 
@@ -376,7 +381,21 @@ function prePruneLoreEntryForNormalization(entry) {
     }
 
     pruned.tags = prePruneStringArray(entry.tags, 10, 40);
-    pruned.extensions = {};
+    const generation = entry.extensions?.wandlightGeneration;
+    pruned.extensions = generation && typeof generation === 'object' ? {
+        wandlightGeneration: {
+            mode: truncateText(generation.mode, 40),
+            batchId: truncateText(generation.batchId, 120),
+            chunkId: truncateText(generation.chunkId, 180),
+            startIndex: Number.isFinite(Number(generation.startIndex)) ? Number(generation.startIndex) : 0,
+            endIndex: Number.isFinite(Number(generation.endIndex)) ? Number(generation.endIndex) : 0,
+            messageHash: truncateText(generation.messageHash, 32),
+            evidenceMessageRefs: prePruneStringArray(generation.evidenceMessageRefs, 20, 32),
+            candidateCategory: truncateText(generation.candidateCategory, 60),
+            generatedAt: Number.isFinite(Number(generation.generatedAt)) ? Number(generation.generatedAt) : 0,
+            targetTotal: Number.isFinite(Number(generation.targetTotal)) ? Number(generation.targetTotal) : 0,
+        },
+    } : {};
     return pruned;
 }
 
@@ -411,6 +430,26 @@ function compactStringMapForStorage(value, limit = 16, textLimit = 120) {
         out[cleanKey] = truncateText(raw, textLimit).trim() || 'unknown';
     }
     return out;
+}
+
+
+function compactLoreExtensionsForStorage(normalized) {
+    const generation = normalized?.extensions?.wandlightGeneration;
+    if (!generation || typeof generation !== 'object') return undefined;
+    return {
+        wandlightGeneration: {
+            mode: truncateText(generation.mode, 40),
+            batchId: truncateText(generation.batchId, 120),
+            chunkId: truncateText(generation.chunkId, 180),
+            startIndex: Number.isFinite(Number(generation.startIndex)) ? Number(generation.startIndex) : 0,
+            endIndex: Number.isFinite(Number(generation.endIndex)) ? Number(generation.endIndex) : 0,
+            messageHash: truncateText(generation.messageHash, 32),
+            evidenceMessageRefs: compactStringArray(generation.evidenceMessageRefs, 20, 32),
+            candidateCategory: truncateText(generation.candidateCategory, 60),
+            generatedAt: Number.isFinite(Number(generation.generatedAt)) ? Number(generation.generatedAt) : 0,
+            targetTotal: Number.isFinite(Number(generation.targetTotal)) ? Number(generation.targetTotal) : 0,
+        },
+    };
 }
 
 function compactLoreEntryForStorage(entry) {
@@ -510,6 +549,7 @@ function compactLoreEntryForStorage(entry) {
             chapter: truncateText(normalized.sourceInfo?.chapter, 100),
             confidence: normalized.sourceInfo?.confidence,
         },
+        extensions: compactLoreExtensionsForStorage(normalized),
     };
 }
 
@@ -1736,7 +1776,7 @@ export function setLoreContext(contextUpdate) {
  * @returns {Object} Updated state
  */
 export function recordLoreAttempt(contextKey, patch = {}, options = {}) {
-    const { increment = true } = options;
+    const { increment = true, syncPrompt = true } = options;
     const state = getState();
 
     if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
@@ -1765,7 +1805,7 @@ export function recordLoreAttempt(contextKey, patch = {}, options = {}) {
         state.loreGeneration.lastFailedFor = contextKey;
     }
 
-    saveState(state);
+    saveState(state, { syncPrompt });
     return state;
 }
 
@@ -1875,8 +1915,70 @@ function ensureLoreBulkGenerationLedger(state = getState()) {
     return state.loreBulkGeneration;
 }
 
+function compactBulkCandidateFact(raw = {}) {
+    if (!raw || typeof raw !== 'object') return null;
+    const messageRefs = Array.isArray(raw.messageRefs) ? raw.messageRefs : [];
+    return {
+        category: truncateText(raw.category || 'knowledge', 60),
+        subject: truncateText(raw.subject || 'Story fact', 160),
+        fact: truncateText(raw.fact || raw.text || raw.description || '', 900),
+        priorityHint: truncateText(raw.priorityHint || raw.priority || 'medium', 40),
+        confidence: Number.isFinite(Number(raw.confidence)) ? Math.max(0, Math.min(1, Number(raw.confidence))) : 0.75,
+        messageRefs: messageRefs.map(v => Number(v)).filter(n => Number.isFinite(n) && n > 0).slice(0, 20),
+        scope: raw.scope && typeof raw.scope === 'object' ? raw.scope : {},
+        evidence: truncateText(raw.evidence || '', 400),
+        chunkId: truncateText(raw.chunkId || '', 180),
+        startIndex: Number.isFinite(Number(raw.startIndex)) ? Number(raw.startIndex) : 0,
+        endIndex: Number.isFinite(Number(raw.endIndex)) ? Number(raw.endIndex) : 0,
+    };
+}
+
+function compactBulkCandidates(candidates = [], limit = 80) {
+    const raw = Array.isArray(candidates) ? candidates : [];
+    return raw.slice(0, Math.max(0, Number(limit) || 80)).map(compactBulkCandidateFact).filter(Boolean);
+}
+
+function compactBulkLedger(state, options = {}) {
+    const ledger = ensureLoreBulkGenerationLedger(state);
+    const retainCompletedBatches = Math.max(1, Number(options.retainCompletedBatches) || Number(getSettings().loreBulkRetainCompletedBatches) || 3);
+    const batchEntries = Object.entries(ledger.batches || {}).sort((a, b) => Number(b[1]?.updatedAt || b[1]?.createdAt || 0) - Number(a[1]?.updatedAt || a[1]?.createdAt || 0));
+    const keepBatchIds = new Set();
+    let completedKept = 0;
+    for (const [id, batch] of batchEntries) {
+        const status = String(batch?.status || '');
+        if (id === ledger.activeBatchId || status === 'running' || status === 'queued' || status === 'partial' || status === 'failed') {
+            keepBatchIds.add(id);
+        } else if (completedKept < retainCompletedBatches) {
+            keepBatchIds.add(id);
+            completedKept++;
+        }
+    }
+    if (ledger.lastBatchId) keepBatchIds.add(ledger.lastBatchId);
+
+    for (const id of Object.keys(ledger.batches || {})) {
+        if (!keepBatchIds.has(id)) delete ledger.batches[id];
+    }
+    for (const [chunkId, chunk] of Object.entries(ledger.chunks || {})) {
+        if (chunk?.batchId && !keepBatchIds.has(chunk.batchId)) delete ledger.chunks[chunkId];
+    }
+    for (const [chunkId, record] of Object.entries(ledger.candidates || {})) {
+        if (record?.batchId && !keepBatchIds.has(record.batchId)) delete ledger.candidates[chunkId];
+    }
+    return ledger;
+}
+
+function saveBulkLedgerState(state, options = {}) {
+    const { full = false, syncPrompt = false } = options || {};
+    if (full) {
+        compactBulkLedger(state, options);
+    }
+    saveState(state, { syncPrompt, sanitize: full });
+}
+
 /**
  * Creates or updates a resumable bulk lore scan batch.
+ * Batch creation is an immediate durable checkpoint, but it deliberately does
+ * not queue prompt-injection sync because pending/accepted lore has not changed.
  * @param {Object} batch - Batch metadata. Must include id.
  * @returns {Object} Updated state
  */
@@ -1893,10 +1995,12 @@ export function startLoreBulkBatch(batch = {}) {
         createdAt: previous.createdAt || Date.now(),
         updatedAt: Date.now(),
         startedAt: batch.startedAt || previous.startedAt || Date.now(),
+        lastFullCheckpointAt: previous.lastFullCheckpointAt || 0,
+        lastFullCheckpointChunkCount: previous.lastFullCheckpointChunkCount || 0,
     };
     ledger.activeBatchId = id;
     ledger.lastBatchId = id;
-    saveState(state);
+    saveBulkLedgerState(state, { full: true, syncPrompt: false });
     return state;
 }
 
@@ -1904,9 +2008,10 @@ export function startLoreBulkBatch(batch = {}) {
  * Patches a bulk lore scan batch.
  * @param {string} batchId - Batch id
  * @param {Object} patch - Fields to merge
+ * @param {Object} [options] - { full?: boolean, syncPrompt?: boolean }
  * @returns {Object} Updated state
  */
-export function updateLoreBulkBatch(batchId, patch = {}) {
+export function updateLoreBulkBatch(batchId, patch = {}, options = {}) {
     const state = getState();
     const ledger = ensureLoreBulkGenerationLedger(state);
     const id = String(batchId || ledger.activeBatchId || ledger.lastBatchId || '');
@@ -1921,7 +2026,7 @@ export function updateLoreBulkBatch(batchId, patch = {}) {
     if (patch.status && !['running', 'queued'].includes(String(patch.status))) {
         if (ledger.activeBatchId === id) ledger.activeBatchId = '';
     }
-    saveState(state);
+    saveBulkLedgerState(state, { full: options.full !== false, syncPrompt: !!options.syncPrompt });
     return state;
 }
 
@@ -1929,9 +2034,10 @@ export function updateLoreBulkBatch(batchId, patch = {}) {
  * Patches a single chunk in the bulk lore scan ledger.
  * @param {string} chunkId - Stable chunk id
  * @param {Object} patch - Fields to merge
+ * @param {Object} [options] - { full?: boolean, syncPrompt?: boolean }
  * @returns {Object} Updated state
  */
-export function updateLoreBulkChunk(chunkId, patch = {}) {
+export function updateLoreBulkChunk(chunkId, patch = {}, options = {}) {
     const state = getState();
     const ledger = ensureLoreBulkGenerationLedger(state);
     const id = String(chunkId || '');
@@ -1943,7 +2049,7 @@ export function updateLoreBulkChunk(chunkId, patch = {}) {
         id,
         updatedAt: Date.now(),
     };
-    saveState(state);
+    saveBulkLedgerState(state, { full: !!options.full, syncPrompt: !!options.syncPrompt });
     return state;
 }
 
@@ -1952,9 +2058,10 @@ export function updateLoreBulkChunk(chunkId, patch = {}) {
  * @param {string} batchId - Batch id
  * @param {string} chunkId - Chunk id
  * @param {Object[]} candidates - Candidate fact objects
+ * @param {Object} [options] - { full?: boolean, syncPrompt?: boolean }
  * @returns {Object} Updated state
  */
-export function storeLoreBulkCandidates(batchId, chunkId, candidates = []) {
+export function storeLoreBulkCandidates(batchId, chunkId, candidates = [], options = {}) {
     const state = getState();
     const ledger = ensureLoreBulkGenerationLedger(state);
     const id = String(chunkId || '');
@@ -1962,10 +2069,114 @@ export function storeLoreBulkCandidates(batchId, chunkId, candidates = []) {
     ledger.candidates[id] = {
         batchId: String(batchId || ''),
         chunkId: id,
-        candidates: Array.isArray(candidates) ? candidates : [],
+        candidates: compactBulkCandidates(candidates, options.maxCandidates || 80),
         updatedAt: Date.now(),
     };
-    saveState(state);
+    saveBulkLedgerState(state, { full: !!options.full, syncPrompt: !!options.syncPrompt });
+    return state;
+}
+
+/**
+ * Writes a single durable bulk-scan checkpoint. This is the primary write-ahead
+ * log primitive for large scans: one small, prompt-sync-free save records chunk
+ * status, optional candidates, and optional batch counters.
+ * @param {string} chunkId - Stable chunk id
+ * @param {Object} payload - { batchId, chunkPatch, candidates, batchPatch, rawResponse }
+ * @param {Object} [options] - { full?: boolean, syncPrompt?: boolean }
+ * @returns {Object} Updated state
+ */
+export function checkpointLoreBulkChunk(chunkId, payload = {}, options = {}) {
+    const state = getState();
+    const ledger = ensureLoreBulkGenerationLedger(state);
+    const id = String(chunkId || payload.chunkId || '');
+    if (!id) return state;
+    const batchId = String(payload.batchId || payload.chunkPatch?.batchId || payload.batchPatch?.id || ledger.activeBatchId || ledger.lastBatchId || '');
+    const previous = ledger.chunks[id] || { id, attempts: 0, createdAt: Date.now() };
+    const rawResponse = payload.rawResponse && getSettings().loreBulkRetainRawResponses ? truncateText(payload.rawResponse, 20000) : '';
+    ledger.chunks[id] = {
+        ...previous,
+        ...(payload.chunkPatch || {}),
+        id,
+        batchId: batchId || previous.batchId || '',
+        rawResponse,
+        updatedAt: Date.now(),
+    };
+    if (Array.isArray(payload.candidates)) {
+        ledger.candidates[id] = {
+            batchId,
+            chunkId: id,
+            candidates: compactBulkCandidates(payload.candidates, payload.maxCandidates || 80),
+            updatedAt: Date.now(),
+        };
+    }
+    if (batchId && payload.batchPatch && typeof payload.batchPatch === 'object') {
+        const batchPrevious = ledger.batches[batchId] || { id: batchId, createdAt: Date.now() };
+        ledger.batches[batchId] = {
+            ...batchPrevious,
+            ...payload.batchPatch,
+            id: batchId,
+            updatedAt: Date.now(),
+        };
+        if (payload.batchPatch.status && !['running', 'queued'].includes(String(payload.batchPatch.status))) {
+            if (ledger.activeBatchId === batchId) ledger.activeBatchId = '';
+        }
+    }
+    saveBulkLedgerState(state, { full: !!options.full, syncPrompt: !!options.syncPrompt });
+    return state;
+}
+
+/**
+ * Marks stale in-flight chunks as interrupted so resuming scans can distinguish
+ * abandoned work from currently running work.
+ * @param {number} [staleMs] - Running/retrying chunks older than this are interrupted
+ * @returns {Object} Updated state
+ */
+export function markInterruptedLoreBulkChunks(staleMs = 10 * 60 * 1000) {
+    const state = getState();
+    const ledger = ensureLoreBulkGenerationLedger(state);
+    const cutoff = Date.now() - Math.max(1000, Number(staleMs) || 600000);
+    let changed = false;
+    for (const [id, chunk] of Object.entries(ledger.chunks || {})) {
+        const status = String(chunk?.status || '');
+        const updatedAt = Number(chunk?.updatedAt || chunk?.startedAt || chunk?.lastScannedAt || 0);
+        if ((status === 'running' || status === 'retrying') && (!updatedAt || updatedAt < cutoff)) {
+            ledger.chunks[id] = {
+                ...chunk,
+                status: 'interrupted',
+                error: chunk?.error || 'Previous scan was interrupted before this chunk completed.',
+                updatedAt: Date.now(),
+            };
+            changed = true;
+        }
+    }
+    if (changed) saveBulkLedgerState(state, { full: false, syncPrompt: false });
+    return state;
+}
+
+/**
+ * Forces a full bulk ledger checkpoint after a batch of lightweight chunk writes.
+ * @param {string} batchId - Batch id
+ * @param {Object} [patch] - Optional batch patch
+ * @returns {Object} Updated state
+ */
+export function flushLoreBulkFullCheckpoint(batchId, patch = {}) {
+    const state = getState();
+    const ledger = ensureLoreBulkGenerationLedger(state);
+    const id = String(batchId || ledger.activeBatchId || ledger.lastBatchId || '');
+    if (!id) return state;
+    const previous = ledger.batches[id] || { id, createdAt: Date.now() };
+    ledger.batches[id] = {
+        ...previous,
+        ...patch,
+        id,
+        updatedAt: Date.now(),
+        lastFullCheckpointAt: Date.now(),
+        lastFullCheckpointChunkCount: Number(patch.completedChunks ?? previous.completedChunks ?? 0) + Number(patch.failedChunks ?? previous.failedChunks ?? 0),
+    };
+    if (patch.status && !['running', 'queued'].includes(String(patch.status))) {
+        if (ledger.activeBatchId === id) ledger.activeBatchId = '';
+    }
+    saveBulkLedgerState(state, { full: true, syncPrompt: false });
     return state;
 }
 
@@ -1978,7 +2189,7 @@ export function storeLoreBulkCandidates(batchId, chunkId, candidates = []) {
  * @returns {{ state: Object, changed: boolean, appendedCount: number, pendingCount: number }}
  */
 export function appendPendingLoreEntries(entries, meta = {}, options = {}) {
-    const { snapshot = false, snapshotLabel = 'Append bulk pending lore entries' } = options;
+    const { snapshot = false, snapshotLabel = 'Append bulk pending lore entries', syncPrompt = true, full = true } = options;
     const state = getState();
     const settings = getSettings();
     const incoming = normalizeLoreMatrix(entries || []);
@@ -2049,7 +2260,7 @@ export function appendPendingLoreEntries(entries, meta = {}, options = {}) {
         lastSource: state.pendingLoreMeta.source,
     };
 
-    saveState(state);
+    saveState(state, { syncPrompt, sanitize: full });
     return { state, changed: true, appendedCount: Math.max(0, merged.length - before.length), pendingCount: merged.length };
 }
 
@@ -2060,7 +2271,7 @@ export function appendPendingLoreEntries(entries, meta = {}, options = {}) {
  * @param {Object} patch - Metadata fields to merge
  * @returns {Object} Updated state
  */
-export function patchPendingLoreMeta(patch = {}) {
+export function patchPendingLoreMeta(patch = {}, options = {}) {
     const state = getState();
     if (!state.pendingLoreMeta || typeof state.pendingLoreMeta !== 'object') {
         return state;
@@ -2071,7 +2282,7 @@ export function patchPendingLoreMeta(patch = {}) {
         updatedAt: Date.now(),
         validEntryCount: Array.isArray(state.pendingLoreEntries) ? state.pendingLoreEntries.length : 0,
     };
-    saveState(state);
+    saveState(state, { syncPrompt: options.syncPrompt !== false, sanitize: options.full !== false });
     return state;
 }
 

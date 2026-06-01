@@ -19,8 +19,6 @@ It is useful for:
 - Users who want explicit control over what continuity and lore are injected into the prompt.
 - Users who are comfortable configuring model providers, scan ranges, and review workflows.
 
-It may be excessive for short, casual, low-continuity chats.
-
 ## What Wandlight Does
 
 Wandlight separates story memory into four layers.
@@ -32,30 +30,11 @@ Wandlight separates story memory into four layers.
 | Lore | Stores durable story and canon facts as reviewable entries. | Secrets, relationships, milestones, canon gates, AU divergences, item history. |
 | Injection | Controls what is actually sent back to the model. | Direct or compressed Continuity and Lore blocks, prompt role, position, depth. |
 
-The distinction matters. Continuity is the short-term operational layer. Lore is the durable memory layer. If a fact should remain true across many scenes, it usually belongs in Lore. If a fact is mainly needed for the next few replies, it usually belongs in Continuity.
-
-## Quick Mental Model
-
-```text
-Context tells Wandlight where the story is.
-Continuity tells the model what is happening now.
-Lore tells the model what remains true over time.
-Injection controls how much of that reaches the prompt.
-```
-
 ## Getting Started
 
 ### 1. Install
 
-Install the extension folder here:
-
-```text
-data/default-user/extensions/third-party/WandlightContinuity
-```
-
-Then restart SillyTavern.
-
-Keep the folder name as `WandlightContinuity` unless you also update the extension folder constant in the code. After restart, open SillyTavern's Extensions panel and find `Wandlight Continuity`.
+Install using the Github URL: https://github.com/MentallyQuill/WandlightContinuity
 
 ### 2. Open the Runtime Window
 
@@ -453,17 +432,6 @@ Current Continuity sections:
 | Key Items | Consequential currently relevant items. |
 | Active Goals | Current objectives, blockers, stakes, and statuses. |
 | Active Threads | Immediate unresolved threads affecting the next scene. |
-
-Removed from first-class Continuity tracking:
-
-- Knowledge
-- Secrets
-- Relationship history
-- Story milestones
-- Canon divergences
-- Continuity Issues / Flags
-
-Those belong in Story Lore Scan and accepted Lore entries when they are durable.
 
 ### Scan Continuity State
 

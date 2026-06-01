@@ -1,0 +1,1474 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-31",
+  "sourceBasis": "Harry Potter Lexicon day-by-day calendar and annual timeline pages; paraphrased factual anchors only.",
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_frank_bryce_dream",
+      "title": "Frank Bryce murder and Harry dream",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 87,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-08-23",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Lord Voldemort",
+          "Frank Bryce",
+          "Peter Pettigrew",
+          "Sirius Black"
+        ],
+        "locations": [
+          "Little Hangleton",
+          "Privet Drive"
+        ],
+        "factions": [],
+        "topics": [
+          "Voldemort dream",
+          "Frank Bryce",
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry wakes from a vision of Voldemort murdering Frank Bryce and writes to Sirius, while the Weasleys invite him to the World Cup.",
+        "injection": "Harry wakes from a vision of Voldemort murdering Frank Bryce and writes to Sirius, while the Weasleys invite him to the World Cup.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-08-23:frank_bryce_dream"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_world_cup_pickup",
+      "title": "Weasleys collect Harry for Quidditch World Cup",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 60,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-08-24",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Arthur Weasley",
+          "Ron Weasley",
+          "Fred Weasley",
+          "George Weasley"
+        ],
+        "locations": [
+          "Privet Drive",
+          "The Burrow"
+        ],
+        "factions": [],
+        "topics": [
+          "World Cup",
+          "Weasley family",
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Arthur, Ron, Fred, and George collect Harry from Privet Drive so he can attend the Quidditch World Cup with the Weasleys.",
+        "injection": "Arthur, Ron, Fred, and George collect Harry from Privet Drive so he can attend the Quidditch World Cup with the Weasleys.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-08-24:world_cup_pickup"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_world_cup_riot",
+      "title": "World Cup riot and Dark Mark aftermath",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 92,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-08-25",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley",
+          "Barty Crouch Sr.",
+          "Winky"
+        ],
+        "locations": [
+          "Quidditch World Cup campsite"
+        ],
+        "factions": [],
+        "topics": [
+          "Dark Mark",
+          "Death Eaters",
+          "Winky",
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the Quidditch World Cup, Death Eater activity and the Dark Mark cause panic at the campsite and expose Winky and Crouch-family mystery threads.",
+        "injection": "After the Quidditch World Cup, Death Eater activity and the Dark Mark cause panic at the campsite and expose Winky and Crouch-family mystery threads.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-08-25:world_cup_riot"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_moody_kidnapped",
+      "title": "Real Moody kidnapped before term",
+      "kind": "knowledge_guard",
+      "gateType": "knowledge_guard",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 96,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-08-31",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Alastor Moody",
+          "Barty Crouch Jr.",
+          "Peter Pettigrew"
+        ],
+        "locations": [
+          "Moody home"
+        ],
+        "factions": [],
+        "topics": [
+          "Moody impostor",
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The real Alastor Moody is attacked before the school year begins, allowing Barty Crouch Jr. to impersonate him at Hogwarts.",
+        "injection": "The real Alastor Moody is attacked before the school year begins, allowing Barty Crouch Jr. to impersonate him at Hogwarts.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "knowledge_guard",
+          "knowledge"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-08-31:moody_kidnapped"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_unforgivables_first_dada",
+      "title": "Moody teaches Unforgivable Curses",
+      "kind": "spell_gate",
+      "gateType": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-09-04",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Barty Crouch Jr.",
+          "Neville Longbottom"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Defence Against the Dark Arts classroom"
+        ],
+        "factions": [],
+        "topics": [
+          "Unforgivable Curses",
+          "Goblet of Fire",
+          "Year 4",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [
+          "Imperio",
+          "Crucio",
+          "Avada Kedavra"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "In the first DADA class, the Moody impostor demonstrates the Unforgivable Curses, including the Imperius Curse, establishing unusually severe classroom exposure.",
+        "injection": "In the first DADA class, the Moody impostor demonstrates the Unforgivable Curses, including the Imperius Curse, establishing unusually severe classroom exposure.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "term_start",
+          "spell_gate",
+          "spell"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-09-04:unforgivables_first_dada"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_summoning_charms_preparation",
+      "title": "Summoning Charms begin before first task",
+      "kind": "spell_gate",
+      "gateType": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-10-25",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Summoning Charms",
+          "Triwizard preparation",
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [
+          "Accio"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry’s Charms work on Summoning becomes crucial once he needs Accio for the first Triwizard task.",
+        "injection": "Harry’s Charms work on Summoning becomes crucial once he needs Accio for the first Triwizard task.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "spell_gate",
+          "spell"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-10-25:summoning_charms_preparation"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_foreign_schools_arrival",
+      "title": "Beauxbatons and Durmstrang arrive",
+      "kind": "institution_state",
+      "gateType": "institution_state",
+      "category": "institution",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 72,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-10-30",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Olympe Maxime",
+          "Igor Karkaroff",
+          "Viktor Krum",
+          "Fleur Delacour"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Triwizard Tournament",
+          "Beauxbatons",
+          "Durmstrang",
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Beauxbatons and Durmstrang delegations arrive at Hogwarts, shifting the school into Triwizard Tournament hosting mode.",
+        "injection": "Beauxbatons and Durmstrang delegations arrive at Hogwarts, shifting the school into Triwizard Tournament hosting mode.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "institution_state",
+          "institution"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-10-30:foreign_schools_arrival"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_goblet_names_harry_selected",
+      "title": "Harry selected as fourth Triwizard champion",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 97,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-10-31",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Cedric Diggory",
+          "Fleur Delacour",
+          "Viktor Krum",
+          "Albus Dumbledore"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Great Hall"
+        ],
+        "factions": [],
+        "topics": [
+          "Goblet of Fire",
+          "Triwizard champions",
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Goblet of Fire"
+        ],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Goblet of Fire selects Cedric, Fleur, Krum, and unexpectedly Harry, binding Harry to compete and triggering his conflict with Ron.",
+        "injection": "The Goblet of Fire selects Cedric, Fleur, Krum, and unexpectedly Harry, binding Harry to compete and triggering his conflict with Ron.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-10-31:goblet_names_harry_selected"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_wand_weighing_skeeter",
+      "title": "Weighing of the Wands and Rita interview",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 70,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-11-13",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Rita Skeeter",
+          "Cedric Diggory",
+          "Viktor Krum",
+          "Fleur Delacour"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Rita Skeeter",
+          "public reputation",
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Weighing of the Wands gives Rita Skeeter an opportunity to frame Harry publicly as the Tournament’s attention-grabbing fourth champion.",
+        "injection": "The Weighing of the Wands gives Rita Skeeter an opportunity to frame Harry publicly as the Tournament’s attention-grabbing fourth champion.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-11-13:wand_weighing_skeeter"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_hagrid_dragons_sirius_fire",
+      "title": "Dragon task revealed and Sirius fire call",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 84,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-11-22",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Rubeus Hagrid",
+          "Sirius Black",
+          "Cedric Diggory"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Hagrid hut",
+          "Gryffindor common room"
+        ],
+        "factions": [],
+        "topics": [
+          "dragons",
+          "first task",
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Hagrid shows Harry the dragons shortly after midnight, and Harry later consults Sirius by fireplace before telling Cedric.",
+        "injection": "Hagrid shows Harry the dragons shortly after midnight, and Harry later consults Sirius by fireplace before telling Cedric.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-11-22:hagrid_dragons_sirius_fire"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_first_task_dragon",
+      "title": "First task completed with dragon and golden egg",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 91,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-11-24",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Cedric Diggory",
+          "Fleur Delacour",
+          "Viktor Krum"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Triwizard arena"
+        ],
+        "factions": [],
+        "topics": [
+          "first task",
+          "Hungarian Horntail",
+          "golden egg",
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "golden egg",
+          "Firebolt"
+        ],
+        "spells": [
+          "Accio"
+        ],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry uses Accio to summon his broom, evade the Hungarian Horntail, and retrieve the golden egg for the first Triwizard task.",
+        "injection": "Harry uses Accio to summon his broom, evade the Hungarian Horntail, and retrieve the golden egg for the first Triwizard task.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-11-24:first_task_dragon"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_yule_ball",
+      "title": "Yule Ball social pivot",
+      "kind": "relationship_gate",
+      "gateType": "relationship_gate",
+      "category": "relationship",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 63,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-12-25",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Viktor Krum",
+          "Cho Chang",
+          "Cedric Diggory"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Great Hall"
+        ],
+        "factions": [],
+        "topics": [
+          "Yule Ball",
+          "romance",
+          "Goblet of Fire",
+          "Year 4",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Yule Ball reshapes several social dynamics, including Harry’s interest in Cho, Ron’s jealousy over Hermione and Krum, and Cedric’s relationship with Cho.",
+        "injection": "The Yule Ball reshapes several social dynamics, including Harry’s interest in Cho, Ron’s jealousy over Hermione and Krum, and Cedric’s relationship with Cho.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "winter",
+          "relationship_gate",
+          "relationship"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1994-12-25:yule_ball"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_egg_clue_bath",
+      "title": "Myrtle helps Harry solve egg clue",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 74,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-01-21",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Moaning Myrtle",
+          "Barty Crouch Jr."
+        ],
+        "locations": [
+          "Hogwarts",
+          "prefects bathroom"
+        ],
+        "factions": [],
+        "topics": [
+          "golden egg",
+          "second task clue",
+          "Goblet of Fire",
+          "Year 4",
+          "winter_term",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "golden egg"
+        ],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "winter_term"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry takes the golden egg to the prefects’ bathroom and, with Myrtle’s help, realizes the second task is underwater.",
+        "injection": "Harry takes the golden egg to the prefects’ bathroom and, with Myrtle’s help, realizes the second task is underwater.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "winter_term",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1995-01-21:egg_clue_bath"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_second_task_lake",
+      "title": "Second task lake hostages",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 87,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-02-24",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Gabrielle Delacour",
+          "Cedric Diggory"
+        ],
+        "locations": [
+          "Hogwarts lake"
+        ],
+        "factions": [],
+        "topics": [
+          "second task",
+          "Gillyweed",
+          "merpeople",
+          "Goblet of Fire",
+          "Year 4",
+          "winter_term",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Gillyweed"
+        ],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "winter_term"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The second Triwizard task sends Harry into the lake to rescue hostages, where he uses Gillyweed and finishes tied with Cedric in first place.",
+        "injection": "The second Triwizard task sends Harry into the lake to rescue hostages, where he uses Gillyweed and finishes tied with Cedric in first place.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "winter_term",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1995-02-24:second_task_lake"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_sirius_cave_meeting",
+      "title": "Sirius meets trio in cave near Hogsmeade",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 72,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-03-06",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Sirius Black"
+        ],
+        "locations": [
+          "Hogsmeade",
+          "cave"
+        ],
+        "factions": [],
+        "topics": [
+          "Sirius adviser",
+          "Hogsmeade",
+          "Goblet of Fire",
+          "Year 4",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry, Ron, and Hermione meet Sirius in a cave near Hogsmeade, making him an active hidden adviser during the Tournament year.",
+        "injection": "Harry, Ron, and Hermione meet Sirius in a cave near Hogsmeade, making him an active hidden adviser during the Tournament year.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "spring",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1995-03-06:sirius_cave_meeting"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_crouch_sr_escape",
+      "title": "Crouch Sr. appears at Hogwarts grounds",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-05-27",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Barty Crouch Sr.",
+          "Viktor Krum",
+          "Albus Dumbledore"
+        ],
+        "locations": [
+          "Hogwarts grounds",
+          "Forbidden Forest edge"
+        ],
+        "factions": [],
+        "topics": [
+          "Crouch mystery",
+          "Voldemort",
+          "Goblet of Fire",
+          "Year 4",
+          "climax",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "climax"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Barty Crouch Sr. appears near the Hogwarts grounds in a distressed state after escaping Voldemort’s control, escalating the hidden Crouch mystery.",
+        "injection": "Barty Crouch Sr. appears near the Hogwarts grounds in a distressed state after escaping Voldemort’s control, escalating the hidden Crouch mystery.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "climax",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1995-05-27:crouch_sr_escape"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y4_third_task_graveyard_return",
+      "title": "Third task becomes graveyard trap",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-06-24",
+        "validTo": "1995-08-31",
+        "precision": "date",
+        "schoolYear": 4,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Cedric Diggory",
+          "Lord Voldemort",
+          "Peter Pettigrew",
+          "Barty Crouch Jr."
+        ],
+        "locations": [
+          "Hogwarts maze",
+          "Little Hangleton graveyard"
+        ],
+        "factions": [],
+        "topics": [
+          "third task",
+          "Voldemort return",
+          "Cedric death",
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Triwizard Cup"
+        ],
+        "spells": [],
+        "schoolYears": [
+          4
+        ],
+        "books": [
+          "Goblet of Fire"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The third task’s Triwizard Cup functions as a Portkey to the graveyard, where Cedric is killed, Voldemort regains a body, and Harry survives the duel.",
+        "injection": "The third task’s Triwizard Cup functions as a Portkey to the graveyard, where Cedric is killed, Voldemort regains a body, and Harry survives the duel.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Goblet of Fire",
+          "Year 4",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Goblet of Fire",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-goblet-fire/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fourth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:gof:1995-06-24:third_task_graveyard_return"
+    }
+  ]
+}

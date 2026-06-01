@@ -1,0 +1,1288 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-31",
+  "sourceBasis": "Harry Potter Lexicon day-by-day calendar and annual timeline pages; paraphrased factual anchors only.",
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_marge_knight_bus",
+      "title": "Aunt Marge incident and Knight Bus escape",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 77,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-08-06",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Marge Dursley",
+          "Stan Shunpike",
+          "Cornelius Fudge"
+        ],
+        "locations": [
+          "Privet Drive",
+          "Knight Bus",
+          "Leaky Cauldron"
+        ],
+        "factions": [],
+        "topics": [
+          "Aunt Marge",
+          "Knight Bus",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After Harry accidentally inflates Aunt Marge, he leaves Privet Drive and reaches the Leaky Cauldron by Knight Bus.",
+        "injection": "After Harry accidentally inflates Aunt Marge, he leaves Privet Drive and reaches the Leaky Cauldron by Knight Bus.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-08-06:marge_knight_bus"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_diagon_alley_wait",
+      "title": "Harry spends final summer weeks in Diagon Alley",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 55,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-08-07",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Cornelius Fudge"
+        ],
+        "locations": [
+          "Leaky Cauldron",
+          "Diagon Alley"
+        ],
+        "factions": [],
+        "topics": [
+          "summer",
+          "Diagon Alley",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Fudge allows Harry to stay at the Leaky Cauldron, giving him an unusually free late-summer period in Diagon Alley before third year.",
+        "injection": "Fudge allows Harry to stay at the Leaky Cauldron, giving him an unusually free late-summer period in Diagon Alley before third year.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-08-07:diagon_alley_wait"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_crookshanks_firebolt_display",
+      "title": "Crookshanks bought and Firebolt noticed",
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "category": "artifact",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 64,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-08-31",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "locations": [
+          "Diagon Alley",
+          "Quality Quidditch Supplies"
+        ],
+        "factions": [],
+        "topics": [
+          "Crookshanks",
+          "Firebolt",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Crookshanks",
+          "Firebolt"
+        ],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Before term starts, Hermione buys Crookshanks and Harry notices the Firebolt on display, setting up later conflicts over Scabbers and the broom.",
+        "injection": "Before term starts, Hermione buys Crookshanks and Harry notices the Firebolt on display, setting up later conflicts over Scabbers and the broom.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "artifact_state",
+          "artifact"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-08-31:crookshanks_firebolt_display"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_dementor_train_lupin",
+      "title": "Dementors board Hogwarts Express; Lupin intervenes",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 86,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-09-01",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Remus Lupin",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "Hogwarts Express"
+        ],
+        "factions": [],
+        "topics": [
+          "Dementors",
+          "Sirius Black",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dementors search the Hogwarts Express for Sirius Black, causing Harry to collapse until Lupin drives them away.",
+        "injection": "Dementors search the Hogwarts Express for Sirius Black, causing Harry to collapse until Lupin drives them away.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "term_start",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-09-01:dementor_train_lupin"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_buckbeak_injury",
+      "title": "Buckbeak injures Draco during first Care of Magical Creatures lesson",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 74,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-09-02",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Rubeus Hagrid",
+          "Draco Malfoy",
+          "Harry Potter"
+        ],
+        "locations": [
+          "Hogwarts grounds"
+        ],
+        "factions": [],
+        "topics": [
+          "Buckbeak",
+          "hippogriff",
+          "Hagrid teaching",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Hagrid’s first Care of Magical Creatures class introduces hippogriffs, and Draco’s mishandling of Buckbeak results in injury and later legal consequences.",
+        "injection": "Hagrid’s first Care of Magical Creatures class introduces hippogriffs, and Draco’s mishandling of Buckbeak results in injury and later legal consequences.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "term_start",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-09-02:buckbeak_injury"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_boggart_lesson",
+      "title": "Lupin teaches Boggart lesson",
+      "kind": "skill_band",
+      "gateType": "skill_band",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 61,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-09-10",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Remus Lupin",
+          "Harry Potter",
+          "Neville Longbottom"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Defence Against the Dark Arts classroom"
+        ],
+        "factions": [],
+        "topics": [
+          "Boggart",
+          "DADA",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Lupin’s early Defence Against the Dark Arts Boggart lesson establishes him as a practically effective teacher and reveals several students’ fears.",
+        "injection": "Lupin’s early Defence Against the Dark Arts Boggart lesson establishes him as a practically effective teacher and reveals several students’ fears.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "term_start",
+          "skill_band",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-09-10:boggart_lesson"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_fat_lady_attack",
+      "title": "Sirius attacks the Fat Lady after first Hogsmeade visit",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 87,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-10-31",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Sirius Black",
+          "Harry Potter",
+          "Fat Lady"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Gryffindor Tower",
+          "Great Hall"
+        ],
+        "factions": [],
+        "topics": [
+          "Sirius Black",
+          "Fat Lady",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After Harry’s first restricted Hogsmeade day, Sirius Black attacks the Fat Lady and the students sleep in the Great Hall during the castle search.",
+        "injection": "After Harry’s first restricted Hogsmeade day, Sirius Black attacks the Fat Lady and the students sleep in the Great Hall during the castle search.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-10-31:fat_lady_attack"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_first_dementor_match",
+      "title": "Dementors disrupt Gryffindor-Hufflepuff match",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-11-06",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Cedric Diggory"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Quidditch pitch",
+          "Whomping Willow"
+        ],
+        "factions": [],
+        "topics": [
+          "Dementors",
+          "Quidditch",
+          "Nimbus destroyed",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Nimbus 2000"
+        ],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dementors enter the Quidditch match, Harry falls from his broom, Hufflepuff wins, and the Nimbus 2000 is destroyed by the Whomping Willow.",
+        "injection": "Dementors enter the Quidditch match, Harry falls from his broom, Hufflepuff wins, and the Nimbus 2000 is destroyed by the Whomping Willow.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-11-06:first_dementor_match"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_marauders_map_hogsmeade",
+      "title": "Marauder Map enables secret Hogsmeade visit",
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "category": "artifact",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 82,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-12-18",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Fred Weasley",
+          "George Weasley",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Hogsmeade"
+        ],
+        "factions": [],
+        "topics": [
+          "Marauder Map",
+          "Sirius backstory",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Marauder's Map"
+        ],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Fred and George give Harry the Marauder’s Map, allowing him to enter Hogsmeade secretly and hear the public version of Sirius’s betrayal.",
+        "injection": "Fred and George give Harry the Marauder’s Map, allowing him to enter Hogsmeade secretly and hear the public version of Sirius’s betrayal.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter",
+          "artifact_state",
+          "artifact"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-12-18:marauders_map_hogsmeade"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_firebolt_confiscated",
+      "title": "Firebolt arrives and is confiscated",
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "category": "artifact",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 74,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-12-25",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Minerva McGonagall",
+          "Ron Weasley"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Firebolt",
+          "trio conflict",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Firebolt"
+        ],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry receives a Firebolt at Christmas, but Hermione reports it and McGonagall confiscates it for safety checks.",
+        "injection": "Harry receives a Firebolt at Christmas, but Hermione reports it and McGonagall confiscates it for safety checks.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter",
+          "artifact_state",
+          "artifact"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1993-12-25:firebolt_confiscated"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_patronus_lessons_start",
+      "title": "Lupin begins Patronus lessons for Harry",
+      "kind": "spell_gate",
+      "gateType": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 84,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-01-06",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Remus Lupin"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Patronus Charm",
+          "Dementors",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter_term",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [
+          "Expecto Patronum"
+        ],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "winter_term"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Lupin starts private anti-Dementor lessons with Harry, initiating Harry’s path toward a corporeal Patronus.",
+        "injection": "Lupin starts private anti-Dementor lessons with Harry, initiating Harry’s path toward a corporeal Patronus.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter_term",
+          "spell_gate",
+          "spell"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1994-01-06:patronus_lessons_start"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_ron_curtains_sirius",
+      "title": "Sirius enters Gryffindor Tower seeking Scabbers",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-02-05",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Sirius Black",
+          "Ron Weasley",
+          "Peter Pettigrew"
+        ],
+        "locations": [
+          "Gryffindor Tower"
+        ],
+        "factions": [],
+        "topics": [
+          "Scabbers",
+          "Sirius Black",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter_term",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "winter_term"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Sirius Black breaches Gryffindor Tower and slashes Ron’s bed curtains while trying to reach Scabbers.",
+        "injection": "Sirius Black breaches Gryffindor Tower and slashes Ron’s bed curtains while trying to reach Scabbers.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter_term",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1994-02-05:ron_curtains_sirius"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_buckbeak_execution_notice",
+      "title": "Buckbeak execution notice after hearing",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 75,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-02-12",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Rubeus Hagrid",
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Buckbeak"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Hagrid hut"
+        ],
+        "factions": [],
+        "topics": [
+          "Buckbeak trial",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter_term",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "winter_term"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the legal hearing, Hagrid tells the trio that Buckbeak has been sentenced to execution.",
+        "injection": "After the legal hearing, Hagrid tells the trio that Buckbeak has been sentenced to execution.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "winter_term",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1994-02-12:buckbeak_execution_notice"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_shrieking_shack_reveal",
+      "title": "Shrieking Shack reveals Sirius, Lupin, and Pettigrew truth",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-06-06",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Sirius Black",
+          "Remus Lupin",
+          "Peter Pettigrew",
+          "Severus Snape"
+        ],
+        "locations": [
+          "Shrieking Shack"
+        ],
+        "factions": [],
+        "topics": [
+          "Marauders",
+          "Pettigrew",
+          "Sirius innocence",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Shrieking Shack confrontation reveals that Peter Pettigrew betrayed the Potters, Sirius was framed, Lupin is a werewolf, and Scabbers is Pettigrew.",
+        "injection": "The Shrieking Shack confrontation reveals that Peter Pettigrew betrayed the Potters, Sirius was framed, Lupin is a werewolf, and Scabbers is Pettigrew.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1994-06-06:shrieking_shack_reveal"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y3_time_turner_rescue",
+      "title": "Time-Turner rescue saves Sirius and Buckbeak",
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "category": "artifact",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 95,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1994-06-06",
+        "validTo": "1994-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Sirius Black",
+          "Buckbeak"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Forbidden Forest"
+        ],
+        "factions": [],
+        "topics": [
+          "Time-Turner",
+          "rescue",
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Time-Turner"
+        ],
+        "spells": [],
+        "schoolYears": [
+          3
+        ],
+        "books": [
+          "Prisoner of Azkaban"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Hermione and Harry use the Time-Turner to rescue Buckbeak and help Sirius escape, while keeping the timeline self-consistent.",
+        "injection": "Hermione and Harry use the Time-Turner to rescue Buckbeak and help Sirius escape, while keeping the timeline self-consistent.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Prisoner of Azkaban",
+          "Year 3",
+          "summer",
+          "artifact_state",
+          "artifact"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-prisoner-azkaban/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-third-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:poa:1994-06-06:time_turner_rescue"
+    }
+  ]
+}

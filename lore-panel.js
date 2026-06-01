@@ -2182,10 +2182,10 @@ function createContinuitySectionToggleCard(state) {
     }
     card.appendChild(grid);
 
-    const help = document.createElement('div');
-    help.className = 'wandlight-runtime-help';
-    help.textContent = 'This follows tracker-style design: schema sections are chat-specific and optional, so a simple scene can track only date and scene while a detailed sim can track emotions, clothing, objects, and goals.';
-    card.appendChild(help);
+    const sectionHelp = document.createElement('div');
+    sectionHelp.className = 'wandlight-runtime-help';
+    sectionHelp.textContent = 'This follows tracker-style design: schema sections are chat-specific and optional, so a simple scene can track only date and scene while a detailed sim can track emotions, clothing, objects, and goals.';
+    card.appendChild(sectionHelp);
     return card;
 }
 

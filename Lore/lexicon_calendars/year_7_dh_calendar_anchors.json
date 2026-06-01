@@ -1,0 +1,1406 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-31",
+  "sourceBasis": "Harry Potter Lexicon day-by-day calendar and annual timeline pages; paraphrased factual anchors only.",
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_malfoy_manor_meeting_burbage",
+      "title": "Malfoy Manor meeting and Charity Burbage death",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 94,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-07-21",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Lord Voldemort",
+          "Charity Burbage",
+          "Severus Snape",
+          "Lucius Malfoy",
+          "Narcissa Malfoy"
+        ],
+        "locations": [
+          "Malfoy Manor"
+        ],
+        "factions": [],
+        "topics": [
+          "Death Eaters",
+          "Charity Burbage",
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Death Eaters meet at Malfoy Manor shortly before the Seven Potters operation, and Charity Burbage is murdered for pro-Muggle views.",
+        "injection": "Death Eaters meet at Malfoy Manor shortly before the Seven Potters operation, and Charity Burbage is murdered for pro-Muggle views.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-07-21:malfoy_manor_meeting_burbage"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_seven_potters",
+      "title": "Seven Potters operation",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 98,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-07-27",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Rubeus Hagrid",
+          "Mad-Eye Moody",
+          "Hedwig",
+          "Order of the Phoenix"
+        ],
+        "locations": [
+          "Privet Drive",
+          "Tonks family home",
+          "The Burrow"
+        ],
+        "factions": [],
+        "topics": [
+          "Seven Potters",
+          "Hedwig death",
+          "Moody death",
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Order moves Harry from Privet Drive using decoys; Hedwig and Mad-Eye Moody die during the ambush before Harry reaches the Burrow.",
+        "injection": "The Order moves Harry from Privet Drive using decoys; Hedwig and Mad-Eye Moody die during the ambush before Harry reaches the Burrow.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-07-27:seven_potters"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_dumbledore_will_birthday",
+      "title": "Harry turns seventeen and receives Dumbledore bequests",
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "category": "artifact",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 85,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-07-31",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Rufus Scrimgeour",
+          "Ginny Weasley"
+        ],
+        "locations": [
+          "The Burrow"
+        ],
+        "factions": [],
+        "topics": [
+          "seventeenth birthday",
+          "Dumbledore will",
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Deluminator",
+          "Snitch",
+          "The Tales of Beedle the Bard"
+        ],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "On Harry’s seventeenth birthday, Scrimgeour delivers Dumbledore’s bequests to Harry, Ron, and Hermione.",
+        "injection": "On Harry’s seventeenth birthday, Scrimgeour delivers Dumbledore’s bequests to Harry, Ron, and Hermione.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "artifact_state",
+          "artifact"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-07-31:dumbledore_will_birthday"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_wedding_ministry_falls",
+      "title": "Wedding ambush and Ministry fall",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 97,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-08-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Bill Weasley",
+          "Fleur Delacour",
+          "Kingsley Shacklebolt"
+        ],
+        "locations": [
+          "The Burrow",
+          "12 Grimmauld Place"
+        ],
+        "factions": [],
+        "topics": [
+          "Ministry fall",
+          "wedding ambush",
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During Bill and Fleur’s wedding, news arrives that the Ministry has fallen; Death Eaters attack and the trio flees to Grimmauld Place.",
+        "injection": "During Bill and Fleur’s wedding, news arrives that the Ministry has fallen; Death Eaters attack and the trio flees to Grimmauld Place.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-08-01:wedding_ministry_falls"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_rab_kreacher_locket",
+      "title": "RAB identity and Kreacher locket story",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 91,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-08-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Kreacher",
+          "Regulus Black",
+          "Mundungus Fletcher"
+        ],
+        "locations": [
+          "12 Grimmauld Place"
+        ],
+        "factions": [],
+        "topics": [
+          "RAB",
+          "Kreacher",
+          "locket",
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Slytherin locket"
+        ],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "At Grimmauld Place, the trio connects R.A.B. to Regulus Black and learns from Kreacher how Mundungus took the real locket.",
+        "injection": "At Grimmauld Place, the trio connects R.A.B. to Regulus Black and learns from Kreacher how Mundungus took the real locket.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-08-02:rab_kreacher_locket"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_ministry_locket_retrieval",
+      "title": "Ministry infiltration recovers locket",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 94,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-09-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Dolores Umbridge"
+        ],
+        "locations": [
+          "Ministry of Magic"
+        ],
+        "factions": [],
+        "topics": [
+          "Ministry infiltration",
+          "locket Horcrux",
+          "Deathly Hallows",
+          "Year 7",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Slytherin locket"
+        ],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The trio infiltrates the Ministry in disguise and escapes with Slytherin’s locket, beginning the difficult camping phase of the Horcrux hunt.",
+        "injection": "The trio infiltrates the Ministry in disguise and escapes with Slytherin’s locket, beginning the difficult camping phase of the Horcrux hunt.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "term_start",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-09-02:ministry_locket_retrieval"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_camping_horcrux_effects",
+      "title": "Camping phase and locket strain",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-09-03",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "various campsites"
+        ],
+        "factions": [],
+        "topics": [
+          "camping",
+          "Horcrux effects",
+          "Deathly Hallows",
+          "Year 7",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Slytherin locket"
+        ],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "While traveling between protected campsites, the trio experiences the locket Horcrux’s negative effects and the practical limits of their plan.",
+        "injection": "While traveling between protected campsites, the trio experiences the locket Horcrux’s negative effects and the practical limits of their plan.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "term_start",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-09-03:camping_horcrux_effects"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_ron_leaves",
+      "title": "Ron leaves during autumn camping phase",
+      "kind": "relationship_gate",
+      "gateType": "relationship_gate",
+      "category": "relationship",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 88,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-10-31",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Ron Weasley",
+          "Harry Potter",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "campsite"
+        ],
+        "factions": [],
+        "topics": [
+          "Ron leaves",
+          "Horcrux strain",
+          "approximate_date",
+          "Deathly Hallows",
+          "Year 7",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During the extended camping search, conflict and Horcrux influence culminate in Ron leaving Harry and Hermione.",
+        "injection": "During the extended camping search, conflict and Horcrux influence culminate in Ron leaving Harry and Hermione.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "autumn",
+          "relationship_gate",
+          "relationship"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.76,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-10-31:ron_leaves"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_godrics_hollow",
+      "title": "Godric’s Hollow visit and broken wand",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 91,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-12-24",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Nagini",
+          "Bathilda Bagshot"
+        ],
+        "locations": [
+          "Godric's Hollow"
+        ],
+        "factions": [],
+        "topics": [
+          "Godric’s Hollow",
+          "Nagini",
+          "broken wand",
+          "Deathly Hallows",
+          "Year 7",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Harry Potter wand"
+        ],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry and Hermione visit Godric’s Hollow, find the Potter graves and house, are attacked through Bathilda/Nagini, and Harry’s wand is broken during escape.",
+        "injection": "Harry and Hermione visit Godric’s Hollow, find the Potter graves and house, are attacked through Bathilda/Nagini, and Harry’s wand is broken during escape.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "winter",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-12-24:godrics_hollow"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_silver_doe_locket_destroyed",
+      "title": "Silver doe, Ron return, and locket destroyed",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 96,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-12-26",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Severus Snape"
+        ],
+        "locations": [
+          "Forest of Dean"
+        ],
+        "factions": [],
+        "topics": [
+          "silver doe",
+          "Ron return",
+          "locket destroyed",
+          "Deathly Hallows",
+          "Year 7",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Gryffindor sword",
+          "Slytherin locket"
+        ],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "In the Forest of Dean, Harry finds Gryffindor’s sword through the silver doe; Ron returns, saves Harry, and destroys the locket Horcrux.",
+        "injection": "In the Forest of Dean, Harry finds Gryffindor’s sword through the silver doe; Ron returns, saves Harry, and destroys the locket Horcrux.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "winter",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-12-26:silver_doe_locket_destroyed"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_xenophilius_hallows",
+      "title": "Xenophilius explains Deathly Hallows",
+      "kind": "knowledge_gate",
+      "gateType": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 94,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-12-28",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Xenophilius Lovegood"
+        ],
+        "locations": [
+          "Lovegood house"
+        ],
+        "factions": [],
+        "topics": [
+          "Deathly Hallows",
+          "Xenophilius",
+          "Deathly Hallows",
+          "Year 7",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Deathly Hallows symbol"
+        ],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The trio visits Xenophilius Lovegood, learns the Deathly Hallows framework, and narrowly escapes his attempt to hand them to the Ministry.",
+        "injection": "The trio visits Xenophilius Lovegood, learns the Deathly Hallows framework, and narrowly escapes his attempt to hand them to the Ministry.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "winter",
+          "knowledge_gate",
+          "knowledge"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1997-12-28:xenophilius_hallows"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_malfoy_manor_escape",
+      "title": "Malfoy Manor escape and Dobby death",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1998-04-08",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Dobby",
+          "Bellatrix Lestrange",
+          "Draco Malfoy"
+        ],
+        "locations": [
+          "Malfoy Manor",
+          "Shell Cottage"
+        ],
+        "factions": [],
+        "topics": [
+          "Malfoy Manor",
+          "Dobby death",
+          "approximate_date",
+          "Deathly Hallows",
+          "Year 7",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After Snatchers capture the trio, they are taken to Malfoy Manor and escape with help from Dobby, who dies during the rescue.",
+        "injection": "After Snatchers capture the trio, they are taken to Malfoy Manor and escape with help from Dobby, who dies during the rescue.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "spring",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.76,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1998-04-08:malfoy_manor_escape"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_shell_cottage_planning",
+      "title": "Shell Cottage recovery and Gringotts planning",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 76,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1998-04-09",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Griphook",
+          "Garrick Ollivander",
+          "Bill Weasley"
+        ],
+        "locations": [
+          "Shell Cottage"
+        ],
+        "factions": [],
+        "topics": [
+          "Dobby burial",
+          "Gringotts planning",
+          "approximate_date",
+          "Deathly Hallows",
+          "Year 7",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "At Shell Cottage, Harry buries Dobby, consults Ollivander and Griphook, and begins planning the Gringotts break-in.",
+        "injection": "At Shell Cottage, Harry buries Dobby, consults Ollivander and Griphook, and begins planning the Gringotts break-in.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "spring",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.76,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1998-04-09:shell_cottage_planning"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_teddy_birth",
+      "title": "Teddy Lupin born; Harry named godfather",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 68,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1998-04-18",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Remus Lupin",
+          "Nymphadora Tonks",
+          "Harry Potter",
+          "Teddy Lupin"
+        ],
+        "locations": [
+          "Shell Cottage"
+        ],
+        "factions": [],
+        "topics": [
+          "Teddy Lupin",
+          "godfather",
+          "approximate_date",
+          "Deathly Hallows",
+          "Year 7",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Lupin arrives at Shell Cottage to announce Teddy’s birth and asks Harry to be godfather.",
+        "injection": "Lupin arrives at Shell Cottage to announce Teddy’s birth and asks Harry to be godfather.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "spring",
+          "character_state",
+          "character"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.76,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1998-04-18:teddy_birth"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_gringotts_hogwarts_return",
+      "title": "Gringotts break-in and return to Hogwarts",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 98,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1998-05-01",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Griphook",
+          "Aberforth Dumbledore"
+        ],
+        "locations": [
+          "Gringotts",
+          "Hogsmeade",
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Gringotts",
+          "Hufflepuff Cup",
+          "Hogwarts return",
+          "Deathly Hallows",
+          "Year 7",
+          "climax",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Hufflepuff Cup",
+          "Gryffindor sword"
+        ],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "climax"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The trio steals Hufflepuff’s Cup from Gringotts, escapes by dragon, then returns to Hogsmeade and Hogwarts as the final battle begins.",
+        "injection": "The trio steals Hufflepuff’s Cup from Gringotts, escapes by dragon, then returns to Hogsmeade and Hogwarts as the final battle begins.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "climax",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1998-05-01:gringotts_hogwarts_return"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y7_battle_hogwarts_final",
+      "title": "Battle of Hogwarts and Voldemort defeated",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1998-05-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Lord Voldemort",
+          "Severus Snape",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Neville Longbottom",
+          "Fred Weasley",
+          "Remus Lupin",
+          "Nymphadora Tonks"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Battle of Hogwarts",
+          "Voldemort defeat",
+          "Horcruxes",
+          "Deathly Hallows",
+          "Year 7",
+          "climax",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Elder Wand",
+          "Ravenclaw diadem",
+          "Nagini"
+        ],
+        "spells": [],
+        "schoolYears": [
+          7
+        ],
+        "books": [
+          "Deathly Hallows"
+        ],
+        "phases": [
+          "climax"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Battle of Hogwarts destroys the remaining Horcruxes, causes major deaths, reveals Snape’s loyalties, and ends with Voldemort’s defeat.",
+        "injection": "The Battle of Hogwarts destroys the remaining Horcruxes, causes major deaths, reveals Snape’s loyalties, and ends with Voldemort’s defeat.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Year 7",
+          "climax",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Deathly Hallows",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-deathly-hallows/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-seventh-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:dh:1998-05-02:battle_hogwarts_final"
+    }
+  ]
+}

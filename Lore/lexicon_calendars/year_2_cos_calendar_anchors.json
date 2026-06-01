@@ -1,0 +1,1377 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-31",
+  "sourceBasis": "Harry Potter Lexicon day-by-day calendar and annual timeline pages; paraphrased factual anchors only.",
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_birthday_dobby_warning",
+      "title": "Dobby warning on Harry’s twelfth birthday",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-07-31",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Dobby",
+          "Vernon Dursley",
+          "Petunia Dursley"
+        ],
+        "locations": [
+          "Privet Drive"
+        ],
+        "factions": [],
+        "topics": [
+          "Dobby",
+          "underage magic warning",
+          "Chamber of Secrets",
+          "Year 2",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "On Harry’s twelfth birthday, Dobby warns him not to return to Hogwarts and causes a magical incident that brings a Ministry warning.",
+        "injection": "On Harry’s twelfth birthday, Dobby warns him not to return to Hogwarts and causes a magical incident that brings a Ministry warning.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-07-31:birthday_dobby_warning"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_flying_car_rescue",
+      "title": "Flying car rescue from Privet Drive",
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "category": "artifact",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 73,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-08-03",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Fred Weasley",
+          "George Weasley"
+        ],
+        "locations": [
+          "Privet Drive",
+          "The Burrow"
+        ],
+        "factions": [],
+        "topics": [
+          "flying car",
+          "rescue",
+          "Chamber of Secrets",
+          "Year 2",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Ford Anglia"
+        ],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Ron, Fred, and George use the flying Ford Anglia to rescue Harry from Privet Drive and bring him to the Burrow.",
+        "injection": "Ron, Fred, and George use the flying Ford Anglia to rescue Harry from Privet Drive and bring him to the Burrow.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "summer",
+          "artifact_state",
+          "artifact"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-08-03:flying_car_rescue"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_knockturn_lockhart_diagon",
+      "title": "Knockturn Alley and Lockhart signing",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 66,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-08-19",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Gilderoy Lockhart",
+          "Lucius Malfoy",
+          "Draco Malfoy",
+          "Arthur Weasley"
+        ],
+        "locations": [
+          "Knockturn Alley",
+          "Diagon Alley",
+          "Flourish and Blotts"
+        ],
+        "factions": [],
+        "topics": [
+          "Floo",
+          "Lockhart",
+          "Lucius",
+          "Chamber of Secrets",
+          "Year 2",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry’s Floo misfire sends him to Knockturn Alley before he reunites with the Weasleys at Diagon Alley and encounters Lockhart and Lucius Malfoy at the book signing.",
+        "injection": "Harry’s Floo misfire sends him to Knockturn Alley before he reunites with the Weasleys at Diagon Alley and encounters Lockhart and Lucius Malfoy at the book signing.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-08-19:knockturn_lockhart_diagon"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_barrier_closed_car_crash",
+      "title": "Platform barrier closes and car reaches Hogwarts",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-09-01",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley"
+        ],
+        "locations": [
+          "King's Cross Station",
+          "Hogwarts",
+          "Whomping Willow"
+        ],
+        "factions": [],
+        "topics": [
+          "flying car",
+          "Whomping Willow",
+          "Chamber of Secrets",
+          "Year 2",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Ford Anglia"
+        ],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The barrier to Platform Nine and Three-Quarters closes on Harry and Ron, leading them to fly the Ford Anglia to Hogwarts and crash into the Whomping Willow.",
+        "injection": "The barrier to Platform Nine and Three-Quarters closes on Harry and Ron, leading them to fly the Ford Anglia to Hogwarts and crash into the Whomping Willow.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "term_start",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-09-01:barrier_closed_car_crash"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_ginny_sorted",
+      "title": "Ginny Weasley sorted into Gryffindor",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 56,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-09-01",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Ginny Weasley"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Great Hall"
+        ],
+        "factions": [],
+        "topics": [
+          "Sorting",
+          "Gryffindor",
+          "Chamber of Secrets",
+          "Year 2",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Ginny Weasley begins Hogwarts and is sorted into Gryffindor during Harry’s second year.",
+        "injection": "Ginny Weasley begins Hogwarts and is sorted into Gryffindor during Harry’s second year.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "term_start",
+          "character_state",
+          "character"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-09-01:ginny_sorted"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_lockhart_pixies",
+      "title": "Lockhart releases Cornish pixies in DADA",
+      "kind": "behavior_gate",
+      "gateType": "behavior_gate",
+      "category": "behavior",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 54,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-09-03",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Gilderoy Lockhart",
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Defence Against the Dark Arts classroom"
+        ],
+        "factions": [],
+        "topics": [
+          "Lockhart",
+          "Cornish pixies",
+          "Chamber of Secrets",
+          "Year 2",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Lockhart’s early Defence Against the Dark Arts lesson with Cornish pixies demonstrates his poor practical classroom control.",
+        "injection": "Lockhart’s early Defence Against the Dark Arts lesson with Cornish pixies demonstrates his poor practical classroom control.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "term_start",
+          "behavior_gate",
+          "behavior"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-09-03:lockhart_pixies"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_basilisk_voice_first",
+      "title": "Harry first hears the basilisk voice",
+      "kind": "knowledge_guard",
+      "gateType": "knowledge_guard",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 82,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-09-05",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "basilisk voice",
+          "Parseltongue",
+          "Chamber of Secrets",
+          "Year 2",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry first hears the hidden basilisk voice during detention, before anyone understands that the sound is Parseltongue-linked and connected to the Chamber.",
+        "injection": "Harry first hears the hidden basilisk voice during detention, before anyone understands that the sound is Parseltongue-linked and connected to the Chamber.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "term_start",
+          "knowledge_guard",
+          "knowledge"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-09-05:basilisk_voice_first"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_deathday_mrs_norris",
+      "title": "Deathday party and Mrs Norris petrified",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 88,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-10-31",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Argus Filch",
+          "Nearly Headless Nick"
+        ],
+        "locations": [
+          "Hogwarts",
+          "second-floor corridor"
+        ],
+        "factions": [],
+        "topics": [
+          "Chamber attacks",
+          "petrification",
+          "Chamber of Secrets",
+          "Year 2",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Halloween brings Nearly Headless Nick’s deathday party, Harry’s second hearing of the hidden voice, and the petrification of Mrs Norris.",
+        "injection": "Halloween brings Nearly Headless Nick’s deathday party, Harry’s second hearing of the hidden voice, and the petrification of Mrs Norris.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-10-31:deathday_mrs_norris"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_chamber_legend_library",
+      "title": "Chamber legend explained and potion research begins",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 74,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-11-04",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Cuthbert Binns",
+          "Moaning Myrtle"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Moaning Myrtle bathroom",
+          "library"
+        ],
+        "factions": [],
+        "topics": [
+          "Chamber of Secrets",
+          "Polyjuice Potion",
+          "Chamber of Secrets",
+          "Year 2",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "History of Magic discussion and Myrtle’s bathroom lead the trio toward the Chamber legend and the research needed to brew Polyjuice Potion.",
+        "injection": "History of Magic discussion and Myrtle’s bathroom lead the trio toward the Chamber legend and the research needed to brew Polyjuice Potion.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-11-04:chamber_legend_library"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_rogue_bludger_colin",
+      "title": "Rogue Bludger match and Colin petrified",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 83,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-11-07",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Dobby",
+          "Colin Creevey",
+          "Gilderoy Lockhart"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Quidditch pitch",
+          "hospital wing"
+        ],
+        "factions": [],
+        "topics": [
+          "rogue Bludger",
+          "petrification",
+          "Chamber of Secrets",
+          "Year 2",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During the Gryffindor-Slytherin Quidditch match, a rogue Bludger breaks Harry’s arm; that night Dobby visits Harry and Colin Creevey is petrified.",
+        "injection": "During the Gryffindor-Slytherin Quidditch match, a rogue Bludger breaks Harry’s arm; that night Dobby visits Harry and Colin Creevey is petrified.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-11-07:rogue_bludger_colin"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_dueling_club_parseltongue",
+      "title": "Dueling Club exposes Harry’s Parseltongue",
+      "kind": "knowledge_gate",
+      "gateType": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 86,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-12-17",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Draco Malfoy",
+          "Gilderoy Lockhart",
+          "Severus Snape"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Great Hall"
+        ],
+        "factions": [],
+        "topics": [
+          "Dueling Club",
+          "Parseltongue",
+          "Chamber of Secrets",
+          "Year 2",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "At the Dueling Club, Harry speaks Parseltongue publicly, increasing suspicion that he may be connected to Slytherin’s heir.",
+        "injection": "At the Dueling Club, Harry speaks Parseltongue publicly, increasing suspicion that he may be connected to Slytherin’s heir.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "winter",
+          "knowledge_gate",
+          "knowledge"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-12-17:dueling_club_parseltongue"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_polyjuice_christmas",
+      "title": "Polyjuice infiltration and Hermione mishap",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 82,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1992-12-25",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Draco Malfoy"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Slytherin common room",
+          "hospital wing"
+        ],
+        "factions": [],
+        "topics": [
+          "Polyjuice Potion",
+          "Slytherin infiltration",
+          "Chamber of Secrets",
+          "Year 2",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "On Christmas, the Polyjuice plan lets Harry and Ron impersonate Crabbe and Goyle, while Hermione’s cat-hair mistake sends her to the hospital wing.",
+        "injection": "On Christmas, the Polyjuice plan lets Harry and Ron impersonate Crabbe and Goyle, while Hermione’s cat-hair mistake sends her to the hospital wing.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "winter",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1992-12-25:polyjuice_christmas"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_riddle_diary_valentine",
+      "title": "Harry communicates with Tom Riddle through the diary",
+      "kind": "knowledge_guard",
+      "gateType": "knowledge_guard",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 91,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-02-14",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Tom Riddle",
+          "Ginny Weasley",
+          "Rubeus Hagrid"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Tom Riddle diary",
+          "false memory",
+          "Chamber of Secrets",
+          "Year 2",
+          "winter_term",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Tom Riddle diary"
+        ],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "winter_term"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "On Valentine’s Day, Harry uses the diary to communicate with Tom Riddle and receives a misleading vision about Hagrid and the Chamber.",
+        "injection": "On Valentine’s Day, Harry uses the diary to communicate with Tom Riddle and receives a misleading vision about Hagrid and the Chamber.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "winter_term",
+          "knowledge_guard",
+          "knowledge"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1993-02-14:riddle_diary_valentine"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_hermione_penelope_petrified",
+      "title": "Hermione and Penelope petrified; Dumbledore removed",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 93,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-05-08",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Hermione Granger",
+          "Penelope Clearwater",
+          "Albus Dumbledore",
+          "Rubeus Hagrid"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "petrification",
+          "Dumbledore removed",
+          "Azkaban",
+          "Chamber of Secrets",
+          "Year 2",
+          "climax",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "climax"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The fourth attack petrifies Hermione and Penelope, cancels Quidditch, and leads to Dumbledore’s removal and Hagrid’s imprisonment.",
+        "injection": "The fourth attack petrifies Hermione and Penelope, cancels Quidditch, and leads to Dumbledore’s removal and Hagrid’s imprisonment.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "climax",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1993-05-08:hermione_penelope_petrified"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_aragog_clue",
+      "title": "Aragog reveals Hagrid did not open the Chamber",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 77,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-05-24",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Aragog",
+          "Rubeus Hagrid"
+        ],
+        "locations": [
+          "Forbidden Forest"
+        ],
+        "factions": [],
+        "topics": [
+          "Aragog",
+          "Chamber clue",
+          "Chamber of Secrets",
+          "Year 2",
+          "climax",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "climax"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry and Ron’s visit to Aragog clarifies that Hagrid was not responsible for the old Chamber attack and points away from the acromantula as the monster.",
+        "injection": "Harry and Ron’s visit to Aragog clarifies that Hagrid was not responsible for the old Chamber attack and points away from the acromantula as the monster.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "climax",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1993-05-24:aragog_clue"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y2_chamber_resolution_feast",
+      "title": "Chamber resolution and Dobby freed",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 97,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1993-05-29",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ginny Weasley",
+          "Tom Riddle",
+          "Dobby",
+          "Lucius Malfoy",
+          "Albus Dumbledore",
+          "Rubeus Hagrid"
+        ],
+        "locations": [
+          "Chamber of Secrets",
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "basilisk",
+          "diary destroyed",
+          "Dobby freed",
+          "Chamber of Secrets",
+          "Year 2",
+          "climax",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Tom Riddle diary",
+          "Gryffindor sword"
+        ],
+        "spells": [],
+        "schoolYears": [
+          2
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "climax"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Ginny is rescued, the basilisk is killed, the diary is destroyed, Dumbledore and Hagrid return, the victims recover, Lucius loses influence, and Dobby is freed.",
+        "injection": "Ginny is rescued, the basilisk is killed, the diary is destroyed, Dumbledore and Hagrid return, the victims recover, Lucius loses influence, and Dobby is freed.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Chamber of Secrets",
+          "Year 2",
+          "climax",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Chamber of Secrets",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:cos:1993-05-29:chamber_resolution_feast"
+    }
+  ]
+}

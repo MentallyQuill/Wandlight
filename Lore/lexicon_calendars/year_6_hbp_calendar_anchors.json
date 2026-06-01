@@ -1,0 +1,1474 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-31",
+  "sourceBasis": "Harry Potter Lexicon day-by-day calendar and annual timeline pages; paraphrased factual anchors only.",
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_privet_slughorn_recruitment",
+      "title": "Dumbledore collects Harry and recruits Slughorn",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-07-12",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Albus Dumbledore",
+          "Horace Slughorn",
+          "Vernon Dursley",
+          "Petunia Dursley"
+        ],
+        "locations": [
+          "Privet Drive",
+          "Budleigh Babberton",
+          "The Burrow"
+        ],
+        "factions": [],
+        "topics": [
+          "Slughorn recruitment",
+          "summer",
+          "Half-Blood Prince",
+          "Year 6",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dumbledore collects Harry from Privet Drive, confronts the Dursleys socially, and brings Harry along while persuading Slughorn to return to Hogwarts.",
+        "injection": "Dumbledore collects Harry from Privet Drive, confronts the Dursleys socially, and brings Harry along while persuading Slughorn to return to Hogwarts.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-07-12:privet_slughorn_recruitment"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_owl_results_arrive",
+      "title": "OWL results define sixth-year course access",
+      "kind": "skill_band",
+      "gateType": "skill_band",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 66,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-07-13",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "The Burrow"
+        ],
+        "factions": [],
+        "topics": [
+          "OWL results",
+          "NEWT courses",
+          "Half-Blood Prince",
+          "Year 6",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry’s OWL results arrive at the Burrow, shaping which NEWT-level courses he can take in sixth year.",
+        "injection": "Harry’s OWL results arrive at the Burrow, shaping which NEWT-level courses he can take in sixth year.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "summer",
+          "skill_band",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-07-13:owl_results_arrive"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_diagon_draco_suspicion",
+      "title": "Diagon Alley visit sharpens Draco suspicion",
+      "kind": "knowledge_guard",
+      "gateType": "knowledge_guard",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 82,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-08-03",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Draco Malfoy",
+          "Narcissa Malfoy",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "locations": [
+          "Diagon Alley",
+          "Borgin and Burkes",
+          "Madam Malkin shop"
+        ],
+        "factions": [],
+        "topics": [
+          "Draco suspicion",
+          "Borgin and Burkes",
+          "Half-Blood Prince",
+          "Year 6",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During the Diagon Alley trip, Harry’s observations of Draco and Narcissa deepen his suspicion that Draco is involved with Death Eaters.",
+        "injection": "During the Diagon Alley trip, Harry’s observations of Draco and Narcissa deepen his suspicion that Draco is involved with Death Eaters.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "summer",
+          "knowledge_guard",
+          "knowledge"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-08-03:diagon_draco_suspicion"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_hogwarts_express_slug_club",
+      "title": "Slug Club begins on Hogwarts Express",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 80,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Horace Slughorn",
+          "Draco Malfoy",
+          "Nymphadora Tonks",
+          "Severus Snape"
+        ],
+        "locations": [
+          "Hogwarts Express",
+          "Hogsmeade station"
+        ],
+        "factions": [],
+        "topics": [
+          "Slug Club",
+          "Draco mission",
+          "Half-Blood Prince",
+          "Year 6",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Slughorn’s first train gathering establishes the Slug Club social channel, while Harry’s spying on Draco results in him being stunned and hidden.",
+        "injection": "Slughorn’s first train gathering establishes the Slug Club social channel, while Harry’s spying on Draco results in him being stunned and hidden.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "term_start",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-09-01:hogwarts_express_slug_club"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_hbp_book_felix",
+      "title": "Half-Blood Prince book wins Felix Felicis",
+      "kind": "artifact_state",
+      "gateType": "artifact_state",
+      "category": "artifact",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 88,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-09-02",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Horace Slughorn",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Potions classroom"
+        ],
+        "factions": [],
+        "topics": [
+          "Half-Blood Prince book",
+          "Felix Felicis",
+          "Half-Blood Prince",
+          "Year 6",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Half-Blood Prince textbook",
+          "Felix Felicis"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry receives the annotated Potions book, uses its instructions to excel, and wins Felix Felicis from Slughorn.",
+        "injection": "Harry receives the annotated Potions book, uses its instructions to excel, and wins Felix Felicis from Slughorn.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "term_start",
+          "artifact_state",
+          "artifact"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-09-02:hbp_book_felix"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_first_memory_lesson",
+      "title": "First Dumbledore memory lesson: Gaunts",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 87,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-09-07",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Albus Dumbledore",
+          "Lord Voldemort",
+          "Marvolo Gaunt",
+          "Merope Gaunt"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Dumbledore office"
+        ],
+        "factions": [],
+        "topics": [
+          "memory lessons",
+          "Gaunt family",
+          "Half-Blood Prince",
+          "Year 6",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dumbledore’s first private lesson shows Harry the Gaunt family background and begins the structured investigation of Voldemort’s past.",
+        "injection": "Dumbledore’s first private lesson shows Harry the Gaunt family background and begins the structured investigation of Voldemort’s past.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "term_start",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-09-07:first_memory_lesson"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_quidditch_tryouts_slug_dinner",
+      "title": "Quidditch tryouts and first Slug Club dinner",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 68,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-09-14",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger",
+          "Ginny Weasley",
+          "Horace Slughorn"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Quidditch pitch"
+        ],
+        "factions": [],
+        "topics": [
+          "Quidditch tryouts",
+          "Slug Club",
+          "Half-Blood Prince",
+          "Year 6",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry selects a new Gryffindor Quidditch team, Hermione helps Ron secure Keeper, and the first Slug Club dinner reinforces Slughorn’s favoritism network.",
+        "injection": "Harry selects a new Gryffindor Quidditch team, Hermione helps Ron secure Keeper, and the first Slug Club dinner reinforces Slughorn’s favoritism network.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "term_start",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-09-14:quidditch_tryouts_slug_dinner"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_katie_necklace_attack",
+      "title": "Katie Bell cursed by necklace",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 91,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-10-12",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Katie Bell",
+          "Harry Potter",
+          "Draco Malfoy",
+          "Minerva McGonagall"
+        ],
+        "locations": [
+          "Hogsmeade",
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "cursed necklace",
+          "Draco mission",
+          "Half-Blood Prince",
+          "Year 6",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "cursed opal necklace"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Katie Bell is Imperiused and cursed through a necklace during a Hogsmeade trip, supporting Harry’s suspicion that Draco is attempting murder.",
+        "injection": "Katie Bell is Imperiused and cursed through a necklace during a Hogsmeade trip, supporting Harry’s suspicion that Draco is attempting murder.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-10-12:katie_necklace_attack"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_ron_lavender_party",
+      "title": "Ron and Lavender relationship starts after Quidditch win",
+      "kind": "relationship_gate",
+      "gateType": "relationship_gate",
+      "category": "relationship",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 60,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-11-03",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Ron Weasley",
+          "Lavender Brown",
+          "Hermione Granger",
+          "Harry Potter"
+        ],
+        "locations": [
+          "Gryffindor common room"
+        ],
+        "factions": [],
+        "topics": [
+          "Ron Lavender",
+          "Hermione conflict",
+          "Half-Blood Prince",
+          "Year 6",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After Gryffindor wins a Quidditch match, Ron kisses Lavender, escalating tension with Hermione and altering the trio’s social dynamic.",
+        "injection": "After Gryffindor wins a Quidditch match, Ron kisses Lavender, escalating tension with Hermione and altering the trio’s social dynamic.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "autumn",
+          "relationship_gate",
+          "relationship"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-11-03:ron_lavender_party"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_slughorn_party_snape_draco",
+      "title": "Slughorn party and Snape-Draco overheard",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 81,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-12-20",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Luna Lovegood",
+          "Severus Snape",
+          "Draco Malfoy",
+          "Horace Slughorn"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Slug Club party",
+          "Draco task",
+          "Half-Blood Prince",
+          "Year 6",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "At Slughorn’s Christmas party, Harry brings Luna; afterward he overhears Snape pressing Draco about his secret task.",
+        "injection": "At Slughorn’s Christmas party, Harry brings Luna; afterward he overhears Snape pressing Draco about his secret task.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "winter",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1996-12-20:slughorn_party_snape_draco"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_horcrux_memory_task",
+      "title": "Altered Horcrux memory and Harry’s task",
+      "kind": "knowledge_gate",
+      "gateType": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 94,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-01-06",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Albus Dumbledore",
+          "Horace Slughorn",
+          "Lord Voldemort"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Dumbledore office"
+        ],
+        "factions": [],
+        "topics": [
+          "Horcrux memory",
+          "Slughorn",
+          "Half-Blood Prince",
+          "Year 6",
+          "winter_term",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "winter_term"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dumbledore shows Harry Slughorn’s altered memory about Horcruxes and assigns him to obtain the true version.",
+        "injection": "Dumbledore shows Harry Slughorn’s altered memory about Horcruxes and assigns him to obtain the true version.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "winter_term",
+          "knowledge_gate",
+          "knowledge"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1997-01-06:horcrux_memory_task"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_ron_poisoned_bezoar",
+      "title": "Ron poisoned on birthday; Harry uses bezoar",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 88,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-03-01",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Ron Weasley",
+          "Harry Potter",
+          "Horace Slughorn",
+          "Lavender Brown"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Slughorn office",
+          "hospital wing"
+        ],
+        "factions": [],
+        "topics": [
+          "poisoned mead",
+          "bezoar",
+          "Half-Blood Prince",
+          "Year 6",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "bezoar",
+          "poisoned mead"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Ron accidentally takes love potion and is then poisoned by mead at Slughorn’s; Harry saves him with a bezoar.",
+        "injection": "Ron accidentally takes love potion and is then poisoned by mead at Slughorn’s; Harry saves him with a bezoar.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "spring",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1997-03-01:ron_poisoned_bezoar"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_room_myrtle_clue",
+      "title": "Harry links Draco to Room of Requirement and Myrtle",
+      "kind": "knowledge_guard",
+      "gateType": "knowledge_guard",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 84,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-03-16",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Draco Malfoy",
+          "Moaning Myrtle",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Room of Requirement",
+          "Moaning Myrtle bathroom"
+        ],
+        "factions": [],
+        "topics": [
+          "Room of Requirement",
+          "Draco mission",
+          "Half-Blood Prince",
+          "Year 6",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry realizes Draco is using the Room of Requirement and learns Myrtle has been speaking with a distressed boy, reinforcing his suspicion.",
+        "injection": "Harry realizes Draco is using the Room of Requirement and learns Myrtle has been speaking with a distressed boy, reinforcing his suspicion.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "spring",
+          "knowledge_guard",
+          "knowledge"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1997-03-16:room_myrtle_clue"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_felix_aragog_memory",
+      "title": "Felix Felicis gets Slughorn memory",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 94,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-04-21",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Horace Slughorn",
+          "Rubeus Hagrid",
+          "Albus Dumbledore"
+        ],
+        "locations": [
+          "Hagrid hut",
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Felix Felicis",
+          "Aragog burial",
+          "Horcrux memory",
+          "Half-Blood Prince",
+          "Year 6",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "Felix Felicis"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry uses Felix Felicis, attends Aragog’s burial, and succeeds in obtaining Slughorn’s true Horcrux memory.",
+        "injection": "Harry uses Felix Felicis, attends Aragog’s burial, and succeeds in obtaining Slughorn’s true Horcrux memory.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "spring",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1997-04-21:felix_aragog_memory"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_sectumsempra_consequence",
+      "title": "Sectumsempra attack and punishment",
+      "kind": "spell_gate",
+      "gateType": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 92,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-05-06",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Draco Malfoy",
+          "Severus Snape",
+          "Moaning Myrtle"
+        ],
+        "locations": [
+          "Hogwarts",
+          "bathroom"
+        ],
+        "factions": [],
+        "topics": [
+          "Sectumsempra",
+          "Draco",
+          "Half-Blood Prince",
+          "Year 6",
+          "climax",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [
+          "Sectumsempra"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "climax"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry uses Sectumsempra on Draco in the bathroom, badly injuring him and receiving detention from Snape for the rest of the year.",
+        "injection": "Harry uses Sectumsempra on Draco in the bathroom, badly injuring him and receiving detention from Snape for the rest of the year.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "climax",
+          "spell_gate",
+          "spell"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1997-05-06:sectumsempra_consequence"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_ginny_harry_start",
+      "title": "Harry and Ginny begin dating after Quidditch win",
+      "kind": "relationship_gate",
+      "gateType": "relationship_gate",
+      "category": "relationship",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 64,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-05-10",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ginny Weasley",
+          "Ron Weasley"
+        ],
+        "locations": [
+          "Gryffindor common room"
+        ],
+        "factions": [],
+        "topics": [
+          "Harry Ginny",
+          "Quidditch Cup",
+          "Half-Blood Prince",
+          "Year 6",
+          "climax",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "climax"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Gryffindor wins the Quidditch Cup while Harry is in detention, and Harry kisses Ginny during the celebration.",
+        "injection": "Gryffindor wins the Quidditch Cup while Harry is in detention, and Harry kisses Ginny during the celebration.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "climax",
+          "relationship_gate",
+          "relationship"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1997-05-10:ginny_harry_start"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y6_horcrux_cave_tower",
+      "title": "Horcrux cave trip leads to Astronomy Tower crisis",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1997-06-30",
+        "validTo": "1997-08-31",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Albus Dumbledore",
+          "Draco Malfoy",
+          "Severus Snape",
+          "Death Eaters"
+        ],
+        "locations": [
+          "sea cave",
+          "Hogwarts",
+          "Astronomy Tower"
+        ],
+        "factions": [],
+        "topics": [
+          "Horcrux cave",
+          "Astronomy Tower",
+          "Dumbledore death",
+          "Half-Blood Prince",
+          "Year 6",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "fake locket"
+        ],
+        "spells": [],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dumbledore takes Harry to retrieve a supposed Horcrux from the cave; they return to find Hogwarts under attack, culminating in Dumbledore’s death.",
+        "injection": "Dumbledore takes Harry to retrieve a supposed Horcrux from the cave; they return to find Hogwarts under attack, culminating in Dumbledore’s death.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Half-Blood Prince",
+          "Year 6",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Half-Blood Prince",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-half-blood-prince/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-sixth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:hbp:1997-06-30:horcrux_cave_tower"
+    }
+  ]
+}

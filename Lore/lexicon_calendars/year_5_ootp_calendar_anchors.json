@@ -1,0 +1,1366 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-31",
+  "sourceBasis": "Harry Potter Lexicon day-by-day calendar and annual timeline pages; paraphrased factual anchors only.",
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_dementor_attack_privet",
+      "title": "Dementor attack in Little Whinging",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 92,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-08-02",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Dudley Dursley"
+        ],
+        "locations": [
+          "Little Whinging"
+        ],
+        "factions": [],
+        "topics": [
+          "Dementor attack",
+          "underage magic",
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [
+          "Expecto Patronum"
+        ],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dementors attack Harry and Dudley in Little Whinging, forcing Harry to use a Patronus and triggering his Ministry hearing.",
+        "injection": "Dementors attack Harry and Dudley in Little Whinging, forcing Harry to use a Patronus and triggering his Ministry hearing.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1995-08-02:dementor_attack_privet"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_grimmauld_housecleaning",
+      "title": "Grimmauld Place headquarters housecleaning phase",
+      "kind": "place_fact",
+      "gateType": "place_fact",
+      "category": "place",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 63,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-08-06",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Sirius Black",
+          "Molly Weasley",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "locations": [
+          "12 Grimmauld Place"
+        ],
+        "factions": [],
+        "topics": [
+          "Order headquarters",
+          "housecleaning",
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After reaching Grimmauld Place, Harry joins the Order household and spends days amid tense housecleaning, family conflict, and restricted war information.",
+        "injection": "After reaching Grimmauld Place, Harry joins the Order household and spends days amid tense housecleaning, family conflict, and restricted war information.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "place_fact",
+          "place"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1995-08-06:grimmauld_housecleaning"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_hearing_acquittal",
+      "title": "Harry’s Ministry hearing acquittal",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 87,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-08-12",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Albus Dumbledore",
+          "Cornelius Fudge",
+          "Dolores Umbridge"
+        ],
+        "locations": [
+          "Ministry of Magic",
+          "Courtroom Ten"
+        ],
+        "factions": [],
+        "topics": [
+          "Ministry hearing",
+          "underage magic",
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry’s disciplinary hearing is moved earlier and relocated to a more intimidating court, but Dumbledore’s defense helps secure his acquittal.",
+        "injection": "Harry’s disciplinary hearing is moved earlier and relocated to a more intimidating court, but Dumbledore’s defense helps secure his acquittal.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1995-08-12:hearing_acquittal"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_prefect_badges_decree22",
+      "title": "Prefect badges and Educational Decree 22",
+      "kind": "institution_state",
+      "gateType": "institution_state",
+      "category": "institution",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 72,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-08-31",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Ron Weasley",
+          "Hermione Granger",
+          "Dolores Umbridge"
+        ],
+        "locations": [
+          "12 Grimmauld Place",
+          "Ministry of Magic"
+        ],
+        "factions": [],
+        "topics": [
+          "prefects",
+          "Educational Decree 22",
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Ron and Hermione receive prefect badges as the Ministry creates the mechanism for appointing teachers through Educational Decree 22.",
+        "injection": "Ron and Hermione receive prefect badges as the Ministry creates the mechanism for appointing teachers through Educational Decree 22.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "institution_state",
+          "institution"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1995-08-31:prefect_badges_decree22"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_umbridge_first_detentions",
+      "title": "Umbridge begins blood-quill detention cycle",
+      "kind": "institution_state",
+      "gateType": "institution_state",
+      "category": "institution",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 88,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-09-03",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Dolores Umbridge"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Umbridge office"
+        ],
+        "factions": [],
+        "topics": [
+          "blood quill",
+          "detention",
+          "Order of the Phoenix",
+          "Year 5",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [
+          "blood quill"
+        ],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Umbridge’s early DADA conflict with Harry leads to repeated detentions using a blood quill, marking her abuse of authority.",
+        "injection": "Umbridge’s early DADA conflict with Harry leads to repeated detentions using a blood quill, marking her abuse of authority.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "term_start",
+          "institution_state",
+          "institution"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1995-09-03:umbridge_first_detentions"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_high_inquisitor_decree23",
+      "title": "Umbridge appointed High Inquisitor",
+      "kind": "institution_state",
+      "gateType": "institution_state",
+      "category": "institution",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 86,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-09-08",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Dolores Umbridge",
+          "Cornelius Fudge"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "High Inquisitor",
+          "Educational Decree 23",
+          "Order of the Phoenix",
+          "Year 5",
+          "term_start",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Educational Decree 23 makes Umbridge Hogwarts High Inquisitor, giving her formal inspection authority over teachers and classes.",
+        "injection": "Educational Decree 23 makes Umbridge Hogwarts High Inquisitor, giving her formal inspection authority over teachers and classes.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "term_start",
+          "institution_state",
+          "institution"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1995-09-08:high_inquisitor_decree23"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_da_first_meeting",
+      "title": "First Dumbledore’s Army meeting",
+      "kind": "skill_band",
+      "gateType": "skill_band",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 90,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-10-09",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley",
+          "Dumbledore’s Army"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Room of Requirement"
+        ],
+        "factions": [],
+        "topics": [
+          "Dumbledore’s Army",
+          "defensive training",
+          "Order of the Phoenix",
+          "Year 5",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The first practical Dumbledore’s Army meeting begins student-led defensive training outside Umbridge’s approved curriculum.",
+        "injection": "The first practical Dumbledore’s Army meeting begins student-led defensive training outside Umbridge’s approved curriculum.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "autumn",
+          "skill_band",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1995-10-09:da_first_meeting"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_quidditch_bans_hagrid_return",
+      "title": "Gryffindor-Slytherin match bans and Hagrid returns",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 78,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-11-02",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Fred Weasley",
+          "George Weasley",
+          "Dolores Umbridge",
+          "Rubeus Hagrid"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Quidditch pitch",
+          "Hagrid hut"
+        ],
+        "factions": [],
+        "topics": [
+          "Quidditch ban",
+          "Hagrid return",
+          "Order of the Phoenix",
+          "Year 5",
+          "autumn",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "autumn"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "After the Gryffindor-Slytherin match, Harry, Fred, and George are banned from Quidditch; Hagrid returns with hidden injuries.",
+        "injection": "After the Gryffindor-Slytherin match, Harry, Fred, and George are banned from Quidditch; Hagrid returns with hidden injuries.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "autumn",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1995-11-02:quidditch_bans_hagrid_return"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_arthur_vision_st_mungos",
+      "title": "Arthur attack vision and St Mungo’s Christmas",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 91,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1995-12-18",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Arthur Weasley",
+          "Ron Weasley",
+          "Ginny Weasley",
+          "Neville Longbottom"
+        ],
+        "locations": [
+          "12 Grimmauld Place",
+          "St Mungo’s"
+        ],
+        "factions": [],
+        "topics": [
+          "Arthur attack",
+          "St Mungo’s",
+          "vision",
+          "Order of the Phoenix",
+          "Year 5",
+          "winter",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "winter"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry dreams from the snake’s perspective as Arthur Weasley is attacked, leading to a Grimmauld return and a Christmas St Mungo’s visit.",
+        "injection": "Harry dreams from the snake’s perspective as Arthur Weasley is attacked, leading to a Grimmauld return and a Christmas St Mungo’s visit.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "winter",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1995-12-18:arthur_vision_st_mungos"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_occlumency_deaths_escape",
+      "title": "Occlumency begins after Azkaban escape",
+      "kind": "skill_band",
+      "gateType": "skill_band",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 86,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-01-13",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Severus Snape",
+          "Lord Voldemort"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Occlumency",
+          "Azkaban escape",
+          "Order of the Phoenix",
+          "Year 5",
+          "winter_term",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "winter_term"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Snape begins Harry’s Occlumency lessons as Death Eaters escape Azkaban and the Ministry’s public narrative begins to strain.",
+        "injection": "Snape begins Harry’s Occlumency lessons as Death Eaters escape Azkaban and the Ministry’s public narrative begins to strain.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "winter_term",
+          "skill_band",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1996-01-13:occlumency_deaths_escape"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_quibbler_interview_decree27",
+      "title": "Quibbler interview and ban",
+      "kind": "institution_state",
+      "gateType": "institution_state",
+      "category": "institution",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 83,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-02-23",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Rita Skeeter",
+          "Luna Lovegood",
+          "Dolores Umbridge"
+        ],
+        "locations": [
+          "Hogsmeade",
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Quibbler interview",
+          "Educational Decree 27",
+          "Order of the Phoenix",
+          "Year 5",
+          "winter_term",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "winter_term"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Harry’s Quibbler interview circulates widely, and Umbridge responds by banning the magazine, which only increases attention on his account.",
+        "injection": "Harry’s Quibbler interview circulates widely, and Umbridge responds by banning the magazine, which only increases attention on his account.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "winter_term",
+          "institution_state",
+          "institution"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1996-02-23:quibbler_interview_decree27"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_trelawney_firenze",
+      "title": "Trelawney sacked and Firenze hired",
+      "kind": "institution_state",
+      "gateType": "institution_state",
+      "category": "institution",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 76,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-03-08",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Sybill Trelawney",
+          "Firenze",
+          "Dolores Umbridge",
+          "Albus Dumbledore"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Divination",
+          "Umbridge",
+          "Order of the Phoenix",
+          "Year 5",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Umbridge sacks Trelawney, but Dumbledore appoints Firenze, creating a direct challenge to Umbridge’s control over Hogwarts staffing.",
+        "injection": "Umbridge sacks Trelawney, but Dumbledore appoints Firenze, creating a direct challenge to Umbridge’s control over Hogwarts staffing.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "spring",
+          "institution_state",
+          "institution"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1996-03-08:trelawney_firenze"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_da_caught_dumbledore_flees",
+      "title": "Dumbledore’s Army exposed and Dumbledore leaves",
+      "kind": "institution_state",
+      "gateType": "institution_state",
+      "category": "institution",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 96,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-04-01",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Albus Dumbledore",
+          "Dolores Umbridge",
+          "Cornelius Fudge",
+          "Dumbledore’s Army"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Headmaster office"
+        ],
+        "factions": [],
+        "topics": [
+          "DA exposed",
+          "Dumbledore leaves",
+          "Order of the Phoenix",
+          "Year 5",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "DA members are caught after Patronus practice, Dumbledore takes responsibility, escapes arrest, and Umbridge becomes Headmistress.",
+        "injection": "DA members are caught after Patronus practice, Dumbledore takes responsibility, escapes arrest, and Umbridge becomes Headmistress.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "spring",
+          "institution_state",
+          "institution"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1996-04-01:da_caught_dumbledore_flees"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_twins_leave_swamp",
+      "title": "Fred and George leave Hogwarts",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 74,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-04-21",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Fred Weasley",
+          "George Weasley",
+          "Dolores Umbridge"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "factions": [],
+        "topics": [
+          "Weasley twins",
+          "swamp",
+          "leaving school",
+          "Order of the Phoenix",
+          "Year 5",
+          "spring",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "spring"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Fred and George create a swamp, defy Umbridge, and leave Hogwarts to pursue Weasleys’ Wizard Wheezes.",
+        "injection": "Fred and George create a swamp, defy Umbridge, and leave Hogwarts to pursue Weasleys’ Wizard Wheezes.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "spring",
+          "character_state",
+          "character"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1996-04-21:twins_leave_swamp"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_owls_hagrid_mcgonagall",
+      "title": "OWL exams and Hagrid removal attempt",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 88,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-06-19",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Rubeus Hagrid",
+          "Minerva McGonagall",
+          "Dolores Umbridge"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Astronomy Tower"
+        ],
+        "factions": [],
+        "topics": [
+          "OWL exams",
+          "Hagrid removal",
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "During OWL week, Umbridge moves against Hagrid during the Astronomy practical, and McGonagall is injured while trying to intervene.",
+        "injection": "During OWL week, Umbridge moves against Hagrid during the Astronomy practical, and McGonagall is injured while trying to intervene.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1996-06-19:owls_hagrid_mcgonagall"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "lexcal_y5_department_mysteries_public_return",
+      "title": "Department of Mysteries battle and public Voldemort acknowledgment",
+      "kind": "event_anchor",
+      "gateType": "event_anchor",
+      "category": "event",
+      "canonStatus": "canon",
+      "truthStatus": "established",
+      "revealPolicy": "public",
+      "priority": 100,
+      "protected": true,
+      "locked": true,
+      "userEditable": true,
+      "date": {
+        "validFrom": "1996-06-20",
+        "validTo": "1996-08-31",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Sirius Black",
+          "Albus Dumbledore",
+          "Lord Voldemort",
+          "Cornelius Fudge",
+          "Death Eaters"
+        ],
+        "locations": [
+          "Department of Mysteries",
+          "Ministry of Magic"
+        ],
+        "factions": [],
+        "topics": [
+          "Sirius death",
+          "public Voldemort return",
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "Lexicon calendar"
+        ],
+        "objects": [],
+        "spells": [],
+        "schoolYears": [
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ],
+        "phases": [
+          "summer"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "The Ministry battle ends with Sirius dead, Death Eaters captured, and Fudge forced to acknowledge Voldemort’s return publicly.",
+        "injection": "The Ministry battle ends with Sirius dead, Death Eaters captured, and Fudge forced to acknowledge Voldemort’s return publicly.",
+        "constraints": [],
+        "antiLore": [],
+        "publicVersion": "",
+        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
+      },
+      "effects": {
+        "addsTags": [
+          "Order of the Phoenix",
+          "Year 5",
+          "summer",
+          "event_anchor",
+          "event"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "injectionRules": {}
+      },
+      "sourceInfo": {
+        "id": "hp-lexicon-day-by-day-calendar",
+        "work": "Harry Potter Lexicon",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86,
+        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-order-phoenix/",
+        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-fifth-year/",
+        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
+      },
+      "source": "hp-lexicon-day-by-day:ootp:1996-06-20:department_mysteries_public_return"
+    }
+  ]
+}

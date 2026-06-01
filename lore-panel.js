@@ -22,7 +22,7 @@ import {
     undoLastChange,
     setLoreContext,
 } from './state-manager.js';
-import { buildMemo, buildMemoPreview, buildContinuityPreview, buildLorePreview, getCompressionSourceSignature } from './memo-builder.js';
+import { buildContinuityPreview, buildLorePreview, getCompressionSourceSignature } from './memo-builder.js';
 import { onExtractionTriggered } from './extractor.js';
 import { runLoreContextDetection, runBulkLoreGeneration } from './lore-generator.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
@@ -729,6 +729,8 @@ function createDangerZoneCard(state) {
         current.pendingLoreEntries = [];
         current.pendingLoreMeta = null;
         current.loreGeneration = defaults.loreGeneration;
+        current.loreBulkGeneration = defaults.loreBulkGeneration;
+        current.continuityScan = defaults.continuityScan;
         current.lastDelta = null;
         if (current.lorePanel) current.lorePanel.reviewSelectedIds = [];
         saveState(current);
@@ -1484,14 +1486,6 @@ async function handleBulkGeneratePendingLore(btn) {
     refreshPanelBody({ preserveScroll: true });
 }
 
-// Legacy Generate tab fallback -------------------------------------------------
-
-function renderGenerateTab(container, state) {
-    // Legacy fallback for older saved panel states. The Generate tab was split into Context and Lore.
-    renderContextTab(container, state);
-}
-
-
 function createCanonLoreDatabaseCard(state) {
     const settings = getSettings();
     const card = document.createElement('div');
@@ -1763,11 +1757,6 @@ function createAutomationModeCard(titleText, modeKey, intervalKey, manualTooltip
     return card;
 }
 
-function createGenerationProgressCard(state) {
-    // Legacy compatibility; new UI uses createContextDetectionCard and createLoreGenerationCard.
-    return createLoreGenerationCard(state);
-}
-
 function setFeatureProgress(kind = 'lore', message, percent = 0) {
     const statusKind = ['context', 'continuity', 'lore', 'canon'].includes(kind) ? kind : 'lore';
     const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
@@ -1828,10 +1817,6 @@ function resetFeatureProgressNow(kind = 'lore') {
 
 function resetAllFeatureProgressNow() {
     ['context', 'continuity', 'lore', 'canon'].forEach(kind => resetFeatureProgressNow(kind));
-}
-
-function setGenerateProgress(message, percent = 0) {
-    setFeatureProgress('lore', message, percent);
 }
 
 function updateLoreContextField(key, value) {
@@ -1896,31 +1881,54 @@ const CONTINUITY_SECTION_LABELS = {
 };
 
 
-function createContinuityScanCard(state) {
+function getContinuityScanScopeSummary(settings = getSettings()) {
+    const mode = settings.continuityScanMode || 'recent';
+    if (mode === 'entire') return 'entire chat';
+    if (mode === 'range') return `${settings.continuityScanRangeStart || 1}-${settings.continuityScanRangeEnd || 'latest'}`;
+    return `last ${settings.continuitySourceMessageCount || 10}`;
+}
+
+function getContinuityScanPerformanceSummary(settings = getSettings()) {
+    return `${settings.continuityScanChunkSize || 8}/chunk · ${settings.continuityScanConcurrency || 3} simultaneous`;
+}
+
+function getContinuityScanResultsSummary(state = getState()) {
+    const ledger = state?.continuityScan || {};
+    const batch = ledger.lastBatchId ? ledger.batches?.[ledger.lastBatchId] : null;
+    if (!batch) return 'no scan results yet';
+    const status = batch.status || 'unknown';
+    const completed = Number(batch.completedChunks || 0);
+    const failed = Number(batch.failedChunks || 0);
+    const observations = Number(batch.observationCount || 0);
+    return `${status} · ${completed} complete · ${failed} failed · ${observations} observations`;
+}
+
+function createContinuityScanScopeSettingsContent() {
     const settings = getSettings();
-    const card = document.createElement('div');
-    card.className = 'wandlight-runtime-card wandlight-generation-progress-card';
+    const content = document.createElement('div');
+    content.className = 'wandlight-lore-scan-settings-block';
 
-    const title = document.createElement('div');
-    title.className = 'wandlight-runtime-card-title';
-    title.textContent = 'Continuity Scan';
-    addTooltip(title, 'Scans recent chat and applies structured state updates directly into the editable Continuity sections below.');
-    card.appendChild(title);
-
-    card.appendChild(createAutomationModeCard(
-        'Continuity Tracking',
-        'continuityTrackingMode',
-        'continuityAutoInterval',
-        'Continuity scans only run when you click Scan Continuity State.',
-        'Wandlight automatically scans continuity state every configured number of turns using the Utility provider.',
-        'Automatic continuity scan interval in completed model turns.'
+    const grid = document.createElement('div');
+    grid.className = 'wandlight-runtime-grid wandlight-lore-scan-compact-grid';
+    grid.appendChild(createSelectSettingRow(
+        'Scan range',
+        'Controls which messages Scan Continuity State processes. Recent is safest for routine use; Custom and Entire are for backfilling or repair scans.',
+        'continuityScanMode',
+        [
+            ['recent', 'Recent messages'],
+            ['range', 'Custom range'],
+            ['entire', 'Entire chat'],
+        ]
     ));
+    grid.appendChild(createNumberSettingRow('Start', 'First 1-based message index used when Scan range is Custom range.', 'continuityScanRangeStart', { min: 1, max: 100000, fallback: 1 }));
+    grid.appendChild(createNumberSettingRow('End', 'Last 1-based message index used when Scan range is Custom range. Use 0 to mean latest message.', 'continuityScanRangeEnd', { min: 0, max: 100000, fallback: 0 }));
+    content.appendChild(grid);
 
     const sourceRow = document.createElement('label');
-    sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row wandlight-lore-scan-setting-row';
     const sourceText = document.createElement('span');
-    sourceText.textContent = `Continuity source messages: ${settings.continuitySourceMessageCount || 10}`;
-    addTooltip(sourceText, 'How many recent chat messages are sent to Scan Continuity State. This is separate from Context and Lore source windows.');
+    sourceText.textContent = `Recent window: ${settings.continuitySourceMessageCount || 10}`;
+    addTooltip(sourceText, 'How many recent chat messages are scanned when Scan range is Recent messages.');
     const sourceInput = document.createElement('input');
     sourceInput.type = 'range';
     sourceInput.min = '1';
@@ -1929,33 +1937,165 @@ function createContinuityScanCard(state) {
     sourceInput.value = String(settings.continuitySourceMessageCount || 10);
     sourceInput.addEventListener('input', () => {
         const next = getSettings();
-        next.continuitySourceMessageCount = Math.max(1, Math.min(200, parseInt(sourceInput.value, 10) || 40));
+        next.continuitySourceMessageCount = Math.max(1, Math.min(200, parseInt(sourceInput.value, 10) || 10));
         saveSettings(next);
-        sourceText.textContent = `Continuity source messages: ${next.continuitySourceMessageCount}`;
+        sourceText.textContent = `Recent window: ${next.continuitySourceMessageCount}`;
     });
     sourceRow.appendChild(sourceText);
     sourceRow.appendChild(sourceInput);
-    card.appendChild(sourceRow);
+    content.appendChild(sourceRow);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help wandlight-compact-help';
+    help.textContent = 'Continuity scans now extract compact observations from chunks first, then reduce them into one ordered state delta.';
+    content.appendChild(help);
+    return content;
+}
+
+function createContinuityScanPerformanceSettingsContent() {
+    const content = document.createElement('div');
+    content.className = 'wandlight-lore-scan-settings-block';
+    content.appendChild(createRangeSettingRow('Chunk size', 'Messages per continuity observation chunk. Smaller chunks reduce prompt size and help smaller Utility models.', 'continuityScanChunkSize', { min: 2, max: 40, fallback: 8 }));
+    content.appendChild(createRangeSettingRow('Overlap', 'Messages repeated at chunk boundaries to preserve continuity facts that span intervals.', 'continuityScanOverlap', { min: 0, max: 10, fallback: 1 }));
+    content.appendChild(createRangeSettingRow('Simultaneous chunks', 'Maximum continuity observation chunks sent to the Utility provider at the same time.', 'continuityScanConcurrency', { min: 1, max: 8, fallback: 3 }));
+    content.appendChild(createRangeSettingRow('Simultaneous reducers', 'Maximum section reducers sent to the Utility provider at the same time after observations are extracted.', 'continuityScanReducerConcurrency', { min: 1, max: 6, fallback: 3 }));
+    content.appendChild(createRangeSettingRow('Retry attempts', 'Chunk-level retry attempts after empty, malformed, or failed observation responses.', 'continuityScanRetryAttempts', { min: 0, max: 4, fallback: 2 }));
+    content.appendChild(createRangeSettingRow('Observations per chunk', 'Upper target for compact continuity observations extracted from each chunk.', 'continuityScanObservationsPerChunk', { min: 3, max: 30, fallback: 12 }));
+    content.appendChild(createRangeSettingRow('Save checkpoint every chunks', 'How often the scan writes a full compact checkpoint after lightweight per-chunk observation saves.', 'continuityScanFullCheckpointEveryChunks', { min: 1, max: 25, fallback: 5 }));
+
+    const rescanRow = createSelectSettingRow(
+        'What to rescan',
+        'Controls whether Scan Continuity State skips unchanged completed chunks, retries failed chunks, rescans edited chunks, or rescans all chunks.',
+        'continuityScanRescanMode',
+        [
+            ['skip_unchanged', 'Skip unchanged'],
+            ['retry_failed', 'Retry failed only'],
+            ['stale_only', 'Rescan edited only'],
+            ['rescan_all', 'Rescan all'],
+        ]
+    );
+    content.appendChild(rescanRow);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help wandlight-compact-help';
+    help.textContent = 'Chunk checkpoints are saved immediately for recovery. Prompt injection sync is deferred until the final delta is applied or stored for review.';
+    content.appendChild(help);
+    return content;
+}
+
+function createContinuityScanResultsCard(state) {
+    const ledger = state?.continuityScan || {};
+    const batch = ledger.lastBatchId ? ledger.batches?.[ledger.lastBatchId] : null;
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-generation-results-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Continuity Scan Results';
+    addTooltip(title, 'Recoverable results from the latest checkpointed continuity scan.');
+    card.appendChild(title);
+
+    if (!batch) {
+        card.appendChild(createEmptyMessage('No continuity scan has run yet.'));
+        return card;
+    }
+
+    card.appendChild(createKeyValue('Status', batch.status || 'unknown', 'Latest scan batch status.'));
+    card.appendChild(createKeyValue('Range', `${batch.startIndex || 0}-${batch.endIndex || 0}`, 'Message range used for this scan.'));
+    card.appendChild(createKeyValue('Chunks', `${batch.completedChunks || 0} complete / ${batch.failedChunks || 0} failed / ${batch.totalChunks || 0} total`, 'Chunk-level checkpoint status.'));
+    card.appendChild(createKeyValue('Observations', String(batch.observationCount || 0), 'Compact observations extracted before reducer passes.'));
+    if (Array.isArray(batch.changeKeys) && batch.changeKeys.length) {
+        card.appendChild(createKeyValue('Changed sections', batch.changeKeys.join(', '), 'Top-level continuity sections updated by the reduced delta.'));
+    }
+    if (batch.error) {
+        card.appendChild(createKeyValue('Last error', batch.error, 'Latest scan error stored in the checkpoint ledger.'));
+    }
+    if (batch.completedAt || batch.updatedAt) {
+        card.appendChild(createKeyValue('Updated', new Date(batch.completedAt || batch.updatedAt).toLocaleString(), 'Last time this scan batch was updated.'));
+    }
+    return card;
+}
+
+function createContinuityScanCard(state) {
+    const settings = getSettings();
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-generation-progress-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Continuity Scan';
+    addTooltip(title, 'Scans chat with a checkpointed chunk pipeline: parallel observations first, section reducers second, then one ordered continuity delta.');
+    card.appendChild(title);
+
+    card.appendChild(createAutomationModeCard(
+        'Continuity Tracking',
+        'continuityTrackingMode',
+        'continuityAutoInterval',
+        'Continuity scans only run when you click Scan Continuity State.',
+        'Wandlight automatically scans recent continuity state every configured number of turns using the Utility provider.',
+        'Automatic continuity scan interval in completed model turns.'
+    ));
+
+    const settingsWrap = document.createElement('div');
+    settingsWrap.className = 'wandlight-lore-scan-settings-wrap';
+    settingsWrap.appendChild(createCollapsibleSection(
+        'continuity.scanScope',
+        'Scan Scope',
+        getContinuityScanScopeSummary(settings),
+        false,
+        createContinuityScanScopeSettingsContent,
+        { tooltip: 'Choose recent, custom range, or entire-chat scanning for continuity state.' }
+    ));
+    settingsWrap.appendChild(createCollapsibleSection(
+        'continuity.scanPerformance',
+        'Performance and Recovery',
+        getContinuityScanPerformanceSummary(settings),
+        false,
+        createContinuityScanPerformanceSettingsContent,
+        { tooltip: 'Chunk size, overlap, parallelism, retry behavior, and checkpoint settings.' }
+    ));
+    const hasScanResults = !!state?.continuityScan?.lastBatchId;
+    if (hasScanResults) {
+        settingsWrap.appendChild(createCollapsibleSection(
+            'continuity.scanResults',
+            'Scan Results',
+            getContinuityScanResultsSummary(state),
+            false,
+            () => createContinuityScanResultsCard(getState()),
+            { tooltip: 'Latest checkpointed continuity scan result and recovery status.' }
+        ));
+    }
+    card.appendChild(settingsWrap);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Scan Continuity State', 'Scans recent chat and applies structured state updates directly into the editable Continuity sections below. Use State History to undo the scan if needed.', async (btn) => {
+    actions.appendChild(createButton('Scan Continuity State', 'Scans the selected message range through checkpointed chunks, then applies one ordered continuity state update. Use State History to undo the scan if needed.', async (btn) => {
         if (!ensureContinuityProviderReadyForAction('Scan Continuity State')) return;
         await runBusyAction(btn, 'Scanning...', async () => {
-            setFeatureProgress('continuity', 'Scanning continuity state...', 10);
-            const result = await onExtractionTriggered({ force: true, applyImmediately: true });
+            setFeatureProgress('continuity', 'Scanning continuity state...', 5);
+            const result = await onExtractionTriggered({
+                force: true,
+                applyImmediately: true,
+                progress: (message, pct) => setFeatureProgress('continuity', message, pct),
+            });
             refreshHeader();
-            refreshPanelBody({ preserveScroll: false });
+            refreshPanelBody({ preserveScroll: true });
 
             if (result?.status === 'applied') {
                 const keys = result.changeKeys?.length ? ` Updated: ${result.changeKeys.join(', ')}.` : '';
+                const chunks = Number(result.completedChunkCount || 0);
+                const failed = Number(result.failedChunkCount || 0);
                 setFeatureProgress('continuity', `Continuity scan applied.${keys}`, 100);
                 resetFeatureProgress('continuity');
-                toast(`Continuity state updated.${keys}`);
-            } else if (result?.status === 'no_changes') {
+                toast(`Continuity state updated from ${chunks} chunk(s)${failed ? `; ${failed} failed` : ''}.${keys}`);
+            } else if (result?.status === 'no_changes' || result?.status === 'skipped_unchanged') {
                 setFeatureProgress('continuity', 'Continuity scan complete. No state changes detected.', 100);
                 resetFeatureProgress('continuity');
-                toast('Scan complete. No continuity changes detected.', 'info');
+                toast(result?.status === 'skipped_unchanged' ? 'Scan skipped unchanged chunks.' : 'Scan complete. No continuity changes detected.', 'info');
+            } else if (result?.status === 'pending_review') {
+                setFeatureProgress('continuity', 'Continuity scan stored changes for review.', 100);
+                resetFeatureProgress('continuity');
+                toast('Continuity changes stored for review.', 'info');
             } else {
                 const status = result?.error || result?.status || 'unknown result';
                 setFeatureProgress('continuity', `Continuity scan did not update state: ${status}`, 100);
@@ -1968,6 +2108,7 @@ function createContinuityScanCard(state) {
     appendGenerationStatus(card, state, 'continuity');
     return card;
 }
+
 
 function renderContinuityTab(container, state) {
     container.appendChild(createSectionHeader(
@@ -3193,62 +3334,7 @@ function createPendingLoreReviewSection(state) {
     return section;
 }
 
-// Legacy Review tab fallback and shared review-card helpers --------------------
-
-function renderReviewTab(container, state) {
-    const pendingLore = normalizeLoreMatrix(state?.pendingLoreEntries || []);
-    const hasDelta = !!state?.lastDelta;
-
-    container.appendChild(createSectionHeader(
-        'Review Pending Changes',
-        'Approve or dismiss model-produced changes before they enter active continuity or accepted lore.'
-    ));
-
-    const summaryCard = document.createElement('div');
-    summaryCard.className = 'wandlight-runtime-card wandlight-review-summary-card';
-    summaryCard.appendChild(createKeyValue('Continuity changes', hasDelta ? '1 pending' : 'none', 'Extracted state delta from the continuity scanner.'));
-    summaryCard.appendChild(createKeyValue('Lore entries', `${pendingLore.length} pending`, 'Generated lore matrix entries waiting for acceptance.'));
-    container.appendChild(summaryCard);
-
-    const deltaSection = document.createElement('div');
-    deltaSection.className = 'wandlight-review-section';
-    const deltaTitle = document.createElement('h4');
-    deltaTitle.textContent = 'Continuity Changes';
-    addTooltip(deltaTitle, 'These are state changes extracted from recent roleplay: canon date, scene, knowledge, secrets, relationships, threads, and flags.');
-    deltaSection.appendChild(deltaTitle);
-
-    if (hasDelta) {
-        deltaSection.appendChild(createDeltaReviewCard(state.lastDelta));
-    } else {
-        deltaSection.appendChild(createEmptyMessage('No extracted continuity changes are waiting for review.'));
-    }
-    container.appendChild(deltaSection);
-
-    const loreSection = document.createElement('div');
-    loreSection.className = 'wandlight-review-section';
-    const loreTitle = document.createElement('h4');
-    loreTitle.textContent = 'Pending Lore Entries';
-    addTooltip(loreTitle, 'These are generated lore entries. Accepting merges them into the accepted lore matrix; dismissing removes them.');
-    loreSection.appendChild(loreTitle);
-
-    if (pendingLore.length > 0) {
-        const batchInfo = document.createElement('div');
-        batchInfo.className = 'wandlight-runtime-help';
-        batchInfo.textContent = getPendingLoreBatchLabel(state);
-        loreSection.appendChild(batchInfo);
-
-        loreSection.appendChild(createPendingLoreBulkControls(pendingLore, state));
-
-        const list = document.createElement('div');
-        list.className = 'wandlight-review-lore-list';
-        pendingLore.forEach((entry, idx) => list.appendChild(createPendingLoreReviewCard(entry, idx, isPendingLoreSelected(state, entry))));
-        loreSection.appendChild(list);
-    } else {
-        loreSection.appendChild(createEmptyMessage('No generated lore entries are waiting for review.'));
-    }
-    container.appendChild(loreSection);
-}
-
+// Shared review-card helpers --------------------------------------------------
 function createDeltaReviewCard(delta) {
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-delta-review-card';

@@ -10,7 +10,6 @@
 import {
     LOG_PREFIX,
     LORE_CONTEXT_DETECTION_SYSTEM_PROMPT,
-    LORE_GENERATION_SYSTEM_PROMPT,
     JSON_REPAIR_SYSTEM_PROMPT,
 } from './constants.js';
 
@@ -19,16 +18,13 @@ import {
     getSettings,
     setLoreContext,
     recordLoreAttempt,
-    setPendingLoreProposal,
     appendPendingLoreEntries,
     startLoreBulkBatch,
-    updateLoreBulkBatch,
     checkpointLoreBulkChunk,
     flushLoreBulkFullCheckpoint,
     markInterruptedLoreBulkChunks,
     patchPendingLoreMeta,
     markPendingLoreStale,
-    markPendingLoreReplaced,
 } from './state-manager.js';
 
 import {
@@ -45,6 +41,12 @@ import { proposeCanonLoreForContext } from './canon-lore-db.js';
 
 let _detectionRunning = false;
 let _generationRunning = false;
+
+/** Cooldown window after a failed/empty automatic scan attempt. */
+const FAILED_RETRY_COOLDOWN_MS = 10 * 60 * 1000;
+
+/** Attempt statuses that count as a recent failure for automatic scan cooldown. */
+const FAILED_STATUSES = ['failed_parse', 'failed_no_response', 'failed_exception', 'empty'];
 
 // ── Helper: quiet LLM prompt ────────────────────────────────────────────────────
 
@@ -310,23 +312,38 @@ function parseJsonResponse(text) {
 }
 
 /**
- * When initial parsing fails, sends the raw response to a repair LLM pass.
- * Only attempted when settings.loreRepairOnParseFail is true.
+ * When initial bulk candidate parsing fails, sends the raw response through a
+ * task-specific JSON repair pass. The repair target is candidate-fact output,
+ * not the removed legacy full-lore-entry schema.
  * @param {string} rawResponse - The raw LLM response that failed parsing
- * @returns {Promise<Object|null>} Repaired and re-parsed JSON, or null
+ * @param {Object} [chunk={}] - Chunk metadata for candidate normalization
+ * @returns {Promise<Object|null>} Parsed { chunkSummary, facts } shape, or null
  */
-async function repairLoreJsonResponse(rawResponse) {
+async function repairBulkCandidateJsonResponse(rawResponse, chunk = {}) {
     const settings = getSettings();
     if (!settings.loreRepairOnParseFail) return null;
 
     try {
-        const repairPrompt = `Repair this malformed lore-generation response into valid JSON.
+        const repairPrompt = `Repair this malformed bulk story-lore extraction response into valid JSON.
 
 Required shape:
 {
-  "summary": "string",
-  "entries": []
+  "chunkSummary": "string",
+  "facts": [
+    {
+      "category": "character|relationship|item|spell|knowledge|place|faction|goal|timeline|event|secret|artifact|skill|rule",
+      "subject": "string",
+      "fact": "one atomic durable story fact",
+      "priorityHint": "high|medium|low",
+      "messageRefs": [1]
+    }
+  ]
 }
+
+Rules:
+- Preserve every recoverable candidate fact from the malformed response.
+- Do not invent facts not present in the malformed response.
+- Return only the repaired JSON object. No markdown fences or commentary.
 
 Malformed response:
 ${String(rawResponse || '').slice(0, 12000)}
@@ -335,12 +352,13 @@ ${String(rawResponse || '').slice(0, 12000)}
         const repaired = await quietPrompt(JSON_REPAIR_SYSTEM_PROMPT, repairPrompt);
         if (!repaired) return null;
 
-        return parseJsonResponse(repaired);
+        return parseBulkCandidateResponse(repaired, chunk);
     } catch (e) {
-        console.warn(`${LOG_PREFIX} JSON repair pass failed:`, e);
+        console.warn(`${LOG_PREFIX} Bulk candidate JSON repair pass failed:`, e);
         return null;
     }
 }
+
 
 // ── Build context message ───────────────────────────────────────────────────────
 
@@ -374,15 +392,6 @@ function formatMessageObjects(messages = []) {
 function getRecentMessages(count = 8) {
     const formatted = formatMessageObjects(getRecentMessageObjects(count));
     return formatted || '(No messages available)';
-}
-
-function chunkMessages(messages = [], chunkSize = 10) {
-    const size = Math.max(1, Math.min(50, Number(chunkSize) || 10));
-    const chunks = [];
-    for (let i = 0; i < messages.length; i += size) {
-        chunks.push(messages.slice(i, i + size));
-    }
-    return chunks.length ? chunks : [[]];
 }
 
 
@@ -689,112 +698,6 @@ function determineLoreGenerationProfile(settings, state, { force = false, source
     };
 }
 
-function priorityGuidanceText(mode) {
-    if (mode === 'bootstrap') {
-        return `Priority guidance for bootstrap mode:
-- 90-100: active secrets, active safety/reveal constraints, current identity/state facts, major AU divergences, facts that will immediately derail continuity if missed.
-- 70-89: current character goals, relationships, possessions, spell/skill capabilities, locations, factions, unresolved active threads.
-- 45-69: useful durable background from the current story that may matter later.
-- 20-44: low-frequency detail, color, or recap facts. Use sparingly.
-Do not assign every entry high priority. A broad bootstrap batch should contain a realistic spread.`;
-    }
-    return `Priority guidance for incremental mode:
-- 80-100: newly changed facts, active secrets, constraints, or immediate-scene facts.
-- 55-79: useful durable updates that could matter in the next few turns.
-- 20-54: background updates; include only if clearly durable.
-Do not assign every entry high priority.`;
-}
-
-function categoryCoverageText(mode) {
-    if (mode === 'bootstrap') {
-        return `Bootstrap coverage categories. Search the supplied messages for all of these, and create entries for every supported durable fact:
-- Characters: new/original characters, canon characters in the story, aliases, roles, house/year, current state, injuries, disguises, transformations.
-- Relationships: alliances, enemies, trusts, debts, promises, romances, rivalries, family links, mentor/student ties.
-- Items and possessions: wands, artifacts, books, potions, tools, keys, money, clothing/disguises, ownership or custody changes.
-- Spells and skills: spells used, spells learned, capability limits, nonverbal/wandless ability, magical specializations.
-- Secrets and knowledge: who knows what, who must not know, public misconceptions, hidden identities, reveal constraints.
-- Locations: current location, home bases, restricted areas, portals, safe houses, schools, businesses, magical places.
-- Factions and institutions: Ministry, Hogwarts, Death Eaters, Order, houses, clubs, families, political alignment.
-- Goals and threads: active plans, quests, obligations, unresolved hooks, threats, bargains, mysteries.
-- Timeline anchors and AU divergences: date/era, canon boundary, changed events, time travel or branch rules.
-Prefer specific scoped entries over one giant summary entry.`;
-    }
-    return `Incremental coverage categories. Extract only durable new or changed facts: character state changes, relationship changes, possessions gained/lost, spells used/learned, secrets revealed, location changes, active plans, timeline shifts, and AU divergences.`;
-}
-
-function buildLoreGenerationSystemPrompt(settings = getSettings(), profile = {}) {
-    const count = Math.max(0, Math.min(10, Number(settings.loreTagCount ?? 4)));
-    const tagInstruction = count === 0
-        ? 'Do not generate tags. Set tags to an empty array for every entry.'
-        : `Generate exactly ${count} tags for each entry unless impossible. Tags must be short searchable labels, not full sentences.`;
-    const mode = profile.mode || 'incremental';
-    const modeLabel = mode === 'bootstrap' ? 'BOOTSTRAP STORY LORE' : 'INCREMENTAL STORY LORE';
-    const targetLine = mode === 'bootstrap'
-        ? `Target output: approximately ${profile.targetTotal || 40} total entries across all chunks. For each chunk, aim for ${profile.perChunkMin || 6}-${profile.perChunkMax || 16} entries when the source supports it. It is acceptable to produce fewer only when the chunk is genuinely sparse.`
-        : `Target output: approximately ${profile.targetTotal || 8} total entries across all chunks. For each chunk, aim for ${profile.perChunkMin || 1}-${profile.perChunkMax || 6} entries focused on new durable changes.`;
-
-    return `${LORE_GENERATION_SYSTEM_PROMPT}
-
-Runtime generation settings:
-- Generation mode: ${modeLabel}.
-- Source window: last ${Math.max(1, Math.min(200, Number(settings.loreSourceMessageCount) || 40))} messages.
-- Existing accepted story/AU lore entries: ${profile.storyLoreCount ?? 'unknown'}.
-- Chunk count: ${profile.chunkCount || 1}.
-- ${targetLine}
-- Tag count: ${count}.
-- ${tagInstruction}
-
-${categoryCoverageText(mode)}
-
-${priorityGuidanceText(mode)}
-
-Mode-specific rules:
-- Bootstrap mode is for a first pass on an existing story. It should populate a broad foundation of pending lore, not a tiny summary.
-- Incremental mode is for maintenance after the story already has accepted lore. It should be more selective.
-- Do not create generic canon-only encyclopedia entries. Canon facts are useful only when they constrain this story's current state, timeline, knowledge boundary, or AU branch.
-- If the messages establish multiple small durable facts, split them into multiple scoped entries rather than merging them into one broad entry.
-- Every entry must have a concrete content.fact and content.injection.`;
-}
-
-function buildLoreChunkUserMessage({ stateSummary, chunkText, chunkIndex, chunkCount, profile, previousTitles = [] }) {
-    const mode = profile?.mode || 'incremental';
-    const previous = previousTitles.length
-        ? `\nAlready generated in earlier chunks; avoid repeating these titles/facts unless the current chunk adds a distinct update:\n- ${previousTitles.slice(-40).join('\n- ')}\n`
-        : '';
-    const target = mode === 'bootstrap'
-        ? `For this chunk, produce ${profile.perChunkMin}-${profile.perChunkMax} supported entries if possible. Capture characters, possessions, spells/skills, secrets, relationships, locations, factions, active goals, and AU/timeline facts found in this chunk.`
-        : `For this chunk, produce ${profile.perChunkMin}-${profile.perChunkMax} supported entries focused on new or changed durable facts.`;
-
-    return `Current state: ${stateSummary}
-
-Generation mode: ${mode}.
-Chunk ${chunkIndex + 1} of ${chunkCount}.
-${target}
-${previous}
-Recent message chunk ${chunkIndex + 1} of ${chunkCount}:
-${chunkText || '(No message text)'}
-
-Generate story/AU lore entries from this chunk. Do not repeat accepted lore unless this chunk makes the fact story-specific, current-state-specific, or divergent. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
-}
-
-function normalizeGeneratedEntry(entry, settings = getSettings(), profile = {}) {
-    const normalized = { ...entry };
-    const tagCount = Math.max(0, Math.min(10, Number(settings.loreTagCount ?? 4)));
-    normalized.tags = tagCount === 0
-        ? []
-        : (Array.isArray(normalized.tags) ? normalized.tags.slice(0, tagCount) : []);
-    normalized.source = normalized.source || `model-generated:${profile.mode || 'incremental'}`;
-    normalized.extensions = {
-        ...(normalized.extensions || {}),
-        wandlightGeneration: {
-            ...((normalized.extensions || {}).wandlightGeneration || {}),
-            mode: profile.mode || 'incremental',
-            generatedAt: Date.now(),
-            targetTotal: profile.targetTotal || 0,
-        },
-    };
-    return normalized;
-}
 
 
 // ── Bulk Lore Scan Helpers ──────────────────────────────────────────────────────
@@ -1200,11 +1103,7 @@ async function extractBulkChunkCandidates({ chunk, plan, batchId, profile, setti
             throwIfAborted(signal);
             let parsed = parseBulkCandidateResponse(rawResponse, chunk);
             if ((!parsed || !parsed.facts.length) && settings.loreRepairOnParseFail) {
-                const repaired = await repairLoreJsonResponse(rawResponse);
-                const shaped = coerceBulkFactsShape(repaired);
-                if (shaped) {
-                    parsed = { chunkSummary: shaped.chunkSummary || '', facts: shaped.facts.map(f => normalizeCandidateFact(f, chunk)).filter(Boolean) };
-                }
+                parsed = await repairBulkCandidateJsonResponse(rawResponse, chunk);
             }
             if (!parsed) {
                 lastError = 'Response was empty or unparseable.';
@@ -1260,7 +1159,7 @@ async function extractBulkChunkCandidates({ chunk, plan, batchId, profile, setti
 
 /**
  * Runs a resumable, range-based bulk story lore scan.
- * Processes chunks concurrently, writes chunk/candidate ledger records, and appends Pending Lore entries as chunks complete.
+ * Processes chunks concurrently, checkpoints candidate facts, and consolidates Pending Lore entries in durable batches.
  * @param {Object} [options]
  * @param {boolean} [options.force=true]
  * @param {AbortSignal} [options.signal]
@@ -1655,425 +1554,6 @@ export const __bulkLoreTestHooks = {
     candidateFactToLoreEntry,
     runWithConcurrency,
 };
-
-// ── Lore Generation ─────────────────────────────────────────────────────────────
-
-/**
- * Cooldown window after a failed/empty auto-generation attempt during which
- * the same context will not be retried automatically. Prevents wasting model
- * calls when the model keeps producing malformed or empty lore. Manual
- * (force) generation always bypasses the cooldown.
- */
-const FAILED_RETRY_COOLDOWN_MS = 10 * 60 * 1000;
-
-/** Attempt statuses that count as a "recent failure" for cooldown purposes. */
-const FAILED_STATUSES = ['failed_parse', 'failed_no_response', 'failed_exception', 'empty'];
-
-/**
- * Runs lore matrix generation via LLM.
- * Guarded by _generationRunning. Results go to pendingLoreEntries (review required).
- * Only runs if contexts have changed since last generation (buildLoreGenerationKey).
- * @param {Object} [options]
- * @param {boolean} [options.force=false] - If true, bypass unchanged-context skip
- * @returns {Promise<Object[]>} Generated lore entries (or empty on skip/failure)
- */
-/**
- * Runs lore generation against the LLM and returns a structured result.
- *
- * Auto-generation never silently overwrites unresolved pending lore.
- * Manual generation (force:true) does NOT by itself imply confirmation to
- * replace existing pending lore — the caller must also pass
- * allowReplacePending:true (the UI does so after the user confirms). When
- * force is true but pending lore exists for a different context and
- * allowReplacePending is false, generation is blocked.
- *
- * A context is only marked "proposed" if at least one valid lore entry
- * survives parsing and normalization. Failed/invalid attempts are recorded
- * in the generation ledger but do NOT update lastProposedFor.
- *
- * Skip logic (checked in order):
- *  1. Already running → skipped_running
- *  2. No loreContext detected → no_context_detected
- *  3. Forced, pending exists for different context, not allowed → blocked_pending_exists
- *  4. Auto, pending exists, same context → skipped_same_context_pending
- *  5. Auto, pending exists, different context → skipped_stale_pending_exists
- *     (marks pending as stale)
- *  6. Auto, already accepted → skipped_already_accepted
- *  7. Auto, previously rejected → skipped_previously_rejected
- *  8. Auto, recent failure within cooldown → skipped_recent_failure
- *
- * @param {Object} [options={}]
- * @param {boolean} [options.force=false] - If true, bypass auto-only skip guards (manual generation)
- * @param {boolean} [options.allowReplacePending=false] - If true, a forced run may replace pending lore for a different context
- * @returns {Promise<Object>} Structured result with status, contextKey, and optional entries/error
- */
-export async function runLoreGeneration(options = {}) {
-    const { force = false, allowReplacePending = false, signal = null } = options;
-    const progress = typeof options.progress === 'function' ? options.progress : null;
-    const source = force ? 'manual' : 'auto';
-
-    if (_generationRunning) {
-        console.debug(`${LOG_PREFIX} Lore generation already running, skipping`);
-        return { status: 'skipped_running' };
-    }
-
-    _generationRunning = true;
-    try {
-        throwIfAborted(signal);
-        const state = getState();
-        const settings = getSettings();
-        const validation = validateLoreProviderConfiguration();
-        if (!validation.ok) {
-            progress?.(`API/model settings incomplete: ${validation.message}`, 100);
-            return { status: 'api_not_configured', error: validation.message };
-        }
-        progress?.('Preparing lore generation...', 5);
-        const contextKey = buildLoreGenerationKey(state);
-
-        // Auto-detect context if none exists (only for manual/forced generation)
-        if (!state.loreContext?.lastDetectedAt) {
-            if (force) {
-                console.debug(`${LOG_PREFIX} Auto-detecting lore context before generation…`);
-                const detected = await runLoreContextDetection({ progress, signal });
-                if (!detected) {
-                    progress?.('No story context could be detected. Set context manually or increase Source Messages.', 100);
-                    _generationRunning = false;
-                    return { status: 'no_context_detected', contextKey };
-                }
-                // Re-read state and contextKey (context detection may have updated it)
-                const freshState = getState();
-                const freshKey = buildLoreGenerationKey(freshState);
-                // Restart the generation with fresh state, release guard first
-                // so the recursive call doesn't conflict with _generationRunning
-                _generationRunning = false;
-                return await runLoreGeneration({ force, allowReplacePending, progress, signal });
-            }
-            if (settings.debugMode) {
-                console.debug(`${LOG_PREFIX} Skipping lore generation — no lore context detected yet`);
-            }
-            return { status: 'no_context_detected', contextKey };
-        }
-
-        const pending = state.pendingLoreEntries || [];
-        const pendingMeta = state.pendingLoreMeta || null;
-        const pendingIsDifferentContext =
-            pending.length > 0 &&
-            pendingMeta?.contextKey &&
-            pendingMeta.contextKey !== contextKey;
-
-        // ── Pending lore guard ─────────────────────────────────────────
-        // Invariant:
-        // - Auto generation never overwrites pending lore.
-        // - Manual generation only overwrites pending lore if caller explicitly
-        //   passed allowReplacePending:true after user confirmation.
-        if (pending.length > 0) {
-            const pendingKey = pendingMeta?.contextKey || '';
-
-            if (force && !allowReplacePending) {
-                return {
-                    status: 'blocked_pending_exists',
-                    contextKey,
-                    pendingContextKey: pendingKey,
-                    pendingStatus: pendingMeta?.status || 'pending',
-                };
-            }
-
-            if (!force) {
-                if (pendingKey && pendingKey !== contextKey) {
-                    markPendingLoreStale(`Current context changed to ${contextKey}`);
-                    return {
-                        status: 'skipped_stale_pending_exists',
-                        contextKey,
-                        pendingContextKey: pendingKey,
-                    };
-                }
-
-                return {
-                    status: 'skipped_same_context_pending',
-                    contextKey,
-                    pendingContextKey: pendingKey,
-                };
-            }
-
-            // Manual replacement was explicitly confirmed by caller.
-            if (force && allowReplacePending) {
-                markPendingLoreReplaced(contextKey);
-            }
-        }
-
-        // ── Ledger-based skip guards (auto only) ──────────────────────
-        const ledger = state.loreGeneration || {};
-        const attempt = ledger.attempts?.[contextKey];
-
-        if (!force && attempt?.status === 'accepted') {
-            if (settings.debugMode) {
-                console.debug(`${LOG_PREFIX} Lore already accepted for this context, skipping`);
-            }
-            return { status: 'skipped_already_accepted', contextKey };
-        }
-
-        if (!force && attempt?.status === 'rejected') {
-            if (settings.debugMode) {
-                console.debug(`${LOG_PREFIX} Lore previously rejected for this context, skipping`);
-            }
-            return { status: 'skipped_previously_rejected', contextKey };
-        }
-
-        // ── Failed-retry cooldown (auto only) ─────────────────────────
-        // Avoid hammering the model after a recent failed/empty attempt for
-        // the same context. Manual generation bypasses this entirely.
-        if (!force && attempt && FAILED_STATUSES.includes(attempt.status)) {
-            const last = attempt.lastAttemptAt || 0;
-            if (Date.now() - last < FAILED_RETRY_COOLDOWN_MS) {
-                if (settings.debugMode) {
-                    console.debug(`${LOG_PREFIX} Recent failed lore generation for this context — within cooldown, skipping`);
-                }
-                return { status: 'skipped_recent_failure', contextKey };
-            }
-        }
-
-        // ── If a forced run is replacing pending lore for a different context,
-        //    mark the old pending batch's ledger entry as 'replaced' before we
-        //    overwrite it, so the ledger stays truthful. ─────────────────────
-        if (force && pendingIsDifferentContext && allowReplacePending) {
-            markPendingLoreReplaced(contextKey);
-        }
-
-        // ── Record the attempt ────────────────────────────────────────
-        recordLoreAttempt(contextKey, {
-            status: 'running',
-            lastSource: source,
-            lastError: '',
-        });
-
-        // ── Call the LLM in message chunks ────────────────────────────
-        const stateSummary = JSON.stringify({
-            canon: state.canon,
-            scene: state.scene,
-            loreContext: state.loreContext,
-            loreMatrix: (state.loreMatrix || []).slice(0, 6),
-        }, null, 0);
-
-        const sourceCount = Math.max(1, Math.min(200, Number(settings.loreSourceMessageCount) || 40));
-        const chunkSize = Math.max(1, Math.min(50, Number(settings.loreGenerationChunkSize) || 10));
-        const messageObjects = getRecentMessageObjects(sourceCount);
-        const chunks = chunkMessages(messageObjects, chunkSize);
-        const profile = determineLoreGenerationProfile(settings, state, {
-            force,
-            sourceCount,
-            chunkCount: chunks.length,
-        });
-        const systemPrompt = buildLoreGenerationSystemPrompt(settings, profile);
-        const allRawEntries = [];
-        let rawEntryCount = 0;
-        let failedChunkCount = 0;
-        let emptyChunkCount = 0;
-        const chunkSummaries = [];
-        const totalSteps = Math.max(1, chunks.length * 2 + 3); // generate + parse per chunk, then normalize/filter/save
-        let completedSteps = 0;
-        const stepProgress = (message) => {
-            const percent = Math.min(94, 6 + Math.round((completedSteps / totalSteps) * 88));
-            progress?.(`${message} (${completedSteps}/${totalSteps} steps)`, percent);
-        };
-
-        progress?.(`${profile.mode === 'bootstrap' ? 'Bootstrap' : 'Incremental'} story lore generation: target ${profile.targetTotal} entries from ${sourceCount} messages.`, 8);
-
-        for (let i = 0; i < chunks.length; i++) {
-            throwIfAborted(signal);
-            const chunkText = formatMessageObjects(chunks[i]);
-            const previousTitles = allRawEntries.map(entry => String(entry?.title || '').trim()).filter(Boolean);
-            stepProgress(`Generating ${profile.mode} lore chunk ${i + 1}/${chunks.length} (${chunks[i].length} messages)...`);
-
-            const userMessage = buildLoreChunkUserMessage({
-                stateSummary,
-                chunkText,
-                chunkIndex: i,
-                chunkCount: chunks.length,
-                profile,
-                previousTitles,
-            });
-            const response = await quietPrompt(systemPrompt, userMessage, { signal, maxTokens: profile.maxTokens });
-            completedSteps++;
-            throwIfAborted(signal);
-
-            if (!response) {
-                failedChunkCount++;
-                completedSteps++;
-                continue;
-            }
-
-            stepProgress(`Parsing lore chunk ${i + 1}/${chunks.length}...`);
-            let parsed = parseJsonResponse(response);
-
-            if (!parsed || !Array.isArray(parsed?.entries)) {
-                if (settings.loreRepairOnParseFail) {
-                    if (settings.debugMode) {
-                        console.debug(`${LOG_PREFIX} Initial lore parse failed for chunk ${i + 1}, attempting repair pass`);
-                    }
-                    progress?.(`Repairing malformed JSON for chunk ${i + 1}/${chunks.length}... (${completedSteps}/${totalSteps} steps)`, Math.min(94, 6 + Math.round((completedSteps / totalSteps) * 88)));
-                    parsed = await repairLoreJsonResponse(response);
-                }
-            }
-            completedSteps++;
-            throwIfAborted(signal);
-
-            if (!parsed || !Array.isArray(parsed.entries)) {
-                failedChunkCount++;
-                continue;
-            }
-
-            rawEntryCount += parsed.entries.length;
-            if (parsed.summary) chunkSummaries.push(String(parsed.summary));
-            if (!parsed.entries.length) emptyChunkCount++;
-            allRawEntries.push(...parsed.entries.map((entry, entryIndex) => ({
-                ...entry,
-                source: entry?.source || `model-generated:${profile.mode}:chunk-${i + 1}-of-${chunks.length}`,
-                extensions: {
-                    ...(entry?.extensions || {}),
-                    wandlightGeneration: {
-                        ...((entry?.extensions || {}).wandlightGeneration || {}),
-                        mode: profile.mode,
-                        chunkIndex: i + 1,
-                        chunkCount: chunks.length,
-                        entryIndex: entryIndex + 1,
-                        targetTotal: profile.targetTotal,
-                    },
-                },
-            })));
-        }
-
-        if (rawEntryCount === 0 && failedChunkCount >= chunks.length) {
-            recordLoreAttempt(contextKey, {
-                status: 'failed_no_response',
-                generationMode: profile.mode,
-                targetEntryCount: profile.targetTotal,
-                lastError: `All ${chunks.length} lore generation chunks returned empty or unparseable responses`,
-            }, { increment: false });
-            progress?.('Lore generation returned no usable responses from any chunk.', 100);
-            return {
-                status: 'failed_no_response',
-                contextKey,
-                generationMode: profile.mode,
-                targetEntryCount: profile.targetTotal,
-                failedChunkCount,
-                emptyChunkCount,
-                chunkCount: chunks.length,
-            };
-        }
-
-        completedSteps++;
-        progress?.(`Normalizing and filtering generated lore entries... (${completedSteps}/${totalSteps} steps)`, Math.min(96, 6 + Math.round((completedSteps / totalSteps) * 88)));
-        let entries = normalizeLoreMatrix(allRawEntries).map(entry => normalizeGeneratedEntry(entry, settings, profile));
-        const normalizedEntryCount = entries.length;
-        let duplicateDrops = [];
-        if (settings.loreDuplicateGuard !== false) {
-            const filtered = filterDuplicateLoreEntries(entries, state.loreMatrix || [], {
-                storyGeneration: true,
-                ignoreCanonicalSourceSimilarity: profile.mode === 'bootstrap',
-            });
-            entries = filtered.entries;
-            duplicateDrops = filtered.dropped;
-        }
-
-        if (entries.length === 0) {
-            recordLoreAttempt(contextKey, {
-                status: 'empty',
-                rawEntryCount,
-                normalizedEntryCount,
-                validEntryCount: 0,
-                generationMode: profile.mode,
-                targetEntryCount: profile.targetTotal,
-                lastError: duplicateDrops.length ? `All valid lore entries were duplicate/similar to existing entries (${duplicateDrops.length} dropped)` : 'No valid lore entries after normalization',
-            }, { increment: false });
-            if (settings.debugMode) {
-                console.debug(`${LOG_PREFIX} Lore generation returned no valid entries after normalization`);
-            }
-            progress?.('Lore generation produced no usable non-duplicate entries.', 100);
-            return {
-                status: 'empty_valid_entries',
-                contextKey,
-                generationMode: profile.mode,
-                targetEntryCount: profile.targetTotal,
-                rawEntryCount,
-                normalizedEntryCount,
-                validEntryCount: 0,
-                droppedDuplicateCount: duplicateDrops.length,
-                duplicateDropReasons: duplicateDrops.map(d => d.reason),
-                failedChunkCount,
-                emptyChunkCount,
-                chunkCount: chunks.length,
-            };
-        }
-
-        // ── Create proposal (only path that marks context as proposed) ─
-        const summary = chunkSummaries.filter(Boolean).join(' | ');
-        completedSteps++;
-        progress?.(`Saving pending lore proposal... (${completedSteps}/${totalSteps} steps)`, 96);
-        const result = setPendingLoreProposal(entries, {
-            contextKey,
-            source,
-            summary,
-            rawEntryCount,
-            normalizedEntryCount,
-            droppedDuplicateCount: duplicateDrops.length,
-            failedChunkCount,
-            emptyChunkCount,
-            chunkCount: chunks.length,
-            sourceMessageCount: sourceCount,
-            chunkSize,
-            generationMode: profile.mode,
-            generationConfiguredMode: profile.configuredMode,
-            targetEntryCount: profile.targetTotal,
-            storyLoreCountBefore: profile.storyLoreCount,
-        }, {
-            snapshot: source === 'manual',
-            snapshotLabel: 'Generate pending lore entries',
-        });
-
-        if (settings.debugMode) {
-            console.log(`${LOG_PREFIX} Lore generated: ${entries.length} entries pending review`, entries);
-        }
-
-        progress?.(`${profile.mode === 'bootstrap' ? 'Bootstrap' : 'Incremental'} story lore ready for review: ${entries.length}/${profile.targetTotal} target entries.`, 100);
-
-        return {
-            status: 'proposed',
-            contextKey,
-            entries,
-            generationMode: profile.mode,
-            generationConfiguredMode: profile.configuredMode,
-            targetEntryCount: profile.targetTotal,
-            sourceMessageCount: sourceCount,
-            rawEntryCount,
-            normalizedEntryCount,
-            validEntryCount: entries.length,
-            droppedEntryCount: rawEntryCount - entries.length,
-            droppedDuplicateCount: duplicateDrops.length,
-            duplicateDropReasons: duplicateDrops.map(d => d.reason),
-            failedChunkCount,
-            emptyChunkCount,
-            chunkCount: chunks.length,
-        };
-    } catch (e) {
-        const currentKey = buildLoreGenerationKey(getState());
-        if (isAbortError(e)) {
-            recordLoreAttempt(currentKey, {
-                status: 'cancelled',
-                lastError: 'Cancelled by user',
-            }, { increment: false });
-            progress?.('Lore generation cancelled by user.', 0);
-            return { status: 'cancelled', contextKey: currentKey, error: 'Cancelled by user' };
-        }
-        console.error(`${LOG_PREFIX} Lore generation failed:`, e);
-        recordLoreAttempt(currentKey, {
-            status: 'failed_exception',
-            lastError: e.message,
-        }, { increment: false });
-        return { status: 'failed_exception', contextKey: currentKey, error: e.message };
-    } finally {
-        _generationRunning = false;
-    }
-}
 
 // ── Fluent pipeline: detect + generate ──────────────────────────────────────────
 

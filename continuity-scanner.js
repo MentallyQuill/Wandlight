@@ -1,0 +1,921 @@
+/**
+ * continuity-scanner.js — Wandlight Continuity
+ * Checkpointed, chunked continuity scanner.
+ *
+ * Pipeline:
+ * messages -> parallel compact observations -> section reducers -> one ordered delta -> review/apply
+ */
+
+import { LOG_PREFIX } from './constants.js';
+import {
+    getSettings,
+    getState,
+    saveState,
+    pushStateSnapshot,
+    applyDelta,
+    validateDelta,
+} from './state-manager.js';
+import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
+
+const SECTION_GROUPS = [
+    {
+        id: 'canon_scene',
+        label: 'Canon and Scene',
+        sections: ['canon', 'scene'],
+        enabled: state => state?.continuityConfig?.canon !== false || state?.continuityConfig?.scene !== false,
+    },
+    {
+        id: 'characters',
+        label: 'Characters',
+        sections: ['characters'],
+        enabled: state => state?.continuityConfig?.characters !== false,
+    },
+    {
+        id: 'inventory_objectives',
+        label: 'Inventory and Objectives',
+        sections: ['inventory', 'objectives'],
+        enabled: state => state?.continuityConfig?.inventory !== false || state?.continuityConfig?.objectives !== false,
+    },
+    {
+        id: 'knowledge_secrets',
+        label: 'Knowledge and Secrets',
+        sections: ['knowledge', 'secrets'],
+        enabled: state => state?.continuityConfig?.knowledge !== false || state?.continuityConfig?.secrets !== false,
+    },
+    {
+        id: 'relationships_threads',
+        label: 'Relationships and Threads',
+        sections: ['relationships', 'threads'],
+        enabled: state => state?.continuityConfig?.relationships !== false || state?.continuityConfig?.threads !== false,
+    },
+    {
+        id: 'milestones_flags',
+        label: 'Milestones and Flags',
+        sections: ['storyMilestones', 'continuityFlags'],
+        enabled: state => state?.continuityConfig?.storyMilestones !== false || state?.continuityConfig?.flags !== false,
+    },
+];
+
+const OBSERVATION_SECTIONS = new Set([
+    'canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'storyMilestones', 'continuityFlags', 'flags',
+]);
+
+function clampInt(value, min, max, fallback) {
+    const parsed = parseInt(value, 10);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.max(min, Math.min(max, parsed));
+}
+
+function truncateText(value, max = 1000) {
+    const text = String(value ?? '').trim();
+    if (text.length <= max) return text;
+    return `${text.slice(0, Math.max(0, max - 1))}…`;
+}
+
+function stableStringHash(value) {
+    const text = String(value || '');
+    let hash = 2166136261;
+    for (let i = 0; i < text.length; i++) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(36);
+}
+
+function isPlainObject(value) {
+    return value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function stripThinking(text) {
+    return String(text || '')
+        .replace(/<think\b[^>]*>([\s\S]*?)<\/think>/gi, '')
+        .replace(/<thinking\b[^>]*>([\s\S]*?)<\/thinking>/gi, '')
+        .replace(/<reasoning\b[^>]*>([\s\S]*?)<\/reasoning>/gi, '')
+        .trim();
+}
+
+function getAllMessageObjects() {
+    try {
+        const ctx = SillyTavern.getContext();
+        const chat = ctx?.chat || [];
+        return Array.isArray(chat) ? chat : [];
+    } catch (_) {
+        return [];
+    }
+}
+
+function normalizeScanMessage(message, zeroIndex = 0) {
+    const rawText = message?.mes || message?.content || '';
+    const text = stripThinking(rawText);
+    const name = String(message?.name || (message?.is_user ? 'User' : message?.is_system ? 'System' : 'Assistant')).trim() || 'Unknown';
+    const role = message?.is_user ? 'user' : message?.is_system ? 'system' : 'assistant';
+    const fallbackId = stableStringHash(`${zeroIndex + 1}|${name}|${role}|${text}`);
+    const id = String(message?.extra?.id || message?.id || message?.swipe_id || fallbackId);
+    const hash = stableStringHash(`${id}|${name}|${role}|${text}`);
+    return { index: zeroIndex + 1, zeroIndex, id, role, speaker: name, text, hash };
+}
+
+function formatScanMessages(messages = []) {
+    return messages
+        .filter(m => String(m?.text || '').trim())
+        .map(m => `[${m.index}] ${m.speaker || m.role || 'Unknown'} (${m.role || 'message'}): ${m.text}`)
+        .join('\n\n');
+}
+
+function formatMessageRefs(refs = []) {
+    const out = [];
+    for (const value of Array.isArray(refs) ? refs : []) {
+        const n = Number(value);
+        if (Number.isFinite(n) && n > 0 && !out.includes(n)) out.push(n);
+    }
+    return out.slice(0, 20);
+}
+
+function contextKeyForState(state = getState()) {
+    const canon = state?.canon || {};
+    const scene = state?.scene || {};
+    const lore = state?.loreContext || {};
+    return stableStringHash([
+        canon.era || '',
+        canon.inUniverseDate || '',
+        canon.canonBoundary || '',
+        lore.branchId || 'main',
+        scene.location || '',
+    ].join('|'));
+}
+
+export function buildContinuityProjection(state = getState()) {
+    const cfg = state?.continuityConfig || {};
+    const compactArray = (arr, max, mapFn = x => x) => (Array.isArray(arr) ? arr.slice(0, max).map(mapFn) : []);
+    const compactObject = (obj, maxKeys = 40) => {
+        if (!isPlainObject(obj)) return {};
+        return Object.fromEntries(Object.entries(obj).slice(0, maxKeys));
+    };
+    return {
+        continuityConfig: { ...cfg },
+        canon: cfg.canon === false ? undefined : {
+            era: state?.canon?.era || '',
+            inUniverseDate: state?.canon?.inUniverseDate || '',
+            canonBoundary: state?.canon?.canonBoundary || '',
+            divergences: compactArray(state?.canon?.divergences, 30),
+        },
+        scene: cfg.scene === false ? undefined : {
+            location: state?.scene?.location || '',
+            timeOfDay: state?.scene?.timeOfDay || '',
+            weather: state?.scene?.weather || '',
+            ambience: state?.scene?.ambience || '',
+            presentCharacters: compactArray(state?.scene?.presentCharacters, 30),
+            nearbyCharacters: compactArray(state?.scene?.nearbyCharacters, 30),
+            currentActivity: state?.scene?.currentActivity || '',
+        },
+        characters: cfg.characters === false ? undefined : compactArray(state?.characters, 60, c => ({
+            name: c?.name || '',
+            role: c?.role || '',
+            location: c?.location || '',
+            physicalState: c?.physicalState || '',
+            clothing: c?.clothing || '',
+            posture: c?.posture || '',
+            currentGoal: c?.currentGoal || '',
+            emotionalState: c?.emotionalState || undefined,
+            notes: truncateText(c?.notes || '', 300),
+        })),
+        inventory: cfg.inventory === false ? undefined : compactArray(state?.inventory, 80),
+        objectives: cfg.objectives === false ? undefined : compactArray(state?.objectives, 80),
+        knowledge: cfg.knowledge === false ? undefined : compactObject(state?.knowledge, 60),
+        secrets: cfg.secrets === false ? undefined : compactArray(state?.secrets, 80),
+        relationships: cfg.relationships === false ? undefined : compactArray(state?.relationships, 80),
+        threads: cfg.threads === false ? undefined : compactArray(state?.threads, 80),
+        storyMilestones: cfg.storyMilestones === false ? undefined : compactObject(state?.storyMilestones, 80),
+        continuityFlags: cfg.flags === false ? undefined : compactArray(state?.continuityFlags, 60),
+    };
+}
+
+function safeJson(value, fallback = '{}') {
+    try { return JSON.stringify(value, null, 2); } catch (_) { return fallback; }
+}
+
+function ensureContinuityLedger(state = getState()) {
+    if (!state.continuityScan || typeof state.continuityScan !== 'object' || Array.isArray(state.continuityScan)) {
+        state.continuityScan = { activeBatchId: '', lastBatchId: '', batches: {}, chunks: {}, observations: {} };
+    }
+    for (const key of ['batches', 'chunks', 'observations']) {
+        if (!state.continuityScan[key] || typeof state.continuityScan[key] !== 'object' || Array.isArray(state.continuityScan[key])) {
+            state.continuityScan[key] = {};
+        }
+    }
+    state.continuityScan.activeBatchId = String(state.continuityScan.activeBatchId || '');
+    state.continuityScan.lastBatchId = String(state.continuityScan.lastBatchId || '');
+    return state.continuityScan;
+}
+
+function compactObservation(raw = {}, chunk = {}) {
+    if (!raw || typeof raw !== 'object') return null;
+    const sectionRaw = String(raw.section || raw.category || 'scene').trim();
+    let section = sectionRaw === 'flags' ? 'continuityFlags' : sectionRaw;
+    if (!OBSERVATION_SECTIONS.has(section)) section = 'scene';
+    const observation = truncateText(raw.observation || raw.fact || raw.text || raw.description || '', 900);
+    if (!observation) return null;
+    return {
+        section,
+        subject: truncateText(raw.subject || raw.character || raw.item || section, 160),
+        observation,
+        actionHint: truncateText(raw.actionHint || raw.action || raw.operation || 'upsert', 40),
+        confidence: Number.isFinite(Number(raw.confidence)) ? Math.max(0, Math.min(1, Number(raw.confidence))) : 0.75,
+        messageRefs: formatMessageRefs(raw.messageRefs || raw.messages || raw.refs),
+        evidence: truncateText(raw.evidence || '', 400),
+        chunkId: chunk.chunkId || raw.chunkId || '',
+        startIndex: Number(chunk.startIndex || raw.startIndex || 0),
+        endIndex: Number(chunk.endIndex || raw.endIndex || 0),
+    };
+}
+
+function saveContinuityLedger(state, { full = false, syncPrompt = false } = {}) {
+    compactContinuityLedger(state, { full });
+    saveState(state, { syncPrompt, sanitize: !!full });
+}
+
+function compactContinuityLedger(state = getState(), options = {}) {
+    const ledger = ensureContinuityLedger(state);
+    const settings = getSettings();
+    const retainCompleted = Math.max(1, Number(settings.continuityScanRetainCompletedBatches) || 3);
+    const batches = Object.entries(ledger.batches || {}).sort((a, b) => Number(b[1]?.updatedAt || b[1]?.createdAt || 0) - Number(a[1]?.updatedAt || a[1]?.createdAt || 0));
+    const keep = new Set();
+    let completedKept = 0;
+    for (const [id, batch] of batches) {
+        const status = String(batch?.status || '');
+        if (id === ledger.activeBatchId || ['running', 'queued', 'partial', 'failed', 'cancelled'].includes(status)) {
+            keep.add(id);
+        } else if (completedKept < retainCompleted) {
+            keep.add(id);
+            completedKept++;
+        }
+    }
+    if (ledger.lastBatchId) keep.add(ledger.lastBatchId);
+    for (const id of Object.keys(ledger.batches || {})) if (!keep.has(id)) delete ledger.batches[id];
+    for (const [id, chunk] of Object.entries(ledger.chunks || {})) if (chunk?.batchId && !keep.has(chunk.batchId)) delete ledger.chunks[id];
+    for (const [id, record] of Object.entries(ledger.observations || {})) if (record?.batchId && !keep.has(record.batchId)) delete ledger.observations[id];
+    return ledger;
+}
+
+function checkpointContinuityChunk(chunkId, payload = {}, options = {}) {
+    const state = getState();
+    const ledger = ensureContinuityLedger(state);
+    const id = String(chunkId || payload.chunkId || '');
+    if (!id) return state;
+    const batchId = String(payload.batchId || payload.batchPatch?.id || ledger.activeBatchId || ledger.lastBatchId || '');
+    const previous = ledger.chunks[id] || { id, attempts: 0, createdAt: Date.now() };
+    ledger.chunks[id] = {
+        ...previous,
+        ...(payload.chunkPatch || {}),
+        id,
+        batchId: batchId || previous.batchId || '',
+        updatedAt: Date.now(),
+    };
+    if (payload.rawResponse && (getSettings().debugMode || getSettings().continuityScanRetainRawResponses)) {
+        ledger.chunks[id].rawResponse = truncateText(payload.rawResponse, 20000);
+    } else if ('rawResponse' in ledger.chunks[id]) {
+        ledger.chunks[id].rawResponse = '';
+    }
+    if (Array.isArray(payload.observations)) {
+        ledger.observations[id] = {
+            batchId,
+            chunkId: id,
+            observations: payload.observations.map(o => compactObservation(o, payload.chunk || {})).filter(Boolean).slice(0, 100),
+            updatedAt: Date.now(),
+        };
+    }
+    if (batchId && payload.batchPatch && typeof payload.batchPatch === 'object') {
+        const prevBatch = ledger.batches[batchId] || { id: batchId, createdAt: Date.now() };
+        ledger.batches[batchId] = { ...prevBatch, ...payload.batchPatch, id: batchId, updatedAt: Date.now() };
+        if (payload.batchPatch.status && !['running', 'queued'].includes(String(payload.batchPatch.status))) {
+            if (ledger.activeBatchId === batchId) ledger.activeBatchId = '';
+        }
+    }
+    saveContinuityLedger(state, { full: !!options.full, syncPrompt: false });
+    return state;
+}
+
+function startContinuityBatch(batch = {}) {
+    const state = getState();
+    const ledger = ensureContinuityLedger(state);
+    const id = String(batch.id || `continuity_scan_${Date.now()}`);
+    const prev = ledger.batches[id] || {};
+    ledger.batches[id] = {
+        ...prev,
+        ...batch,
+        id,
+        status: batch.status || 'running',
+        createdAt: prev.createdAt || Date.now(),
+        startedAt: batch.startedAt || prev.startedAt || Date.now(),
+        updatedAt: Date.now(),
+    };
+    ledger.activeBatchId = id;
+    ledger.lastBatchId = id;
+    saveContinuityLedger(state, { full: true, syncPrompt: false });
+    return state;
+}
+
+function flushContinuityFullCheckpoint(batchId, patch = {}) {
+    const state = getState();
+    const ledger = ensureContinuityLedger(state);
+    const id = String(batchId || ledger.activeBatchId || ledger.lastBatchId || '');
+    if (!id) return state;
+    const prev = ledger.batches[id] || { id, createdAt: Date.now() };
+    ledger.batches[id] = {
+        ...prev,
+        ...patch,
+        id,
+        updatedAt: Date.now(),
+        lastFullCheckpointAt: Date.now(),
+    };
+    if (patch.status && !['running', 'queued'].includes(String(patch.status))) {
+        if (ledger.activeBatchId === id) ledger.activeBatchId = '';
+    }
+    saveContinuityLedger(state, { full: true, syncPrompt: false });
+    return state;
+}
+
+function markInterruptedContinuityChunks(staleMs) {
+    const state = getState();
+    const ledger = ensureContinuityLedger(state);
+    const cutoff = Date.now() - Math.max(1000, Number(staleMs) || 600000);
+    let changed = false;
+    for (const [id, chunk] of Object.entries(ledger.chunks || {})) {
+        const status = String(chunk?.status || '');
+        const updatedAt = Number(chunk?.updatedAt || chunk?.startedAt || 0);
+        if ((status === 'running' || status === 'retrying') && (!updatedAt || updatedAt < cutoff)) {
+            ledger.chunks[id] = { ...chunk, status: 'interrupted', error: chunk?.error || 'Previous continuity scan was interrupted before this chunk completed.', updatedAt: Date.now() };
+            changed = true;
+        }
+    }
+    if (changed) saveContinuityLedger(state, { full: false, syncPrompt: false });
+    return state;
+}
+
+function buildEffectiveContinuitySettings(base = getSettings(), options = {}) {
+    const effective = { ...(base || {}) };
+    if (options.scanModeOverride) effective.continuityScanMode = String(options.scanModeOverride).toLowerCase();
+    if (options.rescanModeOverride) effective.continuityScanRescanMode = String(options.rescanModeOverride).toLowerCase();
+    if (Number.isFinite(Number(options.rangeStart))) effective.continuityScanRangeStart = Number(options.rangeStart);
+    if (Number.isFinite(Number(options.rangeEnd))) effective.continuityScanRangeEnd = Number(options.rangeEnd);
+    if (Number.isFinite(Number(options.sourceMessageCount))) effective.continuitySourceMessageCount = Number(options.sourceMessageCount);
+    if (Number.isFinite(Number(options.chunkSize))) effective.continuityScanChunkSize = Number(options.chunkSize);
+    if (Number.isFinite(Number(options.overlap))) effective.continuityScanOverlap = Number(options.overlap);
+    if (Number.isFinite(Number(options.concurrency))) effective.continuityScanConcurrency = Number(options.concurrency);
+    if (Number.isFinite(Number(options.reducerConcurrency))) effective.continuityScanReducerConcurrency = Number(options.reducerConcurrency);
+    if (Number.isFinite(Number(options.retryAttempts))) effective.continuityScanRetryAttempts = Number(options.retryAttempts);
+    if (Number.isFinite(Number(options.observationsPerChunk))) effective.continuityScanObservationsPerChunk = Number(options.observationsPerChunk);
+
+    if (options.automationSafe) {
+        effective.continuityScanMode = 'recent';
+        effective.continuityScanRescanMode = String(options.rescanModeOverride || 'skip_unchanged').toLowerCase();
+        effective.continuityScanConcurrency = clampInt(effective.continuityScanConcurrency, 1, 3, 2);
+        effective.continuityScanReducerConcurrency = clampInt(effective.continuityScanReducerConcurrency, 1, 3, 2);
+        effective.continuityScanObservationsPerChunk = clampInt(effective.continuityScanObservationsPerChunk, 3, 12, 8);
+    }
+    return effective;
+}
+
+export function buildContinuityScanPlan(settings = getSettings(), state = getState()) {
+    const allMessages = getAllMessageObjects().map((msg, idx) => normalizeScanMessage(msg, idx)).filter(m => m.text);
+    const totalMessages = allMessages.length;
+    const scanMode = String(settings.continuityScanMode || 'recent').toLowerCase();
+    const recentCount = clampInt(settings.continuitySourceMessageCount, 1, 5000, 10);
+    let startIndex = 1;
+    let endIndex = totalMessages;
+    if (scanMode === 'range') {
+        startIndex = clampInt(settings.continuityScanRangeStart, 1, Math.max(1, totalMessages), 1);
+        const configuredEnd = Number(settings.continuityScanRangeEnd) || totalMessages;
+        endIndex = clampInt(configuredEnd, startIndex, Math.max(startIndex, totalMessages), totalMessages);
+    } else if (scanMode === 'entire') {
+        startIndex = 1;
+        endIndex = totalMessages;
+    } else {
+        endIndex = totalMessages;
+        startIndex = Math.max(1, totalMessages - recentCount + 1);
+    }
+    const selected = allMessages.filter(m => m.index >= startIndex && m.index <= endIndex);
+    const chunkSize = clampInt(settings.continuityScanChunkSize, 1, 50, 8);
+    const overlap = clampInt(settings.continuityScanOverlap, 0, Math.max(0, chunkSize - 1), 1);
+    const step = Math.max(1, chunkSize - overlap);
+    const contextKey = contextKeyForState(state);
+    const chunks = [];
+    for (let offset = 0; offset < selected.length; offset += step) {
+        const chunkMessages = selected.slice(offset, offset + chunkSize);
+        if (!chunkMessages.length) break;
+        const first = chunkMessages[0];
+        const last = chunkMessages[chunkMessages.length - 1];
+        const messageHash = stableStringHash(chunkMessages.map(m => `${m.index}:${m.hash}`).join('|'));
+        // Keep the chunk id tied to the message interval, not mutable continuity state.
+        // Staleness is tracked through messageHash so rescans after state changes can still skip unchanged chunks.
+        const chunkId = `continuity:${first.index}-${last.index}`;
+        chunks.push({ chunkId, startIndex: first.index, endIndex: last.index, messageCount: chunkMessages.length, messages: chunkMessages, messageHash });
+        if (offset + chunkSize >= selected.length) break;
+    }
+    return { chatMessageCount: totalMessages, scanMode, startIndex, endIndex, sourceMessageCount: selected.length, chunkSize, overlap, chunks, contextKey };
+}
+
+function getPriorChunk(chunkId) {
+    try { return getState()?.continuityScan?.chunks?.[chunkId] || null; } catch (_) { return null; }
+}
+
+function shouldQueueChunk(chunk, settings) {
+    const mode = String(settings.continuityScanRescanMode || 'skip_unchanged').toLowerCase();
+    const prior = getPriorChunk(chunk.chunkId);
+    if (mode === 'rescan_all') return true;
+    if (mode === 'retry_failed') return prior?.status === 'failed' || prior?.status === 'interrupted';
+    if (mode === 'stale_only') return !!prior && prior.messageHash !== chunk.messageHash;
+    if (!prior) return true;
+    if (prior.status === 'failed' || prior.status === 'interrupted') return true;
+    if (prior.messageHash !== chunk.messageHash) return true;
+    return prior.status !== 'complete';
+}
+
+async function runWithConcurrency(items, limit, worker) {
+    const queue = [...items];
+    const results = [];
+    const count = Math.max(1, Math.min(Math.max(1, items.length), Number(limit) || 1));
+    async function runOne() {
+        while (queue.length) {
+            const item = queue.shift();
+            try {
+                results.push(await worker(item));
+            } catch (e) {
+                results.push({ status: 'rejected', error: e?.message || String(e), item });
+            }
+        }
+    }
+    await Promise.all(Array.from({ length: count }, runOne));
+    return results;
+}
+
+function extractJsonText(text) {
+    let source = String(text || '').trim();
+    const fence = source.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (fence) source = fence[1].trim();
+    return source;
+}
+
+function parseJsonObjectFromText(text) {
+    const source = extractJsonText(text);
+    try { return JSON.parse(source); } catch (_) {}
+    const firstObj = source.indexOf('{');
+    const lastObj = source.lastIndexOf('}');
+    if (firstObj >= 0 && lastObj > firstObj) {
+        try { return JSON.parse(source.slice(firstObj, lastObj + 1)); } catch (_) {}
+    }
+    const firstArr = source.indexOf('[');
+    const lastArr = source.lastIndexOf(']');
+    if (firstArr >= 0 && lastArr > firstArr) {
+        try { return JSON.parse(source.slice(firstArr, lastArr + 1)); } catch (_) {}
+    }
+    return null;
+}
+
+function parseObservationResponse(text, chunk = {}) {
+    const parsed = parseJsonObjectFromText(text);
+    let raw = [];
+    if (Array.isArray(parsed)) raw = parsed;
+    else if (Array.isArray(parsed?.observations)) raw = parsed.observations;
+    else if (Array.isArray(parsed?.facts)) raw = parsed.facts;
+    else if (Array.isArray(parsed?.items)) raw = parsed.items;
+
+    if (!raw.length) {
+        const lines = extractJsonText(text).split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        for (const line of lines) {
+            if (!line.startsWith('{')) continue;
+            try { raw.push(JSON.parse(line)); } catch (_) {}
+        }
+    }
+
+    const observations = raw.map(o => compactObservation(o, chunk)).filter(Boolean);
+    return {
+        summary: truncateText(parsed?.chunkSummary || parsed?.summary || '', 500),
+        observations,
+    };
+}
+
+function isArrayDeltaShape(value) {
+    return isPlainObject(value) && (
+        Array.isArray(value.added) || Array.isArray(value.updated) || Array.isArray(value.removed) || Array.isArray(value.resolved)
+    );
+}
+
+function coerceArrayOrPatch(value) {
+    if (Array.isArray(value)) return { added: value };
+    if (isArrayDeltaShape(value)) return value;
+    return value;
+}
+
+function coerceContinuityFlags(value) {
+    if (Array.isArray(value)) return { added: value };
+    if (isPlainObject(value)) return value;
+    return value;
+}
+
+function coerceFullStateOrLooseDelta(parsed) {
+    if (!isPlainObject(parsed)) return parsed;
+    const knownKeys = ['canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags', 'storyMilestones'];
+    let delta = parsed;
+    if (!isPlainObject(delta.changes)) {
+        const candidate = isPlainObject(parsed.state) ? parsed.state
+            : isPlainObject(parsed.continuityState) ? parsed.continuityState
+            : isPlainObject(parsed.continuity) ? parsed.continuity
+            : parsed;
+        const hasKnown = knownKeys.some(k => k in candidate);
+        if (hasKnown) {
+            const changes = {};
+            for (const key of knownKeys) if (candidate[key] !== undefined) changes[key] = candidate[key];
+            delta = { summary: parsed.summary || 'Continuity state extracted', changes };
+        }
+    }
+    if (!isPlainObject(delta?.changes)) return delta;
+    const changes = { ...delta.changes };
+    for (const key of ['characters', 'inventory', 'objectives', 'secrets', 'relationships', 'threads']) {
+        if (changes[key] !== undefined) changes[key] = coerceArrayOrPatch(changes[key]);
+    }
+    if (changes.continuityFlags !== undefined) changes.continuityFlags = coerceContinuityFlags(changes.continuityFlags);
+    for (const key of ['secrets', 'relationships', 'threads']) {
+        const value = changes[key];
+        if (isPlainObject(value) && !isArrayDeltaShape(value)) changes[key] = { added: [value] };
+    }
+    return { ...delta, changes };
+}
+
+function parseDeltaResponse(text) {
+    const parsed = parseJsonObjectFromText(text);
+    const delta = coerceFullStateOrLooseDelta(parsed);
+    if (!isPlainObject(delta?.changes)) return null;
+    const validation = validateDelta(delta);
+    if (!validation.valid) {
+        console.warn(`${LOG_PREFIX} Continuity reducer delta validation failed: ${validation.errors.join('; ')}`);
+        return null;
+    }
+    return delta;
+}
+
+function buildObservationSystemPrompt(settings, stateProjection) {
+    const maxObs = clampInt(settings.continuityScanObservationsPerChunk, 3, 30, 12);
+    return `You are Wandlight Continuity's continuity observation extractor.\n\nTask:\n- Read one interval of roleplay messages.\n- Extract compact observations that may change the live continuity state.\n- Do not output a final WandlightDelta. Do not modify state directly.\n- Output ONLY valid JSON.\n\nOutput schema:\n{\n  "chunkSummary": "short summary",\n  "observations": [\n    {\n      "section": "canon|scene|characters|inventory|objectives|knowledge|secrets|relationships|threads|storyMilestones|continuityFlags",\n      "subject": "short subject",\n      "observation": "durable factual observation grounded in the messages",\n      "actionHint": "add|update|resolve|remove|upsert",\n      "confidence": 0.0,\n      "messageRefs": [1]\n    }\n  ]\n}\n\nLimits:\n- Return up to ${maxObs} observations.\n- Prefer current actionable continuity: scene, present characters, physical state, emotional state, carried items, knowledge boundaries, active goals, relationship changes, secrets, unresolved threads, milestones, and clear contradictions.\n- Preserve message indexes in messageRefs.\n- If nothing changed, return {"chunkSummary":"No continuity observations.","observations":[]}.\n\nCurrent compact continuity projection for reference:\n${safeJson(stateProjection)}`;
+}
+
+function getSectionPromptText(settings, sectionKey) {
+    const prompts = settings?.continuitySectionPrompts || {};
+    const keyMap = {
+        canon: ['canonScene', 'canonDivergences'],
+        scene: ['canonScene'],
+        characters: ['characters'],
+        inventory: ['inventory'],
+        objectives: ['objectives'],
+        knowledge: ['knowledge'],
+        secrets: ['secrets'],
+        relationships: ['relationships'],
+        threads: ['threads'],
+        storyMilestones: ['storyMilestones'],
+        continuityFlags: ['flags'],
+    };
+    return (keyMap[sectionKey] || [])
+        .map(k => String(prompts[k] || '').trim())
+        .filter(Boolean)
+        .join('\n');
+}
+
+function buildReducerSystemPrompt(settings, group, stateProjection) {
+    const prompts = group.sections.map(section => {
+        const text = getSectionPromptText(settings, section);
+        return text ? `- ${section}: ${text}` : '';
+    }).filter(Boolean).join('\n');
+    return `You are Wandlight Continuity's ${group.label} reducer.\n\nTask:\n- Convert compact continuity observations into ONE valid WandlightDelta partial.\n- Only modify these sections: ${group.sections.join(', ')}.\n- Resolve observations in chronological order using messageRefs.\n- Do not invent facts not supported by observations.\n- If nothing should change for these sections, output {"summary":"No ${group.label} changes","changes":{}}.\n\nReturn ONLY visible valid JSON in WandlightDelta shape.\n\nReducer-specific guidance:\n${prompts || '(none)'}\n\nCurrent compact continuity projection:\n${safeJson(stateProjection)}`;
+}
+
+function buildObservationUserPrompt(chunk, plan) {
+    return `Continuity scan interval: messages ${chunk.startIndex}-${chunk.endIndex}.\nFull scan range: messages ${plan.startIndex}-${plan.endIndex}.\n\nMessages:\n${formatScanMessages(chunk.messages)}\n\nExtract compact observations only. Return JSON only.`;
+}
+
+function buildReducerUserPrompt(group, observations, plan) {
+    const relevant = observations.filter(o => group.sections.includes(o.section) || (o.section === 'flags' && group.sections.includes('continuityFlags')));
+    return `Full scan range: messages ${plan.startIndex}-${plan.endIndex}.\nReducer group: ${group.label}.\nAllowed sections: ${group.sections.join(', ')}.\n\nObservations, already extracted from message chunks:\n${safeJson(relevant)}\n\nReturn one WandlightDelta partial for this reducer group. JSON only.`;
+}
+
+async function extractChunkObservations({ chunk, plan, batchId, settings, stateProjection, signal }) {
+    const maxAttempts = Math.max(1, Math.min(5, clampInt(settings.continuityScanRetryAttempts, 0, 4, 2) + 1));
+    const systemPrompt = buildObservationSystemPrompt(settings, stateProjection);
+    const userPrompt = buildObservationUserPrompt(chunk, plan);
+    let lastError = '';
+    let rawResponse = '';
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        if (signal?.aborted) throw new Error('Continuity scan aborted');
+        checkpointContinuityChunk(chunk.chunkId, {
+            batchId,
+            chunk,
+            chunkPatch: {
+                batchId,
+                status: attempt === 1 ? 'running' : 'retrying',
+                attempts: attempt,
+                startIndex: chunk.startIndex,
+                endIndex: chunk.endIndex,
+                messageCount: chunk.messageCount,
+                messageHash: chunk.messageHash,
+                startedAt: Date.now(),
+                error: '',
+            },
+        });
+        try {
+            rawResponse = await sendLoreRequest(systemPrompt, userPrompt, {
+                providerKind: 'continuity',
+                maxTokens: settings.continuityMaxTokens || 4096,
+                prefill: '',
+                signal,
+                expectedOutput: 'json',
+            });
+            if (!rawResponse || !String(rawResponse).trim()) {
+                lastError = 'Empty continuity observation response.';
+                continue;
+            }
+            const parsed = parseObservationResponse(rawResponse, chunk);
+            checkpointContinuityChunk(chunk.chunkId, {
+                batchId,
+                chunk,
+                observations: parsed.observations,
+                rawResponse,
+                chunkPatch: {
+                    batchId,
+                    status: 'complete',
+                    attempts: attempt,
+                    startIndex: chunk.startIndex,
+                    endIndex: chunk.endIndex,
+                    messageCount: chunk.messageCount,
+                    messageHash: chunk.messageHash,
+                    observationCount: parsed.observations.length,
+                    summary: parsed.summary,
+                    completedAt: Date.now(),
+                    error: '',
+                },
+            });
+            return { status: 'complete', chunk, observations: parsed.observations, summary: parsed.summary };
+        } catch (e) {
+            lastError = e?.message || String(e || 'Continuity observation extraction failed.');
+        }
+    }
+    checkpointContinuityChunk(chunk.chunkId, {
+        batchId,
+        chunk,
+        rawResponse,
+        chunkPatch: {
+            batchId,
+            status: 'failed',
+            attempts: maxAttempts,
+            startIndex: chunk.startIndex,
+            endIndex: chunk.endIndex,
+            messageCount: chunk.messageCount,
+            messageHash: chunk.messageHash,
+            observationCount: 0,
+            error: lastError || 'Continuity observation extraction failed.',
+            failedAt: Date.now(),
+        },
+    });
+    return { status: 'failed', chunk, observations: [], error: lastError || 'Continuity observation extraction failed.' };
+}
+
+async function reduceObservationGroup({ group, observations, plan, settings, stateProjection, signal }) {
+    const relevant = observations.filter(o => group.sections.includes(o.section) || (o.section === 'flags' && group.sections.includes('continuityFlags')));
+    if (!relevant.length) return { status: 'empty', group, delta: { summary: `No ${group.label} observations`, changes: {} } };
+    const systemPrompt = buildReducerSystemPrompt(settings, group, stateProjection);
+    const userPrompt = buildReducerUserPrompt(group, relevant, plan);
+    try {
+        const response = await sendLoreRequest(systemPrompt, userPrompt, {
+            providerKind: 'continuity',
+            maxTokens: settings.continuityMaxTokens || 4096,
+            prefill: '',
+            signal,
+            expectedOutput: 'json',
+        });
+        const parsedDelta = parseDeltaResponse(response);
+        if (!parsedDelta) return { status: 'failed_parse', group, delta: null, error: 'Reducer returned no valid WandlightDelta.' };
+        const delta = restrictDeltaToGroup(parsedDelta, group);
+        const validation = validateDelta(delta);
+        if (!validation.valid) return { status: 'failed_parse', group, delta: null, error: validation.errors.join('; ') };
+        return { status: 'complete', group, delta };
+    } catch (e) {
+        return { status: 'failed_exception', group, delta: null, error: e?.message || String(e || '') };
+    }
+}
+
+
+function restrictDeltaToGroup(delta, group) {
+    if (!delta?.changes || !Array.isArray(group?.sections)) return delta;
+    const allowed = new Set(group.sections);
+    const changes = {};
+    for (const [key, value] of Object.entries(delta.changes || {})) {
+        if (allowed.has(key)) changes[key] = value;
+    }
+    return { ...delta, changes };
+}
+
+function mergeArrayPatch(target = {}, patch = {}) {
+    const out = { ...target };
+    for (const op of ['added', 'updated', 'removed', 'resolved']) {
+        if (Array.isArray(patch[op])) out[op] = [...(out[op] || []), ...patch[op]];
+    }
+    return out;
+}
+
+function mergeDeltaChanges(base = {}, next = {}) {
+    const changes = { ...base };
+    for (const [key, value] of Object.entries(next || {})) {
+        if (value === undefined) continue;
+        if (['characters', 'inventory', 'objectives', 'secrets', 'relationships', 'threads', 'continuityFlags'].includes(key)) {
+            changes[key] = mergeArrayPatch(changes[key] || {}, value || {});
+        } else if (key === 'knowledge' && isPlainObject(value)) {
+            const merged = { ...(changes.knowledge || {}) };
+            for (const [char, facts] of Object.entries(value)) {
+                if (!Array.isArray(facts)) continue;
+                merged[char] = Array.from(new Set([...(merged[char] || []), ...facts]));
+            }
+            changes.knowledge = merged;
+        } else if (key === 'storyMilestones' && isPlainObject(value)) {
+            changes.storyMilestones = { ...(changes.storyMilestones || {}), ...value };
+        } else if (key === 'canon' && isPlainObject(value)) {
+            changes.canon = { ...(changes.canon || {}), ...value };
+        } else if (key === 'scene' && isPlainObject(value)) {
+            changes.scene = { ...(changes.scene || {}), ...value };
+        }
+    }
+    return changes;
+}
+
+function mergeReducerDeltas(results = []) {
+    let changes = {};
+    const summaries = [];
+    for (const result of results) {
+        if (result?.status !== 'complete' || !result.delta?.changes) continue;
+        if (result.delta.summary) summaries.push(result.delta.summary);
+        changes = mergeDeltaChanges(changes, result.delta.changes);
+    }
+    const delta = { summary: summaries.filter(Boolean).join(' | ') || 'Continuity scan changes', changes };
+    const validation = validateDelta(delta);
+    if (!validation.valid) {
+        console.warn(`${LOG_PREFIX} Merged continuity delta failed validation: ${validation.errors.join('; ')}`);
+        return null;
+    }
+    return delta;
+}
+
+function inferHpBoundaryFromText(text) {
+    const value = String(text || '');
+    const monthMap = { jan:0,january:0,feb:1,february:1,mar:2,march:2,apr:3,april:3,may:4,jun:5,june:5,jul:6,july:6,aug:7,august:7,sep:8,sept:8,september:8,oct:9,october:9,nov:10,november:10,dec:11,december:11 };
+    const match = value.match(/\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)?\.?\s*,?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(\d{4})\b/i);
+    if (!match) return { date: '', boundary: '' };
+    const month = monthMap[match[1].toLowerCase().replace('.', '')];
+    const year = Number(match[3]);
+    const schoolYear = month >= 8 ? year : year - 1;
+    const map = { 1991:"Philosopher's/Sorcerer's Stone era, Year 1", 1992:'Chamber of Secrets era, Year 2', 1993:'Prisoner of Azkaban era, Year 3', 1994:'Goblet of Fire era, Year 4', 1995:'Order of the Phoenix era, Year 5', 1996:'Half-Blood Prince era, Year 6', 1997:'Deathly Hallows era, Year 7' };
+    return { date: match[0].trim(), boundary: map[schoolYear] || '' };
+}
+
+function inferFallbackDeltaFromPlan(plan, state = getState()) {
+    const text = (plan?.chunks || []).flatMap(c => c.messages || []).map(m => m.text).join('\n');
+    const inferred = inferHpBoundaryFromText(text);
+    if (!inferred.date && !inferred.boundary) return null;
+    const changes = { canon: {} };
+    if (inferred.date && state?.canon?.inUniverseDate !== inferred.date) changes.canon.inUniverseDate = inferred.date;
+    if (inferred.boundary && state?.canon?.canonBoundary !== inferred.boundary) {
+        changes.canon.canonBoundary = inferred.boundary;
+        changes.canon.era = inferred.boundary.replace(/,\s*Year\s*\d+$/i, '');
+    }
+    if (!Object.keys(changes.canon).length) return null;
+    return { summary: 'Fallback continuity date/context inferred locally from message heading.', changes };
+}
+
+export async function runContinuityScan(options = {}) {
+    const settings = buildEffectiveContinuitySettings(getSettings(), options);
+    const validation = validateLoreProviderConfiguration('continuity');
+    if (!validation.ok) return { status: 'api_not_configured', error: validation.message };
+    markInterruptedContinuityChunks(settings.continuityScanRunningCheckpointStaleMs || 10 * 60 * 1000);
+
+    const stateAtStart = getState();
+    const plan = buildContinuityScanPlan(settings, stateAtStart);
+    if (!plan.sourceMessageCount || !plan.chunks.length) return { status: 'no_messages', plan };
+
+    const queuedChunks = plan.chunks.filter(chunk => shouldQueueChunk(chunk, settings));
+    const skippedChunks = plan.chunks.length - queuedChunks.length;
+    const batchId = `continuity_${Date.now()}_${stableStringHash(`${plan.contextKey}|${plan.startIndex}|${plan.endIndex}|${plan.chunkSize}|${plan.overlap}`)}`;
+    const stateProjection = buildContinuityProjection(stateAtStart);
+    const concurrency = clampInt(settings.continuityScanConcurrency, 1, 8, 3);
+    const reducerConcurrency = clampInt(settings.continuityScanReducerConcurrency, 1, 6, 3);
+    const fullEvery = clampInt(settings.continuityScanFullCheckpointEveryChunks, 1, 25, 5);
+    const progress = typeof options.progress === 'function' ? options.progress : null;
+
+    startContinuityBatch({
+        id: batchId,
+        status: queuedChunks.length ? 'running' : 'complete',
+        mode: options.automationSafe ? 'auto-recent' : 'manual',
+        scanMode: plan.scanMode,
+        startIndex: plan.startIndex,
+        endIndex: plan.endIndex,
+        sourceMessageCount: plan.sourceMessageCount,
+        totalChunks: plan.chunks.length,
+        queuedChunks: queuedChunks.length,
+        skippedChunks,
+        chunkSize: plan.chunkSize,
+        overlap: plan.overlap,
+        concurrency,
+        reducerConcurrency,
+        contextKey: plan.contextKey,
+    });
+
+    if (!queuedChunks.length) {
+        progress?.('Continuity scan skipped unchanged chunks.', 100);
+        return { status: 'skipped_unchanged', batchId, plan, skippedChunks };
+    }
+
+    let completed = 0;
+    let failed = 0;
+    let observationCount = 0;
+    let dirtySinceFull = 0;
+    const observations = [];
+    const summaries = [];
+
+    try {
+        progress?.(`Continuity scan started: ${queuedChunks.length} chunk(s).`, 5);
+        const chunkResults = await runWithConcurrency(queuedChunks, concurrency, async chunk => {
+            progress?.(`Continuity observations: ${completed + failed}/${queuedChunks.length} chunks complete.`, Math.min(80, 8 + Math.round(((completed + failed) / queuedChunks.length) * 65)));
+            const result = await extractChunkObservations({ chunk, plan, batchId, settings, stateProjection, signal: options.signal });
+            if (result.status === 'complete') {
+                completed++;
+                observations.push(...(result.observations || []));
+                observationCount += (result.observations || []).length;
+                if (result.summary) summaries.push(result.summary);
+            } else {
+                failed++;
+            }
+            dirtySinceFull++;
+            if (dirtySinceFull >= fullEvery) {
+                flushContinuityFullCheckpoint(batchId, { completedChunks: completed, failedChunks: failed, observationCount, lastCheckpointReason: 'chunk_window' });
+                dirtySinceFull = 0;
+            }
+            return result;
+        });
+
+        flushContinuityFullCheckpoint(batchId, { completedChunks: completed, failedChunks: failed, observationCount, summaries: summaries.slice(-20), stage: 'reducing' });
+        progress?.(`Continuity reducers running on ${observationCount} observations.`, 84);
+
+        const enabledGroups = SECTION_GROUPS.filter(group => group.enabled(stateAtStart));
+        const reducerResults = await runWithConcurrency(enabledGroups, reducerConcurrency, async group => {
+            return await reduceObservationGroup({ group, observations, plan, settings, stateProjection, signal: options.signal });
+        });
+        let delta = mergeReducerDeltas(reducerResults);
+        if (!delta || !Object.keys(delta.changes || {}).length) {
+            delta = inferFallbackDeltaFromPlan(plan, getState());
+        }
+
+        const reducerFailures = reducerResults.filter(r => String(r?.status || '').startsWith('failed')).length;
+        const status = failed === queuedChunks.length ? 'failed' : failed > 0 || reducerFailures > 0 ? 'partial' : 'complete';
+        const hasChanges = !!delta && Object.keys(delta.changes || {}).length > 0;
+        flushContinuityFullCheckpoint(batchId, {
+            status,
+            completedAt: Date.now(),
+            completedChunks: completed,
+            failedChunks: failed,
+            reducerFailures,
+            observationCount,
+            changeKeys: hasChanges ? Object.keys(delta.changes || {}) : [],
+            summaries: summaries.slice(-20),
+        });
+
+        if (!hasChanges) {
+            progress?.(`Continuity scan complete: ${completed} chunk(s), no state changes.`, 100);
+            return { status: status === 'failed' ? 'failed_no_valid_delta' : 'no_changes', batchId, plan, completedChunkCount: completed, failedChunkCount: failed, observationCount, reducerFailures, chunkResults, reducerResults };
+        }
+
+        const currentState = getState();
+        if (options.applyImmediately || settings.autoApplyDelta) {
+            pushStateSnapshot(currentState, `Continuity scan: ${delta.summary || 'state update'}`, settings.maxSnapshots);
+            const next = applyDelta(currentState, delta);
+            next.lastDelta = null;
+            saveState(next, { syncPrompt: true });
+            progress?.(`Continuity scan applied: ${Object.keys(delta.changes || {}).join(', ') || 'changes'}.`, 100);
+            return { status: 'applied', batchId, delta, summary: delta.summary || '', changeKeys: Object.keys(delta.changes || {}), completedChunkCount: completed, failedChunkCount: failed, observationCount, reducerFailures, scanStatus: status };
+        }
+
+        currentState.lastDelta = delta;
+        saveState(currentState, { syncPrompt: true });
+        progress?.('Continuity scan stored changes for review.', 100);
+        return { status: 'pending_review', batchId, delta, summary: delta.summary || '', changeKeys: Object.keys(delta.changes || {}), completedChunkCount: completed, failedChunkCount: failed, observationCount, reducerFailures, scanStatus: status };
+    } catch (e) {
+        flushContinuityFullCheckpoint(batchId, { status: 'failed', error: e?.message || String(e || ''), failedAt: Date.now(), completedChunks: completed, failedChunks: failed });
+        console.error(`${LOG_PREFIX} Checkpointed continuity scan failed:`, e);
+        progress?.(`Continuity scan failed: ${e?.message || e}`, 100);
+        return { status: 'failed_exception', batchId, error: e?.message || String(e || '') };
+    }
+}
+
+export const __continuityScanTestHooks = {
+    buildContinuityProjection,
+    buildContinuityScanPlan,
+    parseObservationResponse,
+    parseDeltaResponse,
+    mergeReducerDeltas,
+    compactObservation,
+    stableStringHash,
+};

@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -67,6 +67,22 @@ export const DEFAULT_SETTINGS = {
     loreGenerationAutoInterval: 10,
     contextSourceMessageCount: 20,
     continuitySourceMessageCount: 10,
+
+    // Checkpointed continuity scan behavior
+    continuityScanMode: 'recent', // 'recent' | 'range' | 'entire'
+    continuityScanRangeStart: 1,
+    continuityScanRangeEnd: 0, // 0 = latest message
+    continuityScanChunkSize: 8,
+    continuityScanOverlap: 1,
+    continuityScanConcurrency: 3,
+    continuityScanReducerConcurrency: 3,
+    continuityScanRescanMode: 'skip_unchanged', // 'skip_unchanged' | 'retry_failed' | 'stale_only' | 'rescan_all'
+    continuityScanRetryAttempts: 2,
+    continuityScanObservationsPerChunk: 12,
+    continuityScanFullCheckpointEveryChunks: 5,
+    continuityScanRunningCheckpointStaleMs: 10 * 60 * 1000,
+    continuityScanRetainRawResponses: false,
+    continuityScanRetainCompletedBatches: 3,
 
     // Lore matrix
     injectLore: true,
@@ -358,6 +374,15 @@ export function getDefaultState() {
             candidates: {},
         },
 
+        // Resumable continuity scan ledger (schema v9)
+        continuityScan: {
+            activeBatchId: '',
+            lastBatchId: '',
+            batches: {},
+            chunks: {},
+            observations: {},
+        },
+
         pendingLoreMeta: null,
 
         // Prompt injection/compression preview status
@@ -440,90 +465,6 @@ export function getDefaultState() {
     };
 }
 
-// ── Extraction prompt template ──────────────────────────────────────────────────
-export const EXTRACTION_SYSTEM_PROMPT = `You are the Wandlight Continuity State Extractor for a Harry Potter / Hogwarts roleplay. Your task is to read the latest roleplay messages and the current continuity state, then output a JSON delta describing what changed. If this is the first useful scan and the current state is mostly empty, output all clearly established continuity details as additions/changes.
-
-<rules>
-1. Output ONLY a valid JSON object — no markdown fences, no preamble, no commentary.
-2. Only include fields that actually changed. Omit unchanged sections entirely.
-3. If nothing changed, output exactly: {"summary":"No changes detected","changes":{}}
-4. The JSON must follow the WandlightDelta schema exactly.
-5. Character knowledge arrays should be merged (added to existing), not replaced.
-6. For secrets, relationships, and threads: use "added" for new entries, "updated" for changes to existing entries (with index), "removed" for removed entries.
-7. Be conservative — only flag continuity issues when there is a clear contradiction, not just ambiguity.
-8. Canon era, in-universe date, and canon boundary should only change when explicitly established in the narrative. If the current state is empty/unset, treat clearly established details as additions instead of returning no changes.
-9. Track clothing, posture, physical state, carried items, goals, emotional state, trust, affection, desire, and connection when clearly implied.
-10. Emotional state should be current-state, not permanent personality. Avoid feedback loops: reduce or omit heightened emotion unless the latest messages reinforce it.
-11. Numeric emotional values use -5 to +5 where 0 is neutral. Do not jump more than 2 points from the current state unless the scene explicitly justifies it.
-12. Respect optional continuity sections. If a section is disabled in the current state, omit changes for that section.
-13. If the current state is sparse or empty, perform an initial-state extraction: populate every active section that is clearly supported by the messages. Do not return only 1-2 categories when scene, characters, knowledge, objectives, inventory, or relationships are evident.
-14. For thinking/reasoning models: put the final JSON in visible message.content. Do not leave the visible answer empty. Do not put the JSON only in hidden reasoning.
-15. Track story milestones separately from canon dates. Do not mark a milestone happened because a canon date passed. Mark it happened only when the roleplay text establishes it.
-16. Milestone statuses are: not_happened, suspected, happened, blocked, diverged, unknown.
-</rules>
-
-<delta_schema>
-{
-  "summary": "One-line description of what changed",
-  "changes": {
-    "canon": {
-      "era": "string (canon era, e.g. Half-Blood Prince)",
-      "inUniverseDate": "string (e.g. September 1, 1996)",
-      "canonBoundary": "string (e.g. Through Chapter 14 of HBP)",
-      "divergences": [{ "description": "string", "sinceDate": "string" }]
-    },
-    "scene": {
-      "location": "string",
-      "timeOfDay": "string",
-      "weather": "string",
-      "ambience": "string",
-      "presentCharacters": ["string"],
-      "nearbyCharacters": ["string"],
-      "currentActivity": "string"
-    },
-    "characters": {
-      "added": [{ "name": "string", "role": "string", "location": "string", "clothing": "string", "posture": "string", "physicalState": "string", "emotionalState": { "affection": 0, "trust": 0, "desire": 0, "connection": 0, "fear": 0, "anger": 0, "sadness": 0, "joy": 0, "notes": "string" }, "inventory": ["string"], "goals": ["string"] }],
-      "updated": [{ "name": "string", "index": 0, "changes": {} }],
-      "removed": ["string or index"]
-    },
-    "inventory": { "added": [{ "owner": "string", "item": "string", "status": "string", "location": "string" }], "updated": [{ "index": 0, "changes": {} }], "removed": [0] },
-    "objectives": { "added": [{ "owner": "string", "goal": "string", "status": "active|blocked|completed|abandoned", "stakes": "string" }], "updated": [{ "index": 0, "changes": {} }], "removed": [0] },
-    "knowledge": { "CharacterName": ["fact1", "fact2"] },
-    "secrets": {
-      "added": [{ "fact": "string", "trueState": "string", "whoKnows": ["string"], "whoSuspects": ["string"], "publicVersion": "string" }],
-      "updated": [{ "index": 0, "changes": {} }],
-      "removed": [0]
-    },
-    "relationships": {
-      "added": [{ "pair": "string", "notes": "string", "tension": "low|medium|high|critical", "trust": "low|medium|high|absolute" }],
-      "updated": [{ "index": 0, "changes": {} }],
-      "removed": [0]
-    },
-    "threads": {
-      "added": [{ "description": "string", "status": "active|dormant|resolved", "unresolvedConsequences": ["string"] }],
-      "updated": [{ "index": 0, "changes": {} }]
-    },
-    "continuityFlags": {
-      "added": [{ "type": "contradiction|uncertainty|warning", "description": "string", "severity": "low|medium|high", "timestamp": 0 }],
-      "resolved": [0]
-    },
-    "storyMilestones": {
-      "milestone_id": { "status": "not_happened|suspected|happened|blocked|diverged|unknown", "happenedAtStoryDate": "string", "happenedAtTurn": 0, "evidence": ["string"], "confidence": 0.0, "notes": "string" }
-    }
-  }
-}
-</delta_schema>
-
-Current continuity state, including optional section settings:
-{{stateJson}}
-
-Recent roleplay messages:
-{{messages}}
-`;
-
-// ── Extraction prompt (user message) ────────────────────────────────────────────
-export const EXTRACTION_USER_PROMPT = `Analyze the messages above and extract continuity-state changes. If this is a first or sparse scan, populate every active tracked section that is clearly supported: canon, scene, characters, appearance/clothing, emotional state, knowledge, secrets, relationships, threads, inventory, objectives, and flags. Return ONLY visible valid JSON in the WandlightDelta shape. Do not leave message.content empty.`;
-
 // ── Lore Context Detection prompt ───────────────────────────────────────────────
 export const LORE_CONTEXT_DETECTION_SYSTEM_PROMPT = `You are the Wandlight Lore Context Detector for a Harry Potter / Hogwarts roleplay.
 
@@ -546,105 +487,17 @@ Rules:
 - If time travel is implied, separate sceneDate from subjectiveDate.
 - Output JSON only.`;
 
-// ── Lore Generation prompt ──────────────────────────────────────────────────────
-export const LORE_GENERATION_SYSTEM_PROMPT = `You are the Wandlight Lore Matrix Generator for a Harry Potter / Hogwarts roleplay.
-
-Your job is to extract durable, story-established lore from recent chat messages. The output is reviewed by the user before it is accepted, so prefer capturing supported useful facts over being overly sparse.
-
-Do not generate a general Harry Potter encyclopedia. Generate entries only for facts that are established, strongly implied, or operationally useful for this specific roleplay, alternate universe, scene, or timeline branch.
-
-Output ONLY valid JSON:
-{
-  "summary": "one sentence",
-  "entries": [
-    {
-      "schemaVersion": 2,
-      "id": "stable_snake_case_id",
-      "title": "short title",
-      "kind": "fact|event_anchor|knowledge_gate|future_guard|age_gate|spell_gate|skill_band|behavior_gate|relationship_gate|institution_state|character_state|place_fact|artifact_state|public_belief|faction_state|continuity_rule",
-      "category": "canon|au|contested|secret|relationship|timeline|character|event|item|knowledge|place|faction|spell|artifact|behavior|skill|age|future_guard|constraint",
-      "canonStatus": "canon|divergent|au|fanon|contested|unknown",
-      "truthStatus": "true|false|public_belief|rumor|contested|hidden",
-      "revealPolicy": "public|private|do_not_reveal|only_if_knower_present|only_if_user_reveals",
-      "tags": ["short searchable category tags"],
-      "priority": 50,
-      "status": "active",
-      "date": {
-        "validFrom": "YYYY-MM-DD or empty",
-        "validTo": "YYYY-MM-DD or empty",
-        "precision": "date|month|year|school_year|era|approximate|unknown",
-        "schoolYear": null,
-        "book": "",
-        "label": ""
-      },
-      "scope": {
-        "characters": ["string"],
-        "locations": ["string"],
-        "factions": ["string"],
-        "topics": ["string"],
-        "objects": ["string"],
-        "spells": ["string"],
-        "schoolYears": [],
-        "books": []
-      },
-      "visibility": {
-        "knownBy": {},
-        "notKnownByBefore": {},
-        "suspectedBy": {},
-        "publicFrom": "",
-        "secretUntil": ""
-      },
-      "content": {
-        "fact": "what is actually true or believed",
-        "injection": "concise model-facing constraint wording",
-        "constraints": ["date/knowledge/reveal constraints"],
-        "antiLore": ["things the model should not assume"],
-        "publicVersion": "",
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [],
-        "blocksTermsBeforeDate": [],
-        "stateHints": {},
-        "injectionRules": {}
-      },
-      "source": "model-generated",
-      "userEdited": false,
-      "locked": false,
-      "extensions": {}
-    }
-  ]
-}
-
-General rules:
-- Every entry must be grounded in the supplied current state or messages. Do not invent unsupported details.
-- If a fact is story-specific, AU-specific, newly introduced, or changed by the roleplay, prefer canonStatus "au" or "divergent" rather than "canon".
-- Give every entry the requested number of concise tags. Tags must be searchable labels, not full sentences.
-- Tag schema: 1-3 words each; prefer character names, groups, locations, era/year, plot thread, secret type, relationship pair, magic system, faction, object/artifact, event, or villain/ally role.
-- Use priority intentionally. Do not mark everything high priority.
-- If a fact is secret in this era, include content.publicVersion and revealPolicy.
-- If the entry blocks future knowledge leakage, use kind "future_guard" or "knowledge_gate" and include content.antiLore.
-- Do not overwrite user-edited lore. This pass only proposes entries.
-- Output JSON only.`;
-
 // ── JSON repair prompt ──────────────────────────────────────────────────────────
 export const JSON_REPAIR_SYSTEM_PROMPT = `You repair malformed JSON.
 
 Return ONLY valid JSON.
 Do not add markdown.
 Do not explain.
-Preserve the user's intended data.
-The output must have this shape:
-{
-  "summary": "string",
-  "entries": []
-}`;
+Preserve the user's intended data and conform to the required shape provided in the user's repair request.`;
 
 // ── Token budget for memo ───────────────────────────────────────────────────────
 export const MEMO_MAX_TOKENS = 500;
 
-// ── Lore entry limits ───────────────────────────────────────────────────────────
-export const MAX_LORE_ENTRIES_IN_MEMO = 6;
 
 // ── Character list truncation limits ────────────────────────────────────────────
 export const MAX_PRESENT_CHARS_IN_MEMO = 8;

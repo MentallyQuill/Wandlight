@@ -767,6 +767,13 @@ export function migrateState(state) {
         state._version = 8;
     }
 
+    // ── Schema v9: resumable checkpointed continuity scan ledger ───────────
+    if (state._version < 9) {
+        const defaults = getDefaultState();
+        state.continuityScan = mergeDefaults(state.continuityScan, defaults.continuityScan);
+        state._version = 9;
+    }
+
     // ── Always normalize lore fields post-migration ────────────────────────
     // First compact known-heavy canon DB payloads and oversized pending batches so
     // a poisoned chat can recover instead of freezing during panel render/save.
@@ -863,6 +870,21 @@ export function migrateState(state) {
         }
         state.loreBulkGeneration.activeBatchId = String(state.loreBulkGeneration.activeBatchId || '');
         state.loreBulkGeneration.lastBatchId = String(state.loreBulkGeneration.lastBatchId || '');
+    }
+
+
+    if (!state.continuityScan || typeof state.continuityScan !== 'object' || Array.isArray(state.continuityScan)) {
+        state.continuityScan = getDefaultState().continuityScan;
+    } else {
+        const defaults = getDefaultState().continuityScan;
+        state.continuityScan = mergeDefaults(state.continuityScan, defaults);
+        for (const key of ['batches', 'chunks', 'observations']) {
+            if (!state.continuityScan[key] || typeof state.continuityScan[key] !== 'object' || Array.isArray(state.continuityScan[key])) {
+                state.continuityScan[key] = {};
+            }
+        }
+        state.continuityScan.activeBatchId = String(state.continuityScan.activeBatchId || '');
+        state.continuityScan.lastBatchId = String(state.continuityScan.lastBatchId || '');
     }
     // Clean up orphaned metadata
     if (state.pendingLoreMeta && state.pendingLoreEntries?.length === 0) {
@@ -1671,6 +1693,19 @@ export function importState(json) {
                 }
                 : { ...getDefaultState().loreBulkGeneration },
 
+            continuityScan: parsed.continuityScan && typeof parsed.continuityScan === 'object' && !Array.isArray(parsed.continuityScan)
+                ? {
+                    activeBatchId: parsed.continuityScan.activeBatchId || '',
+                    lastBatchId: parsed.continuityScan.lastBatchId || '',
+                    batches: parsed.continuityScan.batches && typeof parsed.continuityScan.batches === 'object' && !Array.isArray(parsed.continuityScan.batches)
+                        ? parsed.continuityScan.batches : {},
+                    chunks: parsed.continuityScan.chunks && typeof parsed.continuityScan.chunks === 'object' && !Array.isArray(parsed.continuityScan.chunks)
+                        ? parsed.continuityScan.chunks : {},
+                    observations: parsed.continuityScan.observations && typeof parsed.continuityScan.observations === 'object' && !Array.isArray(parsed.continuityScan.observations)
+                        ? parsed.continuityScan.observations : {},
+                }
+                : { ...getDefaultState().continuityScan },
+
             pendingLoreMeta: parsed.pendingLoreMeta && typeof parsed.pendingLoreMeta === 'object' && !Array.isArray(parsed.pendingLoreMeta)
                 ? parsed.pendingLoreMeta : null,
         };
@@ -1808,98 +1843,6 @@ export function recordLoreAttempt(contextKey, patch = {}, options = {}) {
     saveState(state, { syncPrompt });
     return state;
 }
-
-/**
- * Sets pending lore entries with full lifecycle metadata.
- * This is the authoritative way to create a pending lore proposal.
- * Normalizes entries, creates pendingLoreMeta, and updates the ledger.
- *
- * Does NOT update loreContext.lastGeneratedFor directly — that's handled
- * by loreContext metadata in setLoreContext.
- *
- * @param {Object[]} entries - Array of raw lore entry objects
- * @param {Object} meta - Proposal metadata
- * @param {string} meta.contextKey - The generation context key
- * @param {string} [meta.source='manual'] - 'auto' or 'manual'
- * @param {string} [meta.summary=''] - One-line generation summary
- * @param {string} [meta.id] - Optional batch id (auto-generated if omitted)
- * @param {number} [meta.rawEntryCount] - Pre-normalization entry count
- * @returns {{ state: Object, changed: boolean }} Updated state and whether a proposal was created
- */
-export function setPendingLoreProposal(entries, meta, options = {}) {
-    const {
-        snapshot = true,
-        snapshotLabel = 'Generate pending lore entries',
-    } = options;
-
-    const state = getState();
-    const settings = getSettings();
-    const normalized = normalizeLoreMatrix(entries || []);
-
-    if (normalized.length === 0) {
-        return { state, changed: false };
-    }
-
-    if (snapshot) {
-        pushStateSnapshot(state, snapshotLabel, settings.maxSnapshots);
-    }
-
-    const contextKey = meta.contextKey || buildLoreGenerationKey(state);
-    const rawEntryCount = meta.rawEntryCount ?? normalized.length;
-    const normalizedEntryCount = meta.normalizedEntryCount ?? normalized.length;
-
-    state.pendingLoreEntries = normalized;
-    state.pendingLoreMeta = {
-        id: meta.id || `lore_batch_${Date.now()}`,
-        contextKey,
-        source: meta.source || 'manual',
-        status: 'pending',
-        createdAt: Date.now(),
-        summary: meta.summary || '',
-        rawEntryCount,
-        normalizedEntryCount,
-        validEntryCount: normalized.length,
-        droppedEntryCount: Math.max(0, rawEntryCount - normalized.length),
-        droppedDuplicateCount: Math.max(0, Number(meta.droppedDuplicateCount) || 0),
-        failedChunkCount: Math.max(0, Number(meta.failedChunkCount) || 0),
-        emptyChunkCount: Math.max(0, Number(meta.emptyChunkCount) || 0),
-        chunkCount: Math.max(0, Number(meta.chunkCount) || 0),
-        sourceMessageCount: Math.max(0, Number(meta.sourceMessageCount) || 0),
-        chunkSize: Math.max(0, Number(meta.chunkSize) || 0),
-        generationMode: meta.generationMode || '',
-        generationConfiguredMode: meta.generationConfiguredMode || '',
-        targetEntryCount: Math.max(0, Number(meta.targetEntryCount) || 0),
-        storyLoreCountBefore: Math.max(0, Number(meta.storyLoreCountBefore) || 0),
-    };
-
-    // Sync loreContext for backward compatibility
-    if (state.loreContext) {
-        state.loreContext.lastGeneratedFor = contextKey;
-        state.loreContext.lastGenerationSummary = meta.summary || '';
-    }
-
-    // Update generation ledger
-    if (!state.loreGeneration || typeof state.loreGeneration !== 'object') {
-        state.loreGeneration = getDefaultState().loreGeneration;
-    }
-    state.loreGeneration.lastProposedFor = contextKey;
-    state.loreGeneration.attempts[contextKey] = {
-        ...(state.loreGeneration.attempts[contextKey] || {}),
-        status: 'pending',
-        lastProposedAt: Date.now(),
-        validEntryCount: normalized.length,
-        rawEntryCount,
-        normalizedEntryCount,
-        droppedDuplicateCount: Math.max(0, Number(meta.droppedDuplicateCount) || 0),
-        generationMode: meta.generationMode || '',
-        targetEntryCount: Math.max(0, Number(meta.targetEntryCount) || 0),
-        lastSource: meta.source || 'manual',
-    };
-
-    saveState(state);
-    return { state, changed: true };
-}
-
 
 function ensureLoreBulkGenerationLedger(state = getState()) {
     if (!state.loreBulkGeneration || typeof state.loreBulkGeneration !== 'object' || Array.isArray(state.loreBulkGeneration)) {
@@ -2342,23 +2285,7 @@ export function markPendingLoreReplaced(newContextKey) {
     return state;
 }
 
-/**
- * Backward-compatible wrapper that delegates to setPendingLoreProposal.
- * Used by code that hasn't been updated to the lifecycle ledger yet.
- *
- * @param {Object[]} entries - Array of lore entry objects
- * @param {string} [summary] - One-line generation summary
- * @param {string} [generationKey] - Context key this generation was produced for
- * @returns {Object} Updated state
- */
-export function setPendingLoreEntries(entries, summary, generationKey) {
-    return setPendingLoreProposal(entries, {
-        contextKey: generationKey || buildLoreGenerationKey(getState()),
-        source: 'manual',
-        summary,
-        rawEntryCount: (entries || []).length,
-    }).state;
-}
+
 
 /**
  * Accepts pending lore entries by merging them into loreMatrix.

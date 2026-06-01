@@ -9,7 +9,6 @@ import {
     MAX_ACTIVE_THREADS_IN_MEMO,
     MAX_RELATIONSHIPS_IN_MEMO,
     MAX_FLAGS_IN_MEMO,
-    MAX_LORE_ENTRIES_IN_MEMO,
 } from './constants.js';
 import { getSettings } from './state-manager.js';
 import { getInjectableLoreEntries, getResolvedLoreInjection } from './lore-matrix.js';

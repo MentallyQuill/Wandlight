@@ -14,7 +14,6 @@ import {
     saveSettings,
     getState,
     saveState,
-    applyDelta,
     pushStateSnapshot,
     undoLastChange,
     exportState,
@@ -470,56 +469,6 @@ function wireSettingsPanel(container) {
         });
     });
 
-    // ── "Extract Now" button ──────────────────────────────────────────────
-    const extractBtn = container.querySelector('#wandlight_extract_now');
-    if (extractBtn) {
-        extractBtn.addEventListener('click', async () => {
-            extractBtn.disabled = true;
-            extractBtn.textContent = 'Extracting...';
-            try {
-                await onExtractionTriggered({ force: true });
-            } finally {
-                extractBtn.disabled = false;
-                extractBtn.textContent = 'Extract Now';
-            }
-        });
-    }
-
-    // ── "Apply Last Delta" button ─────────────────────────────────────────
-    const applyDeltaBtn = container.querySelector('#wandlight_apply_delta');
-    if (applyDeltaBtn) {
-        applyDeltaBtn.addEventListener('click', () => {
-            const state = getState();
-            if (!state.lastDelta) {
-                if (typeof toastr !== 'undefined') toastr.warning('No pending delta to apply');
-                return;
-            }
-            // Snapshot before applying
-            pushStateSnapshot(state, 'Manual delta apply: ' + (state.lastDelta.summary || 'unnamed'), settings.maxSnapshots);
-            const newState = applyDelta(state, state.lastDelta);
-            newState.lastDelta = null;
-            saveState(newState);
-            if (typeof toastr !== 'undefined') toastr.success('Delta applied');
-            if (typeof globalThis._wandlightRefreshUI === 'function') {
-                globalThis._wandlightRefreshUI();
-            }
-        });
-    }
-
-    // ── "Dismiss Delta" button ────────────────────────────────────────────
-    const dismissBtn = container.querySelector('#wandlight_dismiss_delta');
-    if (dismissBtn) {
-        dismissBtn.addEventListener('click', () => {
-            const state = getState();
-            state.lastDelta = null;
-            saveState(state);
-            if (typeof toastr !== 'undefined') toastr.info('Delta dismissed');
-            if (typeof globalThis._wandlightRefreshUI === 'function') {
-                globalThis._wandlightRefreshUI();
-            }
-        });
-    }
-
     // ── "Undo Last Change" button ─────────────────────────────────────────
     const undoBtn = container.querySelector('#wandlight_undo_change');
     if (undoBtn) {
@@ -608,132 +557,6 @@ function wireSettingsPanel(container) {
             if (typeof globalThis._wandlightRefreshUI === 'function') {
                 globalThis._wandlightRefreshUI();
             }
-        });
-    }
-
-    // ── Lore Matrix: Detect Context button ────────────────────────────────
-    const detectLoreBtn = container.querySelector('#wandlight_detect_lore_context');
-    if (detectLoreBtn) {
-        detectLoreBtn.addEventListener('click', async () => {
-            detectLoreBtn.disabled = true;
-            const origHTML = detectLoreBtn.innerHTML;
-            detectLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting...';
-            try {
-                const state = getState();
-                pushStateSnapshot(state, 'Detect lore context', getSettings().maxSnapshots);
-                await runLoreContextDetection();
-                renderLoreContextPreview();
-                renderLoreMatrixPreview();
-                if (typeof toastr !== 'undefined') toastr.success('Lore context detected');
-            } catch (e2) {
-                if (typeof toastr !== 'undefined') toastr.error('Detection failed: ' + e2.message);
-            } finally {
-                detectLoreBtn.disabled = false;
-                detectLoreBtn.innerHTML = origHTML;
-            }
-        });
-    }
-
-    // ── Lore Matrix: Generate Lore button ─────────────────────────────────
-    const generateLoreBtn = container.querySelector('#wandlight_generate_lore');
-    if (generateLoreBtn) {
-        generateLoreBtn.addEventListener('click', async () => {
-            // Warn if there are already pending entries that will be replaced
-            const state = getState();
-            const pendingCount = (state.pendingLoreEntries || []).length;
-            if (pendingCount > 0) {
-                const hasPopupConfirm =
-                    typeof Popup !== 'undefined' &&
-                    Popup.show &&
-                    typeof Popup.show.confirm === 'function';
-
-                const proceed = hasPopupConfirm
-                    ? await Popup.show.confirm(
-                        'Generate Lore — Overwrite Pending?',
-                        `There are already ${pendingCount} pending lore entries awaiting review. Generating new lore will replace them. Continue?`
-                    )
-                    : (typeof confirm === 'function'
-                        ? confirm(
-                            `There are already ${pendingCount} pending lore entries awaiting review.\n\nGenerating new lore will replace them. Continue?`
-                        )
-                        : true);
-
-                if (!proceed) return;
-            }
-
-            generateLoreBtn.disabled = true;
-            const origHTML = generateLoreBtn.innerHTML;
-            generateLoreBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
-            try {
-                const result = await runStoryLoreScan({ force: true, source: 'manual' });
-
-                if (result.status === 'complete' || result.status === 'partial') {
-                    if (typeof toastr !== 'undefined') toastr.success(`${result.pendingEntryCount || 0} pending lore entries available after scan`);
-                    if (result.droppedEntryCount > 0 && typeof toastr !== 'undefined') {
-                        toastr.warning(`${result.droppedEntryCount} entry(s) dropped during normalization`);
-                    }
-                } else if (result.status === 'empty_valid_entries' || result.status === 'empty_range') {
-                    if (typeof toastr !== 'undefined') toastr.warning('Lore generation produced no valid entries');
-                } else if (result.status === 'failed_parse') {
-                    if (typeof toastr !== 'undefined') toastr.error('Could not parse lore scan response');
-                } else if (result.status === 'failed_no_response') {
-                    if (typeof toastr !== 'undefined') toastr.error('Lore scan returned no response');
-                } else if (result.status === 'failed_exception') {
-                    if (typeof toastr !== 'undefined') toastr.error('Lore generation error: ' + (result.error || 'Unknown'));
-                } else {
-                    if (typeof toastr !== 'undefined') toastr.info('Lore scan: ' + result.status);
-                }
-
-                renderLoreContextPreview();
-                renderLoreMatrixPreview();
-            } catch (e2) {
-                if (typeof toastr !== 'undefined') toastr.error('Lore scan failed: ' + e2.message);
-            } finally {
-                generateLoreBtn.disabled = false;
-                generateLoreBtn.innerHTML = origHTML;
-            }
-        });
-    }
-
-    // ── Lore Matrix: Accept All button ────────────────────────────────────
-    const acceptAllBtn = container.querySelector('#wandlight_accept_all_lore');
-    if (acceptAllBtn) {
-        acceptAllBtn.addEventListener('click', () => {
-            const state = getState();
-            const pending = state.pendingLoreEntries || [];
-            if (pending.length === 0) {
-                if (typeof toastr !== 'undefined') toastr.info('No pending lore entries to accept');
-                return;
-            }
-
-            pushStateSnapshot(state, 'Accept pending lore entries', getSettings().maxSnapshots);
-            acceptPendingLoreEntries();
-
-            renderLoreContextPreview();
-            renderLoreMatrixPreview();
-
-            if (typeof toastr !== 'undefined') toastr.success(`${pending.length} lore entries accepted`);
-        });
-    }
-
-    // ── Lore Matrix: Reject All button ────────────────────────────────────
-    const rejectAllBtn = container.querySelector('#wandlight_reject_all_lore');
-    if (rejectAllBtn) {
-        rejectAllBtn.addEventListener('click', () => {
-            const state = getState();
-            const pending = state.pendingLoreEntries || [];
-            if (pending.length === 0) {
-                if (typeof toastr !== 'undefined') toastr.info('No pending lore entries to reject');
-                return;
-            }
-
-            pushStateSnapshot(state, 'Reject pending lore entries', getSettings().maxSnapshots);
-            rejectPendingLoreEntries();
-
-            renderLoreContextPreview();
-            renderLoreMatrixPreview();
-
-            if (typeof toastr !== 'undefined') toastr.info(`${pending.length} lore entries rejected`);
         });
     }
 

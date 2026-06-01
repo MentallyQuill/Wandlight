@@ -9,7 +9,7 @@
         "castle",
         "students"
       ],
-      "category": "place",
+      "category": "location",
       "fact": "Hogwarts is the central British wizarding school setting during the canon school years, with students sorted into houses and governed by school rules, staff, and magical protections.",
       "canonStatus": "canon",
       "truthStatus": "true",
@@ -83,7 +83,9 @@
       "kind": "place_fact",
       "gateType": "place_fact",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_hogsmeade_student_village",
@@ -94,7 +96,7 @@
         "students",
         "Hogwarts"
       ],
-      "category": "place",
+      "category": "location",
       "fact": "Hogsmeade is the wizarding village near Hogwarts that students may visit under school rules when permitted.",
       "canonStatus": "canon",
       "truthStatus": "true",
@@ -156,7 +158,9 @@
       "kind": "place_fact",
       "gateType": "place_fact",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_ministry_of_magic_public_authority",
@@ -167,7 +171,7 @@
         "law",
         "Britain"
       ],
-      "category": "place",
+      "category": "location",
       "fact": "The Ministry of Magic is the main British wizarding government authority and strongly affects public policy, law enforcement, and school politics during the later canon years.",
       "canonStatus": "canon",
       "truthStatus": "true",
@@ -240,7 +244,9 @@
       "kind": "place_fact",
       "gateType": "place_fact",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

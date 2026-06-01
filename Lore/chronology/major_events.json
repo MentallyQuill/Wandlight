@@ -71,7 +71,9 @@
         "book": "Philosopher's Stone"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -137,10 +139,10 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-08-31",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-08-31"
         }
       },
       "canonTiming": {
@@ -151,7 +153,9 @@
         "book": "Philosopher's Stone"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -215,7 +219,16 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "chamber_of_secrets_resolved"
+          ]
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1992-10-31",
         "hardValidTo": "1993-05-29",
@@ -223,13 +236,11 @@
         "schoolYear": 2,
         "book": "Chamber of Secrets"
       },
-      "activation": {
-        "requiresEvents": [
-          "chamber_of_secrets_resolved"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -295,10 +306,18 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-08-31",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-08-31"
+        },
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "chamber_of_secrets_resolved"
+          ]
         }
       },
       "canonTiming": {
@@ -308,13 +327,11 @@
         "schoolYear": 2,
         "book": "Chamber of Secrets"
       },
-      "activation": {
-        "requiresEvents": [
-          "chamber_of_secrets_resolved"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -387,7 +404,9 @@
         "book": "Prisoner of Azkaban"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -453,10 +472,18 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-06-18",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-06-18"
+        },
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "sirius_truth_revealed"
+          ]
         }
       },
       "canonTiming": {
@@ -466,13 +493,11 @@
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
       },
-      "activation": {
-        "requiresEvents": [
-          "sirius_truth_revealed"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -545,7 +570,9 @@
         "book": "Goblet of Fire"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -609,7 +636,16 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "voldemort_return_publicly_acknowledged"
+          ]
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1995-06-24",
         "hardValidTo": "1996-06-30",
@@ -617,13 +653,11 @@
         "schoolYear": 4,
         "book": "Goblet of Fire"
       },
-      "activation": {
-        "requiresEvents": [
-          "voldemort_return_publicly_acknowledged"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -684,7 +718,16 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "voldemort_return_publicly_acknowledged"
+          ]
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1995-07-01",
         "hardValidTo": "1996-06-30",
@@ -692,13 +735,11 @@
         "schoolYear": 5,
         "book": "Order of the Phoenix"
       },
-      "activation": {
-        "requiresEvents": [
-          "voldemort_return_publicly_acknowledged"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -771,7 +812,9 @@
         "book": "Order of the Phoenix"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -837,10 +880,10 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-08-31",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-08-31"
         }
       },
       "canonTiming": {
@@ -851,7 +894,9 @@
         "book": "Order of the Phoenix"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -917,10 +962,18 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-08-31",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-08-31"
+        },
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "voldemort_return_publicly_acknowledged"
+          ]
         }
       },
       "canonTiming": {
@@ -930,13 +983,11 @@
         "schoolYear": 5,
         "book": "Order of the Phoenix"
       },
-      "activation": {
-        "requiresEvents": [
-          "voldemort_return_publicly_acknowledged"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1009,7 +1060,9 @@
         "book": "Half-Blood Prince"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1075,10 +1128,18 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1997-06-30",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1997-06-30"
+        },
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "horcruxes_revealed_to_trio"
+          ]
         }
       },
       "canonTiming": {
@@ -1088,13 +1149,11 @@
         "schoolYear": 6,
         "book": "Half-Blood Prince"
       },
-      "activation": {
-        "requiresEvents": [
-          "horcruxes_revealed_to_trio"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1178,7 +1237,9 @@
         "autoMuteOnExpire": true
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1244,10 +1305,18 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-08-31",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-08-31"
+        },
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "dumbledore_death_occurs"
+          ]
         }
       },
       "canonTiming": {
@@ -1257,13 +1326,11 @@
         "schoolYear": 6,
         "book": "Half-Blood Prince"
       },
-      "activation": {
-        "requiresEvents": [
-          "dumbledore_death_occurs"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1329,10 +1396,18 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-05-02",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-05-02"
+        },
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "ministry_falls"
+          ]
         }
       },
       "canonTiming": {
@@ -1342,13 +1417,11 @@
         "schoolYear": 7,
         "book": "Deathly Hallows"
       },
-      "activation": {
-        "requiresEvents": [
-          "ministry_falls"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1414,10 +1487,18 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-05-02",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-05-02"
+        },
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "horcruxes_revealed_to_trio"
+          ]
         }
       },
       "canonTiming": {
@@ -1427,13 +1508,11 @@
         "schoolYear": 7,
         "book": "Deathly Hallows"
       },
-      "activation": {
-        "requiresEvents": [
-          "horcruxes_revealed_to_trio"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1499,10 +1578,10 @@
       "ui": {},
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-08-31",
           "method": "curated chronology point event: validFrom plus 10 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-08-31"
         }
       },
       "canonTiming": {
@@ -1513,7 +1592,9 @@
         "book": "Deathly Hallows"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     }
   ]
 }

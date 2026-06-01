@@ -5,7 +5,7 @@
       "id": "future_guard_cedric_alive_before_third_task",
       "title": "Future Guard: Cedric alive before Third Task",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
@@ -89,14 +89,16 @@
         "autoMuteOnExpire": true
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
       "id": "future_guard_sirius_alive_before_department_mysteries",
       "title": "Future Guard: Sirius alive before Department of Mysteries",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
@@ -170,14 +172,16 @@
         "book": "Order of the Phoenix"
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
       "id": "future_guard_ministry_not_fallen_before_1997_august",
       "title": "Future Guard: Ministry not fallen before August 1997",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
@@ -259,14 +263,16 @@
         "autoMuteOnExpire": true
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
       "id": "future_guard_deathly_hallows_not_active_before_year7",
       "title": "Future Guard: Hallows not active trio quest before Year 7",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
@@ -355,14 +361,16 @@
         "autoMuteOnExpire": true
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
       "id": "future_guard_battle_of_hogwarts_future",
       "title": "Future Guard: Battle of Hogwarts future event",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
@@ -435,7 +443,9 @@
         "book": "Deathly Hallows"
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     }
   ]
 }

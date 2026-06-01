@@ -440,171 +440,157 @@ Before summer 1996, Hermione should not know about Horcruxes or explain Voldemor
 
 Wandlight works best when the database focuses on chronology, knowledge gates, future guards, spell plausibility, age, behavior, and AU divergence.
 
-## Schema v3: story milestones and lifecycle states
+## Relevance-tier schema
 
-Wandlight now separates canon timing from story truth.
+Wandlight now uses a relevance-tiered accepted-lore model. Older lifecycle fields may still appear in imported entries for compatibility, but author-facing entries should use the simplified fields below.
 
-Canon dates are used to suggest and sort lore, but story milestones determine whether reveal/knowledge lore is actually active. This prevents a story that lags behind canon from suddenly giving characters knowledge just because the canon date passed.
-
-### Core rule
-
-Do not write date rules into `content.injection` unless the date itself is useful to the roleplay model. Store timing in metadata and inject only the resolved truth.
-
-Prefer this:
+### Required user-facing metadata
 
 ```json
 {
-  "id": "guard_trio_no_horcrux_knowledge",
-  "title": "Trio Does Not Know Horcruxes",
-  "kind": "knowledge_guard",
-  "category": "knowledge",
-  "canonTiming": {
-    "canonExpectedUntil": "1996-07-01",
-    "precision": "approximate"
-  },
-  "activation": {
-    "requiresMissingEvents": ["horcruxes_revealed_to_trio"]
-  },
-  "expiration": {
-    "expiresWhenEventsHappen": ["horcruxes_revealed_to_trio"],
-    "autoMuteOnExpire": true
-  },
-  "content": {
-    "injection": "Harry, Ron, and Hermione do not know about Horcruxes."
-  }
+  "relevance": "high|normal|low",
+  "canon": "canon|au",
+  "category": "character|event|location|item|spell|faction|relationship|rule|timeline|knowledge|secret|other",
+  "priority": 0
 }
 ```
 
-Avoid this:
+### `relevance`
+
+Relevance answers: how close is this lore entry to the current story moment?
+
+- `high`: current scene, present character, current location, immediate event/secret/item/constraint.
+- `normal`: recent background, near-future or near-past, important branch context.
+- `low`: long-term background, broad canon, distant past/future, low-context facts.
+
+Relevance controls injection tier, sorting, and compression budget. It is not the injection on/off switch. Muting is the hard injection off switch.
+
+### `canon`
+
+Use only:
+
+- `canon`: mainline canon or canon-reference lore.
+- `au`: story-specific, branch-specific, fanfic, or divergent lore.
+
+Do not use AU as a category. AU is canon alignment, not lore type.
+
+### `category`
+
+Categories describe what kind of lore the entry is:
+
+- `character`
+- `event`
+- `location`
+- `item`
+- `spell`
+- `faction`
+- `relationship`
+- `rule`
+- `timeline`
+- `knowledge`
+- `secret`
+- `other`
+
+### `priority`
+
+Priority sorts entries inside the same relevance tier. A P100 Low-Relevance entry remains in the Low-Relevance injection group, but sorts near the top of that group.
+
+### Pin and mute
+
+Pin and mute are not metadata categories.
+
+- Pin means priority/protection during injection and compression.
+- Mute means excluded from injection and compression.
+
+### Timing metadata
+
+Use date windows for hard temporal eligibility.
 
 ```json
-{
-  "content": {
-    "injection": "Before summer 1996, Harry, Ron, and Hermione should not know about Horcruxes."
-  }
+"date": {
+  "validFrom": "1996-10-12",
+  "validTo": "1996-10-19",
+  "precision": "date"
 }
 ```
 
-The first form lets Wandlight handle the date/milestone logic and keeps injected text shorter.
-
-### `canonTiming`
-
-Use `canonTiming` for canon chronology hints.
+Use `canonTiming` for chronology hints and compatibility with older entries.
 
 ```json
 "canonTiming": {
-  "canonExpectedFrom": "1996-07-01",
-  "canonExpectedUntil": "1997-06-30",
-  "hardValidFrom": "",
-  "hardValidTo": "",
-  "precision": "approximate",
-  "schoolYear": 6,
-  "book": "Half-Blood Prince",
-  "label": "Year 6"
+  "hardValidFrom": "1996-10-12",
+  "hardValidTo": "1996-10-19",
+  "precision": "date",
+  "book": "Half-Blood Prince"
 }
 ```
 
-Meanings:
+The preprocessor and Auto-Relevance use dates to determine whether an entry is High, Normal, or Low relevance for the current story context.
 
-- `canonExpectedFrom`: canon suggests this may apply from this date, but story evidence may still be required.
-- `canonExpectedUntil`: canon suggests this guard/condition is usually resolved by this date.
-- `hardValidFrom`: the entry cannot apply before this date.
-- `hardValidTo`: the entry cannot apply after this date.
+### Activation and expiration
 
-Use hard dates sparingly. Most secret knowledge, reveals, relationship changes, deaths, and betrayals should be milestone-gated instead of hard-date-gated.
+Bundled canon database entries should generally be date-gated, not positively gated by `activation.requiresEvents`. Positive `requiresEvents` can make known canon facts appear as future items in imported or alternate-branch chats that do not have matching milestone flags.
 
-### `activation`
-
-Use `activation` for story conditions required before an entry becomes injectable.
+Use `requiresMissingEvents` for guards that should apply until a story event happens.
 
 ```json
 "activation": {
-  "requiresEvents": ["horcruxes_revealed_to_trio"],
-  "requiresMissingEvents": [],
-  "requiresCharacters": [],
-  "requiresLocation": [],
-  "requiresTopics": []
-}
-```
-
-- `requiresEvents`: all listed milestones must be `happened` or `diverged`.
-- `requiresMissingEvents`: all listed milestones must not have happened yet.
-
-### `expiration`
-
-Use `expiration` to expire old guards or superseded lore.
-
-```json
+  "requiresMissingEvents": ["dumbledore_death_occurs"]
+},
 "expiration": {
-  "expiresWhenEventsHappen": ["horcruxes_revealed_to_trio"],
-  "expiresWhenEntriesActive": [],
-  "autoMuteOnExpire": true
+  "expiresWhenEventsHappen": ["dumbledore_death_occurs"],
+  "autoMuteOnExpire": false
 }
 ```
 
-Expired entries are not injected by default. They remain visible in the Lore tab under the Expired filter and can be manually changed back to Active if the story diverges.
+Auto-mute-on-expire is deprecated for bundled lore. Mute is user-controlled.
 
-### `lifecycle`
+### Pending Lore Review
 
-Wandlight computes a lifecycle status for every accepted lore entry:
-
-- `active`: injectable now.
-- `canon_overdue`: canon timing says this should probably have resolved, but the story milestone has not happened. Guards may still inject in this state.
-- `blocked`: story/scope conditions are missing.
-- `future`: not ready yet.
-- `expired`: superseded or past a hard date.
-- `divergent`: does not fit the current branch/canon status.
-- `muted`: user muted it.
-- `archived`: disabled/archived.
-
-Users can override this status from the colored dropdown at the left of each lore entry card.
-
-### Story milestones
-
-Story milestones are stored per chat in the Continuity tab under `storyMilestones`.
-
-Example:
+Pending entries may include preprocessing metadata under:
 
 ```json
-{
-  "horcruxes_revealed_to_trio": {
-    "status": "not_happened",
-    "happenedAtStoryDate": "",
-    "happenedAtTurn": 0,
-    "evidence": [],
-    "confidence": 0,
-    "notes": ""
+"extensions": {
+  "wandlightPendingReview": {
+    "relevanceRecommendation": "normal",
+    "relevanceScore": 42,
+    "temporalRole": "recent_past",
+    "canonRecommendation": "canon",
+    "recommendationReason": "..."
   }
 }
 ```
 
-Valid statuses:
+This metadata explains the recommendation but should not replace the top-level `relevance`, `canon`, `category`, and `priority` fields.
 
-- `not_happened`
-- `suspected`
-- `happened`
-- `blocked`
-- `diverged`
-- `unknown`
+### Auto-Relevance metadata
 
-The continuity scanner should only set a milestone to `happened` when the roleplay text establishes it. It should not use canon date alone.
+Accepted entries may receive:
 
-### Recommended milestone IDs
+```json
+"extensions": {
+  "autoRelevance": {
+    "mode": "local|model|manual",
+    "confidence": 0.86,
+    "score": 75,
+    "reason": "...",
+    "updatedAt": 0
+  }
+}
+```
 
-Use stable snake_case IDs:
+Manual relevance changes should set `mode` to `manual`, which protects the entry from ordinary auto-demotion unless override settings allow it.
 
-- `horcruxes_revealed_to_trio`
-- `deathly_hallows_revealed_to_trio`
-- `sirius_truth_revealed`
-- `barty_crouch_jr_revealed`
-- `voldemort_return_publicly_acknowledged`
-- `dumbledore_death_occurs`
-- `cedric_dies`
-- `ministry_falls`
-- `draco_mission_revealed`
-- `snape_loyalty_truth_revealed`
-- `sectumsempra_discovered`
-- `prophecy_revealed_to_harry`
-- `chamber_of_secrets_resolved`
+### Legacy compatibility
 
-Add new milestones as needed for your AU.
+Older fields such as `canonStatus`, `lifecycle`, `lifecycleStatus`, `active`, `future`, `expired`, `blocked`, `archived`, and `divergent` are migration/compatibility inputs only. New entries should not rely on them for user-facing behavior.
+
+Migration rules normalize old entries into:
+
+```text
+Relevance: high / normal / low
+Canon: canon / au
+Category: fixed category list
+Mute: injection exclusion
+Pin: compression/priority protection
+```

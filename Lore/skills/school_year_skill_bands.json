@@ -5,7 +5,7 @@
       "id": "skill_band_year_1",
       "title": "Hogwarts Year 1 skill band",
       "kind": "skill_band",
-      "category": "skill",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -71,14 +71,16 @@
         "book": ""
       },
       "gateType": "skill_band",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "skill_band_year_2",
       "title": "Hogwarts Year 2 skill band",
       "kind": "skill_band",
-      "category": "skill",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -144,14 +146,16 @@
         "book": ""
       },
       "gateType": "skill_band",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "skill_band_year_3",
       "title": "Hogwarts Year 3 skill band",
       "kind": "skill_band",
-      "category": "skill",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -217,14 +221,16 @@
         "book": ""
       },
       "gateType": "skill_band",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "skill_band_year_4",
       "title": "Hogwarts Year 4 skill band",
       "kind": "skill_band",
-      "category": "skill",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -290,14 +296,16 @@
         "book": ""
       },
       "gateType": "skill_band",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "skill_band_year_5",
       "title": "Hogwarts Year 5 skill band",
       "kind": "skill_band",
-      "category": "skill",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -363,14 +371,16 @@
         "book": ""
       },
       "gateType": "skill_band",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "skill_band_year_6",
       "title": "Hogwarts Year 6 skill band",
       "kind": "skill_band",
-      "category": "skill",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -436,14 +446,16 @@
         "book": ""
       },
       "gateType": "skill_band",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "skill_band_year_7",
       "title": "Hogwarts Year 7 skill band",
       "kind": "skill_band",
-      "category": "skill",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -500,7 +512,16 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "horcruxes_revealed_to_trio"
+          ]
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1997-09-01",
         "hardValidTo": "1998-08-31",
@@ -508,13 +529,11 @@
         "schoolYear": 7,
         "book": ""
       },
-      "activation": {
-        "requiresEvents": [
-          "horcruxes_revealed_to_trio"
-        ]
-      },
+      "activation": {},
       "gateType": "skill_band",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

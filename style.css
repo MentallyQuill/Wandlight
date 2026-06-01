@@ -3073,3 +3073,28 @@
         grid-template-columns: 1fr !important;
     }
 }
+
+/* Auto-Relevance suggestion review */
+.wandlight-auto-relevance-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.wandlight-auto-relevance-suggestion-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 8px;
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.18));
+    border-radius: 6px;
+}
+
+.wandlight-auto-relevance-suggestion-summary {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

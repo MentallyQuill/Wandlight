@@ -72,7 +72,9 @@
         "book": "Philosopher's Stone"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -137,7 +139,16 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "chamber_of_secrets_resolved"
+          ]
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1992-09-01",
         "hardValidTo": "1993-08-31",
@@ -145,13 +156,11 @@
         "schoolYear": 2,
         "book": "Chamber of Secrets"
       },
-      "activation": {
-        "requiresEvents": [
-          "chamber_of_secrets_resolved"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -225,7 +234,9 @@
         "book": "Prisoner of Azkaban"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -299,7 +310,9 @@
         "book": "Goblet of Fire"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -373,7 +386,9 @@
         "book": "Order of the Phoenix"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -447,7 +462,9 @@
         "book": "Half-Blood Prince"
       },
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -512,7 +529,16 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "deathly_hallows_revealed_to_trio"
+          ]
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1997-09-01",
         "hardValidTo": "1998-08-31",
@@ -520,13 +546,11 @@
         "schoolYear": 7,
         "book": "Deathly Hallows"
       },
-      "activation": {
-        "requiresEvents": [
-          "deathly_hallows_revealed_to_trio"
-        ]
-      },
+      "activation": {},
       "gateType": "event_anchor",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     }
   ]
 }

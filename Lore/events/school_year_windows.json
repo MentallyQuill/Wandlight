@@ -67,7 +67,9 @@
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_year_2_cos_window",
@@ -135,7 +137,9 @@
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_year_3_poa_window",
@@ -203,7 +207,9 @@
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_year_4_gof_window",
@@ -273,7 +279,9 @@
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_year_5_ootp_window",
@@ -345,7 +353,9 @@
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "id": "canon_year_6_hbp_window",
@@ -416,7 +426,9 @@
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "id": "canon_year_7_dh_window",
@@ -485,7 +497,9 @@
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     }
   ]
 }

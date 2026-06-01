@@ -79,7 +79,9 @@
         "book": "Philosopher's Stone"
       },
       "gateType": "spell_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -163,7 +165,9 @@
         "book": "Philosopher's Stone"
       },
       "gateType": "spell_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -247,7 +251,9 @@
         "book": "Prisoner of Azkaban"
       },
       "gateType": "spell_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -328,7 +334,9 @@
         "book": "Goblet of Fire"
       },
       "gateType": "spell_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -409,7 +417,9 @@
         "book": "Order of the Phoenix"
       },
       "gateType": "spell_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -491,7 +501,9 @@
         "book": "Half-Blood Prince"
       },
       "gateType": "spell_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

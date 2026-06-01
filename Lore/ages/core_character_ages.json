@@ -5,7 +5,7 @@
       "id": "age_harry_potter",
       "title": "Harry Potter age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -69,14 +69,16 @@
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "age_hermione_granger",
       "title": "Hermione Granger age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -140,14 +142,16 @@
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "age_ron_weasley",
       "title": "Ron Weasley age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -211,14 +215,16 @@
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "age_draco_malfoy",
       "title": "Draco Malfoy age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -282,14 +288,16 @@
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "age_ginny_weasley",
       "title": "Ginny Weasley age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -353,14 +361,16 @@
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "age_neville_longbottom",
       "title": "Neville Longbottom age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -424,14 +434,16 @@
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "age_luna_lovegood",
       "title": "Luna Lovegood age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -495,7 +507,9 @@
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

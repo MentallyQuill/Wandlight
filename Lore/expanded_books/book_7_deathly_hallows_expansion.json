@@ -8,7 +8,7 @@
       "title": "Seven Potters flight death-state guard",
       "kind": "future_guard",
       "gateType": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -84,7 +84,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:summer"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:summer",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -92,7 +94,7 @@
       "title": "Burrow wedding and Ministry fall transition",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -171,7 +173,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:summer"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:summer",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -256,7 +260,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -264,7 +270,7 @@
       "title": "Ministry infiltration and locket theft",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -342,7 +348,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -350,7 +358,7 @@
       "title": "Camping protections and locket effects",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -427,7 +435,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -511,7 +521,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:winter"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:winter",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -595,12 +607,17 @@
         "notes": "Compact continuity entry for roleplay state management."
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:winter",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1998-01-15"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-02-28",
           "method": "expanded book event cluster: approximate 45-day review window",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-02-28"
         }
       }
     },
@@ -688,7 +705,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:winter"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:winter",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -696,7 +715,7 @@
       "title": "Malfoy Manor Dobby and wand-transfer guard",
       "kind": "future_guard",
       "gateType": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -777,7 +796,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:spring"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:spring",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -785,7 +806,7 @@
       "title": "Shell Cottage recovery and planning",
       "kind": "place_fact",
       "gateType": "place_fact",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -861,7 +882,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:spring"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:spring",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -869,7 +892,7 @@
       "title": "Gringotts cup Horcrux and dragon escape",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -947,7 +970,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:climax"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:climax",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -955,7 +980,7 @@
       "title": "Hogsmeade Aberforth Hogwarts return",
       "kind": "place_fact",
       "gateType": "place_fact",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -1033,7 +1058,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:climax"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:climax",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1041,7 +1068,7 @@
       "title": "Hogwarts under Snape Carrows DA resistance",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -1119,7 +1146,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1127,7 +1156,7 @@
       "title": "Ravenclaw diadem Room of Requirement battle",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -1205,7 +1234,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1213,7 +1244,7 @@
       "title": "Battle of Hogwarts death-state guard",
       "kind": "future_guard",
       "gateType": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -1289,7 +1320,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1375,7 +1408,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1458,7 +1493,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1539,7 +1576,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1623,12 +1662,17 @@
         "notes": "Compact continuity entry for roleplay state management."
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:aftermath",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1998-06-16"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1998-08-31",
           "method": "expanded book event cluster: approximate 45-day review window",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1998-08-31"
         }
       }
     },
@@ -1712,7 +1756,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Deathly Hallows:aftermath"
+      "source": "wandlight-expanded-lore-v1:Deathly Hallows:aftermath",
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

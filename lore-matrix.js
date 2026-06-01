@@ -6,15 +6,21 @@
  * Imported by: state-manager.js, memo-builder.js, lore-generator.js, index.js
  */
 
+import {
+    LORE_RELEVANCE_TIERS,
+    normalizeLoreRelevance,
+    normalizeLoreCanon,
+    normalizeLoreCategory,
+    sortLoreEntriesForInjection,
+    computeLocalLoreRelevance,
+} from './lore-relevance.js';
+
 const DEFAULT_CATEGORIES = [
-    'canon', 'au', 'secret', 'rumor', 'lie', 'relationship', 'location', 'rule', 'timeline',
-    'character', 'event', 'item', 'knowledge', 'place', 'faction', 'spell', 'artifact',
-    'constraint', 'future_guard', 'age', 'behavior', 'skill', 'institution', 'object', 'emotion',
+    'character', 'event', 'location', 'item', 'spell', 'faction', 'relationship', 'rule', 'timeline',
+    'knowledge', 'secret', 'other',
 ];
 
-const DEFAULT_CANON_STATUS = [
-    'canon', 'divergent', 'au', 'fanon', 'contested', 'unknown',
-];
+const DEFAULT_CANON_STATUS = ['canon', 'au'];
 
 const DEFAULT_TRUTH_STATUS = [
     'true', 'false', 'public-belief', 'public_belief', 'rumor', 'contested', 'hidden',
@@ -24,9 +30,9 @@ const DEFAULT_REVEAL_POLICIES = [
     'public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals',
 ];
 
-export const LORE_LIFECYCLE_STATUSES = [
-    'active', 'canon_overdue', 'blocked', 'future', 'expired', 'divergent', 'muted', 'archived',
-];
+export const LORE_RELEVANCE_STATUSES = LORE_RELEVANCE_TIERS;
+// Compatibility export for older UI/import paths. Lifecycle is deprecated; Relevance is the user-facing control.
+export const LORE_LIFECYCLE_STATUSES = ['high', 'normal', 'low'];
 
 export const INJECTABLE_LIFECYCLE_STATUSES = new Set(['active', 'canon_overdue']);
 
@@ -39,7 +45,7 @@ const VALID_TIME_TRAVEL_MODES = new Set([
 ]);
 
 const KNOWN_TOP_LEVEL_FIELDS = new Set([
-    'schemaVersion', 'id', 'title', 'name', 'kind', 'gateType', 'category', 'canonStatus', 'truthStatus',
+    'schemaVersion', 'id', 'title', 'name', 'kind', 'gateType', 'category', 'canonStatus', 'canon', 'relevance', 'truthStatus',
     'revealPolicy', 'tags', 'priority', 'status', 'protected', 'locked', 'userEditable', 'userEdited',
     'date', 'canonTiming', 'activation', 'expiration', 'lifecycle', 'scope', 'visibility', 'content', 'effects', 'source', 'sourceInfo', 'ui', 'extensions',
     // legacy aliases
@@ -418,7 +424,7 @@ export function normalizeLoreEntry(input = {}) {
     const legacyContentString = typeof input.content === 'string' ? input.content : '';
     const title = asFirstString(input.title, input.name, input.fact, legacyContentString, input.description, input.detail, input.text, input.summary) || 'Lore Entry';
     const kind = asFirstString(input.kind, input.gateType) || 'fact';
-    const category = asFirstString(input.category) || 'canon';
+    const category = normalizeLoreCategory(asFirstString(input.category) || 'other');
     const date = normalizeDateBlock(input);
     const canonTiming = normalizeCanonTiming(input);
     const activation = normalizeActivation(input);
@@ -438,11 +444,13 @@ export function normalizeLoreEntry(input = {}) {
         category,
     ]);
     const status = asString(input.status);
-    const canonStatus = normalizeEnum(input.canonStatus, 'unknown', DEFAULT_CANON_STATUS);
+    const canon = normalizeLoreCanon(input.canon || input.canonStatus, deriveSourceString(sourceInfo, input));
+    const canonStatus = canon;
     const truthStatus = normalizeEnum(input.truthStatus, 'true', DEFAULT_TRUTH_STATUS);
     const revealPolicy = normalizeEnum(input.revealPolicy, 'private', DEFAULT_REVEAL_POLICIES);
     const priority = asPriority(input.priority);
     const source = deriveSourceString(sourceInfo, input);
+    const relevance = normalizeLoreRelevance(input.relevance || input.lifecycle?.status || input.lifecycle?.computedStatus || input.status || 'normal');
     const activeWhen = deriveActiveWhen(scope, input);
     const publicVersion = content.publicVersion;
     const whoKnowsTruth = Array.from(new Set([...asStringArray(input.whoKnowsTruth), ...stringMapKeys(visibility.knownBy)]));
@@ -457,6 +465,8 @@ export function normalizeLoreEntry(input = {}) {
         gateType: asFirstString(input.gateType, kind),
         tags,
         category,
+        relevance,
+        canon,
         canonStatus,
         truthStatus,
         revealPolicy,
@@ -609,8 +619,9 @@ function parseIsoDate(value) {
  * @returns {boolean}
  */
 export function isLoreEntryActive(entry, state) {
-    const evaluation = evaluateLoreEntryLifecycle(entry, state);
-    return evaluation.shouldInject && INJECTABLE_LIFECYCLE_STATUSES.has(evaluation.status);
+    const e = normalizeLoreEntry(entry);
+    const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
+    return e.status !== 'archived' && e.status !== 'disabled' && !suppressedIds.has(e.id);
 }
 
 /**
@@ -713,6 +724,19 @@ export function evaluateLoreEntryLifecycle(entry, state = {}) {
         return { status: 'expired', shouldInject: false, reason: 'Current story date is after hard valid-to date.', entry: e };
     }
 
+    // Legacy date windows remain hard temporal eligibility checks, but they no
+    // longer control injection directly. Evaluate them before milestone gates so
+    // old canon entries cannot appear Future after their validTo date simply
+    // because a chat lacks matching story milestone flags.
+    const hasModernTiming = Boolean(e.canonTiming?.canonExpectedFrom || e.canonTiming?.canonExpectedUntil || e.canonTiming?.hardValidFrom || e.canonTiming?.hardValidTo);
+    if (!hasModernTiming && !dateWindowMatches(e, state)) {
+        const cmpTo = e.validTo ? compareStateDate(state, e.validTo) : 0;
+        const cmpFrom = e.validFrom ? compareStateDate(state, e.validFrom) : 0;
+        if (cmpTo > 0) return { status: 'expired', shouldInject: false, reason: 'Current story date is after legacy valid-to date.', entry: e };
+        if (cmpFrom < 0) return { status: 'future', shouldInject: false, reason: 'Current story date is before legacy valid-from date.', entry: e };
+        return { status: 'blocked', shouldInject: false, reason: 'Date window does not match.', entry: e };
+    }
+
     if (e.expiration?.expiresWhenEventsHappen?.length && !allMilestonesMissing(state, e.expiration.expiresWhenEventsHappen)) {
         return { status: 'expired', shouldInject: false, reason: `Expired because story milestone happened: ${e.expiration.expiresWhenEventsHappen.join(', ')}`, entry: e };
     }
@@ -727,15 +751,6 @@ export function evaluateLoreEntryLifecycle(entry, state = {}) {
 
     if (e.activation?.requiresMissingEvents?.length && !allMilestonesMissing(state, e.activation.requiresMissingEvents)) {
         return { status: 'expired', shouldInject: false, reason: `Superseded by story milestone: ${e.activation.requiresMissingEvents.join(', ')}`, entry: e };
-    }
-
-    const hasModernTiming = Boolean(e.canonTiming?.canonExpectedFrom || e.canonTiming?.canonExpectedUntil || e.canonTiming?.hardValidFrom || e.canonTiming?.hardValidTo);
-    if (!hasModernTiming && !dateWindowMatches(e, state)) {
-        const cmpTo = e.validTo ? compareStateDate(state, e.validTo) : 0;
-        const cmpFrom = e.validFrom ? compareStateDate(state, e.validFrom) : 0;
-        if (cmpTo > 0) return { status: 'expired', shouldInject: false, reason: 'Current story date is after legacy valid-to date.', entry: e };
-        if (cmpFrom < 0) return { status: 'future', shouldInject: false, reason: 'Current story date is before legacy valid-from date.', entry: e };
-        return { status: 'blocked', shouldInject: false, reason: 'Date window does not match.', entry: e };
     }
 
     if (!activeWhenMatches(e, state)) {
@@ -986,64 +1001,51 @@ export function getPanelLoreState(state) {
     const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
 
     const categories = new Set();
-    const counts = { all: 0, active: 0, pinned: 0, suppressed: 0, pending: pendingEntries.length, expired: 0, blocked: 0, future: 0, canon_overdue: 0, divergent: 0, muted: 0, archived: 0 };
+    const counts = { all: 0, active: 0, high: 0, normal: 0, low: 0, pinned: 0, suppressed: 0, pending: pendingEntries.length };
 
     const entries = allEntries.map(entry => {
-        const evaluation = evaluateLoreEntryLifecycle(entry, state);
-        const lifecycleStatus = evaluation.status;
-        const isActive = evaluation.shouldInject;
+        const relevance = normalizeLoreRelevance(entry.relevance || 'normal');
         const isPinned = pinnedIds.has(entry.id);
         const isSuppressed = suppressedIds.has(entry.id);
-
         if (entry.category) categories.add(entry.category);
-
         counts.all++;
-        if (isActive) counts.active++;
+        counts[relevance]++;
+        if (relevance === 'high' && !isSuppressed) counts.active++;
         if (isPinned) counts.pinned++;
         if (isSuppressed) counts.suppressed++;
-        if (counts[lifecycleStatus] !== undefined) counts[lifecycleStatus]++;
-
         return {
             ...entry,
-            isActive,
+            relevance,
+            isActive: relevance === 'high' && !isSuppressed,
             isPinned,
             isSuppressed,
             isPending: false,
-            lifecycleStatus,
+            lifecycleStatus: relevance,
         };
     });
 
-    // Add pending entries (not yet in loreMatrix)
     const pendingAnnotated = pendingEntries.map(entry => {
+        const relevance = normalizeLoreRelevance(entry.relevance || 'normal');
         if (entry.category) categories.add(entry.category);
         return {
             ...entry,
-            isActive: true,  // pending entries are assumed active since they were just generated
+            relevance,
+            isActive: relevance === 'high',
             isPinned: pinnedIds.has(entry.id),
             isSuppressed: suppressedIds.has(entry.id),
             isPending: true,
-            lifecycleStatus: 'active',
+            lifecycleStatus: relevance,
         };
     });
 
-    // Merge: pending entries should not duplicate active matrix entries by id
     const entryIds = new Set(entries.map(e => e.id));
     const uniquePending = pendingAnnotated.filter(e => !entryIds.has(e.id));
     const allAnnotated = [...entries, ...uniquePending];
-
-    // Count suppressed across all annotated entries (including pending)
     counts.suppressed = allAnnotated.filter(e => e.isSuppressed).length;
 
     return {
         entries: allAnnotated,
-        categories: [
-            'all',
-            'active',
-            'pinned',
-            'suppressed',
-            'pending',
-            ...Array.from(categories).sort(),
-        ],
+        categories: ['all', 'high', 'normal', 'low', 'pinned', 'suppressed', 'pending', ...Array.from(categories).sort()],
         counts,
     };
 }
@@ -1058,36 +1060,44 @@ export function getPanelLoreState(state) {
  * @param {number} limit - Max entries to return
  * @returns {Object[]} Injectable lore entries
  */
-export function getInjectableLoreEntries(state, limit = 0) {
-    const allEntries = normalizeLoreMatrix(state?.loreMatrix || []);
-    const pinnedIds = new Set(state?.loreSelection?.pinnedIds || []);
-    const suppressedIds = new Set(state?.loreSelection?.suppressedIds || []);
-    const explicitLimit = Number(limit);
-    const effectiveLimit = Number.isFinite(explicitLimit) && explicitLimit > 0 ? explicitLimit : Infinity;
-
-    const injectable = [];
-    for (const entry of allEntries) {
-        if (suppressedIds.has(entry.id)) continue;
-        const evaluation = evaluateLoreEntryLifecycle(entry, state);
-        if (!evaluation.shouldInject) continue;
-        injectable.push({
+export function getInjectableLoreEntries(state, limit = 0, relevance = null) {
+    const all = normalizeLoreMatrix(state?.loreMatrix || []);
+    const suppressed = new Set(state?.loreSelection?.suppressedIds || []);
+    const pinned = new Set(state?.loreSelection?.pinnedIds || []);
+    const tier = relevance ? normalizeLoreRelevance(relevance) : null;
+    const injectable = all
+        .filter(entry => entry.status !== 'archived' && entry.status !== 'disabled')
+        .filter(entry => !suppressed.has(entry.id))
+        .filter(entry => !tier || normalizeLoreRelevance(entry.relevance) === tier)
+        .map(entry => ({
             ...entry,
-            lifecycle: { ...(entry.lifecycle || {}), computedStatus: evaluation.status, status: entry.lifecycle?.manualOverride ? entry.lifecycle.status : evaluation.status, reason: evaluation.reason },
-            lifecycleStatus: evaluation.status,
-            isPinned: pinnedIds.has(entry.id),
-        });
-    }
-
-    injectable.sort((a, b) =>
-        Number(Boolean(b.isPinned)) - Number(Boolean(a.isPinned))
-        || Number(b.priority || 50) - Number(a.priority || 50)
-        || String(a.title || '').localeCompare(String(b.title || ''))
-    );
-
-    if (Number.isFinite(effectiveLimit)) return injectable.slice(0, effectiveLimit);
-    return injectable;
+            isPinned: pinned.has(entry.id),
+            isSuppressed: false,
+            isActive: normalizeLoreRelevance(entry.relevance) === 'high',
+            relevance: normalizeLoreRelevance(entry.relevance),
+        }));
+    const sorted = sortLoreEntriesForInjection(injectable, pinned);
+    const effectiveLimit = Number(limit) > 0 ? Number(limit) : Infinity;
+    return Number.isFinite(effectiveLimit) ? sorted.slice(0, effectiveLimit) : sorted;
 }
 
+export function getInjectableLoreEntriesByRelevance(state, relevance = 'normal', limit = 0) {
+    return getInjectableLoreEntries(state, limit, relevance);
+}
+
+export function getLoreRelevanceCounts(state = {}) {
+    const counts = { high: 0, normal: 0, low: 0, muted: 0 };
+    const suppressed = new Set(state?.loreSelection?.suppressedIds || []);
+    for (const entry of normalizeLoreMatrix(state?.loreMatrix || [])) {
+        if (suppressed.has(entry.id)) { counts.muted += 1; continue; }
+        counts[normalizeLoreRelevance(entry.relevance)] += 1;
+    }
+    return counts;
+}
+
+export function scoreLoreEntryRelevance(entry, state = {}, options = {}) {
+    return computeLocalLoreRelevance(normalizeLoreEntry(entry), state, options);
+}
 
 /**
  * Builds a fingerprint string representing the current context.

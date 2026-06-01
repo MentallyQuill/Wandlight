@@ -8,7 +8,7 @@
       "title": "Dementor attack and underage magic hearing",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -82,7 +82,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:summer"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:summer",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -90,7 +92,7 @@
       "title": "Grimmauld Place and Order headquarters",
       "kind": "place_fact",
       "gateType": "place_fact",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -165,7 +167,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:summer"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:summer",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -173,7 +177,7 @@
       "title": "Harry isolation and Dumbledore distance",
       "kind": "behavior_gate",
       "gateType": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -247,7 +251,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:summer"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:summer",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -255,7 +261,7 @@
       "title": "Umbridge decrees and school control",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -330,7 +336,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:term_start"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:term_start",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -417,7 +425,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:autumn"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:autumn",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -505,7 +515,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:winter"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:winter",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -586,7 +598,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:winter"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:winter",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -668,7 +682,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:winter"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:winter",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -749,7 +765,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:spring"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:spring",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -757,7 +775,7 @@
       "title": "OWL exams and career guidance phase",
       "kind": "skill_band",
       "gateType": "skill_band",
-      "category": "skill",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -831,7 +849,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:spring"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:spring",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -839,7 +859,7 @@
       "title": "Department of Mysteries climax guard",
       "kind": "future_guard",
       "gateType": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -917,7 +937,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:climax"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:climax",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -999,7 +1021,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:aftermath"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:aftermath",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1081,7 +1105,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:aftermath"
+      "source": "wandlight-expanded-lore-v1:Order of the Phoenix:aftermath",
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

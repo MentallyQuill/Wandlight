@@ -5,7 +5,7 @@
       "id": "behavior_harry_potter_year_4",
       "title": "Harry Potter behavior - Year 4",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -78,14 +78,16 @@
         "book": "Goblet of Fire"
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_harry_potter_year_5",
       "title": "Harry Potter behavior - Year 5",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -158,14 +160,16 @@
         "book": "Order of the Phoenix"
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_harry_potter_year_6",
       "title": "Harry Potter behavior - Year 6",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -249,14 +253,16 @@
         "autoMuteOnExpire": true
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_hermione_granger_year_4",
       "title": "Hermione Granger behavior - Year 4",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -340,14 +346,16 @@
         "autoMuteOnExpire": true
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_hermione_granger_year_6",
       "title": "Hermione Granger behavior - Year 6",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -420,14 +428,16 @@
         "book": "Half-Blood Prince"
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_ron_weasley_year_4",
       "title": "Ron Weasley behavior - Year 4",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -500,14 +510,16 @@
         "book": "Goblet of Fire"
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_draco_malfoy_year_6",
       "title": "Draco Malfoy behavior - Year 6",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -580,14 +592,16 @@
         "book": "Half-Blood Prince"
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_albus_dumbledore_year_6",
       "title": "Albus Dumbledore behavior - Year 6",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -651,16 +665,36 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "living/office state expires at death",
+          "notes": "Dumbledore behavior state expires at the Astronomy Tower death.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass"
+        }
+      },
       "canonTiming": {
         "canonExpectedFrom": "1996-09-01",
         "canonExpectedUntil": "1997-06-30",
         "precision": "date",
         "schoolYear": 6,
-        "book": "Half-Blood Prince"
+        "book": "Half-Blood Prince",
+        "hardValidTo": "1997-06-30"
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low",
+      "activation": {
+        "requiresMissingEvents": [
+          "dumbledore_death_occurs"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "dumbledore_death_occurs"
+        ],
+        "autoMuteOnExpire": false
+      }
     }
   ]
 }

@@ -8,7 +8,7 @@
       "title": "Knight Bus and Leaky Cauldron safety state",
       "kind": "place_fact",
       "gateType": "place_fact",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -81,7 +81,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:summer"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:summer",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -162,7 +164,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:summer"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:summer",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -170,7 +174,7 @@
       "title": "Dementors at Hogwarts environment",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -243,7 +247,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:term_start"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:term_start",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -326,7 +332,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:autumn"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:autumn",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -334,7 +342,7 @@
       "title": "Hogsmeade restriction and Marauder Map",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -408,7 +416,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:autumn"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:autumn",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -490,7 +500,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:winter"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:winter",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -572,7 +584,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:winter"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:winter",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -653,7 +667,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:winter"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:winter",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -735,7 +751,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:spring"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:spring",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -821,7 +839,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:climax"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:climax",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -903,7 +923,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:climax"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:climax",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -911,7 +933,7 @@
       "title": "Lupin resigns after werewolf exposure",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -982,7 +1004,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:aftermath"
+      "source": "wandlight-expanded-lore-v1:Prisoner of Azkaban:aftermath",
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

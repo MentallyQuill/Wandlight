@@ -38,6 +38,7 @@ import {
     runStoryLoreScan,
 } from './lore-generator.js';
 import { showLorePanel, hideLorePanel, refreshLorePanel } from './lore-panel.js';
+import { onGenerationEndedAutoRelevance, runAutoRelevance } from './auto-relevance.js';
 
 // ════════════════════════════════════════════════════════════════════════════════
 // jQuery ready — this is the SillyTavern extension lifecycle entrypoint.
@@ -108,6 +109,7 @@ function wireEvents(ctx) {
         ctx.eventSource.on(ctx.event_types.GENERATION_ENDED, () => {
             try {
                 onGenerationEndedAutomation();
+                onGenerationEndedAutoRelevance();
                 syncPromptInjection();
             } catch (e) {
                 console.error(`${LOG_PREFIX} Error in GENERATION_ENDED handler:`, e);
@@ -138,7 +140,7 @@ function wireEvents(ctx) {
     const bus = ctx.eventBus || (typeof eventBus !== 'undefined' ? eventBus : null);
     if (bus && bus.on) {
         bus.on('GENERATION_ENDED', () => {
-            try { onGenerationEndedAutomation(); } catch (e) { console.error(e); }
+            try { onGenerationEndedAutomation(); onGenerationEndedAutoRelevance(); } catch (e) { console.error(e); }
         });
         bus.on('CHAT_CHANGED', () => {
             try { resetExtractionCounter(); } catch (e) { console.error(e); }
@@ -151,7 +153,7 @@ function wireEvents(ctx) {
     if (ctx.eventTypes) {
         ctx.eventTypes['GENERATION_ENDED'] = ctx.eventTypes['GENERATION_ENDED'] || [];
         ctx.eventTypes['GENERATION_ENDED'].push(() => {
-            try { onGenerationEndedAutomation(); } catch (e) { console.error(e); }
+            try { onGenerationEndedAutomation(); onGenerationEndedAutoRelevance(); } catch (e) { console.error(e); }
         });
         ctx.eventTypes['CHAT_CHANGED'] = ctx.eventTypes['CHAT_CHANGED'] || [];
         ctx.eventTypes['CHAT_CHANGED'].push(() => {

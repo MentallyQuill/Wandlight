@@ -1,253 +1,36 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "categories": {
-    "canon": {
-      "label": "Canon",
-      "color": "#7f1d1d",
-      "textColor": "#f8e7c9",
-      "description": "Canon-aligned reference entry."
-    },
-    "au": {
-      "label": "AU",
-      "color": "#4c1d95",
-      "textColor": "#f3e8ff",
-      "description": "Alternate-universe or branch-specific lore."
-    },
-    "contested": {
-      "label": "Contested",
-      "color": "#a16207",
-      "textColor": "#fef3c7",
-      "description": "Potential conflict between canon and accepted story lore."
-    },
-    "secret": {
-      "label": "Secret",
-      "color": "#581c87",
-      "textColor": "#f5d0fe",
-      "description": "Hidden fact or private knowledge."
-    },
-    "relationship": {
-      "label": "Relationship",
-      "color": "#9d174d",
-      "textColor": "#fce7f3",
-      "description": "Date-sensitive relationship state."
-    },
-    "timeline": {
-      "label": "Timeline",
-      "color": "#92400e",
-      "textColor": "#ffedd5",
-      "description": "Timeline window or date anchor."
-    },
-    "character": {
-      "label": "Character",
-      "color": "#1e3a8a",
-      "textColor": "#dbeafe",
-      "description": "Character-specific information."
-    },
-    "event": {
-      "label": "Event",
-      "color": "#92400e",
-      "textColor": "#ffedd5",
-      "description": "Canon event or major transition."
-    },
-    "item": {
-      "label": "Item",
-      "color": "#365314",
-      "textColor": "#ecfccb",
-      "description": "Object or item state."
-    },
-    "knowledge": {
-      "label": "Knowledge",
-      "color": "#065f46",
-      "textColor": "#d1fae5",
-      "description": "Who knows what and when."
-    },
-    "place": {
-      "label": "Place",
-      "color": "#0f766e",
-      "textColor": "#ccfbf1",
-      "description": "Location or institutional state."
-    },
-    "faction": {
-      "label": "Faction",
-      "color": "#4338ca",
-      "textColor": "#e0e7ff",
-      "description": "Group, house, institution, or faction state."
-    },
-    "spell": {
-      "label": "Spell",
-      "color": "#312e81",
-      "textColor": "#e0e7ff",
-      "description": "Spell knowledge or magical ability."
-    },
-    "artifact": {
-      "label": "Artifact",
-      "color": "#713f12",
-      "textColor": "#fef3c7",
-      "description": "Important magical object."
-    },
-    "behavior": {
-      "label": "Behavior",
-      "color": "#831843",
-      "textColor": "#fce7f3",
-      "description": "Date-sensitive characterization guidance."
-    },
-    "skill": {
-      "label": "Skill",
-      "color": "#155e75",
-      "textColor": "#cffafe",
-      "description": "Academic or magical competence band."
-    },
-    "age": {
-      "label": "Age",
-      "color": "#374151",
-      "textColor": "#f3f4f6",
-      "description": "Age and school-year constraint."
-    },
-    "future_guard": {
-      "label": "Future Guard",
-      "color": "#111827",
-      "textColor": "#fde68a",
-      "description": "Blocks future-canon leakage."
-    },
-    "constraint": {
-      "label": "Constraint",
-      "color": "#4b5563",
-      "textColor": "#f9fafb",
-      "description": "General roleplay continuity constraint."
-    },
-    "institution": {
-      "label": "Institution",
-      "color": "#0f766e",
-      "textColor": "#ccfbf1",
-      "description": "Institutional authority or school-state information."
-    }
+    "character": { "label": "Character", "color": "#1e3a8a", "textColor": "#dbeafe", "description": "Character-specific information." },
+    "event": { "label": "Event", "color": "#92400e", "textColor": "#ffedd5", "description": "Dated plot event or major transition." },
+    "location": { "label": "Location", "color": "#0f766e", "textColor": "#ccfbf1", "description": "Place, setting, or institutional location." },
+    "item": { "label": "Item", "color": "#365314", "textColor": "#ecfccb", "description": "Object, artifact, possession, or item state." },
+    "spell": { "label": "Spell", "color": "#312e81", "textColor": "#e0e7ff", "description": "Spell knowledge or magical ability." },
+    "faction": { "label": "Faction", "color": "#4338ca", "textColor": "#e0e7ff", "description": "Group, house, institution, or faction state." },
+    "relationship": { "label": "Relationship", "color": "#9d174d", "textColor": "#fce7f3", "description": "Relationship state or history." },
+    "rule": { "label": "Rule", "color": "#4b5563", "textColor": "#f9fafb", "description": "General roleplay, world, or continuity rule." },
+    "timeline": { "label": "Timeline", "color": "#92400e", "textColor": "#ffedd5", "description": "Timeline window or date anchor." },
+    "knowledge": { "label": "Knowledge", "color": "#065f46", "textColor": "#d1fae5", "description": "Who knows what and when." },
+    "secret": { "label": "Secret", "color": "#581c87", "textColor": "#f5d0fe", "description": "Hidden fact or private knowledge." },
+    "other": { "label": "Other", "color": "#374151", "textColor": "#f3f4f6", "description": "Fallback category." }
   },
   "canonStatuses": {
-    "canon": {
-      "label": "Canon",
-      "color": "#7f1d1d"
-    },
-    "divergent": {
-      "label": "Divergent",
-      "color": "#9a3412"
-    },
-    "au": {
-      "label": "AU",
-      "color": "#4c1d95"
-    },
-    "fanon": {
-      "label": "Fanon",
-      "color": "#155e75"
-    },
-    "contested": {
-      "label": "Contested",
-      "color": "#a16207"
-    },
-    "unknown": {
-      "label": "Unknown",
-      "color": "#374151"
-    }
+    "canon": { "label": "Canon", "color": "#7f1d1d", "textColor": "#f8e7c9", "description": "Mainline canon or canon reference." },
+    "au": { "label": "AU", "color": "#4c1d95", "textColor": "#f3e8ff", "description": "Alternate-universe, branch-specific, or story-generated lore." }
   },
   "truthStatuses": {
-    "true": {
-      "label": "True",
-      "color": "#166534"
-    },
-    "false": {
-      "label": "False",
-      "color": "#991b1b"
-    },
-    "public_belief": {
-      "label": "Public Belief",
-      "color": "#0369a1"
-    },
-    "public-belief": {
-      "label": "Public Belief",
-      "color": "#0369a1"
-    },
-    "rumor": {
-      "label": "Rumor",
-      "color": "#854d0e"
-    },
-    "hidden": {
-      "label": "Hidden",
-      "color": "#581c87"
-    },
-    "contested": {
-      "label": "Contested",
-      "color": "#a16207"
-    }
+    "true": { "label": "True", "description": "True within its canon/AU branch." },
+    "false": { "label": "False", "description": "Known falsehood." },
+    "public_belief": { "label": "Public Belief", "description": "What characters generally believe." },
+    "rumor": { "label": "Rumor", "description": "Unverified claim." },
+    "contested": { "label": "Contested", "description": "Conflicting evidence or contested truth." },
+    "hidden": { "label": "Hidden", "description": "True but not publicly known." }
   },
   "revealPolicies": {
-    "public": {
-      "label": "Public",
-      "description": "Safe to reveal generally."
-    },
-    "private": {
-      "label": "Private",
-      "description": "Reveal only when context supports it."
-    },
-    "do_not_reveal": {
-      "label": "Do Not Reveal",
-      "description": "Use as hidden constraint only."
-    },
-    "only_if_knower_present": {
-      "label": "Knower Present",
-      "description": "Reveal only if a character who knows it is present."
-    },
-    "only_if_user_reveals": {
-      "label": "User Reveals",
-      "description": "Never reveal unless the user introduces it first."
-    }
-  },
-  "priorities": {
-    "P10": 10,
-    "P25": 25,
-    "P50": 50,
-    "P75": 75,
-    "P90": 90,
-    "P100": 100
-  },
-  "lifecycleStatuses": {
-    "active": {
-      "label": "Active",
-      "color": "#166534",
-      "textColor": "#dcfce7"
-    },
-    "canon_overdue": {
-      "label": "Canon Overdue",
-      "color": "#a16207",
-      "textColor": "#fef3c7"
-    },
-    "blocked": {
-      "label": "Story Blocked",
-      "color": "#92400e",
-      "textColor": "#ffedd5"
-    },
-    "future": {
-      "label": "Future",
-      "color": "#1e3a8a",
-      "textColor": "#dbeafe"
-    },
-    "expired": {
-      "label": "Expired",
-      "color": "#4b5563",
-      "textColor": "#f9fafb"
-    },
-    "divergent": {
-      "label": "Divergent",
-      "color": "#7c2d12",
-      "textColor": "#ffedd5"
-    },
-    "muted": {
-      "label": "Muted",
-      "color": "#374151",
-      "textColor": "#f3f4f6"
-    },
-    "archived": {
-      "label": "Archived",
-      "color": "#111827",
-      "textColor": "#e5e7eb"
-    }
+    "public": { "label": "Public", "description": "Can be revealed normally." },
+    "private": { "label": "Private", "description": "Use carefully; not automatically public." },
+    "do_not_reveal": { "label": "Do Not Reveal", "description": "Do not reveal directly." },
+    "only_if_knower_present": { "label": "Only If Knower Present", "description": "Reveal only when a knower is present." },
+    "only_if_user_reveals": { "label": "Only If User Reveals", "description": "Reveal only after the user brings it up." }
   }
 }

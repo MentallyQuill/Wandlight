@@ -88,12 +88,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-06-22:zoo_cupboard_punishment",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1991-07-23"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -179,12 +184,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-07-24:letter_bedroom_move",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1991-07-30"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -270,12 +280,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-07-31:hut_birthday_revelation",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1991-08-07"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -285,7 +300,7 @@
       "title": "Harry receives holly phoenix-feather wand",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -364,12 +379,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-07-31:ollivander_wand_link",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1991-08-07"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -379,7 +399,7 @@
       "title": "Hagrid removes Philosopher’s Stone from Gringotts",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -459,12 +479,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-07-31:stone_moved_from_gringotts",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1991-08-07"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -551,12 +576,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-09-01:platform_weasley_intro",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1991-09-05"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -645,12 +675,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-09-01:hogwarts_arrival_sorting",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1991-09-05"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -660,7 +695,7 @@
       "title": "Snape antagonizes Harry in first Potions class",
       "kind": "behavior_gate",
       "gateType": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -736,12 +771,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-09-06:snape_first_potions",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1991-09-11"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -830,12 +870,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-09-12:flying_lesson_seeker",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1991-09-19"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -924,12 +969,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-09-12:fluffy_discovery",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1991-09-19"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -939,7 +989,7 @@
       "title": "Harry receives Nimbus 2000 and begins Quidditch practice",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -1018,12 +1068,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-09-20:nimbus_first_practice",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1991-10-30"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -1110,12 +1165,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-10-31:halloween_troll_trio",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1991-11-08"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -1202,12 +1262,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-11-09:first_quidditch_snape_counterjinx",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1991-11-16"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -1217,7 +1282,7 @@
       "title": "Christmas cloak and Mirror of Erised sequence",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -1297,12 +1362,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1991-12-25:christmas_cloak_mirror",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1992-01-01"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -1390,12 +1460,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1992-05-09:norbert_removal_points",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1992-05-16"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -1483,12 +1558,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1992-05-26:forest_detention_unicorn",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1992-06-03"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     },
@@ -1580,12 +1660,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ps:1992-06-04:stone_chambers_hospital",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1992-06-11"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1992-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1992-08-31"
         }
       }
     }

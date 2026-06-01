@@ -5,7 +5,7 @@
       "id": "future_guard_no_horcruxes_before_year6",
       "title": "Future Guard: no Horcrux discussion before Year 6",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -85,14 +85,16 @@
         "autoMuteOnExpire": true
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
       "id": "future_guard_dumbledore_alive_before_tower",
       "title": "Future Guard: Dumbledore alive before Tower",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -174,14 +176,16 @@
         "autoMuteOnExpire": true
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
       "id": "future_guard_no_deathly_hallows_before_year7",
       "title": "Future Guard: no Deathly Hallows framework before Year 7",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -261,14 +265,16 @@
         "autoMuteOnExpire": true
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
       "id": "future_guard_sirius_alive_before_department",
       "title": "Future Guard: Sirius alive before Department battle",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -336,14 +342,16 @@
         "book": "Order of the Phoenix"
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
       "id": "future_guard_voldemort_not_public_year5",
       "title": "Future Guard: public denial during Year 5",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -422,14 +430,16 @@
         "autoMuteOnExpire": true
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
       "id": "future_guard_normal_classes_before_year7",
       "title": "Future Guard: normal Hogwarts schooling before Year 7",
       "kind": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -509,7 +519,9 @@
         "autoMuteOnExpire": true
       },
       "gateType": "future_guard",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     }
   ]
 }

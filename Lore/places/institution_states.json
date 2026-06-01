@@ -5,7 +5,7 @@
       "id": "institution_hogwarts_year6_staff",
       "title": "Hogwarts staff roles in Year 6",
       "kind": "institution_state",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -76,14 +76,16 @@
         "book": "Half-Blood Prince"
       },
       "gateType": "institution_state",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "institution_hogwarts_year5_umbridge",
       "title": "Hogwarts under Umbridge influence",
       "kind": "institution_state",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -154,7 +156,9 @@
         "book": "Order of the Phoenix"
       },
       "gateType": "institution_state",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -220,7 +224,16 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "voldemort_return_publicly_acknowledged"
+          ]
+        }
+      },
       "canonTiming": {
         "canonExpectedFrom": "1995-07-01",
         "canonExpectedUntil": "1996-06-17",
@@ -228,13 +241,11 @@
         "schoolYear": 5,
         "book": "Order of the Phoenix"
       },
-      "activation": {
-        "requiresEvents": [
-          "voldemort_return_publicly_acknowledged"
-        ]
-      },
+      "activation": {},
       "gateType": "institution_state",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -300,7 +311,16 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "voldemort_return_publicly_acknowledged"
+          ]
+        }
+      },
       "canonTiming": {
         "canonExpectedFrom": "1996-06-18",
         "canonExpectedUntil": "1997-07-31",
@@ -308,13 +328,11 @@
         "schoolYear": 6,
         "book": "Half-Blood Prince"
       },
-      "activation": {
-        "requiresEvents": [
-          "voldemort_return_publicly_acknowledged"
-        ]
-      },
+      "activation": {},
       "gateType": "institution_state",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

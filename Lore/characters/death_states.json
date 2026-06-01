@@ -1,0 +1,1702 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "death_state_quirinus_quirrell",
+      "title": "Quirinus Quirrell death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 62,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1992-06-04",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Philosopher's Stone"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1992-06-04",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Philosopher's Stone"
+      },
+      "scope": {
+        "characters": [
+          "Quirinus Quirrell"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Quirinus Quirrell",
+          "Quirinus"
+        ],
+        "tagsAny": [
+          "Quirinus Quirrell",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Quirinus Quirrell is dead after the Philosopher's Stone confrontation.",
+        "injection": "Quirinus Quirrell is dead after the Philosopher's Stone confrontation.",
+        "constraints": [
+          "Do not treat Quirinus Quirrell as alive after 1992-06-04 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "quirinus"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Philosopher's Stone",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_barty_crouch_sr",
+      "title": "Barty Crouch Sr. death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 58,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1995-05-27",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Goblet of Fire"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1995-05-27",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Barty Crouch Sr."
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Barty Crouch Sr.",
+          "Barty"
+        ],
+        "tagsAny": [
+          "Barty Crouch Sr.",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Barty Crouch Sr. is dead after his appearance near Hogwarts in late Year 4.",
+        "injection": "Barty Crouch Sr. is dead after his appearance near Hogwarts in late Year 4.",
+        "constraints": [
+          "Do not treat Barty Crouch Sr. as alive after 1995-05-27 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "barty"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_cedric_diggory",
+      "title": "Cedric Diggory death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 68,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1995-06-24",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Goblet of Fire"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1995-06-24",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Goblet of Fire"
+      },
+      "scope": {
+        "characters": [
+          "Cedric Diggory"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Cedric Diggory",
+          "Cedric"
+        ],
+        "tagsAny": [
+          "Cedric Diggory",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Cedric Diggory is dead after the Third Task graveyard event unless the current branch explicitly changes that outcome.",
+        "injection": "Cedric Diggory is dead after the Third Task graveyard event unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Cedric Diggory as alive after 1995-06-24 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "cedric"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Goblet of Fire",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_sirius_black",
+      "title": "Sirius Black death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 66,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1996-06-18",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Order of the Phoenix"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1996-06-18",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Sirius Black"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Order of the Phoenix",
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Sirius Black",
+          "Sirius"
+        ],
+        "tagsAny": [
+          "Sirius Black",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Sirius Black is dead after the Department of Mysteries battle unless the current branch explicitly changes that outcome.",
+        "injection": "Sirius Black is dead after the Department of Mysteries battle unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Sirius Black as alive after 1996-06-18 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "sirius"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_albus_dumbledore",
+      "title": "Albus Dumbledore death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 72,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1997-06-30",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Half-Blood Prince"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1997-06-30",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Albus Dumbledore"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Half-Blood Prince",
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Albus Dumbledore",
+          "Albus"
+        ],
+        "tagsAny": [
+          "Albus Dumbledore",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Albus Dumbledore is dead after the Astronomy Tower event unless the current branch explicitly changes that outcome.",
+        "injection": "Albus Dumbledore is dead after the Astronomy Tower event unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Albus Dumbledore as alive after 1997-06-30 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "albus"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_charity_burbage",
+      "title": "Charity Burbage death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 56,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1997-07-21",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1997-07-21",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Charity Burbage"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Charity Burbage",
+          "Charity"
+        ],
+        "tagsAny": [
+          "Charity Burbage",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Charity Burbage is dead after the Malfoy Manor meeting near the start of Year 7.",
+        "injection": "Charity Burbage is dead after the Malfoy Manor meeting near the start of Year 7.",
+        "constraints": [
+          "Do not treat Charity Burbage as alive after 1997-07-21 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "charity"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_hedwig",
+      "title": "Hedwig death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 62,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1997-07-27",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1997-07-27",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Hedwig"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Hedwig",
+          "Hedwig"
+        ],
+        "tagsAny": [
+          "Hedwig",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Hedwig is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
+        "injection": "Hedwig is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Hedwig as alive after 1997-07-27 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "hedwig"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_alastor_moody",
+      "title": "Alastor Moody death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 62,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1997-07-27",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1997-07-27",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Alastor Moody"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Alastor Moody",
+          "Alastor"
+        ],
+        "tagsAny": [
+          "Alastor Moody",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Alastor “Mad-Eye” Moody is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
+        "injection": "Alastor “Mad-Eye” Moody is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Alastor Moody as alive after 1997-07-27 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "alastor"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_peter_pettigrew",
+      "title": "Peter Pettigrew death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 58,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1998-04-08",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1998-04-08",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Peter Pettigrew"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Peter Pettigrew",
+          "Peter"
+        ],
+        "tagsAny": [
+          "Peter Pettigrew",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Peter Pettigrew is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
+        "injection": "Peter Pettigrew is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Peter Pettigrew as alive after 1998-04-08 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "peter"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_dobby",
+      "title": "Dobby death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 68,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1998-04-08",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1998-04-08",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Dobby"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Dobby",
+          "Dobby"
+        ],
+        "tagsAny": [
+          "Dobby",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Dobby is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
+        "injection": "Dobby is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Dobby as alive after 1998-04-08 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "dobby"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_fred_weasley",
+      "title": "Fred Weasley death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 66,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1998-05-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1998-05-02",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Fred Weasley"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Fred Weasley",
+          "Fred"
+        ],
+        "tagsAny": [
+          "Fred Weasley",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Fred Weasley is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "injection": "Fred Weasley is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Fred Weasley as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "fred"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_remus_lupin",
+      "title": "Remus Lupin death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 62,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1998-05-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1998-05-02",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Remus Lupin"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Remus Lupin",
+          "Remus"
+        ],
+        "tagsAny": [
+          "Remus Lupin",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Remus Lupin is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "injection": "Remus Lupin is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Remus Lupin as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "remus"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_nymphadora_tonks",
+      "title": "Nymphadora Tonks death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 62,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1998-05-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1998-05-02",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Nymphadora Tonks"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Nymphadora Tonks",
+          "Nymphadora"
+        ],
+        "tagsAny": [
+          "Nymphadora Tonks",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Nymphadora Tonks is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "injection": "Nymphadora Tonks is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Nymphadora Tonks as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "nymphadora"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_severus_snape",
+      "title": "Severus Snape death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 66,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1998-05-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1998-05-02",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Severus Snape"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Severus Snape",
+          "Severus"
+        ],
+        "tagsAny": [
+          "Severus Snape",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Severus Snape is dead after the Battle of Hogwarts and his final memories unless the current branch explicitly changes that outcome.",
+        "injection": "Severus Snape is dead after the Battle of Hogwarts and his final memories unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Severus Snape as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "severus"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_bellatrix_lestrange",
+      "title": "Bellatrix Lestrange death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 62,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1998-05-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1998-05-02",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Bellatrix Lestrange"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Bellatrix Lestrange",
+          "Bellatrix"
+        ],
+        "tagsAny": [
+          "Bellatrix Lestrange",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Bellatrix Lestrange is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "injection": "Bellatrix Lestrange is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Bellatrix Lestrange as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "bellatrix"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_lord_voldemort",
+      "title": "Lord Voldemort death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 76,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1998-05-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1998-05-02",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Lord Voldemort"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Lord Voldemort",
+          "Lord"
+        ],
+        "tagsAny": [
+          "Lord Voldemort",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Lord Voldemort is dead after the final duel at the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "injection": "Lord Voldemort is dead after the final duel at the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Lord Voldemort as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "lord"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "death_state_colin_creevey",
+      "title": "Colin Creevey death state",
+      "kind": "character_state",
+      "gateType": "character_state",
+      "category": "character",
+      "relevance": "low",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 54,
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1998-05-02",
+        "validTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1998-05-02",
+        "hardValidTo": "1998-08-31",
+        "precision": "date",
+        "schoolYear": null,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Colin Creevey"
+        ],
+        "topics": [
+          "death state",
+          "canon outcome"
+        ],
+        "schoolYears": [],
+        "books": [
+          "Deathly Hallows"
+        ]
+      },
+      "activeWhen": {
+        "charactersPresentAny": [
+          "Colin Creevey",
+          "Colin"
+        ],
+        "tagsAny": [
+          "Colin Creevey",
+          "death state"
+        ]
+      },
+      "visibility": {},
+      "content": {
+        "fact": "Colin Creevey is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "injection": "Colin Creevey is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "constraints": [
+          "Do not treat Colin Creevey as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+        ],
+        "antiLore": [],
+        "notes": ""
+      },
+      "effects": {
+        "addsTags": [
+          "death-state",
+          "colin"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.82,
+        "notes": "Curated post-death canon state added during dead-character gate repair."
+      },
+      "activation": {
+        "requiresMissingEvents": []
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "added bounded post-death character state",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        }
+      }
+    }
+  ]
+}

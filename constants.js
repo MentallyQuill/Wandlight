@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 14;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -135,11 +135,25 @@ export const DEFAULT_SETTINGS = {
     canonLoreAutoPropose: true,
     canonLoreMaxEntries: 10,
 
-    // Lore lifecycle / canon timing
+    // Lore relevance / canon timing
     canonTimelineStrictness: 'balanced', // 'loose' | 'balanced' | 'strict'
-    autoReevaluateLoreLifecycle: true,
-    autoMuteExpiredLore: true,
-    includeCanonOverdueLore: true,
+    autoReevaluateLoreLifecycle: false, // Deprecated by relevance-tiered lore. Kept for old settings compatibility.
+    autoMuteExpiredLore: false,
+    includeCanonOverdueLore: false,
+    autoRelevanceEnabled: false,
+    autoRelevanceMode: 'suggest', // 'off' | 'suggest' | 'apply_high_confidence'
+    autoRelevanceEveryTurns: 5,
+    autoRelevanceRecentMessages: 20,
+    autoRelevanceCandidateCap: 40,
+    autoRelevanceMinConfidence: 0.7,
+    autoRelevanceNearFutureDays: 30,
+    autoRelevanceRecentPastDays: 45,
+    autoRelevanceProtectPinned: true,
+    autoRelevanceEvaluateMuted: false,
+    autoRelevanceUseModel: false,
+    autoRelevanceModelCandidateCap: 30,
+    autoRelevanceModelMaxTokens: 2048,
+    autoRelevanceModelRecentChars: 5000,
 
     // Prompt injection transport / placement
     // 'extension_prompt' uses SillyTavern setExtensionPrompt with role/depth.
@@ -151,11 +165,35 @@ export const DEFAULT_SETTINGS = {
     loreInjectionPosition: 1,
     loreInjectionDepth: 4,
     loreInjectionRole: 0,
+    loreHighInjectionPosition: 1,
+    loreHighInjectionDepth: 3,
+    loreHighInjectionRole: 0,
+    loreNormalInjectionPosition: 1,
+    loreNormalInjectionDepth: 6,
+    loreNormalInjectionRole: 0,
+    loreLowInjectionPosition: 1,
+    loreLowInjectionDepth: 10,
+    loreLowInjectionRole: 0,
     injectionPromptScan: false,
 
     // Lore injection / compression
-    loreInjectionMode: 'direct', // 'direct' | 'compressed'
-    loreCompressionLevel: 2, // 1=minimal, 5=aggressive
+    loreInjectionMode: 'direct', // legacy aggregate compatibility
+    loreHighInjectionEnabled: true,
+    loreNormalInjectionEnabled: true,
+    loreLowInjectionEnabled: true,
+    loreHighInjectionMode: 'direct', // 'direct' | 'compressed'
+    loreNormalInjectionMode: 'compressed',
+    loreLowInjectionMode: 'compressed',
+    loreHighCompressionLevel: 1,
+    loreNormalCompressionLevel: 2,
+    loreLowCompressionLevel: 4,
+    loreHighCompressionTurnInterval: 4,
+    loreNormalCompressionTurnInterval: 8,
+    loreLowCompressionTurnInterval: 16,
+    loreHighMaxEntries: 30,
+    loreNormalMaxEntries: 60,
+    loreLowMaxEntries: 120,
+    loreCompressionLevel: 2, // legacy aggregate compatibility
     loreCompressionTurnInterval: 8,
     continuityInjectionMode: 'direct', // 'direct' | 'compressed'
     continuityCompressionLevel: 2,
@@ -378,6 +416,10 @@ export function getDefaultState() {
 
         pendingLoreMeta: null,
 
+        // Auto-Relevance suggestion queue/status. Suggest mode writes here instead of mutating accepted lore.
+        autoRelevanceSuggestions: [],
+        autoRelevanceLastRun: null,
+
         // Prompt injection/compression preview status
         loreCompressionStatus: {
             lastCompressedAt: 0,
@@ -396,6 +438,26 @@ export function getDefaultState() {
             lastChatLength: 0,
             cachedText: '',
             lastError: '',
+        },
+        loreCompressionStatusByRelevance: {
+            high: {
+                lastCompressedAt: 0, lastSignature: '', lastMode: 'direct', lastTokenEstimate: 0, lastCharacterCount: 0,
+                lastDirectTokenEstimate: 0, lastDirectCharacterCount: 0, lastTargetTokenEstimate: 0, lastTargetCharacterCount: 0,
+                lastHardTokenLimit: 0, lastHardCharacterLimit: 0, lastCompressionRatio: 0, turnsSinceCompression: 0, lastChatLength: 0,
+                cachedText: '', lastError: '',
+            },
+            normal: {
+                lastCompressedAt: 0, lastSignature: '', lastMode: 'direct', lastTokenEstimate: 0, lastCharacterCount: 0,
+                lastDirectTokenEstimate: 0, lastDirectCharacterCount: 0, lastTargetTokenEstimate: 0, lastTargetCharacterCount: 0,
+                lastHardTokenLimit: 0, lastHardCharacterLimit: 0, lastCompressionRatio: 0, turnsSinceCompression: 0, lastChatLength: 0,
+                cachedText: '', lastError: '',
+            },
+            low: {
+                lastCompressedAt: 0, lastSignature: '', lastMode: 'direct', lastTokenEstimate: 0, lastCharacterCount: 0,
+                lastDirectTokenEstimate: 0, lastDirectCharacterCount: 0, lastTargetTokenEstimate: 0, lastTargetCharacterCount: 0,
+                lastHardTokenLimit: 0, lastHardCharacterLimit: 0, lastCompressionRatio: 0, turnsSinceCompression: 0, lastChatLength: 0,
+                cachedText: '', lastError: '',
+            },
         },
         continuityCompressionStatus: {
             lastCompressedAt: 0,

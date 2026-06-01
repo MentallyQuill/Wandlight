@@ -86,12 +86,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1995-08-02:dementor_attack_privet",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1995-08-05"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -101,7 +106,7 @@
       "title": "Grimmauld Place headquarters housecleaning phase",
       "kind": "place_fact",
       "gateType": "place_fact",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -179,12 +184,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1995-08-06:grimmauld_housecleaning",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1995-08-11"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -272,12 +282,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1995-08-12:hearing_acquittal",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1995-08-19"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -287,7 +302,7 @@
       "title": "Prefect badges and Educational Decree 22",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "institution",
+      "category": "faction",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -364,12 +379,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1995-08-31:prefect_badges_decree22",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1995-09-02"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -379,7 +399,7 @@
       "title": "Umbridge begins blood-quill detention cycle",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "institution",
+      "category": "faction",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -457,12 +477,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1995-09-03:umbridge_first_detentions",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1995-09-07"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -472,7 +497,7 @@
       "title": "Umbridge appointed High Inquisitor",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "institution",
+      "category": "faction",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -547,12 +572,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1995-09-08:high_inquisitor_decree23",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1995-09-15"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -640,12 +670,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1995-10-09:da_first_meeting",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1995-11-01"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -735,12 +770,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1995-11-02:quidditch_bans_hagrid_return",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1995-11-09"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -830,12 +870,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1995-12-18:arthur_vision_st_mungos",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1995-12-25"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -921,12 +966,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1996-01-13:occlumency_deaths_escape",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1996-02-22"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -936,7 +986,7 @@
       "title": "Quibbler interview and ban",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "institution",
+      "category": "faction",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -1015,12 +1065,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1996-02-23:quibbler_interview_decree27",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1996-03-01"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -1030,7 +1085,7 @@
       "title": "Trelawney sacked and Firenze hired",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "institution",
+      "category": "faction",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -1107,12 +1162,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1996-03-08:trelawney_firenze",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1996-03-15"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -1122,7 +1182,7 @@
       "title": "Dumbledore’s Army exposed and Dumbledore leaves",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "institution",
+      "category": "faction",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -1201,12 +1261,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1996-04-01:da_caught_dumbledore_flees",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1996-04-08"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -1293,12 +1358,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1996-04-21:twins_leave_swamp",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1996-04-28"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -1386,12 +1456,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1996-06-19:owls_hagrid_mcgonagall",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1996-06-19"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     },
@@ -1481,12 +1556,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:ootp:1996-06-20:department_mysteries_public_return",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1996-06-27"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1996-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1996-08-31"
         }
       }
     }

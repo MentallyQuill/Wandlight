@@ -5,7 +5,7 @@
       "id": "age_fred_weasley",
       "title": "Fred Weasley age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -14,7 +14,7 @@
       "locked": true,
       "date": {
         "validFrom": "1978-04-01",
-        "validTo": "1998-08-31",
+        "validTo": "1998-05-02",
         "precision": "date",
         "schoolYear": null,
         "book": ""
@@ -61,23 +61,42 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "deceased age gate bounded by death date",
+          "notes": "Fred age constraints end at his canon death during the Battle of Hogwarts.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass"
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1978-04-01",
-        "hardValidTo": "1998-08-31",
+        "hardValidTo": "1998-05-02",
         "precision": "date",
         "schoolYear": null,
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low",
+      "activation": {
+        "requiresMissingEvents": [
+          "fred_weasley_dies"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "fred_weasley_dies"
+        ],
+        "autoMuteOnExpire": false
+      }
     },
     {
       "schemaVersion": 2,
       "id": "age_george_weasley",
       "title": "George Weasley age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -142,14 +161,16 @@
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "age_cedric_diggory",
       "title": "Cedric Diggory age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -158,7 +179,7 @@
       "locked": true,
       "date": {
         "validFrom": "1977-09-01",
-        "validTo": "1998-08-31",
+        "validTo": "1995-06-24",
         "precision": "date",
         "schoolYear": null,
         "book": ""
@@ -205,28 +226,42 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "deceased age gate bounded by death date",
+          "notes": "Cedric age constraints end at his canon death in the graveyard.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass"
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1977-09-01",
-        "hardValidTo": "1998-08-31",
+        "hardValidTo": "1995-06-24",
         "precision": "date",
         "schoolYear": null,
         "book": ""
       },
       "activation": {
-        "requiresEvents": [
+        "requiresMissingEvents": [
           "cedric_dies"
         ]
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low",
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "cedric_dies"
+        ],
+        "autoMuteOnExpire": false
+      }
     },
     {
       "schemaVersion": 2,
       "id": "age_cho_chang",
       "title": "Cho Chang age constraint",
       "kind": "age_gate",
-      "category": "age",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -291,7 +326,9 @@
         "book": ""
       },
       "gateType": "age_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

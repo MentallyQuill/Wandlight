@@ -5,7 +5,7 @@
       "id": "behavior_hermione_year_6",
       "title": "Hermione Granger behavior - Year 6",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -80,14 +80,16 @@
         "book": "Half-Blood Prince"
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_ron_year_6",
       "title": "Ron Weasley behavior - Year 6",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -161,14 +163,16 @@
         "book": "Half-Blood Prince"
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_draco_year_6",
       "title": "Draco Malfoy behavior - Year 6",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "private",
@@ -233,7 +237,16 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "draco_mission_revealed"
+          ]
+        }
+      },
       "canonTiming": {
         "canonExpectedFrom": "1996-09-01",
         "canonExpectedUntil": "1997-06-30",
@@ -241,20 +254,18 @@
         "schoolYear": 6,
         "book": "Half-Blood Prince"
       },
-      "activation": {
-        "requiresEvents": [
-          "draco_mission_revealed"
-        ]
-      },
+      "activation": {},
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
       "id": "behavior_snape_year_6",
       "title": "Severus Snape behavior - Year 6",
       "kind": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
@@ -328,7 +339,9 @@
         "book": "Half-Blood Prince"
       },
       "gateType": "behavior_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

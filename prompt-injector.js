@@ -15,7 +15,10 @@ import { buildMemo, buildContinuityMemo, buildLoreMemo } from './memo-builder.js
 
 const COMBINED_MARKER = '[WANDLIGHT CONTINUITY STATE]';
 const CONTINUITY_PROMPT_KEY = 'wandlight_continuity_state';
-const LORE_PROMPT_KEY = 'wandlight_lore_entries';
+const LORE_PROMPT_KEY = 'wandlight_lore_entries'; // legacy aggregate key, cleared for compatibility
+const LORE_HIGH_PROMPT_KEY = 'wandlight_lore_high_relevance';
+const LORE_NORMAL_PROMPT_KEY = 'wandlight_lore_normal_relevance';
+const LORE_LOW_PROMPT_KEY = 'wandlight_lore_low_relevance';
 
 
 // Do not statically import SillyTavern's root script.js here. Some ST builds do
@@ -110,7 +113,10 @@ export function syncPromptInjection() {
         const injectLore = settings.injectLore !== false;
 
         const continuityText = injectContinuity ? wrapContinuityPrompt(buildContinuityMemo(state)) : '';
-        const loreText = injectLore ? wrapLorePrompt(buildLoreMemo(state)) : '';
+        const loreHighText = injectLore && settings.loreHighInjectionEnabled !== false ? wrapLorePrompt(buildLoreMemo(state, { relevanceTier: 'high' }), 'HIGH RELEVANCE LORE') : '';
+        const loreNormalText = injectLore && settings.loreNormalInjectionEnabled !== false ? wrapLorePrompt(buildLoreMemo(state, { relevanceTier: 'normal' }), 'NORMAL RELEVANCE LORE') : '';
+        const loreLowText = injectLore && settings.loreLowInjectionEnabled !== false ? wrapLorePrompt(buildLoreMemo(state, { relevanceTier: 'low' }), 'LOW RELEVANCE LORE') : '';
+        const loreText = [loreHighText, loreNormalText, loreLowText].filter(Boolean).join('\n\n');
 
         setWandlightExtensionPrompt(
             CONTINUITY_PROMPT_KEY,
@@ -121,12 +127,30 @@ export function syncPromptInjection() {
             !!settings.injectionPromptScan,
         );
 
+        // Legacy aggregate lore prompt is cleared; relevance tiers are injected as independent prompt groups.
+        setWandlightExtensionPrompt(LORE_PROMPT_KEY, '', settings.loreInjectionPosition, settings.loreInjectionDepth, settings.loreInjectionRole, !!settings.injectionPromptScan);
         setWandlightExtensionPrompt(
-            LORE_PROMPT_KEY,
-            loreText,
-            settings.loreInjectionPosition,
-            settings.loreInjectionDepth,
-            settings.loreInjectionRole,
+            LORE_HIGH_PROMPT_KEY,
+            loreHighText,
+            settings.loreHighInjectionPosition ?? settings.loreInjectionPosition,
+            settings.loreHighInjectionDepth ?? settings.loreInjectionDepth,
+            settings.loreHighInjectionRole ?? settings.loreInjectionRole,
+            !!settings.injectionPromptScan,
+        );
+        setWandlightExtensionPrompt(
+            LORE_NORMAL_PROMPT_KEY,
+            loreNormalText,
+            settings.loreNormalInjectionPosition ?? settings.loreInjectionPosition,
+            settings.loreNormalInjectionDepth ?? settings.loreInjectionDepth,
+            settings.loreNormalInjectionRole ?? settings.loreInjectionRole,
+            !!settings.injectionPromptScan,
+        );
+        setWandlightExtensionPrompt(
+            LORE_LOW_PROMPT_KEY,
+            loreLowText,
+            settings.loreLowInjectionPosition ?? settings.loreInjectionPosition,
+            settings.loreLowInjectionDepth ?? settings.loreInjectionDepth,
+            settings.loreLowInjectionRole ?? settings.loreInjectionRole,
             !!settings.injectionPromptScan,
         );
 
@@ -134,6 +158,9 @@ export function syncPromptInjection() {
             transport: 'extension_prompt',
             continuityChars: continuityText.length,
             loreChars: loreText.length,
+            loreHighChars: loreHighText.length,
+            loreNormalChars: loreNormalText.length,
+            loreLowChars: loreLowText.length,
             combinedChars: continuityText.length + loreText.length,
             syncedAt: Date.now(),
             fallback: false,
@@ -143,9 +170,9 @@ export function syncPromptInjection() {
                 role: normalizeRole(settings.continuityInjectionRole),
             },
             lore: {
-                position: normalizePosition(settings.loreInjectionPosition),
-                depth: normalizeDepth(settings.loreInjectionDepth),
-                role: normalizeRole(settings.loreInjectionRole),
+                high: { position: normalizePosition(settings.loreHighInjectionPosition ?? settings.loreInjectionPosition), depth: normalizeDepth(settings.loreHighInjectionDepth ?? settings.loreInjectionDepth), role: normalizeRole(settings.loreHighInjectionRole ?? settings.loreInjectionRole) },
+                normal: { position: normalizePosition(settings.loreNormalInjectionPosition ?? settings.loreInjectionPosition), depth: normalizeDepth(settings.loreNormalInjectionDepth ?? settings.loreInjectionDepth), role: normalizeRole(settings.loreNormalInjectionRole ?? settings.loreInjectionRole) },
+                low: { position: normalizePosition(settings.loreLowInjectionPosition ?? settings.loreInjectionPosition), depth: normalizeDepth(settings.loreLowInjectionDepth ?? settings.loreInjectionDepth), role: normalizeRole(settings.loreLowInjectionRole ?? settings.loreInjectionRole) },
             },
         };
 
@@ -168,6 +195,9 @@ export function clearExtensionPrompts() {
         if (!api.setExtensionPrompt) return;
         api.setExtensionPrompt(CONTINUITY_PROMPT_KEY, '', api.extension_prompt_types.IN_CHAT, 4, false, api.extension_prompt_roles.SYSTEM);
         api.setExtensionPrompt(LORE_PROMPT_KEY, '', api.extension_prompt_types.IN_CHAT, 4, false, api.extension_prompt_roles.SYSTEM);
+        api.setExtensionPrompt(LORE_HIGH_PROMPT_KEY, '', api.extension_prompt_types.IN_CHAT, 4, false, api.extension_prompt_roles.SYSTEM);
+        api.setExtensionPrompt(LORE_NORMAL_PROMPT_KEY, '', api.extension_prompt_types.IN_CHAT, 4, false, api.extension_prompt_roles.SYSTEM);
+        api.setExtensionPrompt(LORE_LOW_PROMPT_KEY, '', api.extension_prompt_types.IN_CHAT, 4, false, api.extension_prompt_roles.SYSTEM);
     } catch (e) {
         console.warn(`${LOG_PREFIX} Failed to clear extension prompts`, e);
     }
@@ -233,10 +263,10 @@ function wrapContinuityPrompt(text) {
     return `[WANDLIGHT CONTINUITY]\n${body}\n[/WANDLIGHT CONTINUITY]`;
 }
 
-function wrapLorePrompt(text) {
+function wrapLorePrompt(text, label = 'LORE') {
     const body = String(text || '').trim();
     if (!body) return '';
-    return `[WANDLIGHT LORE]\n${body}\n[/WANDLIGHT LORE]`;
+    return `[WANDLIGHT ${label}]\n${body}\n[/WANDLIGHT ${label}]`;
 }
 
 /**

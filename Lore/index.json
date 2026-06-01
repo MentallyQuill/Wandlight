@@ -7,6 +7,7 @@
     "chronology/major_events.json",
     "characters/core_students.json",
     "characters/adults_and_factions.json",
+    "characters/death_states.json",
     "events/school_year_windows.json",
     "items/artifacts_and_objects.json",
     "knowledge/secret_knowledge.json",

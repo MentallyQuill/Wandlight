@@ -9,6 +9,7 @@
 
 import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
 import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey, applyLoreLifecycleEvaluation } from './lore-matrix.js';
+import { normalizeLoreRelevance, normalizeLoreCanon, normalizeLoreCategory, computeLocalLoreRelevance } from './lore-relevance.js';
 import { preprocessPendingLoreEntries } from './pending-lore-preprocessor.js';
 
 const MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST = 200000;
@@ -26,6 +27,60 @@ function disableRetiredContinuitySections(state) {
         state.continuityConfig[key] = false;
     }
     return state;
+}
+
+
+function migrateLoreEntryToRelevance(entry = {}, state = {}) {
+    const normalized = normalizeLoreEntry(entry);
+    const local = computeLocalLoreRelevance(normalized, state, getSettings());
+    const previousState = normalized.lifecycle?.status || normalized.lifecycle?.computedStatus || entry.status || '';
+    let relevance = normalizeLoreRelevance(entry.relevance || previousState || local.relevance || 'normal');
+    if (!entry.relevance) {
+        if (['expired', 'archived', 'muted', 'blocked'].includes(String(previousState || '').toLowerCase())) relevance = 'low';
+        else if (['active', 'canon_overdue'].includes(String(previousState || '').toLowerCase())) relevance = local.relevance === 'low' ? 'normal' : local.relevance;
+        else relevance = local.relevance || relevance;
+    }
+    const canon = normalizeLoreCanon(entry.canon || entry.canonStatus || normalized.canon, normalized.source || normalized.sourceInfo?.work || '');
+    return normalizeLoreEntry({
+        ...normalized,
+        relevance,
+        canon,
+        canonStatus: canon,
+        category: normalizeLoreCategory(normalized.category),
+        extensions: {
+            ...(normalized.extensions || {}),
+            relevanceMigration: {
+                ...(normalized.extensions?.relevanceMigration || {}),
+                migratedAt: Date.now(),
+                previousLifecycleStatus: previousState || '',
+                localRelevanceScore: local.score || 0,
+                temporalRole: local.temporalRole || '',
+            },
+        },
+    });
+}
+
+function migrateLoreCollectionsToRelevance(state = {}) {
+    if (Array.isArray(state.loreMatrix)) state.loreMatrix = state.loreMatrix.map(entry => migrateLoreEntryToRelevance(entry, state));
+    if (Array.isArray(state.pendingLoreEntries)) state.pendingLoreEntries = state.pendingLoreEntries.map(entry => migrateLoreEntryToRelevance(entry, state));
+    return state;
+}
+
+function ensureTierCompressionStatus(state = {}) {
+    const defaults = getDefaultState().loreCompressionStatusByRelevance;
+    if (!state.loreCompressionStatusByRelevance || typeof state.loreCompressionStatusByRelevance !== 'object') {
+        state.loreCompressionStatusByRelevance = JSON.parse(JSON.stringify(defaults));
+    } else {
+        state.loreCompressionStatusByRelevance = mergeDefaults(state.loreCompressionStatusByRelevance, defaults);
+    }
+    for (const tier of ['high', 'normal', 'low']) {
+        if (!state.loreCompressionStatusByRelevance[tier] || typeof state.loreCompressionStatusByRelevance[tier] !== 'object') {
+            state.loreCompressionStatusByRelevance[tier] = { ...defaults[tier] };
+        } else {
+            state.loreCompressionStatusByRelevance[tier] = mergeDefaults(state.loreCompressionStatusByRelevance[tier], defaults[tier]);
+        }
+        normalizeCompressionStatusNumbers(state.loreCompressionStatusByRelevance[tier]);
+    }
 }
 
 
@@ -397,6 +452,8 @@ function prePruneLoreEntryForNormalization(entry) {
 
     pruned.tags = prePruneStringArray(entry.tags, 10, 40);
     const generation = entry.extensions?.wandlightGeneration;
+    const relevanceMigration = entry.extensions?.relevanceMigration;
+    const autoRelevance = entry.extensions?.autoRelevance;
     const pendingReview = entry.extensions?.wandlightPendingReview;
     const extensions = {};
     if (generation && typeof generation === 'object') {
@@ -413,25 +470,19 @@ function prePruneLoreEntryForNormalization(entry) {
             targetTotal: Number.isFinite(Number(generation.targetTotal)) ? Number(generation.targetTotal) : 0,
         };
     }
-    if (pendingReview && typeof pendingReview === 'object' && !Array.isArray(pendingReview)) {
-        extensions.wandlightPendingReview = {
-            sourceAlignment: truncateText(pendingReview.sourceAlignment, 40),
-            branchApplicability: truncateText(pendingReview.branchApplicability, 40),
-            temporalRole: truncateText(pendingReview.temporalRole, 40),
-            lifecycleRecommendation: truncateText(pendingReview.lifecycleRecommendation, 80),
-            recommendedStatus: truncateText(pendingReview.recommendedStatus, 40),
-            recommendationReason: truncateText(pendingReview.recommendationReason, 240),
-            currentBranchId: truncateText(pendingReview.currentBranchId, 80),
-            strictCanon: !!pendingReview.strictCanon,
-            preprocessedAt: Number.isFinite(Number(pendingReview.preprocessedAt)) ? Number(pendingReview.preprocessedAt) : 0,
-            originalTemporalBounds: pendingReview.originalTemporalBounds && typeof pendingReview.originalTemporalBounds === 'object' ? {
-                dateValidTo: truncateText(pendingReview.originalTemporalBounds.dateValidTo, 32),
-                hardValidTo: truncateText(pendingReview.originalTemporalBounds.hardValidTo, 32),
-                canonExpectedUntil: truncateText(pendingReview.originalTemporalBounds.canonExpectedUntil, 32),
-            } : {},
-            temporalNote: truncateText(pendingReview.temporalNote, 180),
-        };
-    }
+    if (relevanceMigration && typeof relevanceMigration === 'object') extensions.relevanceMigration = {
+        migratedAt: Number.isFinite(Number(relevanceMigration.migratedAt)) ? Number(relevanceMigration.migratedAt) : 0,
+        previousLifecycleStatus: truncateText(relevanceMigration.previousLifecycleStatus, 40),
+        localRelevanceScore: Number.isFinite(Number(relevanceMigration.localRelevanceScore)) ? Number(relevanceMigration.localRelevanceScore) : 0,
+        temporalRole: truncateText(relevanceMigration.temporalRole, 40),
+    };
+    if (autoRelevance && typeof autoRelevance === 'object') extensions.autoRelevance = {
+        mode: truncateText(autoRelevance.mode, 20),
+        confidence: Number.isFinite(Number(autoRelevance.confidence)) ? Number(autoRelevance.confidence) : 0,
+        reason: truncateText(autoRelevance.reason, 240),
+        updatedAt: Number.isFinite(Number(autoRelevance.updatedAt)) ? Number(autoRelevance.updatedAt) : 0,
+    };
+    if (pendingReview && typeof pendingReview === 'object') extensions.wandlightPendingReview = pendingReview;
     pruned.extensions = extensions;
     return pruned;
 }
@@ -471,10 +522,10 @@ function compactStringMapForStorage(value, limit = 16, textLimit = 120) {
 
 
 function compactLoreExtensionsForStorage(normalized) {
-    const extensions = {};
+    const out = {};
     const generation = normalized?.extensions?.wandlightGeneration;
     if (generation && typeof generation === 'object') {
-        extensions.wandlightGeneration = {
+        out.wandlightGeneration = {
             mode: truncateText(generation.mode, 40),
             batchId: truncateText(generation.batchId, 120),
             chunkId: truncateText(generation.chunkId, 180),
@@ -487,27 +538,23 @@ function compactLoreExtensionsForStorage(normalized) {
             targetTotal: Number.isFinite(Number(generation.targetTotal)) ? Number(generation.targetTotal) : 0,
         };
     }
+    const relevanceMigration = normalized?.extensions?.relevanceMigration;
+    if (relevanceMigration && typeof relevanceMigration === 'object') out.relevanceMigration = {
+        migratedAt: Number.isFinite(Number(relevanceMigration.migratedAt)) ? Number(relevanceMigration.migratedAt) : 0,
+        previousLifecycleStatus: truncateText(relevanceMigration.previousLifecycleStatus, 40),
+        localRelevanceScore: Number.isFinite(Number(relevanceMigration.localRelevanceScore)) ? Number(relevanceMigration.localRelevanceScore) : 0,
+        temporalRole: truncateText(relevanceMigration.temporalRole, 40),
+    };
+    const autoRelevance = normalized?.extensions?.autoRelevance;
+    if (autoRelevance && typeof autoRelevance === 'object') out.autoRelevance = {
+        mode: truncateText(autoRelevance.mode, 20),
+        confidence: Number.isFinite(Number(autoRelevance.confidence)) ? Number(autoRelevance.confidence) : 0,
+        reason: truncateText(autoRelevance.reason, 240),
+        updatedAt: Number.isFinite(Number(autoRelevance.updatedAt)) ? Number(autoRelevance.updatedAt) : 0,
+    };
     const pendingReview = normalized?.extensions?.wandlightPendingReview;
-    if (pendingReview && typeof pendingReview === 'object') {
-        extensions.wandlightPendingReview = {
-            sourceAlignment: truncateText(pendingReview.sourceAlignment, 40),
-            branchApplicability: truncateText(pendingReview.branchApplicability, 40),
-            temporalRole: truncateText(pendingReview.temporalRole, 40),
-            lifecycleRecommendation: truncateText(pendingReview.lifecycleRecommendation, 80),
-            recommendedStatus: truncateText(pendingReview.recommendedStatus, 40),
-            recommendationReason: truncateText(pendingReview.recommendationReason, 240),
-            currentBranchId: truncateText(pendingReview.currentBranchId, 80),
-            strictCanon: !!pendingReview.strictCanon,
-            preprocessedAt: Number.isFinite(Number(pendingReview.preprocessedAt)) ? Number(pendingReview.preprocessedAt) : 0,
-            originalTemporalBounds: pendingReview.originalTemporalBounds && typeof pendingReview.originalTemporalBounds === 'object' ? {
-                dateValidTo: truncateText(pendingReview.originalTemporalBounds.dateValidTo, 32),
-                hardValidTo: truncateText(pendingReview.originalTemporalBounds.hardValidTo, 32),
-                canonExpectedUntil: truncateText(pendingReview.originalTemporalBounds.canonExpectedUntil, 32),
-            } : {},
-            temporalNote: truncateText(pendingReview.temporalNote, 180),
-        };
-    }
-    return Object.keys(extensions).length ? extensions : undefined;
+    if (pendingReview && typeof pendingReview === 'object') out.wandlightPendingReview = pendingReview;
+    return Object.keys(out).length ? out : undefined;
 }
 
 function compactLoreEntryForStorage(entry) {
@@ -518,8 +565,10 @@ function compactLoreEntryForStorage(entry) {
         title: truncateText(normalized.title, 180),
         kind: normalized.kind || 'fact',
         gateType: normalized.gateType || normalized.kind || 'fact',
-        category: normalized.category || 'canon',
-        canonStatus: normalized.canonStatus || 'unknown',
+        category: normalized.category || 'other',
+        relevance: normalizeLoreRelevance(normalized.relevance || 'normal'),
+        canon: normalizeLoreCanon(normalized.canon || normalized.canonStatus, normalized.source || normalized.sourceInfo?.work || ''),
+        canonStatus: normalizeLoreCanon(normalized.canon || normalized.canonStatus, normalized.source || normalized.sourceInfo?.work || ''),
         truthStatus: normalized.truthStatus || 'true',
         revealPolicy: normalized.revealPolicy || 'private',
         tags: compactStringArray(normalized.tags, 10, 40),
@@ -632,17 +681,12 @@ function sanitizeLoreArraysForStorage(state) {
             ? state.loreMatrix.slice(-cap)
             : state.loreMatrix;
         state.loreMatrix = limited.map(raw => {
+            // Relevance-tier architecture: lifecycle/date evaluation may add review
+            // metadata, but it must not secretly mutate mute/injection state. Mute is
+            // the only hard injection exclusion control.
             let evaluated = raw;
             try { evaluated = applyLoreLifecycleEvaluation(raw, state); } catch (_) { evaluated = raw; }
-            const status = evaluated?.lifecycle?.status || evaluated?.lifecycle?.computedStatus || '';
-            if (status === 'expired' && evaluated?.expiration?.autoMuteOnExpire !== false && !evaluated?.lifecycle?.manualOverride) {
-                if (!suppressedSet.has(evaluated.id)) {
-                    suppressedSet.add(evaluated.id);
-                    evaluated.lifecycle = { ...(evaluated.lifecycle || {}), autoMutedOnExpire: true };
-                }
-            }
-            const source = typeof evaluated?.source === 'string' ? evaluated.source : '';
-            return source.includes('canon-lore-db') ? compactLoreEntryForStorage(evaluated) : compactLoreEntryForStorage(evaluated);
+            return compactLoreEntryForStorage(evaluated);
         });
         state.loreSelection.suppressedIds = Array.from(suppressedSet);
     } else {
@@ -669,6 +713,23 @@ function sanitizeLoreArraysForStorage(state) {
 
     if (state.pendingLoreEntries.length === 0) {
         state.pendingLoreMeta = null;
+    }
+
+    if (Array.isArray(state.autoRelevanceSuggestions)) {
+        state.autoRelevanceSuggestions = state.autoRelevanceSuggestions.slice(0, 100).map(s => ({
+            id: truncateText(s?.id, 140),
+            title: truncateText(s?.title, 180),
+            currentRelevance: truncateText(s?.currentRelevance, 20),
+            suggestedRelevance: truncateText(s?.suggestedRelevance, 20),
+            confidence: Number.isFinite(Number(s?.confidence)) ? Number(s.confidence) : 0,
+            score: Number.isFinite(Number(s?.score)) ? Number(s.score) : 0,
+            temporalRole: truncateText(s?.temporalRole, 40),
+            source: truncateText(s?.source, 20),
+            reason: truncateText(s?.reason, 240),
+            suggestedAt: Number.isFinite(Number(s?.suggestedAt)) ? Number(s.suggestedAt) : 0,
+        })).filter(s => s.id && s.suggestedRelevance);
+    } else {
+        state.autoRelevanceSuggestions = [];
     }
 
     return state;
@@ -839,12 +900,37 @@ export function migrateState(state) {
         state._version = 10;
     }
 
-    // ── Schema v11: pending lore preprocessing metadata and branch-safe defaults ──
-    if (state._version < 11) {
-        if (Array.isArray(state.pendingLoreEntries) && state.pendingLoreEntries.length) {
-            state.pendingLoreEntries = preprocessPendingLoreEntries(state.pendingLoreEntries, state, getSettings());
+    // ── Schema v12: relevance-tiered lore injection and simplified Canon/AU metadata ──
+    if (state._version < 12) {
+        migrateLoreCollectionsToRelevance(state);
+        ensureTierCompressionStatus(state);
+        state._version = 12;
+    }
+
+    // ── Schema v13: Auto-Relevance suggestions and no lifecycle-driven auto-mute ──
+    if (state._version < 13) {
+        state.autoRelevanceSuggestions = Array.isArray(state.autoRelevanceSuggestions) ? state.autoRelevanceSuggestions : [];
+        state.autoRelevanceLastRun = state.autoRelevanceLastRun || null;
+        if (Array.isArray(state.loreMatrix)) {
+            state.loreMatrix = state.loreMatrix.map(entry => ({
+                ...entry,
+                lifecycle: {
+                    ...(entry.lifecycle || {}),
+                    autoMutedOnExpire: false,
+                },
+            }));
         }
-        state._version = 11;
+        state._version = 13;
+    }
+
+    // ── Schema v14: Auto-Relevance model adjudication and per-suggestion review ──
+    if (state._version < 14) {
+        state.autoRelevanceSuggestions = Array.isArray(state.autoRelevanceSuggestions) ? state.autoRelevanceSuggestions.map(s => ({
+            ...s,
+            source: s.source || 'local',
+        })) : [];
+        state.autoRelevanceLastRun = state.autoRelevanceLastRun || null;
+        state._version = 14;
     }
 
     // ── Always normalize lore fields post-migration ────────────────────────
@@ -866,6 +952,7 @@ export function migrateState(state) {
         state.loreCompressionStatus = mergeDefaults(state.loreCompressionStatus, defaults);
         normalizeCompressionStatusNumbers(state.loreCompressionStatus);
     }
+    ensureTierCompressionStatus(state);
 
     // Normalize lorePanel
     if (!state.lorePanel || typeof state.lorePanel !== 'object') {

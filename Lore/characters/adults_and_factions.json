@@ -81,7 +81,30 @@
       "kind": "character_state",
       "gateType": "character_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1997-06-30"
+      },
+      "activation": {
+        "requiresMissingEvents": [
+          "dumbledore_death_occurs"
+        ]
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [
+          "dumbledore_death_occurs"
+        ],
+        "autoMuteOnExpire": false
+      },
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "living/office state expires at death",
+          "notes": "Dumbledore Headmaster state is bounded by his death.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass"
+        }
+      }
     },
     {
       "id": "canon_snape_potions_defense_role",
@@ -170,7 +193,9 @@
       "kind": "character_state",
       "gateType": "character_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_order_of_the_phoenix_faction",
@@ -254,7 +279,9 @@
       "kind": "faction_state",
       "gateType": "faction_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_death_eaters_faction",
@@ -336,7 +363,9 @@
       "kind": "faction_state",
       "gateType": "faction_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

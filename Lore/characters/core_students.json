@@ -83,7 +83,9 @@
       "kind": "character_state",
       "gateType": "character_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_hermione_granger_student_status",
@@ -170,7 +172,9 @@
       "kind": "character_state",
       "gateType": "character_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_ron_weasley_student_status",
@@ -256,7 +260,9 @@
       "kind": "character_state",
       "gateType": "character_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_draco_malfoy_student_status",
@@ -343,7 +349,9 @@
       "kind": "character_state",
       "gateType": "character_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     }
   ]
 }

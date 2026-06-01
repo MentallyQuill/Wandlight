@@ -86,12 +86,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-07-31:birthday_dobby_warning",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1992-08-02"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -101,7 +106,7 @@
       "title": "Flying car rescue from Privet Drive",
       "kind": "artifact_state",
       "gateType": "artifact_state",
-      "category": "artifact",
+      "category": "item",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -181,12 +186,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-08-03:flying_car_rescue",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1992-08-10"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -277,12 +287,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-08-19:knockturn_lockhart_diagon",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1992-08-26"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -371,12 +386,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-09-01:barrier_closed_car_crash",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1992-09-02"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -461,12 +481,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-09-01:ginny_sorted",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1992-09-02"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -476,7 +501,7 @@
       "title": "Lockhart releases Cornish pixies in DADA",
       "kind": "behavior_gate",
       "gateType": "behavior_gate",
-      "category": "behavior",
+      "category": "character",
       "canonStatus": "canon",
       "truthStatus": "established",
       "revealPolicy": "public",
@@ -554,12 +579,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-09-03:lockhart_pixies",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1992-09-04"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -643,12 +673,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-09-05:basilisk_voice_first",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1992-09-12"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -737,12 +772,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-10-31:deathday_mrs_norris",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1992-11-03"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -832,12 +872,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-11-04:chamber_legend_library",
+      "canon": "canon",
+      "relevance": "low",
+      "canonTiming": {
+        "hardValidTo": "1992-11-06"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -926,12 +971,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-11-07:rogue_bludger_colin",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1992-11-14"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -1019,12 +1069,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-12-17:dueling_club_parseltongue",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1992-12-24"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -1113,12 +1168,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1992-12-25:polyjuice_christmas",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1993-01-01"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -1207,12 +1267,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1993-02-14:riddle_diary_valentine",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1993-02-21"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -1300,12 +1365,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1993-05-08:hermione_penelope_petrified",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1993-05-15"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -1392,12 +1462,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1993-05-24:aragog_clue",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1993-05-28"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     },
@@ -1492,12 +1567,17 @@
         "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
       },
       "source": "hp-lexicon-day-by-day:cos:1993-05-29:chamber_resolution_feast",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1993-07-13"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1993-08-31",
           "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1993-08-31"
         }
       }
     }

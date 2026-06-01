@@ -8,7 +8,8 @@ import {
     MAX_ACTIVE_THREADS_IN_MEMO,
 } from './constants.js';
 import { getSettings } from './state-manager.js';
-import { getInjectableLoreEntries, getResolvedLoreInjection } from './lore-matrix.js';
+import { getInjectableLoreEntries, getInjectableLoreEntriesByRelevance, getResolvedLoreInjection } from './lore-matrix.js';
+import { normalizeLoreRelevance, LORE_RELEVANCE_LABELS } from './lore-relevance.js';
 
 export function buildMemo(state, settingsOverride = {}) {
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
@@ -28,51 +29,87 @@ export function buildMemo(state, settingsOverride = {}) {
     return '[WANDLIGHT CONTINUITY STATE]\n' + chunks.join('\n\n') + '\n[/WANDLIGHT CONTINUITY STATE]';
 }
 
+function parseCompressionKind(kind = 'lore') {
+    const raw = String(kind || 'lore').toLowerCase().replace(/_/g, '-');
+    if (raw === 'continuity') return { base: 'continuity', tier: '' };
+    if (raw.includes('high')) return { base: 'lore', tier: 'high' };
+    if (raw.includes('normal')) return { base: 'lore', tier: 'normal' };
+    if (raw.includes('low')) return { base: 'lore', tier: 'low' };
+    return { base: 'lore', tier: '' };
+}
+
+function capTier(tier) { return tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : ''; }
+function tierSettingKey(tier, suffix) { return tier ? `lore${capTier(tier)}${suffix}` : `lore${suffix}`; }
+
 function getCompressionLevel(settings, kind) {
-    const raw = kind === 'continuity' ? settings.continuityCompressionLevel : settings.loreCompressionLevel;
-    return Math.max(1, Math.min(5, Number(raw) || 2));
+    const parsed = parseCompressionKind(kind);
+    if (parsed.base === 'continuity') return Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 2));
+    const raw = parsed.tier ? settings[tierSettingKey(parsed.tier, 'CompressionLevel')] : settings.loreCompressionLevel;
+    return Math.max(1, Math.min(5, Number(raw) || (parsed.tier === 'high' ? 1 : parsed.tier === 'low' ? 4 : 2)));
+}
+
+function getInjectionMode(settings, kind) {
+    const parsed = parseCompressionKind(kind);
+    if (parsed.base === 'continuity') return settings.continuityInjectionMode || 'direct';
+    if (parsed.tier) return settings[tierSettingKey(parsed.tier, 'InjectionMode')] || (parsed.tier === 'high' ? 'direct' : 'compressed');
+    return settings.loreInjectionMode || 'direct';
 }
 
 function getCompressionTemplate(settings, kind) {
-    const key = kind === 'continuity' ? 'continuityCompressionPromptTemplate' : 'loreCompressionPromptTemplate';
+    const parsed = parseCompressionKind(kind);
+    const key = parsed.base === 'continuity' ? 'continuityCompressionPromptTemplate' : 'loreCompressionPromptTemplate';
     return String(settings?.[key] || '');
+}
+
+function buildLoreDirectMemoForTier(state, tier = 'normal', settingsOverride = {}) {
+    const normalizedTier = normalizeLoreRelevance(tier);
+    return buildLoreDirectMemo(state, {
+        ...settingsOverride,
+        relevanceTier: normalizedTier,
+        loreInjectionMode: 'direct',
+        [tierSettingKey(normalizedTier, 'InjectionMode')]: 'direct',
+    });
 }
 
 export function getCompressionSourceSignature(state, kind = 'lore', directTextOverride = null, settingsOverride = {}) {
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
-    const normalizedKind = kind === 'continuity' ? 'continuity' : 'lore';
+    const parsed = parseCompressionKind(kind);
+    const normalizedKind = parsed.base === 'continuity' ? 'continuity' : (parsed.tier ? `lore-${parsed.tier}` : 'lore');
     const directText = directTextOverride !== null && directTextOverride !== undefined
         ? String(directTextOverride || '')
-        : (normalizedKind === 'continuity'
+        : (parsed.base === 'continuity'
             ? buildContinuityDirectMemo(state, { ...settings, continuityInjectionMode: 'direct' })
-            : buildLoreDirectMemo(state, { ...settings, loreInjectionMode: 'direct' }));
+            : parsed.tier
+                ? buildLoreDirectMemoForTier(state, parsed.tier, settings)
+                : buildLoreDirectMemo(state, { ...settings, loreInjectionMode: 'direct' }));
     return JSON.stringify({
-        signatureVersion: 2,
+        signatureVersion: 3,
         kind: normalizedKind,
-        compressionLevel: getCompressionLevel(settings, normalizedKind),
-        compressionTemplate: getCompressionTemplate(settings, normalizedKind),
-        // Pinned lore is not included in the direct text, but it changes the
-        // compression contract because pinned/protected details must survive
-        // more fully than ordinary lore.
-        pinnedLoreIds: normalizedKind === 'lore' ? (state?.loreSelection?.pinnedIds || []).join('|') : '',
+        compressionLevel: getCompressionLevel(settings, kind),
+        compressionTemplate: getCompressionTemplate(settings, kind),
+        pinnedLoreIds: parsed.base === 'lore' ? (state?.loreSelection?.pinnedIds || []).join('|') : '',
         directText,
     });
 }
 
+function getCompressionStatusObject(state, kind) {
+    const parsed = parseCompressionKind(kind);
+    if (parsed.base === 'continuity') return state?.continuityCompressionStatus || {};
+    if (parsed.tier) return state?.loreCompressionStatusByRelevance?.[parsed.tier] || {};
+    return state?.loreCompressionStatus || {};
+}
+
 function getCachedModelCompression(state, settings, kind) {
     if (!state) return '';
-    const mode = kind === 'continuity' ? settings.continuityInjectionMode : settings.loreInjectionMode;
-    if (mode !== 'compressed') return '';
-    const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
-    const status = state[statusKey] || {};
-    const directText = kind === 'continuity'
+    if (getInjectionMode(settings, kind) !== 'compressed') return '';
+    const parsed = parseCompressionKind(kind);
+    const status = getCompressionStatusObject(state, kind);
+    const directText = parsed.base === 'continuity'
         ? buildContinuityDirectMemo(state, { ...settings, continuityInjectionMode: 'direct' })
-        : buildLoreDirectMemo(state, { ...settings, loreInjectionMode: 'direct' });
+        : parsed.tier
+            ? buildLoreDirectMemoForTier(state, parsed.tier, settings)
+            : buildLoreDirectMemo(state, { ...settings, loreInjectionMode: 'direct' });
     const currentSignature = getCompressionSourceSignature(state, kind, directText, settings);
-    // Compressed mode uses a saved model compression only when it matches the
-    // exact direct source text, compression level, and compression template.
-    // It intentionally ignores unrelated Direct/Compressed mode toggles so the
-    // cache survives switching back and forth in the Injection tab.
     return status.lastSignature === currentSignature && typeof status.cachedText === 'string' && status.cachedText.trim()
         ? status.cachedText.trim()
         : '';
@@ -180,28 +217,42 @@ function buildContinuityDirectMemo(state, settingsOverride = {}) {
 export function buildLoreMemo(state, settingsOverride = {}) {
     if (!state) return '';
     const settings = { ...getSettings(), ...(settingsOverride || {}) };
-    const cached = getCachedModelCompression(state, settings, 'lore');
-    if (cached) return cached;
-    return buildLoreDirectMemo(state, { ...settings, loreInjectionMode: 'direct' });
+    if (settings.relevanceTier) {
+        const tier = normalizeLoreRelevance(settings.relevanceTier);
+        const cached = getCachedModelCompression(state, settings, `lore-${tier}`);
+        if (cached) return cached;
+        return buildLoreDirectMemoForTier(state, tier, settings);
+    }
+    const chunks = [];
+    for (const tier of ['high', 'normal', 'low']) {
+        const enabledKey = tierSettingKey(tier, 'InjectionEnabled');
+        if (settings[enabledKey] === false) continue;
+        const cached = getCachedModelCompression(state, settings, `lore-${tier}`);
+        const direct = cached || buildLoreDirectMemoForTier(state, tier, settings);
+        if (direct) chunks.push(direct);
+    }
+    return chunks.join('\n\n');
 }
 
 function buildLoreDirectMemo(state, settingsOverride = {}) {
     if (!state) return '';
     const settings = { ...getSettings(), ...(settingsOverride || {}), loreInjectionMode: 'direct' };
-    // Direct lore injection intentionally includes every accepted, unmuted lore entry.
-    // Users exclude entries by muting them; compression can then condense the full
-    // direct block. Do not pass legacy maxLoreEntriesInMemo here.
-    const activeLore = getInjectableLoreEntries(state, 0);
+    const tier = settings.relevanceTier ? normalizeLoreRelevance(settings.relevanceTier) : '';
+    const maxKey = tier ? tierSettingKey(tier, 'MaxEntries') : 'maxLoreEntriesInMemo';
+    const maxEntries = Number(settings[maxKey] || 0);
+    const activeLore = tier ? getInjectableLoreEntriesByRelevance(state, tier, maxEntries) : getInjectableLoreEntries(state, maxEntries);
     if (!activeLore.length) return '';
 
     const lines = [];
-    lines.push(settings.loreInjectionMode === 'compressed' ? '## Lore Entries (Compressed)' : '## Lore Entries');
+    const label = tier ? `${LORE_RELEVANCE_LABELS[tier]}-Relevance Lore` : 'Lore Entries';
+    lines.push(`## ${label}${getInjectionMode(settings, tier ? `lore-${tier}` : 'lore') === 'compressed' ? ' (Compressed)' : ''}`);
     const pinnedIds = new Set(state?.loreSelection?.pinnedIds || []);
     for (const entry of activeLore) {
         lines.push(formatLoreEntryForInjection(entry, settings, pinnedIds.has(entry.id), state));
     }
     return lines.join('\n');
 }
+
 
 function formatEmotionalState(raw = {}, settings = getSettings()) {
     const turns = getChatLength() - Number(raw.lastUpdatedChatLength || getChatLength());
@@ -277,20 +328,6 @@ function normalizeInjectionLine(text) {
         .trim();
 }
 
-function appendRevealHints(parts, entry, compact = false) {
-    const prefix = compact ? ' ' : '\n    ';
-    if (entry.revealPolicy === 'do_not_reveal') {
-        parts.push(`${prefix}(Do Not Reveal)`);
-    } else if (entry.revealPolicy === 'only_if_knower_present') {
-        parts.push(`${prefix}(Only reveal if knowers present: ${(entry.whoKnowsTruth || []).join(', ') || 'unknown'})`);
-    } else if (entry.revealPolicy === 'only_if_user_reveals') {
-        parts.push(`${prefix}(Only reveal if user brings it up)`);
-    }
-    if (entry.publicVersion && entry.truthStatus !== 'true') {
-        parts.push(`${prefix}(Public version: ${truncateForInjection(entry.publicVersion, 160)})`);
-    }
-}
-
 function truncateForInjection(text, maxLen) {
     const value = String(text || '').replace(/\s+/g, ' ').trim();
     if (value.length <= maxLen) return value;
@@ -307,8 +344,13 @@ export function buildContinuityPreview(state, mode = null) {
     return buildContinuityMemo(state, override);
 }
 
-export function buildLorePreview(state, mode = null) {
+export function buildLorePreview(state, mode = null, tier = null) {
     const override = mode ? { loreInjectionMode: mode } : {};
+    if (tier) {
+        const normalizedTier = normalizeLoreRelevance(tier);
+        override.relevanceTier = normalizedTier;
+        override[tierSettingKey(normalizedTier, 'InjectionMode')] = mode || getSettings()[tierSettingKey(normalizedTier, 'InjectionMode')];
+    }
     return buildLoreMemo(state, override);
 }
 
@@ -317,6 +359,9 @@ export function getMemoSignature(state, mode = null, kind = 'combined') {
     const payload = {
         kind,
         loreMode: settings.loreInjectionMode || 'direct',
+        loreHighMode: settings.loreHighInjectionMode || 'direct',
+        loreNormalMode: settings.loreNormalInjectionMode || 'compressed',
+        loreLowMode: settings.loreLowInjectionMode || 'compressed',
         loreLevel: settings.loreCompressionLevel || 2,
         continuityMode: settings.continuityInjectionMode || 'direct',
         continuityLevel: settings.continuityCompressionLevel || 2,
@@ -331,7 +376,7 @@ export function getMemoSignature(state, mode = null, kind = 'combined') {
             objectives: state?.objectives || [],
             threads: state?.threads || [],
         } : null,
-        loreIds: kind !== 'continuity' ? (state?.loreMatrix || []).map(e => `${e?.id || ''}:${e?.updatedAt || ''}:${e?.userEdited ? 1 : 0}`).join('|') : '',
+        loreIds: kind !== 'continuity' ? (state?.loreMatrix || []).map(e => `${e?.id || ''}:${e?.relevance || ''}:${e?.priority || 0}:${e?.updatedAt || ''}:${e?.userEdited ? 1 : 0}`).join('|') : '',
         pinned: (state?.loreSelection?.pinnedIds || []).join('|'),
         muted: (state?.loreSelection?.suppressedIds || []).join('|'),
     };

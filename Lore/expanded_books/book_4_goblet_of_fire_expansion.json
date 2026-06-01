@@ -8,7 +8,7 @@
       "title": "Quidditch World Cup campground culture",
       "kind": "place_fact",
       "gateType": "place_fact",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -81,7 +81,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:summer"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:summer",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -162,7 +164,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:summer"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:summer",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -170,7 +174,7 @@
       "title": "Triwizard selection and binding constraints",
       "kind": "institution_state",
       "gateType": "institution_state",
-      "category": "place",
+      "category": "location",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -246,7 +250,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:term_start"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:term_start",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -329,7 +335,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:autumn"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:autumn",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -413,7 +421,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:autumn"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:autumn",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -496,7 +506,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:autumn"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:autumn",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -577,7 +589,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:winter"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:winter",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -660,7 +674,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:winter"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:winter",
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "schemaVersion": 2,
@@ -745,12 +761,17 @@
         "notes": "Compact continuity entry for roleplay state management."
       },
       "source": "wandlight-expanded-lore-v1:Goblet of Fire:winter",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1995-02-04"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1995-02-28",
           "method": "expanded book event cluster: approximate 45-day review window",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1995-02-28"
         }
       }
     },
@@ -834,7 +855,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:spring"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:spring",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -842,7 +865,7 @@
       "title": "Portkey Cup and graveyard guard",
       "kind": "future_guard",
       "gateType": "future_guard",
-      "category": "future_guard",
+      "category": "timeline",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
@@ -920,7 +943,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:climax"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:climax",
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -1004,12 +1029,17 @@
         "notes": "Compact continuity entry for roleplay state management."
       },
       "source": "wandlight-expanded-lore-v1:Goblet of Fire:aftermath",
+      "canon": "canon",
+      "relevance": "normal",
+      "canonTiming": {
+        "hardValidTo": "1995-08-08"
+      },
       "extensions": {
         "temporalTightening": {
-          "previousValidTo": "1995-08-31",
           "method": "expanded book event cluster: approximate 45-day review window",
-          "appliedIn": "Wandlight lore date tightening pass",
-          "notes": "End date narrowed so canon calendar anchors and event-like lore do not remain active as open-ended suggestions."
+          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "previousValidTo": "1995-08-31"
         }
       }
     },
@@ -1092,7 +1122,9 @@
         "confidence": 0.86,
         "notes": "Compact continuity entry for roleplay state management."
       },
-      "source": "wandlight-expanded-lore-v1:Goblet of Fire:aftermath"
+      "source": "wandlight-expanded-lore-v1:Goblet of Fire:aftermath",
+      "canon": "canon",
+      "relevance": "normal"
     }
   ]
 }

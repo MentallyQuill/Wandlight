@@ -49,11 +49,7 @@ export const DEFAULT_LORE_TAXONOMY = Object.freeze({
     },
     canonStatuses: {
         canon: { label: 'Canon', color: '#7f1d1d' },
-        divergent: { label: 'Divergent', color: '#9a3412' },
         au: { label: 'AU', color: '#4c1d95' },
-        fanon: { label: 'Fanon', color: '#155e75' },
-        contested: { label: 'Contested', color: '#a16207' },
-        unknown: { label: 'Unknown', color: '#374151' },
     },
     truthStatuses: {
         true: { label: 'True', color: '#166534' },
@@ -422,6 +418,29 @@ function selectPriorityAwareCanonCandidates(candidates = [], max = 10) {
     return selected;
 }
 
+
+function capPreprocessedByRelevance(entries = [], max = 10) {
+    const buckets = { high: [], normal: [], low: [] };
+    for (const entry of entries) {
+        const tier = ['high', 'normal', 'low'].includes(entry.relevance) ? entry.relevance : 'normal';
+        buckets[tier].push(entry);
+    }
+    const highCap = Math.max(1, Math.ceil(max * 0.40));
+    const normalCap = Math.max(1, Math.ceil(max * 0.40));
+    const lowCap = Math.max(0, max - highCap - normalCap);
+    const selected = [...buckets.high.slice(0, highCap), ...buckets.normal.slice(0, normalCap), ...buckets.low.slice(0, lowCap)];
+    if (selected.length < max) {
+        const ids = new Set(selected.map(e => e.id));
+        for (const entry of [...buckets.high, ...buckets.normal, ...buckets.low]) {
+            if (selected.length >= max) break;
+            if (ids.has(entry.id)) continue;
+            selected.push(entry);
+            ids.add(entry.id);
+        }
+    }
+    return selected.slice(0, max);
+}
+
 function compactCanonLoreEntryForPending(entry) {
     const normalized = normalizeLoreMatrix([entry])[0] || entry;
     return {
@@ -430,8 +449,10 @@ function compactCanonLoreEntryForPending(entry) {
         title: normalized.title,
         kind: normalized.kind || 'fact',
         gateType: normalized.gateType || normalized.kind || 'fact',
-        category: normalized.category || 'canon',
-        canonStatus: normalized.canonStatus || 'canon',
+        category: normalized.category || 'other',
+        relevance: normalized.relevance || 'normal',
+        canon: normalized.canon || normalized.canonStatus || 'canon',
+        canonStatus: normalized.canon || normalized.canonStatus || 'canon',
         truthStatus: normalized.truthStatus || 'true',
         revealPolicy: normalized.revealPolicy || 'private',
         priority: normalized.priority || 50,
@@ -494,14 +515,16 @@ function compactPendingCanonEntryForStorage(entry) {
         title: trim(normalized.title, 160),
         kind: normalized.kind || 'fact',
         gateType: normalized.gateType || normalized.kind || 'fact',
-        category: normalized.category || 'canon',
-        canonStatus: normalized.canonStatus || 'canon',
+        category: normalized.category || 'other',
+        relevance: normalized.relevance || 'normal',
+        canon: normalized.canon || normalized.canonStatus || 'canon',
+        canonStatus: normalized.canon || normalized.canonStatus || 'canon',
         truthStatus: normalized.truthStatus || 'true',
         revealPolicy: normalized.revealPolicy || 'private',
         priority: Number.isFinite(Number(normalized.priority)) ? Number(normalized.priority) : 50,
         protected: !!normalized.protected,
         userEditable: normalized.userEditable !== false,
-        branchId: trim(normalized.branchId, 100) || 'main',
+        branchId: normalized.branchId || 'main',
         date: {
             validFrom: trim(normalized.date?.validFrom || normalized.validFrom, 32),
             validTo: trim(normalized.date?.validTo || normalized.validTo, 32),
@@ -682,7 +705,7 @@ export async function proposeCanonLoreForContext(context = null, options = {}) {
     // oversized pending canon entries, full normalization + fuzzy comparison can lock the browser.
     const existing = [...(Array.isArray(state.loreMatrix) ? state.loreMatrix : []), ...(Array.isArray(state.pendingLoreEntries) ? state.pendingLoreEntries : [])];
     const filtered = fastFilterCanonDuplicates(query.entries, existing);
-    const entries = filtered.entries;
+    const entries = capPreprocessedByRelevance(preprocessPendingLoreEntries(filtered.entries, state, settings), Number(options.maxEntries ?? settings.canonLoreMaxEntries) || 10);
 
     if (!entries.length) {
         dbState.lastProposedCount = 0;
@@ -699,11 +722,8 @@ export async function proposeCanonLoreForContext(context = null, options = {}) {
     }
 
     const pending = Array.isArray(state.pendingLoreEntries) ? state.pendingLoreEntries : [];
-    const preprocessedEntries = preprocessPendingLoreEntries(entries, state, settings);
-    // Canon DB proposals are already storage-compact. The pending preprocessor adds
-    // branch-safe lifecycle defaults and review metadata before the final bounded
-    // sanitizer runs in saveState().
-    state.pendingLoreEntries = [...pending, ...preprocessedEntries].slice(-250);
+    // Canon DB proposals are preprocessed into relevance tiers before review; saveState() runs final bounded sanitization.
+    state.pendingLoreEntries = [...pending, ...entries].slice(-250);
     state.pendingLoreMeta = {
         id: `canon-db-${Date.now()}`,
         contextKey: buildLoreGenerationKey(state),
@@ -711,15 +731,15 @@ export async function proposeCanonLoreForContext(context = null, options = {}) {
         status: 'pending',
         summary: `Local canon database proposed ${entries.length} entries for ${query.sceneIso}.`,
         rawEntryCount: query.entries.length,
-        validEntryCount: preprocessedEntries.length,
+        validEntryCount: entries.length,
         createdAt: Date.now(),
     };
 
-    dbState.lastProposedCount = preprocessedEntries.length;
-    dbState.lastStatus = `Matched ${query.matchedCount} canon entries; proposed ${preprocessedEntries.length} new pending entries.`;
+    dbState.lastProposedCount = entries.length;
+    dbState.lastStatus = `Matched ${query.matchedCount} canon entries; proposed ${entries.length} new pending entries.`;
     state.canonLoreDatabase = dbState;
     saveState(state);
 
-    progress?.(`Canon database proposed ${preprocessedEntries.length} pending lore entries.`, 100);
-    return { ...query, status: 'proposed', entries: preprocessedEntries, proposedCount: preprocessedEntries.length, dropped: filtered.dropped };
+    progress?.(`Canon database proposed ${entries.length} pending lore entries.`, 100);
+    return { ...query, status: 'proposed', entries, proposedCount: entries.length, dropped: filtered.dropped };
 }

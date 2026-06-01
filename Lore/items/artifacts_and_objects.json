@@ -77,7 +77,9 @@
       "kind": "artifact_state",
       "gateType": "artifact_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_marauders_map_known_item",
@@ -88,7 +90,7 @@
         "secret",
         "artifact"
       ],
-      "category": "artifact",
+      "category": "item",
       "fact": "The Marauder's Map is a magical map of Hogwarts that can reveal people moving through the castle, but its possession and use are not public knowledge.",
       "canonStatus": "canon",
       "truthStatus": "hidden",
@@ -172,7 +174,9 @@
       "kind": "artifact_state",
       "gateType": "artifact_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_invisibility_cloak_known_item",
@@ -183,7 +187,7 @@
         "artifact",
         "stealth"
       ],
-      "category": "artifact",
+      "category": "item",
       "fact": "Harry possesses an invisibility cloak during the Hogwarts years; its use is private and tactically important when stealth matters.",
       "canonStatus": "canon",
       "truthStatus": "hidden",
@@ -262,7 +266,9 @@
       "kind": "artifact_state",
       "gateType": "artifact_state",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low"
     },
     {
       "id": "canon_horcrux_concept_secret",
@@ -307,11 +313,7 @@
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
       "locked": true,
-      "activation": {
-        "requiresEvents": [
-          "horcruxes_revealed_to_trio"
-        ]
-      },
+      "activation": {},
       "content": {},
       "scope": {
         "characters": [
@@ -345,7 +347,19 @@
       "kind": "knowledge_gate",
       "gateType": "knowledge_gate",
       "protected": false,
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal",
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "horcruxes_revealed_to_trio"
+          ]
+        }
+      }
     }
   ]
 }

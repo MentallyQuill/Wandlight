@@ -6,7 +6,8 @@
  * raw previews. This window is the runtime surface used during roleplay.
  */
 
-import { getPanelLoreState, getInjectableLoreEntries, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag, LORE_LIFECYCLE_STATUSES } from './lore-matrix.js';
+import { getPanelLoreState, getInjectableLoreEntries, getLoreRelevanceCounts, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag, LORE_LIFECYCLE_STATUSES } from './lore-matrix.js';
+import { LORE_RELEVANCE_TIERS, LORE_RELEVANCE_LABELS, normalizeLoreRelevance, LORE_CATEGORY_VALUES } from './lore-relevance.js';
 import { getDefaultState, DEFAULT_SETTINGS } from './constants.js';
 import {
     getState,
@@ -27,6 +28,7 @@ import { onExtractionTriggered } from './extractor.js';
 import { runLoreContextDetection, runBulkLoreGeneration } from './lore-generator.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
 import { proposeCanonLoreForContext, getLoreTaxonomySync } from './canon-lore-db.js';
+import { runAutoRelevance, applyAutoRelevanceSuggestions, clearAutoRelevanceSuggestions, rejectAutoRelevanceSuggestions } from './auto-relevance.js';
 
 const PANEL_ID = 'wandlight-lore-panel';
 const MIN_PANEL_WIDTH = 420;
@@ -35,15 +37,12 @@ const MAX_PANEL_MARGIN = 16;
 
 const CATEGORY_LABELS = {
     all: 'All',
-    active: 'Context Active',
     pinned: 'Pinned',
     suppressed: 'Muted',
     pending: 'Pending',
-    expired: 'Expired',
-    blocked: 'Story Blocked',
-    future: 'Future',
-    canon_overdue: 'Canon Overdue',
-    divergent: 'Divergent',
+    high: 'High Relevance',
+    normal: 'Normal Relevance',
+    low: 'Low Relevance',
     canon: 'Canon',
     au: 'AU',
     secret: 'Secret',
@@ -131,6 +130,8 @@ function getLoreRegistry(registryName) {
 }
 
 function getLoreRegistryValues(registryName, fallback = []) {
+    if (registryName === 'canonStatuses') return ['canon', 'au'];
+    if (registryName === 'categories') return LORE_CATEGORY_VALUES;
     const registry = getLoreRegistry(registryName);
     const values = Object.keys(registry);
     return values.length ? values : fallback;
@@ -283,7 +284,7 @@ let resizeStartHeight = 0;
 let floatingTooltip = null;
 let tooltipAnchor = null;
 
-// Public lifecycle ------------------------------------------------------------
+// Public runtime ------------------------------------------------------------
 
 export function showLorePanel() {
     const state = getState();
@@ -550,7 +551,7 @@ function renderSessionTab(container, state) {
     stats.appendChild(createKeyValue('Pending continuity changes', state?.lastDelta ? '1' : '0', 'Legacy extracted state delta waiting in the Continuity tab. New scans apply directly to Continuity sections.'));
     stats.appendChild(createKeyValue('Pending lore entries', String((state?.pendingLoreEntries || []).length), 'Generated lore entries waiting in the Lore tab Pending Lore Review section.'));
     stats.appendChild(createKeyValue('Accepted lore entries', String(counts.all - counts.pending), 'Lore entries currently stored in the accepted lore matrix.'));
-    stats.appendChild(createKeyValue('Context-active lore entries', String(counts.active), 'Accepted lore entries whose date, branch, character, location, or scope rules match the current Continuity/Context state. This can be 0 even when fallback priority-based lore is still selected for injection.'));
+    stats.appendChild(createKeyValue('High-relevance lore entries', String(counts.active), 'Accepted lore entries currently assigned to the High-Relevance injection tier.'));
     stats.appendChild(createKeyValue('Lore selected for injection', String(selectedLoreCount), 'Accepted lore entries that Wandlight is currently selecting for Lore Injection after pin/mute rules, context activation, and fallback priority selection. There is no hidden entry cap; mute entries to exclude them.'));
     stats.appendChild(createKeyValue('Injection token estimate', injectionStats.totalChars ? `${injectionStats.totalTokens} tokens` : 'empty', 'Approximate token count for the combined Continuity + Lore injection previews.'));
     stats.appendChild(createKeyValue('Total chars injected', `${injectionStats.totalChars} chars`, 'Combined character count of Continuity Injection plus Lore Injection using current Injection tab toggles and handling modes.'));
@@ -2419,7 +2420,12 @@ function renderInjectionTab(container, state) {
     const activeLore = getInjectableLoreEntries(state, 0).length;
     const continuityPreview = buildContinuityPreview(state, settings.continuityInjectionMode || 'direct');
     const lorePreview = buildLorePreview(state, settings.loreInjectionMode || 'direct');
-    updateCompressionTurnStatus(state, 'lore');
+    const loreHighPreview = buildLorePreview(state, getLoreTierMode(settings, 'high'), 'high');
+    const loreNormalPreview = buildLorePreview(state, getLoreTierMode(settings, 'normal'), 'normal');
+    const loreLowPreview = buildLorePreview(state, getLoreTierMode(settings, 'low'), 'low');
+    updateCompressionTurnStatus(state, 'lore-high');
+    updateCompressionTurnStatus(state, 'lore-normal');
+    updateCompressionTurnStatus(state, 'lore-low');
     updateCompressionTurnStatus(state, 'continuity');
 
     container.appendChild(createSectionHeader(
@@ -2445,7 +2451,7 @@ function renderInjectionTab(container, state) {
     toggles.appendChild(createToggleCard(
         'Inject Lore',
         settings.injectLore !== false,
-        'Injects accepted active Lore tab entries. Turn this off if you want Wandlight to track/edit lore without sending lore entries to the roleplay model.',
+        'Injects accepted, unmuted Lore entries through relevance-tiered prompt groups. Turn this off if you want Wandlight to track/edit lore without sending lore to the roleplay model.',
         (checked) => {
             const next = getSettings();
             next.injectLore = checked;
@@ -2456,7 +2462,7 @@ function renderInjectionTab(container, state) {
     ));
     container.appendChild(toggles);
 
-    const placementStatus = `${settings.injectionTransport === 'interceptor' ? 'Legacy prepend' : 'Extension Prompt'} · C ${formatPlacementSummary(settings, 'continuity')} · L ${formatPlacementSummary(settings, 'lore')}`;
+    const placementStatus = `${settings.injectionTransport === 'interceptor' ? 'Legacy prepend' : 'Extension Prompt'} · C ${formatPlacementSummary(settings, 'continuity')} · H ${formatPlacementSummary(settings, 'loreHigh')} · N ${formatPlacementSummary(settings, 'loreNormal')} · L ${formatPlacementSummary(settings, 'loreLow')}`;
     container.appendChild(createCollapsibleSection('injection.promptPlacement', 'Prompt Placement', placementStatus, false, createInjectionPlacementCard(settings), { tooltip: 'Role, position, and depth used for prompt injection.' }));
 
     container.appendChild(createCollapsibleSection(
@@ -2470,9 +2476,9 @@ function renderInjectionTab(container, state) {
 
     container.appendChild(createCollapsibleSection(
         'injection.loreHandling',
-        'Lore Handling',
-        `${settings.loreInjectionMode || 'direct'} · ${activeLore} entries · ${getCompressionStatusTextForSummary(state, 'lore')}`,
-        (settings.loreInjectionMode || 'direct') === 'compressed',
+        'Relevance-Tiered Lore Handling',
+        `${activeLore} entries · H ${getLoreTierMode(settings, 'high')} · N ${getLoreTierMode(settings, 'normal')} · L ${getLoreTierMode(settings, 'low')}`,
+        false,
         createLoreHandlingCard(state, settings, activeLore),
         { tooltip: 'Direct or model-compressed handling for Lore injection.' }
     ));
@@ -2487,7 +2493,10 @@ function renderInjectionTab(container, state) {
     ));
 
     container.appendChild(createInjectionPreviewCard('Continuity Injection', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This is the actual Continuity block currently configured for prompt injection. It can be placed at a different depth because it is separated from Lore.'));
-    container.appendChild(createInjectionPreviewCard('Lore Injection', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'This is the actual Lore block currently configured for prompt injection, using Direct or cached model-compressed handling.'));
+    container.appendChild(createInjectionPreviewCard('High-Relevance Lore Injection', 'wandlight-lore-high-injection-preview', loreHighPreview, settings.injectLore !== false && settings.loreHighInjectionEnabled !== false, 'Lore injected in the high-relevance prompt group.'));
+    container.appendChild(createInjectionPreviewCard('Normal-Relevance Lore Injection', 'wandlight-lore-normal-injection-preview', loreNormalPreview, settings.injectLore !== false && settings.loreNormalInjectionEnabled !== false, 'Lore injected in the normal-relevance prompt group.'));
+    container.appendChild(createInjectionPreviewCard('Low-Relevance Lore Injection', 'wandlight-lore-low-injection-preview', loreLowPreview, settings.injectLore !== false && settings.loreLowInjectionEnabled !== false, 'Lore injected in the low-relevance prompt group.'));
+    container.appendChild(createInjectionPreviewCard('Combined Lore Preview', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'Combined read-only preview of all relevance-tiered lore blocks.')); 
 }
 
 function createContinuityHandlingCard(state, settings) {
@@ -2543,55 +2552,83 @@ function createLoreHandlingCard(state, settings, activeLore) {
     card.className = 'wandlight-runtime-card wandlight-compression-handling-card';
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
-    title.textContent = 'Lore Handling Mode';
-    addTooltip(title, 'Direct sends resolved accepted lore text. Compressed uses a cached model compression generated from the direct lore preview.');
+    title.textContent = 'Relevance-Tiered Lore Handling';
+    addTooltip(title, 'Lore is split into High, Normal, and Low relevance injection groups. Each tier has independent Direct/Compressed handling and cache status.');
     card.appendChild(title);
 
-    const buttons = document.createElement('div');
-    buttons.className = 'wandlight-mode-buttons';
-    buttons.appendChild(createInjectionModeButton('direct', 'Direct', 'Insert all accepted, unmuted lore entries as resolved text. There is no hidden entry cap.', settings));
-    buttons.appendChild(createInjectionModeButton('compressed', 'Compressed', 'Use a saved model-compressed lore block. If the cache is stale or missing, direct text is used until you click Compress Lore Now.', settings));
-    card.appendChild(buttons);
+    const counts = getLoreRelevanceCounts(state);
+    card.appendChild(createKeyValue('Lore available', `High ${counts.high} · Normal ${counts.normal} · Low ${counts.low} · Muted ${counts.muted}`, 'Accepted lore grouped by relevance. Muted entries are excluded before injection/compression.'));
 
-    card.appendChild(createKeyValue('Lore available', String(activeLore), 'Accepted, unmuted lore entries eligible for prompt injection. Muting controls exclusion.'));
-    card.appendChild(createKeyValue('Pinned protection', 'enabled', 'Pinned entries are identified as protected details in the compression prompt.'));
-    card.appendChild(createCompressionLevelControl('lore', settings));
-    card.appendChild(createKeyValue('Target budget', getCompressionBudgetSummary('lore', state), 'Compression levels set an explicit target token budget for the model request.'));
+    for (const tier of ['high', 'normal', 'low']) {
+        const wrap = document.createElement('div');
+        wrap.className = 'wandlight-runtime-subcard wandlight-lore-tier-injection-card';
+        const tierTitle = document.createElement('div');
+        tierTitle.className = 'wandlight-runtime-card-subtitle';
+        tierTitle.textContent = `${RELEVANCE_META[tier]?.label || tier} Relevance Lore`;
+        wrap.appendChild(tierTitle);
 
-    const intervalLabel = document.createElement('label');
-    intervalLabel.className = 'wandlight-inline-field';
-    const intervalText = document.createElement('span');
-    intervalText.textContent = 'Auto-compress interval';
-    addTooltip(intervalText, 'Number of completed chat turns before Wandlight should refresh model-compressed lore after lore changes. Manual compression is available with Compress Lore Now.');
-    const interval = document.createElement('input');
-    interval.type = 'number';
-    interval.min = '1';
-    interval.max = '100';
-    interval.step = '1';
-    interval.value = String(settings.loreCompressionTurnInterval || 8);
-    interval.addEventListener('change', () => {
-        const next = getSettings();
-        next.loreCompressionTurnInterval = Math.max(1, Math.min(100, parseInt(interval.value, 10) || 8));
-        saveSettings(next);
-        refreshPanelBody({ preserveScroll: false });
-    });
-    intervalLabel.appendChild(intervalText);
-    intervalLabel.appendChild(interval);
-    card.appendChild(intervalLabel);
-    card.appendChild(createKeyValue('Lore compression status', getCompressionStatusText(getState()), 'Shows whether cached model-compressed lore is current, stale, missing, or failed.'));
+        const enabledLabel = document.createElement('label');
+        enabledLabel.className = 'wandlight-inline-toggle';
+        const enabled = document.createElement('input');
+        enabled.type = 'checkbox';
+        enabled.checked = settings[tierSettingKey(tier, 'InjectionEnabled')] !== false;
+        enabled.addEventListener('change', () => {
+            const next = getSettings();
+            next[tierSettingKey(tier, 'InjectionEnabled')] = enabled.checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true, preserveWindowScroll: true });
+        });
+        enabledLabel.appendChild(enabled);
+        enabledLabel.appendChild(document.createTextNode(' Enable injection'));
+        wrap.appendChild(enabledLabel);
 
-    const actions = document.createElement('div');
-    actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Compress Lore Now', 'Uses the Utility provider to compress the direct Lore Injection block and cache it for compressed injection.', async (btn) => {
-        await runModelCompression('lore', btn);
-    }, 'wandlight-primary-button'));
-    card.appendChild(actions);
+        const buttons = document.createElement('div');
+        buttons.className = 'wandlight-mode-buttons';
+        buttons.appendChild(createLoreTierModeButton(tier, 'direct', 'Direct', 'Inject this tier as resolved lore text.'));
+        buttons.appendChild(createLoreTierModeButton(tier, 'compressed', 'Compressed', 'Inject this tier from its own cached model compression.'));
+        wrap.appendChild(buttons);
+
+        wrap.appendChild(createKeyValue('Entries', String(getInjectableLoreEntries(getState(), 0, tier).length), 'Accepted, unmuted entries in this relevance tier.'));
+        wrap.appendChild(createCompressionLevelControl(`lore-${tier}`, settings));
+        wrap.appendChild(createKeyValue('Target budget', getCompressionBudgetSummary(`lore-${tier}`, state), 'Compression budget for this relevance tier.'));
+        wrap.appendChild(createKeyValue('Compression status', getCompressionStatusTextForKind(getState(), `lore-${tier}`), 'Tier-specific compression cache status.'));
+
+        const actions = document.createElement('div');
+        actions.className = 'wandlight-primary-actions';
+        actions.appendChild(createButton(`Compress ${RELEVANCE_META[tier]?.label || tier} Now`, `Compresses only ${tier} relevance lore.`, async (btn) => {
+            await runModelCompression(`lore-${tier}`, btn);
+        }, tier === 'high' ? 'wandlight-primary-button' : ''));
+        wrap.appendChild(actions);
+        card.appendChild(wrap);
+    }
     return card;
 }
 
+function createLoreTierModeButton(tier, mode, label, tooltip) {
+    const settings = getSettings();
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'wandlight-mode-button';
+    if (getLoreTierMode(settings, tier) === mode) btn.classList.add('wandlight-mode-button-active');
+    btn.textContent = label;
+    addTooltip(btn, tooltip);
+    btn.addEventListener('click', () => {
+        const next = getSettings();
+        next[tierSettingKey(tier, 'InjectionMode')] = mode;
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: true, preserveWindowScroll: true });
+        refreshHeader();
+        toast(`${RELEVANCE_META[tier]?.label || tier} relevance lore set to ${label}.`);
+    });
+    return btn;
+}
+
+
 function createCompressionLevelControl(kind, settings) {
-    const levelKey = kind === 'continuity' ? 'continuityCompressionLevel' : 'loreCompressionLevel';
-    const levelValue = Math.max(1, Math.min(5, Number(settings[levelKey]) || 2));
+    const parsed = parseLoreCompressionKind(kind);
+    const levelKey = parsed.base === 'continuity' ? 'continuityCompressionLevel' : parsed.tier ? tierSettingKey(parsed.tier, 'CompressionLevel') : 'loreCompressionLevel';
+    const fallback = parsed.tier === 'high' ? 1 : parsed.tier === 'low' ? 4 : 2;
+    const levelValue = Math.max(1, Math.min(5, Number(settings[levelKey]) || fallback));
     const label = document.createElement('label');
     label.className = 'wandlight-slider-row';
     const text = document.createElement('span');
@@ -2677,7 +2714,7 @@ function createCompressionPromptTextarea(labelText, settingKey, defaultValue) {
 
 
 function formatPlacementSummary(settings, kind) {
-    const prefix = kind === 'continuity' ? 'continuity' : 'lore';
+    const prefix = kind === 'continuity' ? 'continuity' : kind === 'loreHigh' ? 'loreHigh' : kind === 'loreNormal' ? 'loreNormal' : kind === 'loreLow' ? 'loreLow' : 'lore';
     const position = Number(settings[`${prefix}InjectionPosition`] ?? 1);
     const role = Number(settings[`${prefix}InjectionRole`] ?? 0);
     const depth = Number(settings[`${prefix}InjectionDepth`] ?? 4);
@@ -2719,12 +2756,13 @@ function estimateTokenBudgetForCompression(text, level) {
 
 function getCompressionBudgetSummary(kind, state) {
     const settings = getSettings();
-    const level = kind === 'continuity'
+    const parsed = parseLoreCompressionKind(kind);
+    const level = parsed.base === 'continuity'
         ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 2))
-        : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 2));
-    const directText = kind === 'continuity'
+        : parsed.tier ? getLoreTierLevel(settings, parsed.tier) : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 2));
+    const directText = parsed.base === 'continuity'
         ? buildContinuityPreview(state, 'direct')
-        : buildLorePreview(state, 'direct');
+        : parsed.tier ? buildLorePreview(state, 'direct', parsed.tier) : buildLorePreview(state, 'direct');
     if (!directText || !directText.trim()) return 'No source text';
     const budget = estimateTokenBudgetForCompression(directText, level);
     return `~${budget.targetTokens} tokens / ${budget.targetCharacters} chars target; max ${budget.hardTokenLimit} tokens / ${budget.hardCharacterLimit} chars from ~${budget.directTokens} tokens / ${budget.directCharacters} chars`;
@@ -2780,19 +2818,21 @@ function createInjectionPlacementCard(settings) {
         ], 'Role used for the injected Continuity block when using In-chat extension prompt placement.', 'wandlight-placement-role'),
     ]));
 
-    placement.appendChild(createPromptPlacementLine('Lore', [
-        createPlacementSelect('Position', 'loreInjectionPosition', String(settings.loreInjectionPosition ?? 1), [
-            ['1', 'In-chat'],
-            ['0', 'After prompt'],
-            ['2', 'Before prompt'],
-        ], 'Where the Lore Injection block is inserted. Depth only applies to In-chat.', 'wandlight-placement-position'),
-        createPlacementNumber('Depth', 'loreInjectionDepth', settings.loreInjectionDepth ?? 4, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.', 'wandlight-placement-depth'),
-        createPlacementSelect('Role', 'loreInjectionRole', String(settings.loreInjectionRole ?? 0), [
-            ['0', 'System'],
-            ['1', 'User'],
-            ['2', 'Assistant'],
-        ], 'Role used for the injected Lore block when using In-chat extension prompt placement.', 'wandlight-placement-role'),
-    ]));
+    for (const [tier, label, depth] of [['high', 'High-Relevance Lore', 3], ['normal', 'Normal-Relevance Lore', 6], ['low', 'Low-Relevance Lore', 10]]) {
+        placement.appendChild(createPromptPlacementLine(label, [
+            createPlacementSelect('Position', tierSettingKey(tier, 'InjectionPosition'), String(settings[tierSettingKey(tier, 'InjectionPosition')] ?? 1), [
+                ['1', 'In-chat'],
+                ['0', 'After prompt'],
+                ['2', 'Before prompt'],
+            ], `Where the ${label} block is inserted. Depth only applies to In-chat.`, 'wandlight-placement-position'),
+            createPlacementNumber('Depth', tierSettingKey(tier, 'InjectionDepth'), settings[tierSettingKey(tier, 'InjectionDepth')] ?? depth, 0, 1000, 'Depth 0 is closest to the latest message. Higher depth moves the block earlier in chat history.', 'wandlight-placement-depth'),
+            createPlacementSelect('Role', tierSettingKey(tier, 'InjectionRole'), String(settings[tierSettingKey(tier, 'InjectionRole')] ?? 0), [
+                ['0', 'System'],
+                ['1', 'User'],
+                ['2', 'Assistant'],
+            ], `Role used for ${label}.`, 'wandlight-placement-role'),
+        ]));
+    }
 
     card.appendChild(placement);
 
@@ -2800,7 +2840,7 @@ function createInjectionPlacementCard(settings) {
         ? globalThis.wandlightGetInjectionStatus()
         : null;
     const statusText = status
-        ? `${status.transport || 'unknown'} | continuity ${status.continuityChars || 0} chars | lore ${status.loreChars || 0} chars`
+        ? `${status.transport || 'unknown'} | continuity ${status.continuityChars || 0} chars | high ${status.loreHighChars || 0} chars | normal ${status.loreNormalChars || 0} chars | low ${status.loreLowChars || 0} chars`
         : 'Prompt sync status unavailable until extension initialization completes.';
     card.appendChild(createKeyValue('Current sync', statusText, 'Shows the last Wandlight prompt sync result.'));
 
@@ -2937,13 +2977,25 @@ function refreshInjectionPreviewOnly() {
     const settings = getSettings();
     const continuity = buildContinuityPreview(state, settings.continuityInjectionMode || 'direct');
     const lore = buildLorePreview(state, settings.loreInjectionMode || 'direct');
+    const loreHigh = buildLorePreview(state, getLoreTierMode(settings, 'high'), 'high');
+    const loreNormal = buildLorePreview(state, getLoreTierMode(settings, 'normal'), 'normal');
+    const loreLow = buildLorePreview(state, getLoreTierMode(settings, 'low'), 'low');
     updateCompressionTurnStatus(state, 'continuity');
-    updateCompressionTurnStatus(state, 'lore');
+    updateCompressionTurnStatus(state, 'lore-high');
+    updateCompressionTurnStatus(state, 'lore-normal');
+    updateCompressionTurnStatus(state, 'lore-low');
 
     const continuityPre = panelRoot?.querySelector('.wandlight-continuity-injection-preview');
     if (continuityPre) {
         continuityPre.textContent = getInjectionDisplayText('Continuity Injection', continuity, settings.injectContinuity !== false && settings.injectMemo !== false);
     }
+
+    const loreHighPre = panelRoot?.querySelector('.wandlight-lore-high-injection-preview');
+    if (loreHighPre) loreHighPre.textContent = getInjectionDisplayText('High-Relevance Lore Injection', loreHigh, settings.injectLore !== false && settings.loreHighInjectionEnabled !== false);
+    const loreNormalPre = panelRoot?.querySelector('.wandlight-lore-normal-injection-preview');
+    if (loreNormalPre) loreNormalPre.textContent = getInjectionDisplayText('Normal-Relevance Lore Injection', loreNormal, settings.injectLore !== false && settings.loreNormalInjectionEnabled !== false);
+    const loreLowPre = panelRoot?.querySelector('.wandlight-lore-low-injection-preview');
+    if (loreLowPre) loreLowPre.textContent = getInjectionDisplayText('Low-Relevance Lore Injection', loreLow, settings.injectLore !== false && settings.loreLowInjectionEnabled !== false);
 
     const lorePre = panelRoot?.querySelector('.wandlight-lore-injection-preview');
     if (lorePre) {
@@ -2957,8 +3009,11 @@ function refreshInjectionPreviewOnly() {
 
 function updateCompressionTurnStatus(state, kind = 'lore') {
     if (!state) return;
-    const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
-    const status = state[statusKey];
+    const parsed = parseLoreCompressionKind(kind);
+    let status = null;
+    if (parsed.base === 'continuity') status = state.continuityCompressionStatus;
+    else if (parsed.tier) status = state.loreCompressionStatusByRelevance?.[parsed.tier];
+    else status = state.loreCompressionStatus;
     if (!status?.lastCompressedAt) return;
     const chatLength = getChatLength();
     status.turnsSinceCompression = Math.max(0, chatLength - Number(status.lastChatLength || chatLength));
@@ -2980,23 +3035,29 @@ async function runModelCompression(kind = 'lore', btn = null) {
     const originalText = btn?.textContent || '';
     if (btn) {
         btn.disabled = true;
-        btn.textContent = kind === 'continuity' ? 'Compressing continuity...' : 'Compressing lore...';
+        const parsedKindForLabel = parseLoreCompressionKind(kind);
+        btn.textContent = parsedKindForLabel.base === 'continuity' ? 'Compressing continuity...' : `Compressing ${parsedKindForLabel.tier || ''} lore...`;
     }
 
     try {
         const state = getState();
-        const directText = kind === 'continuity'
+        const parsedKind = parseLoreCompressionKind(kind);
+        const directText = parsedKind.base === 'continuity'
             ? buildContinuityPreview(state, 'direct')
-            : buildLorePreview(state, 'direct');
+            : parsedKind.tier
+                ? buildLorePreview(state, 'direct', parsedKind.tier)
+                : buildLorePreview(state, 'direct');
 
         if (!directText || !directText.trim()) {
-            toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} preview is empty; nothing to compress.`, 'warning');
+            toast(`${parsedKind.base === 'continuity' ? 'Continuity' : 'Lore'} preview is empty; nothing to compress.`, 'warning');
             return null;
         }
 
-        const level = kind === 'continuity'
+        const level = parsedKind.base === 'continuity'
             ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 2))
-            : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 2));
+            : parsedKind.tier
+                ? getLoreTierLevel(settings, parsedKind.tier)
+                : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 2));
 
         const context = JSON.stringify({
             sceneDate: state?.loreContext?.sceneDate || state?.canon?.inUniverseDate || '',
@@ -3043,11 +3104,23 @@ async function runModelCompression(kind = 'lore', btn = null) {
         }
 
         const freshState = getState();
-        const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
-        if (!freshState[statusKey]) freshState[statusKey] = {};
+        let statusKey = parsedKind.base === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
+        let statusTarget = null;
+        if (parsedKind.base === 'continuity') {
+            if (!freshState.continuityCompressionStatus) freshState.continuityCompressionStatus = {};
+            statusTarget = freshState.continuityCompressionStatus;
+        } else if (parsedKind.tier) {
+            if (!freshState.loreCompressionStatusByRelevance) freshState.loreCompressionStatusByRelevance = {};
+            if (!freshState.loreCompressionStatusByRelevance[parsedKind.tier]) freshState.loreCompressionStatusByRelevance[parsedKind.tier] = {};
+            statusTarget = freshState.loreCompressionStatusByRelevance[parsedKind.tier];
+            statusKey = `loreCompressionStatusByRelevance.${parsedKind.tier}`;
+        } else {
+            if (!freshState.loreCompressionStatus) freshState.loreCompressionStatus = {};
+            statusTarget = freshState.loreCompressionStatus;
+        }
         const compressedTokens = estimateTokens(cleaned);
-        freshState[statusKey] = {
-            ...freshState[statusKey],
+        const nextStatus = {
+            ...statusTarget,
             lastCompressedAt: Date.now(),
             lastSignature: getCompressionSourceSignature(freshState, kind, directText, settings),
             lastMode: 'compressed',
@@ -3065,15 +3138,19 @@ async function runModelCompression(kind = 'lore', btn = null) {
             cachedText: cleaned,
             lastError: '',
         };
+        if (parsedKind.base === 'continuity') freshState.continuityCompressionStatus = nextStatus;
+        else if (parsedKind.tier) freshState.loreCompressionStatusByRelevance[parsedKind.tier] = nextStatus;
+        else freshState.loreCompressionStatus = nextStatus;
         saveState(freshState);
         refreshPanelBody({ preserveScroll: false });
-        toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression updated: ${compressedTokens} tokens / ${cleaned.length} chars from ${budget.directTokens} tokens / ${budget.directCharacters} chars.`);
+        toast(`${parsedKind.base === 'continuity' ? 'Continuity' : parsedKind.tier ? `${RELEVANCE_META[parsedKind.tier]?.label || parsedKind.tier} lore` : 'Lore'} compression updated: ${compressedTokens} tokens / ${cleaned.length} chars from ${budget.directTokens} tokens / ${budget.directCharacters} chars.`);
         return cleaned;
     } catch (e) {
         const freshState = getState();
-        const statusKey = kind === 'continuity' ? 'continuityCompressionStatus' : 'loreCompressionStatus';
-        if (freshState[statusKey]) {
-            freshState[statusKey].lastError = e?.message || String(e);
+        const parsedKind = parseLoreCompressionKind(kind);
+        let status = parsedKind.base === 'continuity' ? freshState.continuityCompressionStatus : parsedKind.tier ? freshState.loreCompressionStatusByRelevance?.[parsedKind.tier] : freshState.loreCompressionStatus;
+        if (status) {
+            status.lastError = e?.message || String(e);
             saveState(freshState);
         }
         toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression failed: ${e?.message || e}`, 'error');
@@ -3117,7 +3194,8 @@ function shouldRetryCompression(result, directText, level) {
 }
 
 function buildCompressionRetryPrompt(kind, level, context, directText, previousOutput, budget, reason) {
-    const kindLabel = kind === 'continuity' ? 'Continuity State' : 'Lore Entries';
+    const parsedKind = parseLoreCompressionKind(kind);
+    const kindLabel = parsedKind.base === 'continuity' ? 'Continuity State' : parsedKind.tier ? `${RELEVANCE_META[parsedKind.tier]?.label || parsedKind.tier} Relevance Lore Entries` : 'Lore Entries';
     return `Compress the Wandlight ${kindLabel} injection again. The previous output failed validation: ${reason}
 
 Required visible-output limits:
@@ -3140,10 +3218,11 @@ Output only the corrected compressed injection text. No markdown fences, JSON, r
 
 function buildCompressionPrompt(kind, level, context, directText, budget = null) {
     const settings = getSettings();
-    const kindLabel = kind === 'continuity' ? 'Continuity State' : 'Lore Entries';
+    const parsedKind = parseLoreCompressionKind(kind);
+    const kindLabel = parsedKind.base === 'continuity' ? 'Continuity State' : parsedKind.tier ? `${RELEVANCE_META[parsedKind.tier]?.label || parsedKind.tier} Relevance Lore Entries` : 'Lore Entries';
     const computedBudget = budget || estimateTokenBudgetForCompression(directText, level);
-    const templateKey = kind === 'continuity' ? 'continuityCompressionPromptTemplate' : 'loreCompressionPromptTemplate';
-    const fallbackTemplate = kind === 'continuity'
+    const templateKey = parsedKind.base === 'continuity' ? 'continuityCompressionPromptTemplate' : 'loreCompressionPromptTemplate';
+    const fallbackTemplate = parsedKind.base === 'continuity'
         ? DEFAULT_SETTINGS.continuityCompressionPromptTemplate
         : DEFAULT_SETTINGS.loreCompressionPromptTemplate;
     const template = String(settings[templateKey] || fallbackTemplate || '');
@@ -3186,6 +3265,49 @@ function cleanCompressedText(text) {
         } catch (_) {}
     }
     return cleaned;
+}
+
+function parseLoreCompressionKind(kind = 'lore') {
+    const raw = String(kind || 'lore').toLowerCase().replace(/_/g, '-');
+    if (raw === 'continuity') return { base: 'continuity', tier: '' };
+    if (raw.includes('high')) return { base: 'lore', tier: 'high' };
+    if (raw.includes('normal')) return { base: 'lore', tier: 'normal' };
+    if (raw.includes('low')) return { base: 'lore', tier: 'low' };
+    return { base: 'lore', tier: '' };
+}
+function capTier(tier) { return tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : ''; }
+function tierSettingKey(tier, suffix) { return tier ? `lore${capTier(tier)}${suffix}` : `lore${suffix}`; }
+function getCompressionStatusObjectForKind(state, kind = 'lore') {
+    const parsed = parseLoreCompressionKind(kind);
+    if (parsed.base === 'continuity') return state?.continuityCompressionStatus || {};
+    if (parsed.tier) return state?.loreCompressionStatusByRelevance?.[parsed.tier] || {};
+    return state?.loreCompressionStatus || {};
+}
+function getCompressionStatusKeyForKind(kind = 'lore') {
+    const parsed = parseLoreCompressionKind(kind);
+    if (parsed.base === 'continuity') return 'continuityCompressionStatus';
+    if (parsed.tier) return `loreCompressionStatusByRelevance.${parsed.tier}`;
+    return 'loreCompressionStatus';
+}
+function getLoreTierMode(settings, tier) { return settings[tierSettingKey(tier, 'InjectionMode')] || (tier === 'high' ? 'direct' : 'compressed'); }
+function getLoreTierLevel(settings, tier) { return Math.max(1, Math.min(5, Number(settings[tierSettingKey(tier, 'CompressionLevel')]) || (tier === 'high' ? 1 : tier === 'low' ? 4 : 2))); }
+
+function getCompressionStatusTextForKind(state, kind = 'lore') {
+    const settings = getSettings();
+    const parsed = parseLoreCompressionKind(kind);
+    if (parsed.base === 'continuity') return getContinuityCompressionStatusText(state);
+    if (parsed.tier && getLoreTierMode(settings, parsed.tier) !== 'compressed') return 'Direct mode active; compression not used.';
+    if (!parsed.tier && (settings.loreInjectionMode || 'direct') !== 'compressed') return 'Direct mode active; compression not used.';
+    const status = getCompressionStatusObjectForKind(state, kind);
+    const direct = parsed.tier ? buildLorePreview(state, 'direct', parsed.tier) : buildLorePreview(state, 'direct');
+    const currentSignature = getCompressionSourceSignature(state, kind, direct);
+    if (status.lastSignature !== currentSignature) {
+        return status.lastError ? `cached compression is stale; last error: ${status.lastError}` : 'Cached compression is missing or stale. Click Compress Now.';
+    }
+    if (status.lastError) return `last compression failed: ${status.lastError}`;
+    if (!status.lastCompressedAt) return 'No cached model compression yet. Click Compress Now.';
+    const when = new Date(status.lastCompressedAt).toLocaleTimeString();
+    return `model-compressed ${when}; ${status.turnsSinceCompression || 0} turns since; ~${status.lastTokenEstimate || 0} tokens / ${status.lastCharacterCount || 0} chars${status.lastCompressionRatio ? `; ratio ${Math.round(status.lastCompressionRatio * 100)}%` : ''}`;
 }
 
 function getCompressionStatusText(state) {
@@ -3569,17 +3691,16 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     const status = document.createElement('span');
     status.className = 'wandlight-lore-badge wandlight-lore-badge-pending';
     status.textContent = 'pending';
-    addTooltip(status, 'This lore entry has not been accepted into the active lore matrix yet.');
+    addTooltip(status, 'This lore entry has not been accepted into the accepted lore matrix yet.');
     actions.appendChild(status);
     headerRow.appendChild(actions);
     card.appendChild(headerRow);
 
     const meta = document.createElement('div');
     meta.className = 'wandlight-lore-entry-meta';
-    meta.appendChild(createRegistryBadge('category', entry.category || 'canon', `Category: ${entry.category || 'canon'}. Pending cards use the same compact metadata style as accepted cards.`));
-    meta.appendChild(createRegistryBadge('canonStatus', entry.canonStatus || 'unknown', `Canon status: ${entry.canonStatus || 'unknown'}.`));
+    meta.appendChild(createRegistryBadge('category', entry.category || 'other', `Category: ${entry.category || 'other'}. Pending cards use the same compact metadata style as accepted cards.`));
+    meta.appendChild(createRegistryBadge('canonStatus', entry.canon || entry.canonStatus || 'canon', `Canon/AU: ${entry.canon || entry.canonStatus || 'canon'}.`));
     meta.appendChild(createBadge(`P${Number(entry.priority || 50)}`, 'Priority used for sorting, injection preference, and canon-lore suggestion limits.'));
-    meta.appendChild(createPendingReviewMetadataBadges(entry));
     meta.appendChild(createSpellMetadataBadges(entry));
     if (entry.confidence !== undefined) meta.appendChild(createBadge(`confidence ${entry.confidence}`, 'Model-provided confidence for this entry.'));
     card.appendChild(meta);
@@ -3719,28 +3840,25 @@ function createAcceptedLoreBulkControls(state) {
     const editRow = document.createElement('div');
     editRow.className = 'wandlight-lore-bulk-row wandlight-lore-bulk-edit-row';
     const selectedIdsNow = () => Array.from(getAcceptedSelectionSet(getState()));
-    editRow.appendChild(createBulkSelect('State', LORE_LIFECYCLE_STATUSES, 'Set lifecycle state for selected entries.', async value => {
+    editRow.appendChild(createBulkSelect('Relevance', LORE_RELEVANCE_TIERS, 'Set relevance tier for selected entries.', async value => {
         const ids = selectedIdsNow();
-        if (!(await confirmBulkAcceptedAction('Set State', ids, `Selected entries will have lifecycle state set to ${value}.`))) return;
+        if (!(await confirmBulkAcceptedAction('Set Relevance', ids, `Selected entries will have relevance set to ${value}.`))) return;
         bulkUpdateAcceptedLore(ids, raw => ({
             ...raw,
-            lifecycle: {
-                ...(raw.lifecycle || {}),
-                status: value,
-                manualOverride: true,
-                reason: 'Bulk lifecycle override.',
-            },
+            relevance: normalizeLoreRelevance(value),
+            lifecycle: { ...(raw.lifecycle || {}), status: '', computedStatus: '', manualOverride: false, reason: 'Relevance replaced lifecycle state.' },
+            extensions: { ...(raw.extensions || {}), autoRelevance: { ...(raw.extensions?.autoRelevance || {}), mode: 'manual', confidence: 1, reason: `Bulk relevance set to ${value}.`, updatedAt: Date.now() } },
         }));
-    }, disabled));
-    editRow.appendChild(createBulkSelect('Category', getLoreRegistryValues('categories', Object.keys(CATEGORY_LABELS)), 'Set category for selected entries.', async value => {
+    }, disabled, value => RELEVANCE_META[value]?.label || value));
+    editRow.appendChild(createBulkSelect('Category', getLoreRegistryValues('categories', LORE_CATEGORY_VALUES), 'Set category for selected entries.', async value => {
         const ids = selectedIdsNow();
         if (!(await confirmBulkAcceptedAction('Set Category', ids, `Selected entries will have category set to ${value}.`))) return;
         bulkUpdateAcceptedLore(ids, raw => ({ ...raw, category: value }));
     }, disabled));
-    editRow.appendChild(createBulkSelect('Canon', getLoreRegistryValues('canonStatuses', ['canon', 'divergent', 'au', 'fanon', 'contested', 'unknown']), 'Set canon status for selected entries.', async value => {
+    editRow.appendChild(createBulkSelect('Canon', getLoreRegistryValues('canonStatuses', ['canon', 'au']), 'Set canon status for selected entries.', async value => {
         const ids = selectedIdsNow();
         if (!(await confirmBulkAcceptedAction('Set Canon Status', ids, `Selected entries will have canon status set to ${value}.`))) return;
-        bulkUpdateAcceptedLore(ids, raw => ({ ...raw, canonStatus: value }));
+        bulkUpdateAcceptedLore(ids, raw => ({ ...raw, canon: value, canonStatus: value }));
     }, disabled));
     editRow.appendChild(createBulkSelect('Truth', getLoreRegistryValues('truthStatuses', ['true', 'false', 'public_belief', 'rumor', 'contested', 'hidden']), 'Set truth status for selected entries.', async value => {
         const ids = selectedIdsNow();
@@ -4020,6 +4138,15 @@ function renderLoreTab(container, state) {
         { tooltip: 'Suggest canon lore from the local database or generate story/AU lore from recent chat messages.', className: 'wandlight-lore-generation-collapsible' }
     ));
 
+    container.appendChild(createCollapsibleSection(
+        'lore.autoRelevance',
+        'Auto-Relevance',
+        getSettings().autoRelevanceEnabled ? `every ${getSettings().autoRelevanceEveryTurns || 5} turns` : 'off',
+        false,
+        createAutoRelevanceCard(state),
+        { tooltip: 'Automatically promotes or demotes accepted lore between High, Normal, and Low relevance tiers.' }
+    ));
+
     const pendingCount = (state?.pendingLoreEntries || []).length;
     container.appendChild(createCollapsibleSection(
         'lore.pendingReview',
@@ -4041,6 +4168,191 @@ function renderLoreTab(container, state) {
         createAcceptedLoreEntriesSection(state),
         { tooltip: 'Search, filter, bulk edit, tag, pin, mute, and edit accepted lore entries.', className: 'wandlight-lore-accepted-collapsible' }
     ));
+}
+
+function createAutoRelevanceCard(state) {
+    const settings = getSettings();
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-auto-relevance-card';
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Auto-Relevance';
+    addTooltip(title, 'Periodically rescans recent story context and adjusts accepted lore relevance tiers. Mute remains the hard injection on/off control.');
+    card.appendChild(title);
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Auto-Relevance uses local scoring for performance. It changes High/Normal/Low relevance, not mute or pin.';
+    card.appendChild(help);
+
+    const enabled = document.createElement('label');
+    enabled.className = 'wandlight-inline-toggle';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !!settings.autoRelevanceEnabled;
+    cb.addEventListener('change', () => {
+        const next = getSettings();
+        next.autoRelevanceEnabled = cb.checked;
+        if (cb.checked && (!next.autoRelevanceMode || next.autoRelevanceMode === 'off')) next.autoRelevanceMode = 'suggest';
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: true });
+    });
+    enabled.appendChild(cb);
+    enabled.appendChild(document.createTextNode(' Enable Auto-Relevance'));
+    card.appendChild(enabled);
+
+    const modeRow = document.createElement('div');
+    modeRow.className = 'wandlight-runtime-grid';
+    const modeLabel = document.createElement('label');
+    modeLabel.className = 'wandlight-inline-field';
+    const modeSpan = document.createElement('span');
+    modeSpan.textContent = 'Mode';
+    const modeSelect = document.createElement('select');
+    for (const [value, label] of [['suggest', 'Suggest changes'], ['apply_high_confidence', 'Apply high confidence'], ['off', 'Off']]) {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        if ((settings.autoRelevanceMode || 'suggest') === value) option.selected = true;
+        modeSelect.appendChild(option);
+    }
+    modeSelect.addEventListener('change', () => {
+        const next = getSettings();
+        next.autoRelevanceMode = modeSelect.value;
+        next.autoRelevanceEnabled = modeSelect.value !== 'off';
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: true });
+    });
+    modeLabel.appendChild(modeSpan);
+    modeLabel.appendChild(modeSelect);
+    modeRow.appendChild(modeLabel);
+    card.appendChild(modeRow);
+
+    const row = document.createElement('div');
+    row.className = 'wandlight-runtime-grid';
+    row.appendChild(createNumberSettingMini('Run every turns', 'autoRelevanceEveryTurns', settings.autoRelevanceEveryTurns || 5, 1, 50));
+    row.appendChild(createNumberSettingMini('Recent messages', 'autoRelevanceRecentMessages', settings.autoRelevanceRecentMessages || 20, 1, 200));
+    row.appendChild(createNumberSettingMini('Candidate cap', 'autoRelevanceCandidateCap', settings.autoRelevanceCandidateCap || 40, 1, 500));
+    row.appendChild(createNumberSettingMini('Min confidence %', 'autoRelevanceMinConfidence', Math.round((settings.autoRelevanceMinConfidence || 0.7) * 100), 1, 100, value => Number(value) / 100));
+    card.appendChild(row);
+
+    const modelRow = document.createElement('div');
+    modelRow.className = 'wandlight-runtime-grid';
+    const modelToggle = document.createElement('label');
+    modelToggle.className = 'wandlight-inline-toggle';
+    const modelCb = document.createElement('input');
+    modelCb.type = 'checkbox';
+    modelCb.checked = !!settings.autoRelevanceUseModel;
+    modelCb.addEventListener('change', () => {
+        const next = getSettings();
+        next.autoRelevanceUseModel = modelCb.checked;
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: true });
+    });
+    modelToggle.appendChild(modelCb);
+    modelToggle.appendChild(document.createTextNode(' Use Utility Provider adjudication'));
+    addTooltip(modelToggle, 'Optional second-stage model review. Wandlight still scores locally first and sends only the candidate cap subset.');
+    modelRow.appendChild(modelToggle);
+    modelRow.appendChild(createNumberSettingMini('Model candidate cap', 'autoRelevanceModelCandidateCap', settings.autoRelevanceModelCandidateCap || 30, 1, 80));
+    modelRow.appendChild(createNumberSettingMini('Model max tokens', 'autoRelevanceModelMaxTokens', settings.autoRelevanceModelMaxTokens || 2048, 512, 4096));
+    card.appendChild(modelRow);
+    const counts = getLoreRelevanceCounts(state);
+    card.appendChild(createKeyValue('Current tiers', `High ${counts.high} · Normal ${counts.normal} · Low ${counts.low} · Muted ${counts.muted}`, 'Current accepted lore counts by relevance.'));
+
+    const suggestions = Array.isArray(state.autoRelevanceSuggestions) ? state.autoRelevanceSuggestions : [];
+    if (suggestions.length) {
+        const box = document.createElement('div');
+        box.className = 'wandlight-auto-relevance-suggestions';
+        const heading = document.createElement('div');
+        heading.className = 'wandlight-runtime-help';
+        heading.textContent = `Pending relevance suggestions: ${suggestions.length}`;
+        box.appendChild(heading);
+        for (const suggestion of suggestions.slice(0, 12)) {
+            const row = document.createElement('div');
+            row.className = 'wandlight-auto-relevance-suggestion-row';
+            const summary = document.createElement('div');
+            summary.className = 'wandlight-auto-relevance-suggestion-summary';
+            summary.textContent = `${suggestion.title || suggestion.id}: ${suggestion.currentRelevance || '?'} -> ${suggestion.suggestedRelevance} (${Math.round((suggestion.confidence || 0) * 100)}%, ${suggestion.source || 'local'})`;
+            addTooltip(summary, suggestion.reason || 'Auto-Relevance suggestion.');
+            row.appendChild(summary);
+            const applyOne = createButton('Apply', 'Apply this relevance suggestion only.', () => {
+                const result = applyAutoRelevanceSuggestions([suggestion.id]);
+                refreshPanelBody({ preserveScroll: true });
+                refreshHeader();
+                toast(`Applied ${result.applied || 0} relevance suggestion.`, 'success');
+            }, 'wandlight-mini-button');
+            const rejectOne = createButton('Reject', 'Reject this relevance suggestion only.', () => {
+                const result = rejectAutoRelevanceSuggestions([suggestion.id]);
+                refreshPanelBody({ preserveScroll: true });
+                toast(`Rejected ${result.rejected || 0} relevance suggestion.`, 'info');
+            }, 'wandlight-mini-button');
+            row.appendChild(applyOne);
+            row.appendChild(rejectOne);
+            box.appendChild(row);
+        }
+        if (suggestions.length > 12) {
+            const more = document.createElement('div');
+            more.className = 'wandlight-runtime-help';
+            more.textContent = `${suggestions.length - 12} additional suggestions hidden. Use Apply Suggestions or Clear Suggestions for the full queue.`;
+            box.appendChild(more);
+        }
+        card.appendChild(box);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Run Auto-Relevance Now', 'Runs Auto-Relevance immediately. Local scoring always runs first; optional Utility Provider adjudication reviews only the candidate set.', async (btn) => {
+        const original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Running...';
+        try {
+            const result = await runAutoRelevance({ force: true });
+            refreshPanelBody({ preserveScroll: true });
+            refreshHeader();
+            toast(`Auto-Relevance ${result.status}: ${result.changed || 0} changed, ${result.suggested || 0} suggested, ${result.considered || 0} considered${result.modelStatus ? `, model ${result.modelStatus}` : ''}.`, 'info');
+        } catch (e) {
+            console.error(e);
+            toast(`Auto-Relevance failed: ${e?.message || e}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = original;
+        }
+    }, 'wandlight-primary-button'));
+    if (suggestions.length) {
+        actions.appendChild(createButton('Apply Suggestions', 'Applies all pending Auto-Relevance suggestions.', () => {
+            const result = applyAutoRelevanceSuggestions();
+            refreshPanelBody({ preserveScroll: true });
+            refreshHeader();
+            toast(`Auto-Relevance suggestions applied: ${result.applied || 0}.`, 'success');
+        }, 'wandlight-small-button'));
+        actions.appendChild(createButton('Reject All Suggestions', 'Rejects all pending Auto-Relevance suggestions without applying them.', () => {
+            clearAutoRelevanceSuggestions();
+            refreshPanelBody({ preserveScroll: true });
+            toast('Auto-Relevance suggestions rejected.', 'info');
+        }, 'wandlight-small-button'));
+    }
+    card.appendChild(actions);
+    return card;
+}
+
+function createNumberSettingMini(labelText, settingKey, value, min, max, transform = null) {
+    const label = document.createElement('label');
+    label.className = 'wandlight-inline-field';
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = String(min);
+    input.max = String(max);
+    input.value = String(value);
+    input.addEventListener('change', () => {
+        const next = getSettings();
+        const raw = Math.max(min, Math.min(max, Number(input.value) || Number(value) || min));
+        next[settingKey] = transform ? transform(raw) : raw;
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: true });
+    });
+    label.appendChild(span);
+    label.appendChild(input);
+    return label;
 }
 
 function createAcceptedLoreEntriesSection(state) {
@@ -4113,7 +4425,7 @@ function createAcceptedLoreEntriesSection(state) {
 
     const pinHelp = document.createElement('div');
     pinHelp.className = 'wandlight-runtime-help wandlight-pin-help';
-    pinHelp.textContent = 'Pinned = prioritized and protected from aggressive compression. Muted = excluded from injection. Lifecycle state controls whether an entry is eligible for injection.';
+    pinHelp.textContent = 'Pinned = prioritized/protected. Muted = excluded from injection. Relevance controls tier placement, sorting, and compression budget.';
     addTooltip(pinHelp, 'Pin important facts you always want kept prominent. Mute facts that should stay stored but not be sent to the model.');
     controls.appendChild(pinHelp);
 
@@ -4293,14 +4605,16 @@ function getFilteredLoreEntries(state) {
 
     if (panelState.selectedCategory === 'pending') {
         filtered = [];
-    } else if (panelState.selectedCategory === 'active') {
-        filtered = filtered.filter(e => e.isActive || e.isPinned);
+    } else if (panelState.selectedCategory === 'active' || panelState.selectedCategory === 'high') {
+        filtered = filtered.filter(e => e.relevance === 'high');
+    } else if (panelState.selectedCategory === 'normal') {
+        filtered = filtered.filter(e => e.relevance === 'normal');
+    } else if (panelState.selectedCategory === 'low') {
+        filtered = filtered.filter(e => e.relevance === 'low');
     } else if (panelState.selectedCategory === 'pinned') {
         filtered = filtered.filter(e => e.isPinned);
     } else if (panelState.selectedCategory === 'suppressed') {
         filtered = filtered.filter(e => e.isSuppressed);
-    } else if (['expired', 'blocked', 'future', 'canon_overdue', 'divergent'].includes(panelState.selectedCategory)) {
-        filtered = filtered.filter(e => (e.lifecycleStatus || e.lifecycle?.status || 'active') === panelState.selectedCategory);
     } else if (panelState.selectedCategory && panelState.selectedCategory !== 'all') {
         filtered = filtered.filter(e => e.category === panelState.selectedCategory);
     }
@@ -4352,73 +4666,42 @@ function sortLoreEntriesForPanel(a, b) {
 }
 
 function getLoreCategoryRank(category) {
-    const order = ['event', 'timeline', 'character', 'relationship', 'place', 'location', 'faction', 'knowledge', 'secret', 'item', 'artifact', 'spell', 'rule', 'canon', 'au', 'rumor', 'lie'];
+    const order = ['event', 'timeline', 'character', 'relationship', 'location', 'faction', 'knowledge', 'secret', 'item', 'spell', 'rule', 'other'];
     const idx = order.indexOf(category || '');
     return idx >= 0 ? idx : 99;
 }
 
 
-const LIFECYCLE_META = {
-    active: { label: 'Active', color: '#166534', textColor: '#dcfce7', tooltip: 'Injectable now.' },
-    canon_overdue: { label: 'Canon Overdue', color: '#a16207', textColor: '#fef3c7', tooltip: 'Canon timing suggests this should have resolved, but the story milestone has not happened. Still injectable if it is a guard.' },
-    blocked: { label: 'Blocked', color: '#92400e', textColor: '#ffedd5', tooltip: 'Not injected because required story conditions are missing.' },
-    future: { label: 'Future', color: '#1e3a8a', textColor: '#dbeafe', tooltip: 'Not injected yet.' },
-    expired: { label: 'Expired', color: '#4b5563', textColor: '#f9fafb', tooltip: 'Expired by story milestone or hard date. Not injected unless manually overridden.' },
-    divergent: { label: 'Divergent', color: '#7c2d12', textColor: '#ffedd5', tooltip: 'Conflicts with current branch or canon status. Not injected by default.' },
-    muted: { label: 'Muted', color: '#374151', textColor: '#f3f4f6', tooltip: 'Muted by user.' },
-    archived: { label: 'Archived', color: '#111827', textColor: '#e5e7eb', tooltip: 'Archived or disabled.' },
+const RELEVANCE_META = {
+    high: { label: 'High', color: '#166534', textColor: '#dcfce7', tooltip: 'Current-scene or immediate story relevance. Injects in the High-Relevance lore group.' },
+    normal: { label: 'Normal', color: '#1e3a8a', textColor: '#dbeafe', tooltip: 'Recent, branch-defining, or medium-range story relevance. Injects in the Normal-Relevance lore group.' },
+    low: { label: 'Low', color: '#4b5563', textColor: '#f9fafb', tooltip: 'Long-term background or distant past/future lore. Injects in the Low-Relevance lore group if enabled.' },
 };
+const LIFECYCLE_META = RELEVANCE_META;
 
 function getLifecycleStatus(entry) {
-    return entry.lifecycleStatus || entry.lifecycle?.status || entry.lifecycle?.computedStatus || 'active';
-}
-
-function titleCaseLabel(value) {
-    return String(value || '')
-        .replace(/[_-]+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .replace(/\b\w/g, ch => ch.toUpperCase());
-}
-
-function getPendingReviewInfo(entry) {
-    return entry?.extensions?.wandlightPendingReview && typeof entry.extensions.wandlightPendingReview === 'object'
-        ? entry.extensions.wandlightPendingReview
-        : {};
-}
-
-function createPendingReviewMetadataBadges(entry) {
-    const info = getPendingReviewInfo(entry);
-    const frag = document.createDocumentFragment();
-    if (info.sourceAlignment) frag.appendChild(createBadge(titleCaseLabel(info.sourceAlignment), `Source alignment: ${titleCaseLabel(info.sourceAlignment)}.`));
-    if (info.branchApplicability) frag.appendChild(createBadge(titleCaseLabel(info.branchApplicability), `Branch applicability: ${titleCaseLabel(info.branchApplicability)}.`));
-    if (info.temporalRole) frag.appendChild(createBadge(titleCaseLabel(info.temporalRole), `Temporal role: ${titleCaseLabel(info.temporalRole)}.`));
-    if (info.originalTemporalBounds && Object.values(info.originalTemporalBounds).some(Boolean)) {
-        frag.appendChild(createBadge('Open Ended', info.temporalNote || 'Far-future sentinel dates are treated as open-ended lookup horizons.'));
-    }
-    return frag;
+    return normalizeLoreRelevance(entry.relevance || entry.lifecycleStatus || entry.lifecycle?.status || entry.lifecycle?.computedStatus || 'normal');
 }
 
 function createEditableLifecycleBadge(entry, options = {}) {
     const value = getLifecycleStatus(entry);
-    const meta = LIFECYCLE_META[value] || LIFECYCLE_META.active;
+    const meta = RELEVANCE_META[value] || RELEVANCE_META.normal;
     const wrap = document.createElement('label');
     wrap.className = 'wandlight-lore-lifecycle-select-wrap';
-    if (options.pending) wrap.classList.add('wandlight-pending-lore-state-select-wrap');
     wrap.style.setProperty('--wandlight-chip-bg', meta.color);
     wrap.style.setProperty('--wandlight-chip-fg', meta.textColor);
-    addTooltip(wrap, `${meta.label}: ${entry.lifecycle?.reason || meta.tooltip} Use the dropdown to override this ${options.pending ? 'pending ' : ''}entry state.`);
+    addTooltip(wrap, `${meta.label} Relevance: ${meta.tooltip}`);
 
     const select = document.createElement('select');
     select.className = 'wandlight-lore-lifecycle-select';
-    select.setAttribute('aria-label', options.pending ? 'Pending lore state' : 'Lore lifecycle status');
+    select.setAttribute('aria-label', 'Lore relevance');
     select.addEventListener('click', e => e.stopPropagation());
     select.addEventListener('mousedown', e => e.stopPropagation());
 
-    for (const status of LORE_LIFECYCLE_STATUSES) {
+    for (const status of LORE_RELEVANCE_TIERS) {
         const option = document.createElement('option');
         option.value = status;
-        option.textContent = LIFECYCLE_META[status]?.label || status;
+        option.textContent = RELEVANCE_META[status]?.label || status;
         if (status === value) option.selected = true;
         select.appendChild(option);
     }
@@ -4426,40 +4709,40 @@ function createEditableLifecycleBadge(entry, options = {}) {
     select.addEventListener('change', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const nextStatus = select.value;
+        const nextRelevance = normalizeLoreRelevance(select.value);
         updateLoreEntryById(entry.id, raw => ({
             ...raw,
+            relevance: nextRelevance,
             lifecycle: {
                 ...(raw.lifecycle || {}),
-                status: nextStatus,
-                computedStatus: nextStatus,
-                manualOverride: true,
-                reason: `Manually set to ${nextStatus}.`,
+                status: '',
+                computedStatus: '',
+                manualOverride: false,
+                reason: `Relevance manually set to ${nextRelevance}.`,
                 lastEvaluatedAt: Date.now(),
             },
             extensions: {
                 ...(raw.extensions || {}),
-                wandlightPendingReview: raw.extensions?.wandlightPendingReview ? {
-                    ...(raw.extensions.wandlightPendingReview || {}),
-                    recommendedStatus: nextStatus,
-                    lifecycleRecommendation: LIFECYCLE_META[nextStatus]?.label || nextStatus,
-                    recommendationReason: `Manually set to ${nextStatus} before acceptance.`,
-                } : raw.extensions?.wandlightPendingReview,
+                autoRelevance: {
+                    ...(raw.extensions?.autoRelevance || {}),
+                    mode: 'manual',
+                    confidence: 1,
+                    reason: `User manually set relevance to ${nextRelevance}.`,
+                    updatedAt: Date.now(),
+                },
             },
         }), { deferSave: true });
-        if (options.pending) {
-            refreshPanelBody({ preserveScroll: true });
-        } else {
-            if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
-            refreshAcceptedLoreBulkToolbar();
-        }
+        if (options.pending) refreshPanelBody({ preserveScroll: true });
+        else if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
+        refreshAcceptedLoreBulkToolbar();
         refreshHeader();
-        toast(`${entry.title || 'Lore entry'} state set to ${LIFECYCLE_META[nextStatus]?.label || nextStatus}.`, 'info');
+        toast(`${entry.title || 'Lore entry'} relevance set to ${RELEVANCE_META[nextRelevance]?.label || nextRelevance}.`, 'info');
     });
 
     wrap.appendChild(select);
     return wrap;
 }
+
 
 function createRegistryBadge(field, value, tooltip = '') {
     const label = getLoreDisplayLabel(field, value);
@@ -4471,8 +4754,9 @@ function createRegistryBadge(field, value, tooltip = '') {
 
 function createEditableLoreMetaBadge(entry, field, value, values = null, tooltip = '') {
     const fallbackValues = {
-        category: ['canon', 'au', 'secret', 'relationship', 'timeline', 'character', 'event', 'item', 'knowledge', 'place', 'faction', 'spell', 'artifact', 'behavior', 'skill', 'age', 'future_guard', 'constraint'],
-        canonStatus: ['canon', 'divergent', 'au', 'fanon', 'contested', 'unknown'],
+        category: LORE_CATEGORY_VALUES,
+        canon: ['canon', 'au'],
+        canonStatus: ['canon', 'au'],
         truthStatus: ['true', 'false', 'public_belief', 'rumor', 'contested', 'hidden'],
         revealPolicy: ['public', 'private', 'do_not_reveal', 'only_if_knower_present', 'only_if_user_reveals'],
     };
@@ -4494,7 +4778,7 @@ function createEditableLoreMetaBadge(entry, field, value, values = null, tooltip
 
     const prefix = document.createElement('span');
     prefix.className = 'wandlight-lore-meta-select-prefix';
-    prefix.textContent = field === 'canonStatus'
+    prefix.textContent = (field === 'canonStatus' || field === 'canon')
         ? 'Canon'
         : field === 'truthStatus'
             ? 'Truth'
@@ -4530,7 +4814,9 @@ function createEditableLoreMetaBadge(entry, field, value, values = null, tooltip
         e.preventDefault();
         e.stopPropagation();
         const nextValue = select.value;
-        updateLoreEntryById(entry.id, raw => ({ ...raw, [field]: nextValue }), { deferSave: true });
+        updateLoreEntryById(entry.id, raw => field === 'canonStatus' || field === 'canon'
+            ? ({ ...raw, canon: nextValue, canonStatus: nextValue })
+            : ({ ...raw, [field]: nextValue }), { deferSave: true });
         if (!refreshAcceptedLoreRow(entry.id)) refreshAcceptedLoreList({ preserveScroll: true });
         refreshHeader();
         toast(`${entry.title || 'Lore entry'} ${prefix.textContent.toLowerCase()} set to ${getLoreDisplayLabel(field, nextValue)}.`, 'info');
@@ -4698,14 +4984,14 @@ function createEntryCard(entry, state) {
     const metaRow = document.createElement('div');
     metaRow.className = 'wandlight-lore-entry-meta';
     if (isExpanded) {
-        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'canon', null, `Category: ${entry.category || 'canon'}. Use dropdown to change.`));
-        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canonStatus || 'unknown', null, `Canon status: ${entry.canonStatus || 'unknown'}. Use dropdown to change.`));
+        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'other', null, `Category: ${entry.category || 'canon'}. Use dropdown to change.`));
+        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canon || entry.canonStatus || 'canon', null, `Canon/AU: ${entry.canon || entry.canonStatus || 'canon'}. Use dropdown to change.`));
         metaRow.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', null, `Truth/reveal status: ${entry.truthStatus || 'true'}. Use dropdown to change.`));
         metaRow.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', null, `Reveal policy: ${entry.revealPolicy || 'private'}. Use dropdown to change.`));
         metaRow.appendChild(createEditablePriorityBadge(entry));
     } else {
-        metaRow.appendChild(createRegistryBadge('category', entry.category || 'canon', `Category: ${entry.category || 'canon'}. Expand the entry to edit.`));
-        metaRow.appendChild(createRegistryBadge('canonStatus', entry.canonStatus || 'unknown', `Canon status: ${entry.canonStatus || 'unknown'}. Expand the entry to edit.`));
+        metaRow.appendChild(createRegistryBadge('category', entry.category || 'other', `Category: ${entry.category || 'canon'}. Expand the entry to edit.`));
+        metaRow.appendChild(createRegistryBadge('canonStatus', entry.canon || entry.canonStatus || 'canon', `Canon/AU: ${entry.canon || entry.canonStatus || 'canon'}. Expand the entry to edit.`));
         metaRow.appendChild(createBadge(`P${Number(entry.priority || 50)}`, 'Priority. Expand the entry to edit.'));
     }
     metaRow.appendChild(createSpellMetadataBadges(entry));
@@ -4766,7 +5052,7 @@ function createEntryCard(entry, state) {
         if (conditions.length) {
             const cond = document.createElement('div');
             cond.className = 'wandlight-lore-entry-conditions';
-            cond.textContent = `Active when: ${conditions.join(' | ')}`;
+            cond.textContent = `Relevant when: ${conditions.join(' | ')}`;
             addTooltip(cond, 'Context conditions used to determine whether this lore entry should be active.');
             details.appendChild(cond);
         }
@@ -5500,11 +5786,12 @@ function getWorkflowTooltip(settings) {
 
 function getCategoryCount(cat, entries, counts) {
     if (cat === 'all') return counts.all;
-    if (cat === 'active') return counts.active;
+    if (cat === 'active' || cat === 'high') return counts.high || counts.active || 0;
+    if (cat === 'normal') return counts.normal || 0;
+    if (cat === 'low') return counts.low || 0;
     if (cat === 'pinned') return counts.pinned;
     if (cat === 'suppressed') return counts.suppressed;
     if (cat === 'pending') return counts.pending;
-    if (['expired', 'blocked', 'future', 'canon_overdue', 'divergent'].includes(cat)) return counts[cat] || 0;
     return entries.filter(e => e.category === cat).length;
 }
 
@@ -5513,15 +5800,13 @@ function getCategoryTooltip(cat) {
     if (registryMeta?.description) return registryMeta.description;
     const map = {
         all: 'Shows every accepted and pending lore entry.',
-        active: 'Shows entries whose date, branch, character, location, or scope rules match the current Continuity/Context state. Lore may still inject fallback high-priority entries when this count is 0.',
-        pinned: 'Shows entries manually prioritized for injection.',
+        active: 'Legacy alias for High Relevance.',
+        high: 'Shows accepted lore in the High-Relevance injection tier.',
+        normal: 'Shows accepted lore in the Normal-Relevance injection tier.',
+        low: 'Shows accepted lore in the Low-Relevance injection tier.',
+        pinned: 'Shows entries manually prioritized and protected during injection/compression.',
         suppressed: 'Shows muted entries excluded from injection.',
         pending: 'Shows generated entries that still need review.',
-        expired: 'Shows lore that has expired by story milestone or hard date. Expired entries are not injected unless manually overridden.',
-        blocked: 'Shows lore blocked by missing story milestones or scene conditions.',
-        future: 'Shows lore not yet active for the current story state.',
-        canon_overdue: 'Shows canon-timed lore where the canon date has passed, but the story milestone has not happened.',
-        divergent: 'Shows lore that does not match the current branch or canon status.',
     };
     return map[cat] || `Shows lore entries in category: ${cat}.`;
 }

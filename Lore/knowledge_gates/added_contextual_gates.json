@@ -80,14 +80,16 @@
     "gateType": "knowledge_gate",
     "protected": false,
     "locked": true,
-    "userEditable": true
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "normal"
   },
   {
     "schemaVersion": 2,
     "id": "future_guard_deathly_hallows_before_year7",
     "title": "Future Guard: Deathly Hallows Before Year 7",
     "kind": "future_guard",
-    "category": "future_guard",
+    "category": "timeline",
     "canonStatus": "canon",
     "truthStatus": "hidden",
     "revealPolicy": "do_not_reveal",
@@ -156,14 +158,16 @@
     },
     "gateType": "future_guard",
     "locked": true,
-    "userEditable": true
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "normal"
   },
   {
     "schemaVersion": 2,
     "id": "behavior_hermione_year6_research_mode",
     "title": "Hermione Behavior: Year 6 Research Mode",
     "kind": "behavior_gate",
-    "category": "behavior",
+    "category": "character",
     "canonStatus": "canon",
     "truthStatus": "true",
     "revealPolicy": "public",
@@ -217,7 +221,9 @@
     "gateType": "behavior_gate",
     "protected": false,
     "locked": true,
-    "userEditable": true
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "low"
   },
   {
     "schemaVersion": 2,
@@ -277,14 +283,16 @@
     "gateType": "spell_gate",
     "protected": false,
     "locked": true,
-    "userEditable": true
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "low"
   },
   {
     "schemaVersion": 2,
     "id": "institution_hogwarts_year6_security",
     "title": "Hogwarts Security State - Year 6",
     "kind": "institution_state",
-    "category": "place",
+    "category": "location",
     "canonStatus": "canon",
     "truthStatus": "true",
     "revealPolicy": "public",
@@ -334,14 +342,22 @@
       "schoolYear": 6,
       "book": "Half-Blood Prince"
     },
-    "activation": {
-      "requiresEvents": [
-        "dumbledore_death_occurs"
-      ]
-    },
+    "activation": {},
     "gateType": "institution_state",
     "protected": false,
     "locked": true,
-    "userEditable": true
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "low",
+    "extensions": {
+      "deathStateGatePass": {
+        "method": "removed positive requiresEvents from canon database entry",
+        "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+        "appliedIn": "Wandlight relevance-tier regression repair pass",
+        "requiresEventsRemoved": [
+          "dumbledore_death_occurs"
+        ]
+      }
+    }
   }
 ]

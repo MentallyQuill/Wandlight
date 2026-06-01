@@ -331,10 +331,11 @@ Required shape:
   "chunkSummary": "string",
   "facts": [
     {
-      "category": "character|relationship|item|spell|knowledge|place|faction|goal|timeline|event|secret|artifact|skill|rule",
+      "category": "character|relationship|item|spell|knowledge|location|faction|timeline|event|secret|rule",
       "subject": "string",
       "fact": "one atomic durable story fact",
       "priorityHint": "high|medium|low",
+      "relevanceHint": "high|normal|low",
       "messageRefs": [1]
     }
   ]
@@ -860,13 +861,15 @@ Task:
 - Do not output full lore-entry schema. Output compact candidate facts only.
 - Do not create generic Harry Potter encyclopedia facts unless the story messages make them current, divergent, private, or plot-relevant.
 - Capture new/original characters, canon characters as used by this story, relationships, possessions/items, spells/skills, secrets/knowledge boundaries, locations, factions, goals/threads, timeline anchors, and AU divergences.
-- Use priorityHint: high only for active secrets, identity/state constraints, major relationship/current-goal facts, critical possessions, current injuries/conditions, or major AU divergences; medium for durable useful facts; low for flavor/background.
+- Use priorityHint: high only for active secrets, identity constraints, major relationship/current-goal facts, critical possessions, current injuries/conditions, or major AU divergences; medium for durable useful facts; low for flavor/background.
+- Use relevanceHint: high for facts from the current scene or immediate next-scene constraints; normal for durable recent-background/story facts; low for long-term background or flavor.
+- Story-scan output is AU/story lore by default unless the message explicitly restates a canon fact.
 
 Output requirements:
 - Return ONLY valid JSON. No markdown fences. No commentary.
 - Required shape: {"chunkSummary":"string","facts":[...]}
 - Produce up to ${factsPerChunk} facts when supported by the chunk. Sparse chunks may produce fewer.
-- Every fact must include: category, subject, fact, priorityHint, messageRefs.
+- Every fact must include: category, subject, fact, priorityHint, relevanceHint, messageRefs.
 - messageRefs must be message numbers from the bracketed message labels.
 - Keep facts atomic: one durable claim per fact.
 - Use categories: character, relationship, item, spell, knowledge, place, faction, goal, timeline, event, secret, artifact, skill, rule.
@@ -901,6 +904,8 @@ function normalizeCandidateFact(raw = {}, chunk = {}) {
         subject: subject || fact.split(/[.;]/)[0].slice(0, 80).trim() || 'Story fact',
         fact,
         priorityHint: String(raw.priorityHint || raw.priority || 'medium').trim().toLowerCase(),
+        relevanceHint: String(raw.relevanceHint || raw.relevance || '').trim().toLowerCase(),
+        canon: String(raw.canon || raw.canonMode || 'au').trim().toLowerCase(),
         confidence: Number.isFinite(Number(raw.confidence)) ? Number(raw.confidence) : 0.75,
         messageRefs: messageRefs.map(v => Number(v)).filter(n => Number.isFinite(n) && n > 0),
         scope: raw.scope && typeof raw.scope === 'object' ? raw.scope : {},
@@ -995,10 +1000,27 @@ function inferScopeFromCandidate(candidate = {}) {
 
 function categoryToLoreCategory(category = '') {
     const c = String(category || '').toLowerCase();
-    if (c === 'location') return 'place';
+    if (c === 'place') return 'location';
+    if (c === 'artifact' || c === 'object') return 'item';
     if (c === 'goal') return 'event';
-    if (c === 'rule') return 'knowledge';
-    return ['character', 'relationship', 'item', 'spell', 'knowledge', 'place', 'faction', 'timeline', 'event', 'secret', 'artifact', 'skill'].includes(c) ? c : 'knowledge';
+    if (c === 'skill' || c === 'behavior' || c === 'age') return 'character';
+    return ['character', 'relationship', 'item', 'spell', 'knowledge', 'location', 'faction', 'timeline', 'event', 'secret', 'rule'].includes(c) ? c : 'knowledge';
+}
+
+function candidateRelevanceToLoreRelevance(candidate = {}, profile = {}) {
+    const raw = String(candidate.relevanceHint || candidate.relevance || '').trim().toLowerCase();
+    if (['high', 'normal', 'low'].includes(raw)) return raw;
+    const priority = String(candidate.priorityHint || '').trim().toLowerCase();
+    const category = String(candidate.category || '').trim().toLowerCase();
+    if (profile.mode === 'incremental' && ['high', 'urgent', 'critical'].includes(priority)) return 'high';
+    if (['secret', 'relationship', 'item', 'artifact', 'goal'].includes(category) && ['high', 'critical'].includes(priority)) return 'high';
+    if (['low', 'flavor', 'background'].includes(priority)) return 'low';
+    return profile.mode === 'incremental' ? 'normal' : 'normal';
+}
+
+function candidateCanonToLoreCanon(candidate = {}) {
+    const raw = String(candidate.canon || candidate.canonMode || candidate.canonStatus || '').trim().toLowerCase();
+    return raw === 'canon' ? 'canon' : 'au';
 }
 
 function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, profile = {} } = {}) {
@@ -1017,7 +1039,9 @@ function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, pr
         kind: category === 'spell' ? 'spell_use' : category === 'relationship' ? 'relationship_state' : category === 'item' || category === 'artifact' ? 'object_state' : 'fact',
         gateType: category === 'spell' ? 'spell_use' : category === 'relationship' ? 'relationship_state' : category === 'item' || category === 'artifact' ? 'object_state' : 'fact',
         category,
-        canonStatus: 'au',
+        canon: candidateCanonToLoreCanon(candidate),
+        canonStatus: candidateCanonToLoreCanon(candidate),
+        relevance: candidateRelevanceToLoreRelevance(candidate, profile),
         truthStatus: category === 'secret' ? 'hidden' : 'true',
         revealPolicy: category === 'secret' ? 'private' : 'public',
         priority: priorityFromHint(candidate.priorityHint, category),
@@ -1046,6 +1070,8 @@ function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, pr
                 messageHash: chunk?.messageHash || '',
                 evidenceMessageRefs: messageRefs,
                 candidateCategory: candidate.category || category,
+                relevanceHint: candidate.relevanceHint || '',
+                canonHint: candidate.canon || '',
                 generatedAt: Date.now(),
                 targetTotal: profile.targetTotal || 0,
             },

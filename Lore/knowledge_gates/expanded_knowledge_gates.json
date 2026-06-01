@@ -92,7 +92,9 @@
         "autoMuteOnExpire": true
       },
       "gateType": "knowledge_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -183,7 +185,9 @@
         "autoMuteOnExpire": true
       },
       "gateType": "knowledge_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -277,7 +281,9 @@
         "autoMuteOnExpire": true
       },
       "gateType": "knowledge_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -363,7 +369,9 @@
         "autoMuteOnExpire": true
       },
       "gateType": "knowledge_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -456,7 +464,9 @@
         "autoMuteOnExpire": true
       },
       "gateType": "knowledge_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     },
     {
       "schemaVersion": 2,
@@ -552,7 +562,9 @@
         "autoMuteOnExpire": true
       },
       "gateType": "knowledge_gate",
-      "userEditable": true
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal"
     }
   ]
 }

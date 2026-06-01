@@ -5,10 +5,7 @@
 
 import {
     MAX_PRESENT_CHARS_IN_MEMO,
-    MAX_KNOWLEDGE_FACTS_PER_CHAR,
     MAX_ACTIVE_THREADS_IN_MEMO,
-    MAX_RELATIONSHIPS_IN_MEMO,
-    MAX_FLAGS_IN_MEMO,
 } from './constants.js';
 import { getSettings } from './state-manager.js';
 import { getInjectableLoreEntries, getResolvedLoreInjection } from './lore-matrix.js';
@@ -103,13 +100,8 @@ function buildContinuityDirectMemo(state, settingsOverride = {}) {
         if (state.canon?.inUniverseDate) canonParts.push(`Date: ${state.canon.inUniverseDate}`);
         if (state.canon?.canonBoundary) canonParts.push(`Canon boundary: ${state.canon.canonBoundary}`);
         if (canonParts.length) {
-            lines.push('## Canon / Date');
+            lines.push('## Scene and Timeline');
             lines.push(compressLine(canonParts.join(' | '), settings, 'continuity'));
-        }
-        if (Array.isArray(state.canon?.divergences) && state.canon.divergences.length) {
-            for (const d of state.canon.divergences.slice(0, 5)) {
-                lines.push(compressLine(`- Divergence: ${d.description || d}${d.sinceDate ? ` (since ${d.sinceDate})` : ''}`, settings, 'continuity'));
-            }
         }
     }
 
@@ -118,7 +110,7 @@ function buildContinuityDirectMemo(state, settingsOverride = {}) {
             || (state.scene?.presentCharacters || []).length || state.scene?.currentActivity;
         if (hasScene) {
             lines.push('');
-            lines.push('## Scene');
+            lines.push('## Current Scene');
             const sceneParts = [];
             if (state.scene.location) sceneParts.push(`Location: ${state.scene.location}`);
             if (state.scene.timeOfDay) sceneParts.push(`Time: ${state.scene.timeOfDay}`);
@@ -153,53 +145,11 @@ function buildContinuityDirectMemo(state, settingsOverride = {}) {
         }
     }
 
-    if (enabled('knowledge') && state.knowledge && Object.keys(state.knowledge).length) {
-        const relevantKnowledge = filterRelevantKnowledge(state);
-        if (Object.keys(relevantKnowledge).length) {
-            lines.push('');
-            lines.push('## Character Knowledge');
-            for (const [char, facts] of Object.entries(relevantKnowledge).slice(0, 8)) {
-                const truncated = facts.slice(0, MAX_KNOWLEDGE_FACTS_PER_CHAR);
-                lines.push(compressLine(`${char}: ${truncated.join('; ')}`, settings, 'continuity'));
-            }
-        }
-    }
-
-    if (enabled('secrets') && Array.isArray(state.secrets) && state.secrets.length) {
-        const nonPublicSecrets = state.secrets.filter(isNonPublicSecret).slice(0, 8);
-        if (nonPublicSecrets.length) {
-            lines.push('');
-            lines.push('## Secrets');
-            for (const s of nonPublicSecrets) {
-                const parts = [`- ${s.fact}`];
-                if (s.trueState) parts.push(`Truth: ${s.trueState}`);
-                if (s.publicVersion) parts.push(`Public: ${s.publicVersion}`);
-                if ((s.whoKnows || []).length) parts.push(`Known by: ${s.whoKnows.join(', ')}`);
-                lines.push(compressLine(parts.join(' | '), settings, 'continuity'));
-            }
-        }
-    }
-
-    if (enabled('relationships') && Array.isArray(state.relationships) && state.relationships.length) {
-        const rels = state.relationships.slice(0, MAX_RELATIONSHIPS_IN_MEMO);
-        if (rels.length) {
-            lines.push('');
-            lines.push('## Relationships');
-            for (const r of rels) {
-                const parts = [`- ${r.pair}`];
-                if (r.notes) parts.push(r.notes);
-                if (r.tension) parts.push(`tension: ${r.tension}`);
-                if (r.trust) parts.push(`trust: ${r.trust}`);
-                lines.push(compressLine(parts.join(' | '), settings, 'continuity'));
-            }
-        }
-    }
-
     if (enabled('threads') && Array.isArray(state.threads) && state.threads.length) {
         const activeThreads = state.threads.filter(t => t.status === 'active').slice(0, MAX_ACTIVE_THREADS_IN_MEMO);
         if (activeThreads.length) {
             lines.push('');
-            lines.push('## Active Threads');
+            lines.push('## Active Goals and Threads');
             for (const t of activeThreads) {
                 lines.push(compressLine(`- ${t.description}${(t.unresolvedConsequences || []).length ? ` | hooks: ${t.unresolvedConsequences.join('; ')}` : ''}`, settings, 'continuity'));
             }
@@ -208,7 +158,7 @@ function buildContinuityDirectMemo(state, settingsOverride = {}) {
 
     if (enabled('inventory') && Array.isArray(state.inventory) && state.inventory.length) {
         lines.push('');
-        lines.push('## Inventory / Objects');
+        lines.push('## Key Items');
         for (const i of state.inventory.slice(0, 10)) {
             lines.push(compressLine(`- ${i.owner || 'Unowned'}: ${i.item}${i.status ? ` (${i.status})` : ''}${i.location ? ` at ${i.location}` : ''}`, settings, 'continuity'));
         }
@@ -216,20 +166,12 @@ function buildContinuityDirectMemo(state, settingsOverride = {}) {
 
     if (enabled('objectives') && Array.isArray(state.objectives) && state.objectives.length) {
         lines.push('');
-        lines.push('## Objectives');
+        lines.push('## Active Goals');
         for (const o of state.objectives.filter(x => x.status !== 'completed' && x.status !== 'abandoned').slice(0, 8)) {
             lines.push(compressLine(`- ${o.owner || 'Story'}: ${o.goal}${o.status ? ` [${o.status}]` : ''}${o.stakes ? ` | stakes: ${o.stakes}` : ''}`, settings, 'continuity'));
         }
     }
 
-    if (enabled('flags')) {
-        const flags = (state.continuityFlags || []).filter(f => !f?.resolved).slice(0, MAX_FLAGS_IN_MEMO);
-        if (flags.length) {
-            lines.push('');
-            lines.push('## Continuity Flags');
-            for (const f of flags) lines.push(`- [${f.severity}] ${f.type}: ${f.description}`);
-        }
-    }
 
     const body = lines.join('\n').trim();
     return body ? `## Continuity State\n${body}` : '';
@@ -259,26 +201,6 @@ function buildLoreDirectMemo(state, settingsOverride = {}) {
         lines.push(formatLoreEntryForInjection(entry, settings, pinnedIds.has(entry.id), state));
     }
     return lines.join('\n');
-}
-
-function filterRelevantKnowledge(state) {
-    const presentChars = state.scene?.presentCharacters || [];
-    if (!presentChars.length) return state.knowledge || {};
-    const presentLower = presentChars.map(c => c.toLowerCase().trim());
-    const relevant = {};
-    for (const [char, facts] of Object.entries(state.knowledge || {})) {
-        const charLower = char.toLowerCase().trim();
-        const isRelevant = presentLower.some(pc => charLower === pc || charLower.includes(pc) || pc.includes(charLower) || pc.split(' ').some(w => w.length > 2 && charLower.includes(w)));
-        if (isRelevant && Array.isArray(facts) && facts.length) relevant[char] = facts;
-    }
-    return relevant;
-}
-
-function isNonPublicSecret(s) {
-    const who = Array.isArray(s?.whoKnows) ? s.whoKnows : (typeof s?.whoKnows === 'string' ? [s.whoKnows] : []);
-    if (!who.length) return true;
-    const whoLower = who.map(w => w.toLowerCase());
-    return !whoLower.includes('everyone') && !whoLower.includes('all') && !whoLower.includes('public');
 }
 
 function formatEmotionalState(raw = {}, settings = getSettings()) {
@@ -407,11 +329,7 @@ export function getMemoSignature(state, mode = null, kind = 'combined') {
             characters: state?.characters || [],
             inventory: state?.inventory || [],
             objectives: state?.objectives || [],
-            knowledge: state?.knowledge || {},
-            secrets: state?.secrets || [],
-            relationships: state?.relationships || [],
             threads: state?.threads || [],
-            flags: state?.continuityFlags || [],
         } : null,
         loreIds: kind !== 'continuity' ? (state?.loreMatrix || []).map(e => `${e?.id || ''}:${e?.updatedAt || ''}:${e?.userEdited ? 1 : 0}`).join('|') : '',
         pinned: (state?.loreSelection?.pinnedIds || []).join('|'),

@@ -13,6 +13,20 @@ import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeL
 const MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST = 200000;
 const migratedStateRefs = new WeakSet();
 
+const RETIRED_CONTINUITY_CONFIG_KEYS = ['knowledge', 'secrets', 'relationships', 'flags', 'storyMilestones'];
+const ACTIVE_CONTINUITY_CHANGE_KEYS = ['canon', 'scene', 'characters', 'inventory', 'objectives', 'threads'];
+
+function disableRetiredContinuitySections(state) {
+    if (!state || typeof state !== 'object') return state;
+    if (!state.continuityConfig || typeof state.continuityConfig !== 'object' || Array.isArray(state.continuityConfig)) {
+        state.continuityConfig = {};
+    }
+    for (const key of RETIRED_CONTINUITY_CONFIG_KEYS) {
+        state.continuityConfig[key] = false;
+    }
+    return state;
+}
+
 
 // ── Settings I/O ────────────────────────────────────────────────────────────────
 
@@ -774,6 +788,12 @@ export function migrateState(state) {
         state._version = 9;
     }
 
+    // ── Schema v10: streamlined live continuity sections ─────────────────────
+    if (state._version < 10) {
+        disableRetiredContinuitySections(state);
+        state._version = 10;
+    }
+
     // ── Always normalize lore fields post-migration ────────────────────────
     // First compact known-heavy canon DB payloads and oversized pending batches so
     // a poisoned chat can recover instead of freezing during panel render/save.
@@ -930,6 +950,7 @@ function normalizeContinuityStructure(state) {
             state.continuityConfig[key] = state.continuityConfig[key] !== false;
         }
     }
+    disableRetiredContinuitySections(state);
 
     if (!state.scene || typeof state.scene !== 'object' || Array.isArray(state.scene)) {
         state.scene = { ...defaults.scene };
@@ -1107,9 +1128,7 @@ const VALID_ENUMS = {
 };
 
 /** Known top-level change keys */
-const KNOWN_CHANGE_KEYS = new Set([
-    'canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags', 'storyMilestones',
-]);
+const KNOWN_CHANGE_KEYS = new Set(ACTIVE_CONTINUITY_CHANGE_KEYS);
 
 /**
  * Validates a WandlightDelta against the schema.

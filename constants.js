@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -176,7 +176,7 @@ Target length: at most {{targetTokens}} tokens / {{targetCharacters}} characters
 Hard maximum visible output: {{hardTokenLimit}} tokens / {{hardCharacterLimit}} characters.
 
 Rules:
-- Preserve current scene state, character state, knowledge boundaries, secrets, active goals, relationships, and contradictions.
+- Preserve current scene/timeline state, active character state, key items, and active goals/threads.
 - Keep emotional state only when it currently affects character behavior.
 - Merge redundant details and rewrite for density; do not simply restate the source.
 - At compression level 3 or higher, prefer compact bullets and phrase fragments over prose.
@@ -224,24 +224,14 @@ Direct injection block:
         'injection.loreHandling': true,
         'injection.compressionPrompts': true,
         'continuity.trackedSections': true,
-        'continuity.knowledge': true,
-        'continuity.secrets': true,
-        'continuity.relationships': true,
         'continuity.threads': true,
         'continuity.inventory': true,
         'continuity.objectives': true,
-        'continuity.flags': true,
         'continuity.prompt.canonScene': true,
-        'continuity.prompt.canonDivergences': true,
         'continuity.prompt.characters': true,
-        'continuity.prompt.storyMilestones': true,
-        'continuity.prompt.knowledge': true,
-        'continuity.prompt.secrets': true,
-        'continuity.prompt.relationships': true,
         'continuity.prompt.threads': true,
         'continuity.prompt.inventory': true,
         'continuity.prompt.objectives': true,
-        'continuity.prompt.flags': true,
     },
 
 
@@ -249,17 +239,11 @@ Direct injection block:
     // Continuity scan prompt overrides. These are appended to the extractor prompt only
     // when the corresponding section is enabled/tracked for the current chat.
     continuitySectionPrompts: {
-        canonScene: 'Extract only explicitly established canon/date and scene details: era, in-universe date, canon boundary, location, time of day, weather, ambience, present/nearby characters, and current activity. Do not invent missing fields.',
-        canonDivergences: 'Track AU or changed-canon divergences separately from ordinary scene state. Only add a divergence when the roleplay clearly contradicts or departs from canon.',
-        characters: 'Track character-specific state when clearly supported: role, location, clothing, posture, physical condition, current emotional state, inventory, and immediate goals. Keep emotions current-state, not permanent personality.',
-        storyMilestones: 'Detect story milestone status changes only from roleplay evidence. Do not mark milestones happened merely because a canon date passed.',
-        knowledge: 'Track who knows what. Prefer character-keyed concise facts. Do not give characters knowledge that has not been established in this roleplay.',
-        secrets: 'Track non-public truths, who knows them, who suspects them, and the public version. Preserve reveal boundaries.',
-        relationships: 'Track relationship state changes such as trust, tension, alliance, suspicion, affection, rivalry, or dependence only when the scene supports them.',
-        threads: 'Track active, dormant, or resolved story threads and unresolved consequences that should influence future turns.',
-        inventory: 'Track important carried items, ownership, locations, object status, and temporary possessions only when likely to matter later.',
-        objectives: 'Track current goals, plans, blockers, stakes, and whether objectives are active, blocked, completed, or abandoned.',
-        flags: 'Track contradictions, warnings, uncertainties, and resolved continuity issues. Be conservative; do not flag ambiguity as contradiction.'
+        canonScene: 'Extract only explicitly established scene and timeline details: era, in-universe date, canon boundary, location, time of day, weather, ambience, present/nearby characters, and current activity. Do not invent missing fields. Durable AU/canon divergences belong in Story Lore, not Continuity.',
+        characters: 'Track active character state when clearly supported: role, current location, clothing, posture, physical condition, current emotional state, carried key items, and immediate goals. Do not summarize relationship history or durable knowledge here; Story Lore owns that memory.',
+        threads: 'Track only active immediate threads that affect the next scene or next few replies. Durable plot history, milestones, secrets, and relationship history belong in Story Lore.',
+        inventory: 'Track only consequential currently relevant items: carried key items, ownership, location, and immediate object status. Item history belongs in Story Lore.',
+        objectives: 'Track current goals, plans, blockers, stakes, and whether objectives are active, blocked, completed, or abandoned. Long-term plot facts belong in Story Lore.'
     },
 
     // Utility provider: used by compression and Scan Continuity State / automatic continuity tracking. Internal key retained for backward compatibility.
@@ -315,14 +299,16 @@ export function getDefaultState() {
             characters: true,
             appearance: true,
             emotionalState: true,
-            knowledge: true,
-            secrets: true,
-            relationships: true,
             threads: true,
             inventory: true,
             objectives: true,
-            flags: true,
-            storyMilestones: true,
+            // Retired continuity sections remain in saved state for backward compatibility
+            // but are no longer scanned, injected, or shown in the streamlined UI.
+            knowledge: false,
+            secrets: false,
+            relationships: false,
+            flags: false,
+            storyMilestones: false,
         },
         scene: {
             location: '',

@@ -229,13 +229,11 @@ export function renderStatePanel(container, state) {
         }
     }
 
-    addSection('Canon Facts', state.canon, '\uD83D\uDCD6');
-    addSection('Scene', state.scene, '\uD83C\uDFAC');
-    addSection('Knowledge', state.knowledge, '\uD83E\uDDE0');
-    addSection('Secrets', state.secrets, '\uD83D\uDD12');
-    addSection('Relationships', state.relationships, '\uD83D\uDC65');
-    addSection('Threads', state.threads, '\uD83E\uDDF5');
-    addSection('Continuity Flags', state.continuityFlags, '\uD83C\uDFF4');
+    addSection('Scene and Timeline', { ...(state.canon || {}), ...(state.scene || {}) }, '\uD83C\uDFAC');
+    addSection('Active Characters', state.characters, '\uD83D\uDC65');
+    addSection('Key Items', state.inventory, '\uD83C\uDF92');
+    addSection('Active Goals', state.objectives, '\uD83C\uDFAF');
+    addSection('Active Threads', state.threads, '\uD83E\uDDF5');
 
     // ── Lore Context ──
     if (state.loreContext) {

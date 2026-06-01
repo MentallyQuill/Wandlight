@@ -17,48 +17,37 @@ import {
 } from './state-manager.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
 
+const ACTIVE_CONTINUITY_SECTIONS = ['canon', 'scene', 'characters', 'inventory', 'objectives', 'threads'];
+const RETIRED_CONTINUITY_SECTIONS = ['knowledge', 'secrets', 'relationships', 'storyMilestones', 'continuityFlags', 'flags'];
+
 const SECTION_GROUPS = [
     {
-        id: 'canon_scene',
-        label: 'Canon and Scene',
+        id: 'scene_timeline',
+        label: 'Scene and Timeline',
         sections: ['canon', 'scene'],
         enabled: state => state?.continuityConfig?.canon !== false || state?.continuityConfig?.scene !== false,
     },
     {
-        id: 'characters',
-        label: 'Characters',
+        id: 'active_characters',
+        label: 'Active Characters',
         sections: ['characters'],
         enabled: state => state?.continuityConfig?.characters !== false,
     },
     {
-        id: 'inventory_objectives',
-        label: 'Inventory and Objectives',
-        sections: ['inventory', 'objectives'],
-        enabled: state => state?.continuityConfig?.inventory !== false || state?.continuityConfig?.objectives !== false,
+        id: 'key_items',
+        label: 'Key Items',
+        sections: ['inventory'],
+        enabled: state => state?.continuityConfig?.inventory !== false,
     },
     {
-        id: 'knowledge_secrets',
-        label: 'Knowledge and Secrets',
-        sections: ['knowledge', 'secrets'],
-        enabled: state => state?.continuityConfig?.knowledge !== false || state?.continuityConfig?.secrets !== false,
-    },
-    {
-        id: 'relationships_threads',
-        label: 'Relationships and Threads',
-        sections: ['relationships', 'threads'],
-        enabled: state => state?.continuityConfig?.relationships !== false || state?.continuityConfig?.threads !== false,
-    },
-    {
-        id: 'milestones_flags',
-        label: 'Milestones and Flags',
-        sections: ['storyMilestones', 'continuityFlags'],
-        enabled: state => state?.continuityConfig?.storyMilestones !== false || state?.continuityConfig?.flags !== false,
+        id: 'active_goals_threads',
+        label: 'Active Goals and Threads',
+        sections: ['objectives', 'threads'],
+        enabled: state => state?.continuityConfig?.objectives !== false || state?.continuityConfig?.threads !== false,
     },
 ];
 
-const OBSERVATION_SECTIONS = new Set([
-    'canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'storyMilestones', 'continuityFlags', 'flags',
-]);
+const OBSERVATION_SECTIONS = new Set(ACTIVE_CONTINUITY_SECTIONS);
 
 function clampInt(value, min, max, fallback) {
     const parsed = parseInt(value, 10);
@@ -157,7 +146,6 @@ export function buildContinuityProjection(state = getState()) {
             era: state?.canon?.era || '',
             inUniverseDate: state?.canon?.inUniverseDate || '',
             canonBoundary: state?.canon?.canonBoundary || '',
-            divergences: compactArray(state?.canon?.divergences, 30),
         },
         scene: cfg.scene === false ? undefined : {
             location: state?.scene?.location || '',
@@ -179,29 +167,26 @@ export function buildContinuityProjection(state = getState()) {
             emotionalState: c?.emotionalState || undefined,
             notes: truncateText(c?.notes || '', 300),
         })),
-        inventory: cfg.inventory === false ? undefined : compactArray(state?.inventory, 80),
-        objectives: cfg.objectives === false ? undefined : compactArray(state?.objectives, 80),
-        knowledge: cfg.knowledge === false ? undefined : compactObject(state?.knowledge, 60),
-        secrets: cfg.secrets === false ? undefined : compactArray(state?.secrets, 80),
-        relationships: cfg.relationships === false ? undefined : compactArray(state?.relationships, 80),
-        threads: cfg.threads === false ? undefined : compactArray(state?.threads, 80),
-        storyMilestones: cfg.storyMilestones === false ? undefined : compactObject(state?.storyMilestones, 80),
-        continuityFlags: cfg.flags === false ? undefined : compactArray(state?.continuityFlags, 60),
+        inventory: cfg.inventory === false ? undefined : compactArray(state?.inventory, 40),
+        objectives: cfg.objectives === false ? undefined : compactArray(state?.objectives, 40),
+        threads: cfg.threads === false ? undefined : compactArray(state?.threads, 30),
     };
 }
 
 
 function isContinuitySectionEnabled(state = getState(), sectionKey = '') {
+    const normalized = sectionKey === 'continuityFlags' ? 'flags' : String(sectionKey || '');
+    if (RETIRED_CONTINUITY_SECTIONS.includes(normalized)) return false;
+    if (!ACTIVE_CONTINUITY_SECTIONS.includes(normalized)) return false;
     const cfg = state?.continuityConfig || {};
-    if (sectionKey === 'continuityFlags') return cfg.flags !== false;
-    return cfg[sectionKey] !== false;
+    return cfg[normalized] !== false;
 }
 
 function buildContinuityProjectionForSections(state = getState(), sections = []) {
     const full = buildContinuityProjection(state);
     const wanted = new Set(sections || []);
     const projection = { continuityConfig: full.continuityConfig };
-    for (const key of ['canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'storyMilestones', 'continuityFlags']) {
+    for (const key of ACTIVE_CONTINUITY_SECTIONS) {
         if (wanted.has(key) && full[key] !== undefined) projection[key] = full[key];
     }
     return projection;
@@ -222,14 +207,14 @@ function buildContinuityScanHeaderProjection(state = getState()) {
             currentActivity: state?.scene?.currentActivity || '',
         },
         trackedCharacters: characters.map(c => c?.name).filter(Boolean).slice(0, 40),
-        activeObjectives: Array.isArray(state?.objectives) ? state.objectives.slice(0, 20) : [],
+        activeObjectives: Array.isArray(state?.objectives) ? state.objectives.slice(0, 12) : [],
+        activeThreads: Array.isArray(state?.threads) ? state.threads.filter(t => t?.status !== 'resolved').slice(0, 12) : [],
     };
 }
 
 function deriveEnabledSections(state = getState(), mode = 'all') {
-    const all = ['canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'storyMilestones', 'continuityFlags'];
     const essentials = ['canon', 'scene', 'characters', 'inventory', 'objectives'];
-    const source = mode === 'essentials' ? essentials : all;
+    const source = mode === 'essentials' ? essentials : ACTIVE_CONTINUITY_SECTIONS;
     return source.filter(section => isContinuitySectionEnabled(state, section));
 }
 
@@ -303,6 +288,9 @@ function compactObservation(raw = {}, chunk = {}) {
     if (!raw || typeof raw !== 'object') return null;
     const sectionRaw = String(raw.section || raw.category || 'scene').trim();
     let section = sectionRaw === 'flags' ? 'continuityFlags' : sectionRaw;
+    if (section === 'items' || section === 'item') section = 'inventory';
+    if (section === 'goals' || section === 'goal') section = 'objectives';
+    if (RETIRED_CONTINUITY_SECTIONS.includes(section)) return null;
     if (!OBSERVATION_SECTIONS.has(section)) section = 'scene';
     const observation = truncateText(raw.observation || raw.fact || raw.text || raw.description || '', 900);
     if (!observation) return null;
@@ -612,7 +600,7 @@ function parseObservationResponse(text, chunk = {}) {
         for (const [field, value] of Object.entries(snap)) {
             if (value === undefined || value === null || value === '' || (Array.isArray(value) && !value.length)) continue;
             raw.push({
-                section: field === 'canonDateHints' || field === 'divergenceHints' ? 'canon' : 'scene',
+                section: field === 'canonDateHints' ? 'canon' : 'scene',
                 subject: `sceneSnapshot.${field}`,
                 observation: `${field}: ${Array.isArray(value) ? value.join(', ') : value}`,
                 actionHint: 'update',
@@ -649,7 +637,7 @@ function coerceContinuityFlags(value) {
 
 function coerceFullStateOrLooseDelta(parsed) {
     if (!isPlainObject(parsed)) return parsed;
-    const knownKeys = ['canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'continuityFlags', 'storyMilestones'];
+    const knownKeys = ACTIVE_CONTINUITY_SECTIONS;
     let delta = parsed;
     if (!isPlainObject(delta.changes)) {
         const candidate = isPlainObject(parsed.state) ? parsed.state
@@ -665,11 +653,10 @@ function coerceFullStateOrLooseDelta(parsed) {
     }
     if (!isPlainObject(delta?.changes)) return delta;
     const changes = { ...delta.changes };
-    for (const key of ['characters', 'inventory', 'objectives', 'secrets', 'relationships', 'threads']) {
+    for (const key of ['characters', 'inventory', 'objectives', 'threads']) {
         if (changes[key] !== undefined) changes[key] = coerceArrayOrPatch(changes[key]);
     }
-    if (changes.continuityFlags !== undefined) changes.continuityFlags = coerceContinuityFlags(changes.continuityFlags);
-    for (const key of ['secrets', 'relationships', 'threads']) {
+    for (const key of ['threads']) {
         const value = changes[key];
         if (isPlainObject(value) && !isArrayDeltaShape(value)) changes[key] = { added: [value] };
     }
@@ -699,12 +686,11 @@ function buildObservationSystemPrompt(settings, stateProjection) {
     "timeOfDay": "current/most recent time of day if evident",
     "presentCharacters": ["characters visibly present"],
     "currentActivity": "what is happening now",
-    "canonDateHints": ["explicit or implied dates/era hints"],
-    "divergenceHints": ["clear canon divergence hints"]
+    "canonDateHints": ["explicit or implied dates/era hints"]
   },
   "observations": [
     {
-      "section": "canon|scene|characters|inventory|objectives|knowledge|secrets|relationships|threads|storyMilestones|continuityFlags",
+      "section": "canon|scene|characters|inventory|objectives|threads",
       "subject": "short subject",
       "observation": "durable factual observation grounded in the messages",
       "actionHint": "add|update|resolve|remove|upsert",
@@ -714,23 +700,18 @@ function buildObservationSystemPrompt(settings, stateProjection) {
   ]
 }
 
-Limits:\n- Return up to ${maxObs} observations.\n- Prefer current actionable continuity: scene, present characters, physical state, emotional state, carried items, knowledge boundaries, active goals, relationship changes, secrets, unresolved threads, milestones, and clear contradictions.\n- Preserve message indexes in messageRefs.\n- If nothing changed, return {"chunkSummary":"No continuity observations.","observations":[]}.\n\nCurrent compact continuity projection for reference:\n${safeJson(stateProjection)}`;
+Limits:\n- Return up to ${maxObs} observations.\n- Prefer current actionable continuity only: scene/timeline, present active characters, physical/emotional state, carried key items, active goals, and immediate unresolved threads.\n- Do not extract knowledge, secrets, relationship history, story milestones, lore facts, or continuity warnings; Story Lore owns those durable memories.\n- Preserve message indexes in messageRefs.\n- If nothing changed, return {"chunkSummary":"No continuity observations.","observations":[]}.\n\nCurrent compact continuity projection for reference:\n${safeJson(stateProjection)}`;
 }
 
 function getSectionPromptText(settings, sectionKey) {
     const prompts = settings?.continuitySectionPrompts || {};
     const keyMap = {
-        canon: ['canonScene', 'canonDivergences'],
+        canon: ['canonScene'],
         scene: ['canonScene'],
         characters: ['characters'],
         inventory: ['inventory'],
         objectives: ['objectives'],
-        knowledge: ['knowledge'],
-        secrets: ['secrets'],
-        relationships: ['relationships'],
         threads: ['threads'],
-        storyMilestones: ['storyMilestones'],
-        continuityFlags: ['flags'],
     };
     return (keyMap[sectionKey] || [])
         .map(k => String(prompts[k] || '').trim())
@@ -751,7 +732,7 @@ function buildObservationUserPrompt(chunk, plan) {
 }
 
 function buildReducerUserPrompt(group, observations, plan) {
-    const relevant = observations.filter(o => group.sections.includes(o.section) || (o.section === 'flags' && group.sections.includes('continuityFlags')));
+    const relevant = observations.filter(o => group.sections.includes(o.section));
     return `Full scan range: messages ${plan.startIndex}-${plan.endIndex}.\nReducer group: ${group.label}.\nAllowed sections: ${group.sections.join(', ')}.\n\nObservations, already extracted from message chunks:\n${safeJson(relevant)}\n\nReturn one WandlightDelta partial for this reducer group. JSON only.`;
 }
 
@@ -836,7 +817,7 @@ async function extractChunkObservations({ chunk, plan, batchId, settings, stateP
 }
 
 async function reduceObservationGroup({ group, observations, plan, settings, stateProjection, signal }) {
-    const relevant = observations.filter(o => group.sections.includes(o.section) || (o.section === 'flags' && group.sections.includes('continuityFlags')));
+    const relevant = observations.filter(o => group.sections.includes(o.section));
     if (!relevant.length) return { status: 'empty', group, delta: { summary: `No ${group.label} observations`, changes: {} } };
     const systemPrompt = buildReducerSystemPrompt(settings, group, stateProjection);
     const userPrompt = buildReducerUserPrompt(group, relevant, plan);
@@ -882,17 +863,8 @@ function mergeDeltaChanges(base = {}, next = {}) {
     const changes = { ...base };
     for (const [key, value] of Object.entries(next || {})) {
         if (value === undefined) continue;
-        if (['characters', 'inventory', 'objectives', 'secrets', 'relationships', 'threads', 'continuityFlags'].includes(key)) {
+        if (['characters', 'inventory', 'objectives', 'threads'].includes(key)) {
             changes[key] = mergeArrayPatch(changes[key] || {}, value || {});
-        } else if (key === 'knowledge' && isPlainObject(value)) {
-            const merged = { ...(changes.knowledge || {}) };
-            for (const [char, facts] of Object.entries(value)) {
-                if (!Array.isArray(facts)) continue;
-                merged[char] = Array.from(new Set([...(merged[char] || []), ...facts]));
-            }
-            changes.knowledge = merged;
-        } else if (key === 'storyMilestones' && isPlainObject(value)) {
-            changes.storyMilestones = { ...(changes.storyMilestones || {}), ...value };
         } else if (key === 'canon' && isPlainObject(value)) {
             changes.canon = { ...(changes.canon || {}), ...value };
         } else if (key === 'scene' && isPlainObject(value)) {
@@ -948,14 +920,14 @@ function inferFallbackDeltaFromPlan(plan, state = getState()) {
 function buildContinuityDeltaSystemPrompt({ settings, stateProjection, enabledSections, prepass, mode = 'fast' }) {
     const sectionTemplate = buildSectionDecisionTemplate(enabledSections);
     const emphasis = mode === 'fast'
-        ? 'Use one compact pass. Prioritize Canon and Scene, Characters, Inventory, and Objectives, but evaluate every enabled section.'
+        ? 'Use one compact pass. Prioritize Scene and Timeline, Active Characters, Key Items, and Active Goals/Threads, but evaluate every enabled section.'
         : 'This is a grouped continuity reducer pass. Update only the allowed sections and evaluate each allowed section explicitly.';
     return `You are Wandlight Continuity's ${mode === 'fast' ? 'fast continuity delta scanner' : 'hybrid continuity section scanner'}.
 
 Task:
 - Read the supplied roleplay messages and current compact state.
 - Return one valid JSON object with section decisions and a WandlightDelta.
-- Canon and Scene must always be evaluated when enabled. Do not skip them merely because the change seems minor.
+- Scene and Timeline must always be evaluated when enabled. Do not skip them merely because the change seems minor.
 - Use only facts grounded in the supplied messages and local prepass hints.
 - Do not include reasoning, markdown, or prose outside JSON.
 
@@ -967,17 +939,12 @@ Output schema:
   "delta": {
     "summary": "short summary of proposed continuity changes",
     "changes": {
-      "canon": { "era": "", "inUniverseDate": "", "canonBoundary": "", "divergences": [] },
+      "canon": { "era": "", "inUniverseDate": "", "canonBoundary": "" },
       "scene": { "location": "", "timeOfDay": "", "weather": "", "ambience": "", "presentCharacters": [], "nearbyCharacters": [], "currentActivity": "" },
       "characters": { "added": [], "updated": [], "removed": [] },
       "inventory": { "added": [], "updated": [], "removed": [] },
       "objectives": { "added": [], "updated": [], "removed": [] },
-      "knowledge": { "Character Name": ["fact known by that character"] },
-      "secrets": { "added": [], "updated": [], "removed": [] },
-      "relationships": { "added": [], "updated": [], "removed": [] },
-      "threads": { "added": [], "updated": [] },
-      "storyMilestones": { "milestone_id": { "status": "not_happened|suspected|happened|blocked|diverged|unknown", "evidence": [] } },
-      "continuityFlags": { "added": [], "resolved": [] }
+      "threads": { "added": [], "updated": [] }
     }
   }
 }
@@ -1132,8 +1099,8 @@ async function runFastContinuityDeltaScan({ settings, plan, options, stateAtStar
 
 function getHybridDeltaGroups(stateAtStart = getState()) {
     const groups = [
-        { id: 'essentials', label: 'Canon, Scene, and Characters', sections: ['canon', 'scene', 'characters'].filter(section => isContinuitySectionEnabled(stateAtStart, section)) },
-        { id: 'details', label: 'Inventory, Knowledge, Relationships, and Threads', sections: ['inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'storyMilestones', 'continuityFlags'].filter(section => isContinuitySectionEnabled(stateAtStart, section)) },
+        { id: 'essentials', label: 'Scene, Timeline, and Characters', sections: ['canon', 'scene', 'characters'].filter(section => isContinuitySectionEnabled(stateAtStart, section)) },
+        { id: 'details', label: 'Key Items, Active Goals, and Threads', sections: ['inventory', 'objectives', 'threads'].filter(section => isContinuitySectionEnabled(stateAtStart, section)) },
     ];
     return groups.filter(group => group.sections.length);
 }

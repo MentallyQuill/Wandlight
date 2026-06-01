@@ -73,7 +73,7 @@ const TAB_LABELS = {
 
 const TAB_TOOLTIPS = {
     session: 'Runtime overview, instructions, undo history, and destructive cleanup actions.',
-    continuity: 'Scan, automatically track, view, and edit structured continuity state: scene, characters, emotions, inventory, knowledge, relationships, and flags.',
+    continuity: 'Scan, automatically track, view, and edit lightweight live continuity state: scene/timeline, active characters, key items, and active goals/threads.',
     context: 'Detect, automatically update, view, and edit story context: scene date, canon reference point, branch, and source range.',
     lore: 'Generate pending lore, review generated entries, and manage accepted lore with search, filters, tags, pinning, and muting.',
     injection: 'Choose what Wandlight sends to the model: continuity state, lore entries, direct/compressed handling, and live split injection previews.',
@@ -579,7 +579,7 @@ function createInstructionsCard() {
         },
         {
             title: 'Continuity',
-            body: 'Scan the live story state: scene, characters, knowledge, secrets, relationships, objectives, and milestones.',
+            body: 'Scan lightweight live state: scene/timeline, active characters, key items, and active goals/threads. Durable memory belongs in Lore.',
         },
         {
             title: 'Lore',
@@ -700,8 +700,8 @@ function createDangerZoneCard(state) {
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
 
-    actions.appendChild(createButton('Delete All Lore', 'Deletes accepted lore, pending lore, and pin/mute selections. Canon/scene/relationship continuity state is left intact.', async () => {
-        const proceed = await confirmAction('Are you sure? Delete all Wandlight lore?', 'You are about to delete every accepted lore entry, every pending lore entry, and all pin/mute selections for this chat. Scene, character knowledge, secrets, relationships, threads, and other continuity state will remain. A state-history snapshot will be saved first. This cannot be reversed except by Undo Last Change. Continue?');
+    actions.appendChild(createButton('Delete All Lore', 'Deletes accepted lore, pending lore, and pin/mute selections. Lightweight continuity state is left intact.', async () => {
+        const proceed = await confirmAction('Are you sure? Delete all Wandlight lore?', 'You are about to delete every accepted lore entry, every pending lore entry, and all pin/mute selections for this chat. Lightweight continuity state will remain. A state-history snapshot will be saved first. This cannot be reversed except by Undo Last Change. Continue?');
         if (!proceed) return;
         const current = getState();
         pushStateSnapshot(current, 'Delete all lore', getSettings().maxSnapshots);
@@ -740,7 +740,7 @@ function createDangerZoneCard(state) {
     }, 'wandlight-danger-button'));
 
     actions.appendChild(createButton('Total Reset', 'Resets Wandlight continuity state for this chat to defaults and clears State History. Panel size and position are preserved.', async () => {
-        const proceed = await confirmAction('Are you sure? Total reset?', 'You are about to reset all Wandlight continuity data for this chat: canon/scene state, knowledge, secrets, relationships, threads, flags, accepted lore, pending lore, generation state, and State History. Window position and size are preserved. Because State History will also be cleared, this action cannot be undone. Continue?');
+        const proceed = await confirmAction('Are you sure? Total reset?', 'You are about to reset all Wandlight data for this chat: lightweight continuity state, accepted lore, pending lore, generation state, and State History. Window position and size are preserved. Because State History will also be cleared, this action cannot be undone. Continue?');
         if (!proceed) return;
         const current = getState();
         const defaults = getDefaultState();
@@ -1865,19 +1865,14 @@ function formatGenerationStatus(result) {
 // Continuity tab --------------------------------------------------------------
 
 const CONTINUITY_SECTION_LABELS = {
-    canon: 'Canon / Date',
+    canon: 'Timeline / Date',
     scene: 'Scene',
-    characters: 'Characters',
-    appearance: 'Appearance',
+    characters: 'Active Characters',
+    appearance: 'Appearance Detail',
     emotionalState: 'Emotional State',
-    knowledge: 'Knowledge',
-    secrets: 'Secrets',
-    relationships: 'Relationships',
-    threads: 'Story Threads',
-    inventory: 'Inventory / Objects',
-    objectives: 'Objectives',
-    flags: 'Continuity Flags',
-    storyMilestones: 'Story Milestones',
+    inventory: 'Key Items',
+    objectives: 'Active Goals',
+    threads: 'Active Threads',
 };
 
 
@@ -1950,7 +1945,7 @@ function createContinuityScanScopeSettingsContent() {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help wandlight-compact-help';
-    help.textContent = 'Continuity scans now extract compact observations from chunks first, then reduce them into one ordered state delta.';
+    help.textContent = 'Adaptive continuity scans use a single compact delta call for small recent windows, grouped calls for medium ranges, and checkpointed chunks only for large backfills.';
     content.appendChild(help);
     return content;
 }
@@ -2135,7 +2130,7 @@ function createContinuityScanCard(state) {
 function renderContinuityTab(container, state) {
     container.appendChild(createSectionHeader(
         'Continuity State',
-        'Edit the structured roleplay state Wandlight tracks and injects separately from Lore entries. Each section can be enabled or disabled for this chat.'
+        'Edit the lightweight live roleplay state Wandlight tracks for the next scene. Durable memory such as knowledge, secrets, milestones, and relationships belongs in Story Lore.'
     ));
 
     container.appendChild(createContinuityScanCard(state));
@@ -2151,18 +2146,11 @@ function renderContinuityTab(container, state) {
         container.appendChild(pendingDelta);
     }
 
-    container.appendChild(createCollapsibleSection('continuity.trackedSections', 'Tracked Sections', 'Enable/disable scan and injection sections', false, createContinuitySectionToggleCard(state), { tooltip: 'Optional continuity sections for this chat.' }));
-    container.appendChild(createCollapsibleSection('continuity.canonScene', 'Canon and Scene', getContinuityCanonSceneSummary(state), false, createCanonSceneEditorCard(state), { tooltip: 'Core date, scene, cast, and activity fields.' }));
-    container.appendChild(createCollapsibleSection('continuity.canonDivergences', 'Canon Divergences', getCountLabel(state?.canon?.divergences || [], 'divergence'), false, createCanonDivergencesEditorCard(state), { tooltip: 'AU or changed-canon facts separated from the core scene fields.' }));
-    container.appendChild(createCollapsibleSection('continuity.characters', 'Characters', getCountLabel(state.characters || [], 'character'), false, createCharacterStateEditorCard(state), { tooltip: 'Character-specific state: clothing, posture, emotion, goals, and notes.' }));
-    container.appendChild(createCollapsibleSection('continuity.storyMilestones', 'Story Milestones', getCountLabel(state.storyMilestones || {}, 'milestone'), false, createStoryMilestonesEditorCard(state), { tooltip: 'Story-state switches that control lore activation and expiration.' }));
-    container.appendChild(createCollapsibleSection('continuity.knowledge', 'Knowledge', getCountLabel(state.knowledge || {}, 'character'), false, createJsonEditorCard('Knowledge', 'Character-keyed facts. Example: { "Harry": ["knows X"] }', 'knowledge', state.knowledge || {}, false, 'knowledge'), { tooltip: 'Character-keyed knowledge facts.' }));
-    container.appendChild(createCollapsibleSection('continuity.secrets', 'Secrets', getCountLabel(state.secrets || [], 'secret'), false, createJsonEditorCard('Secrets', 'Non-public facts, who knows them, suspicions, and public versions.', 'secrets', state.secrets || [], false, 'secrets'), { tooltip: 'Secret facts and reveal state.' }));
-    container.appendChild(createCollapsibleSection('continuity.relationships', 'Relationships', getCountLabel(state.relationships || [], 'relationship'), false, createJsonEditorCard('Relationships', 'Relationship state such as trust, tension, and notes.', 'relationships', state.relationships || [], false, 'relationships'), { tooltip: 'Relationship state such as trust, tension, and notes.' }));
-    container.appendChild(createCollapsibleSection('continuity.threads', 'Threads', getCountLabel(state.threads || [], 'thread'), false, createJsonEditorCard('Threads', 'Active, dormant, or resolved story threads and unresolved consequences.', 'threads', state.threads || [], false, 'threads'), { tooltip: 'Story threads and unresolved consequences.' }));
-    container.appendChild(createCollapsibleSection('continuity.inventory', 'Inventory / Objects', getCountLabel(state.inventory || [], 'item'), false, createJsonEditorCard('Inventory / Objects', 'Tracked items, owners, locations, and object status.', 'inventory', state.inventory || [], false, 'inventory'), { tooltip: 'Tracked items, owners, locations, and object status.' }));
-    container.appendChild(createCollapsibleSection('continuity.objectives', 'Objectives', getCountLabel(state.objectives || [], 'objective'), false, createJsonEditorCard('Objectives', 'Character or story goals, status, and stakes.', 'objectives', state.objectives || [], false, 'objectives'), { tooltip: 'Character or story goals, status, and stakes.' }));
-    container.appendChild(createCollapsibleSection('continuity.flags', 'Continuity Flags', getCountLabel(state.continuityFlags || [], 'flag'), false, createJsonEditorCard('Continuity Flags', 'Contradictions, warnings, uncertainties, and resolved flags.', 'continuityFlags', state.continuityFlags || [], false, 'flags'), { tooltip: 'Contradictions, warnings, uncertainties, and resolved flags.' }));
+    container.appendChild(createCollapsibleSection('continuity.trackedSections', 'Tracked Sections', 'Enable/disable live-state scan and injection sections', false, createContinuitySectionToggleCard(state), { tooltip: 'Optional lightweight continuity sections for this chat.' }));
+    container.appendChild(createCollapsibleSection('continuity.canonScene', 'Scene and Timeline', getContinuityCanonSceneSummary(state), false, createCanonSceneEditorCard(state), { tooltip: 'Current date, scene, cast, and activity fields.' }));
+    container.appendChild(createCollapsibleSection('continuity.characters', 'Active Characters', getCountLabel(state.characters || [], 'character'), false, createCharacterStateEditorCard(state), { tooltip: 'Current character-specific state: clothing, posture, emotion, immediate goals, and notes.' }));
+    container.appendChild(createCollapsibleSection('continuity.inventory', 'Key Items', getCountLabel(state.inventory || [], 'item'), false, createJsonEditorCard('Key Items', 'Currently relevant items, owners, locations, and object status. Durable item history belongs in Story Lore.', 'inventory', state.inventory || [], false, 'inventory'), { tooltip: 'Current consequential items only.' }));
+    container.appendChild(createCollapsibleSection('continuity.activeGoalsThreads', 'Active Goals and Threads', getActiveGoalsThreadsSummary(state), false, createActiveGoalsThreadsEditorCard(state), { tooltip: 'Immediate goals and active threads that affect the next scene.' }));
 }
 
 function createContinuitySectionToggleCard(state) {
@@ -2173,6 +2161,11 @@ function createContinuitySectionToggleCard(state) {
     title.textContent = 'Tracked Sections';
     addTooltip(title, 'Disabled sections are not updated by Scan Continuity State and are omitted from continuity injection. Existing data is preserved unless you delete it.');
     card.appendChild(title);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Continuity now tracks only live operational state. Knowledge, secrets, milestones, relationship history, and continuity issues should be captured by Story Lore Scan instead.';
+    card.appendChild(help);
 
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid wandlight-continuity-toggle-grid';
@@ -2201,8 +2194,8 @@ function createCanonSceneEditorCard(state) {
     card.className = 'wandlight-runtime-card';
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
-    title.textContent = 'Canon and Scene';
-    addTooltip(title, 'Frequently edited continuity fields. Changes save into chatMetadata.wandlight_continuity.');
+    title.textContent = 'Scene and Timeline';
+    addTooltip(title, 'Lightweight live scene and timeline fields. Durable AU/canon divergences belong in Story Lore.');
     card.appendChild(title);
 
     const grid = document.createElement('div');
@@ -2219,7 +2212,7 @@ function createCanonSceneEditorCard(state) {
 
     card.appendChild(createArrayTextField('Present characters', state?.scene?.presentCharacters || [], 'scene', 'presentCharacters', 'Comma-separated characters currently present.'));
     card.appendChild(createArrayTextField('Nearby characters', state?.scene?.nearbyCharacters || [], 'scene', 'nearbyCharacters', 'Comma-separated characters nearby but not necessarily in the active conversation.'));
-    card.appendChild(createContinuitySectionPromptEditor('canonScene', 'Canon and Scene'));
+    card.appendChild(createContinuitySectionPromptEditor('canonScene', 'Scene and Timeline'));
     return card;
 }
 
@@ -2230,37 +2223,42 @@ function getContinuityCanonSceneSummary(state) {
     return parts.length ? parts.slice(0, 2).join(' · ') : 'core fields';
 }
 
-function createCanonDivergencesEditorCard(state) {
-    return createJsonEditorCard(
-        'Canon Divergences',
-        'AU or changed-canon facts with optional sinceDate fields. Kept separate from Canon and Scene so it can stay collapsed during normal play.',
-        'canon.divergences',
-        state?.canon?.divergences || [],
-        false,
-        'canonDivergences'
-    );
+
+function getActiveGoalsThreadsSummary(state) {
+    const objectives = Array.isArray(state?.objectives) ? state.objectives.filter(o => o?.status !== 'completed' && o?.status !== 'abandoned').length : 0;
+    const threads = Array.isArray(state?.threads) ? state.threads.filter(t => t?.status !== 'resolved').length : 0;
+    const parts = [];
+    if (objectives) parts.push(`${objectives} active goal${objectives === 1 ? '' : 's'}`);
+    if (threads) parts.push(`${threads} active thread${threads === 1 ? '' : 's'}`);
+    return parts.join(' · ') || 'none active';
 }
 
-function createStoryMilestonesEditorCard(state) {
-    const card = createJsonEditorCard(
-        'Story Milestones',
-        'Story-state switches used by Lore entries. Canon dates can suggest entries, but milestones decide whether reveal/knowledge entries are actually true. Example: { "horcruxes_revealed_to_trio": { "status": "not_happened", "evidence": [] } }',
-        'storyMilestones',
-        state?.storyMilestones || {},
-        false,
-        'storyMilestones'
-    );
-    const schema = document.createElement('div');
-    schema.className = 'wandlight-runtime-help';
-    schema.textContent = 'Statuses: not_happened, suspected, happened, blocked, diverged, unknown. Wandlight should only mark happened when the roleplay establishes it, not merely because the canon date passed.';
-    card.appendChild(schema);
-    return card;
+function createActiveGoalsThreadsEditorCard(state) {
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-runtime-grid';
+    wrap.appendChild(createJsonEditorCard(
+        'Active Goals',
+        'Immediate goals, blockers, stakes, and status. Long-term plot memory belongs in Story Lore.',
+        'objectives',
+        state?.objectives || [],
+        true,
+        'objectives'
+    ));
+    wrap.appendChild(createJsonEditorCard(
+        'Active Threads',
+        'Immediate unresolved threads that should influence the next scene. Durable relationship history, milestones, secrets, and plot history belong in Story Lore.',
+        'threads',
+        state?.threads || [],
+        true,
+        'threads'
+    ));
+    return wrap;
 }
 
 function createCharacterStateEditorCard(state) {
     const card = createJsonEditorCard(
-        'Characters',
-        'Character state supports name, role, location, clothing, posture, physicalState, emotionalState, inventory, goals, and notes. Emotional numeric values are -5 to +5 and cool toward neutral in injection previews unless reinforced.',
+        'Active Characters',
+        'Live character state supports name, role, current location, clothing, posture, physicalState, emotionalState, carried key items, immediate goals, and notes. Durable knowledge, secrets, relationships, and milestones belong in Story Lore.',
         'characters',
         state?.characters || [],
         false,
@@ -2268,7 +2266,7 @@ function createCharacterStateEditorCard(state) {
     );
     const schema = document.createElement('div');
     schema.className = 'wandlight-runtime-help';
-    schema.textContent = 'Recommended character object: { "name": "Harry", "clothing": "school robes", "physicalState": "tired", "emotionalState": { "trust": 2, "fear": 1, "notes": "uneasy but cooperative" }, "goals": ["find the source of the curse"] }';
+    schema.textContent = 'Recommended active character object: { "name": "Harry", "clothing": "school robes", "physicalState": "tired", "emotionalState": { "trust": 2, "fear": 1, "notes": "uneasy but cooperative" }, "goals": ["find the source of the curse"] }';
     card.appendChild(schema);
     return card;
 }
@@ -2434,7 +2432,7 @@ function renderInjectionTab(container, state) {
     toggles.appendChild(createToggleCard(
         'Inject Continuity',
         settings.injectContinuity !== false && settings.injectMemo !== false,
-        'Injects the editable Continuity tab state: scene, characters, emotions, knowledge, relationships, threads, objects, objectives, and flags. This is separate from Lore entries.',
+        'Injects the editable lightweight Continuity state: scene/timeline, active characters, key items, and active goals/threads. Durable memory is handled by Lore entries.',
         (checked) => {
             const next = getSettings();
             next.injectContinuity = checked;

@@ -83,6 +83,13 @@ export const DEFAULT_SETTINGS = {
     continuityScanRunningCheckpointStaleMs: 10 * 60 * 1000,
     continuityScanRetainRawResponses: false,
     continuityScanRetainCompletedBatches: 3,
+    continuityScanStrategy: 'adaptive', // 'adaptive' | 'fast' | 'hybrid' | 'bulk'
+    continuityScanFastThreshold: 20,
+    continuityScanHybridThreshold: 80,
+    continuityFastMaxTokens: 2048,
+    continuityHybridMaxTokens: 3072,
+    continuityObservationMaxTokens: 1536,
+    continuityReducerMaxTokens: 1536,
 
     // Lore matrix
     injectLore: true,

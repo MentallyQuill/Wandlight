@@ -190,6 +190,97 @@ export function buildContinuityProjection(state = getState()) {
     };
 }
 
+
+function isContinuitySectionEnabled(state = getState(), sectionKey = '') {
+    const cfg = state?.continuityConfig || {};
+    if (sectionKey === 'continuityFlags') return cfg.flags !== false;
+    return cfg[sectionKey] !== false;
+}
+
+function buildContinuityProjectionForSections(state = getState(), sections = []) {
+    const full = buildContinuityProjection(state);
+    const wanted = new Set(sections || []);
+    const projection = { continuityConfig: full.continuityConfig };
+    for (const key of ['canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'storyMilestones', 'continuityFlags']) {
+        if (wanted.has(key) && full[key] !== undefined) projection[key] = full[key];
+    }
+    return projection;
+}
+
+function buildContinuityScanHeaderProjection(state = getState()) {
+    const characters = Array.isArray(state?.characters) ? state.characters : [];
+    return {
+        canon: {
+            era: state?.canon?.era || '',
+            inUniverseDate: state?.canon?.inUniverseDate || '',
+            canonBoundary: state?.canon?.canonBoundary || '',
+        },
+        scene: {
+            location: state?.scene?.location || '',
+            timeOfDay: state?.scene?.timeOfDay || '',
+            presentCharacters: Array.isArray(state?.scene?.presentCharacters) ? state.scene.presentCharacters.slice(0, 20) : [],
+            currentActivity: state?.scene?.currentActivity || '',
+        },
+        trackedCharacters: characters.map(c => c?.name).filter(Boolean).slice(0, 40),
+        activeObjectives: Array.isArray(state?.objectives) ? state.objectives.slice(0, 20) : [],
+    };
+}
+
+function deriveEnabledSections(state = getState(), mode = 'all') {
+    const all = ['canon', 'scene', 'characters', 'inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'storyMilestones', 'continuityFlags'];
+    const essentials = ['canon', 'scene', 'characters', 'inventory', 'objectives'];
+    const source = mode === 'essentials' ? essentials : all;
+    return source.filter(section => isContinuitySectionEnabled(state, section));
+}
+
+function buildSectionDecisionTemplate(sections = []) {
+    const unique = Array.from(new Set(sections));
+    const entries = unique.map(section => `    "${section}": { "status": "changed|unchanged|insufficient", "reason": "one short reason" }`);
+    return `"sectionDecisions": {\n${entries.join(',\n')}\n  }`;
+}
+
+const COMMON_SCENE_HINTS = [
+    'Great Hall', 'common room', 'dormitory', 'classroom', 'library', 'hospital wing', 'grounds', 'Forbidden Forest', 'Hogsmeade', 'Diagon Alley', 'Ministry', 'Burrow', 'Privet Drive', 'Platform 9¾', 'Quidditch pitch', 'corridor', 'office', 'dungeon', 'greenhouse', 'Astronomy Tower', 'Room of Requirement', 'Hogwarts Express',
+];
+
+function escapeRegExp(value) {
+    return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildLocalContinuityPrepass(plan = {}) {
+    const messages = (plan.chunks || []).flatMap(c => c.messages || []);
+    const text = messages.map(m => m.text || '').join('\n');
+    const speakersSeen = Array.from(new Set(messages.map(m => m.speaker).filter(Boolean))).slice(0, 40);
+    const candidateSceneHints = COMMON_SCENE_HINTS.filter(hint => new RegExp(`\\b${escapeRegExp(hint)}\\b`, 'i').test(text)).slice(0, 20);
+    const explicitDates = [];
+    const datePattern = /\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)?\.?\s*,?\s*(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+\d{1,2}(?:st|nd|rd|th)?\s*,?\s*\d{4}\b/gi;
+    for (const match of text.matchAll(datePattern)) {
+        if (!explicitDates.includes(match[0])) explicitDates.push(match[0]);
+        if (explicitDates.length >= 10) break;
+    }
+    const inferredCanon = inferHpBoundaryFromText(text);
+    return {
+        messageRange: `${plan.startIndex || 0}-${plan.endIndex || 0}`,
+        messageCount: Number(plan.sourceMessageCount || messages.length || 0),
+        speakersSeen,
+        candidatePresentCharacters: speakersSeen,
+        candidateSceneHints,
+        explicitDates,
+        inferredCanon,
+    };
+}
+
+function chooseContinuityScanStrategy(plan = {}, settings = {}, options = {}) {
+    const requested = String(options.strategyOverride || settings.continuityScanStrategy || 'adaptive').toLowerCase();
+    if (['fast', 'hybrid', 'bulk'].includes(requested)) return requested;
+    const count = Number(plan.sourceMessageCount || 0);
+    const fastThreshold = clampInt(settings.continuityScanFastThreshold, 1, 200, 20);
+    const hybridThreshold = Math.max(fastThreshold, clampInt(settings.continuityScanHybridThreshold, fastThreshold, 500, 80));
+    if (count <= fastThreshold) return 'fast';
+    if (count <= hybridThreshold) return 'hybrid';
+    return 'bulk';
+}
+
 function safeJson(value, fallback = '{}') {
     try { return JSON.stringify(value, null, 2); } catch (_) { return fallback; }
 }
@@ -332,6 +423,34 @@ function flushContinuityFullCheckpoint(batchId, patch = {}) {
         if (ledger.activeBatchId === id) ledger.activeBatchId = '';
     }
     saveContinuityLedger(state, { full: true, syncPrompt: false });
+    return state;
+}
+
+function markContinuityPlanChunksComplete(batchId, plan = {}, status = 'complete') {
+    const state = getState();
+    const ledger = ensureContinuityLedger(state);
+    const now = Date.now();
+    for (const chunk of plan.chunks || []) {
+        const id = String(chunk.chunkId || '');
+        if (!id) continue;
+        const previous = ledger.chunks[id] || { id, createdAt: now };
+        ledger.chunks[id] = {
+            ...previous,
+            id,
+            batchId,
+            status,
+            startIndex: chunk.startIndex,
+            endIndex: chunk.endIndex,
+            messageCount: chunk.messageCount,
+            messageHash: chunk.messageHash,
+            attempts: Math.max(1, Number(previous.attempts || 0)),
+            observationCount: Number(previous.observationCount || 0),
+            completedAt: now,
+            updatedAt: now,
+            error: '',
+        };
+    }
+    saveContinuityLedger(state, { full: false, syncPrompt: false });
     return state;
 }
 
@@ -488,6 +607,21 @@ function parseObservationResponse(text, chunk = {}) {
         }
     }
 
+    if (isPlainObject(parsed?.sceneSnapshot)) {
+        const snap = parsed.sceneSnapshot;
+        for (const [field, value] of Object.entries(snap)) {
+            if (value === undefined || value === null || value === '' || (Array.isArray(value) && !value.length)) continue;
+            raw.push({
+                section: field === 'canonDateHints' || field === 'divergenceHints' ? 'canon' : 'scene',
+                subject: `sceneSnapshot.${field}`,
+                observation: `${field}: ${Array.isArray(value) ? value.join(', ') : value}`,
+                actionHint: 'update',
+                confidence: 0.8,
+                messageRefs: [chunk.startIndex, chunk.endIndex].filter(Boolean),
+            });
+        }
+    }
+
     const observations = raw.map(o => compactObservation(o, chunk)).filter(Boolean);
     return {
         summary: truncateText(parsed?.chunkSummary || parsed?.summary || '', 500),
@@ -544,19 +678,43 @@ function coerceFullStateOrLooseDelta(parsed) {
 
 function parseDeltaResponse(text) {
     const parsed = parseJsonObjectFromText(text);
-    const delta = coerceFullStateOrLooseDelta(parsed);
+    const candidate = isPlainObject(parsed?.delta) ? { ...parsed.delta, sectionDecisions: parsed.sectionDecisions || parsed.delta.sectionDecisions } : parsed;
+    const delta = coerceFullStateOrLooseDelta(candidate);
     if (!isPlainObject(delta?.changes)) return null;
     const validation = validateDelta(delta);
     if (!validation.valid) {
         console.warn(`${LOG_PREFIX} Continuity reducer delta validation failed: ${validation.errors.join('; ')}`);
         return null;
     }
-    return delta;
+    return { ...delta, sectionDecisions: delta.sectionDecisions || parsed?.sectionDecisions || null };
 }
 
 function buildObservationSystemPrompt(settings, stateProjection) {
     const maxObs = clampInt(settings.continuityScanObservationsPerChunk, 3, 30, 12);
-    return `You are Wandlight Continuity's continuity observation extractor.\n\nTask:\n- Read one interval of roleplay messages.\n- Extract compact observations that may change the live continuity state.\n- Do not output a final WandlightDelta. Do not modify state directly.\n- Output ONLY valid JSON.\n\nOutput schema:\n{\n  "chunkSummary": "short summary",\n  "observations": [\n    {\n      "section": "canon|scene|characters|inventory|objectives|knowledge|secrets|relationships|threads|storyMilestones|continuityFlags",\n      "subject": "short subject",\n      "observation": "durable factual observation grounded in the messages",\n      "actionHint": "add|update|resolve|remove|upsert",\n      "confidence": 0.0,\n      "messageRefs": [1]\n    }\n  ]\n}\n\nLimits:\n- Return up to ${maxObs} observations.\n- Prefer current actionable continuity: scene, present characters, physical state, emotional state, carried items, knowledge boundaries, active goals, relationship changes, secrets, unresolved threads, milestones, and clear contradictions.\n- Preserve message indexes in messageRefs.\n- If nothing changed, return {"chunkSummary":"No continuity observations.","observations":[]}.\n\nCurrent compact continuity projection for reference:\n${safeJson(stateProjection)}`;
+    return `You are Wandlight Continuity's continuity observation extractor.\n\nTask:\n- Read one interval of roleplay messages.\n- Extract compact observations that may change the live continuity state.\n- Do not output a final WandlightDelta. Do not modify state directly.\n- Output ONLY valid JSON.\n\nOutput schema:
+{
+  "chunkSummary": "short summary",
+  "sceneSnapshot": {
+    "location": "current/most recent location if evident",
+    "timeOfDay": "current/most recent time of day if evident",
+    "presentCharacters": ["characters visibly present"],
+    "currentActivity": "what is happening now",
+    "canonDateHints": ["explicit or implied dates/era hints"],
+    "divergenceHints": ["clear canon divergence hints"]
+  },
+  "observations": [
+    {
+      "section": "canon|scene|characters|inventory|objectives|knowledge|secrets|relationships|threads|storyMilestones|continuityFlags",
+      "subject": "short subject",
+      "observation": "durable factual observation grounded in the messages",
+      "actionHint": "add|update|resolve|remove|upsert",
+      "confidence": 0.0,
+      "messageRefs": [1]
+    }
+  ]
+}
+
+Limits:\n- Return up to ${maxObs} observations.\n- Prefer current actionable continuity: scene, present characters, physical state, emotional state, carried items, knowledge boundaries, active goals, relationship changes, secrets, unresolved threads, milestones, and clear contradictions.\n- Preserve message indexes in messageRefs.\n- If nothing changed, return {"chunkSummary":"No continuity observations.","observations":[]}.\n\nCurrent compact continuity projection for reference:\n${safeJson(stateProjection)}`;
 }
 
 function getSectionPromptText(settings, sectionKey) {
@@ -623,7 +781,7 @@ async function extractChunkObservations({ chunk, plan, batchId, settings, stateP
         try {
             rawResponse = await sendLoreRequest(systemPrompt, userPrompt, {
                 providerKind: 'continuity',
-                maxTokens: settings.continuityMaxTokens || 4096,
+                maxTokens: clampInt(settings.continuityObservationMaxTokens || Math.min(Number(settings.continuityMaxTokens || 4096), 1536), 512, 8192, 1536),
                 prefill: '',
                 signal,
                 expectedOutput: 'json',
@@ -685,7 +843,7 @@ async function reduceObservationGroup({ group, observations, plan, settings, sta
     try {
         const response = await sendLoreRequest(systemPrompt, userPrompt, {
             providerKind: 'continuity',
-            maxTokens: settings.continuityMaxTokens || 4096,
+            maxTokens: clampInt(settings.continuityReducerMaxTokens || Math.min(Number(settings.continuityMaxTokens || 4096), 1536), 512, 8192, 1536),
             prefill: '',
             signal,
             expectedOutput: 'json',
@@ -787,7 +945,262 @@ function inferFallbackDeltaFromPlan(plan, state = getState()) {
     return { summary: 'Fallback continuity date/context inferred locally from message heading.', changes };
 }
 
+function buildContinuityDeltaSystemPrompt({ settings, stateProjection, enabledSections, prepass, mode = 'fast' }) {
+    const sectionTemplate = buildSectionDecisionTemplate(enabledSections);
+    const emphasis = mode === 'fast'
+        ? 'Use one compact pass. Prioritize Canon and Scene, Characters, Inventory, and Objectives, but evaluate every enabled section.'
+        : 'This is a grouped continuity reducer pass. Update only the allowed sections and evaluate each allowed section explicitly.';
+    return `You are Wandlight Continuity's ${mode === 'fast' ? 'fast continuity delta scanner' : 'hybrid continuity section scanner'}.
+
+Task:
+- Read the supplied roleplay messages and current compact state.
+- Return one valid JSON object with section decisions and a WandlightDelta.
+- Canon and Scene must always be evaluated when enabled. Do not skip them merely because the change seems minor.
+- Use only facts grounded in the supplied messages and local prepass hints.
+- Do not include reasoning, markdown, or prose outside JSON.
+
+${emphasis}
+
+Output schema:
+{
+  ${sectionTemplate},
+  "delta": {
+    "summary": "short summary of proposed continuity changes",
+    "changes": {
+      "canon": { "era": "", "inUniverseDate": "", "canonBoundary": "", "divergences": [] },
+      "scene": { "location": "", "timeOfDay": "", "weather": "", "ambience": "", "presentCharacters": [], "nearbyCharacters": [], "currentActivity": "" },
+      "characters": { "added": [], "updated": [], "removed": [] },
+      "inventory": { "added": [], "updated": [], "removed": [] },
+      "objectives": { "added": [], "updated": [], "removed": [] },
+      "knowledge": { "Character Name": ["fact known by that character"] },
+      "secrets": { "added": [], "updated": [], "removed": [] },
+      "relationships": { "added": [], "updated": [], "removed": [] },
+      "threads": { "added": [], "updated": [] },
+      "storyMilestones": { "milestone_id": { "status": "not_happened|suspected|happened|blocked|diverged|unknown", "evidence": [] } },
+      "continuityFlags": { "added": [], "resolved": [] }
+    }
+  }
+}
+
+Only include change keys that actually change or add useful state. If a section was evaluated but unchanged, mark it unchanged in sectionDecisions and omit it from delta.changes.
+
+Local prepass hints:
+${safeJson(prepass)}
+
+Current compact continuity projection:
+${safeJson(stateProjection)}
+
+Relevant configured section guidance:
+${enabledSections.map(section => {
+    const text = getSectionPromptText(settings, section);
+    return text ? `- ${section}: ${text}` : '';
+}).filter(Boolean).join('\n') || '(none)'}`;
+}
+
+function buildFastContinuityUserPrompt(plan = {}) {
+    return `Continuity scan strategy: fast single-pass delta.
+Scan range: messages ${plan.startIndex}-${plan.endIndex} (${plan.sourceMessageCount} message(s)).
+
+Messages:
+${formatScanMessages((plan.chunks || []).flatMap(c => c.messages || []))}
+
+Return the sectionDecisions object and one delta object. JSON only.`;
+}
+
+function buildHybridContinuityUserPrompt(group, plan = {}) {
+    return `Continuity scan strategy: hybrid grouped delta.
+Allowed sections for this call: ${group.sections.join(', ')}.
+Scan range: messages ${plan.startIndex}-${plan.endIndex} (${plan.sourceMessageCount} message(s)).
+
+Messages:
+${formatScanMessages((plan.chunks || []).flatMap(c => c.messages || []))}
+
+Return sectionDecisions and one delta object for the allowed sections only. JSON only.`;
+}
+
+function getDeltaCallMaxTokens(settings, mode) {
+    const key = mode === 'fast' ? 'continuityFastMaxTokens' : 'continuityHybridMaxTokens';
+    const fallback = mode === 'fast' ? 2048 : 3072;
+    return clampInt(settings[key] || Math.min(Number(settings.continuityMaxTokens || fallback), fallback), 512, 8192, fallback);
+}
+
+async function requestContinuityDelta(systemPrompt, userPrompt, settings, options = {}, mode = 'fast') {
+    const maxAttempts = Math.max(1, Math.min(4, clampInt(settings.continuityScanRetryAttempts, 0, 3, 1) + 1));
+    let lastError = '';
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        if (options.signal?.aborted) throw new Error('Continuity scan aborted');
+        try {
+            const response = await sendLoreRequest(systemPrompt, userPrompt, {
+                providerKind: 'continuity',
+                maxTokens: getDeltaCallMaxTokens(settings, mode),
+                prefill: '',
+                signal: options.signal,
+                expectedOutput: 'json',
+            });
+            const delta = parseDeltaResponse(response);
+            if (delta) return delta;
+            lastError = 'Model returned no valid WandlightDelta.';
+        } catch (e) {
+            lastError = e?.message || String(e || 'Continuity delta request failed.');
+        }
+    }
+    throw new Error(lastError || 'Continuity delta request failed.');
+}
+
+function finalizeContinuityScanDelta({ batchId, delta, plan, settings, options = {}, progress, scanStatus = 'complete', meta = {} }) {
+    const hasChanges = !!delta && Object.keys(delta.changes || {}).length > 0;
+    if (meta.markChunksComplete !== false) markContinuityPlanChunksComplete(batchId, plan, scanStatus === 'failed' ? 'failed' : 'complete');
+    flushContinuityFullCheckpoint(batchId, {
+        status: scanStatus,
+        completedAt: Date.now(),
+        strategy: meta.strategy || '',
+        modelCallCount: meta.modelCallCount || 0,
+        changeKeys: hasChanges ? Object.keys(delta.changes || {}) : [],
+        sectionDecisions: delta?.sectionDecisions || meta.sectionDecisions || null,
+        ...meta,
+    });
+
+    if (!hasChanges) {
+        progress?.('Continuity scan complete: no state changes.', 100);
+        return { status: 'no_changes', batchId, plan, strategy: meta.strategy || '', sectionDecisions: delta?.sectionDecisions || meta.sectionDecisions || null };
+    }
+
+    const currentState = getState();
+    if (options.applyImmediately || settings.autoApplyDelta) {
+        pushStateSnapshot(currentState, `Continuity scan: ${delta.summary || 'state update'}`, settings.maxSnapshots);
+        const next = applyDelta(currentState, delta);
+        next.lastDelta = null;
+        saveState(next, { syncPrompt: true });
+        progress?.(`Continuity scan applied: ${Object.keys(delta.changes || {}).join(', ') || 'changes'}.`, 100);
+        return { status: 'applied', batchId, delta, summary: delta.summary || '', changeKeys: Object.keys(delta.changes || {}), strategy: meta.strategy || '', sectionDecisions: delta.sectionDecisions || null };
+    }
+
+    currentState.lastDelta = delta;
+    saveState(currentState, { syncPrompt: true });
+    progress?.('Continuity scan stored changes for review.', 100);
+    return { status: 'pending_review', batchId, delta, summary: delta.summary || '', changeKeys: Object.keys(delta.changes || {}), strategy: meta.strategy || '', sectionDecisions: delta.sectionDecisions || null };
+}
+
+function buildSyntheticBatchId(strategy, plan) {
+    return `continuity_${strategy}_${Date.now()}_${stableStringHash(`${plan.contextKey}|${plan.startIndex}|${plan.endIndex}|${plan.sourceMessageCount}`)}`;
+}
+
+function hasQueuedContinuityWork(plan, settings) {
+    const queued = plan.chunks.filter(chunk => shouldQueueChunk(chunk, settings));
+    return { queuedChunks: queued, skippedChunks: plan.chunks.length - queued.length };
+}
+
+async function runFastContinuityDeltaScan({ settings, plan, options, stateAtStart }) {
+    const { queuedChunks, skippedChunks } = hasQueuedContinuityWork(plan, settings);
+    const batchId = buildSyntheticBatchId('fast', plan);
+    const progress = typeof options.progress === 'function' ? options.progress : null;
+    startContinuityBatch({
+        id: batchId,
+        status: queuedChunks.length ? 'running' : 'complete',
+        strategy: 'fast',
+        mode: options.automationSafe ? 'auto-recent' : 'manual',
+        scanMode: plan.scanMode,
+        startIndex: plan.startIndex,
+        endIndex: plan.endIndex,
+        sourceMessageCount: plan.sourceMessageCount,
+        totalChunks: plan.chunks.length,
+        queuedChunks: queuedChunks.length,
+        skippedChunks,
+        modelCallCount: 1,
+    });
+    if (!queuedChunks.length) return { status: 'skipped_unchanged', batchId, plan, skippedChunks, strategy: 'fast' };
+
+    const enabledSections = deriveEnabledSections(stateAtStart, options.automationSafe ? 'essentials' : 'all');
+    const prepass = buildLocalContinuityPrepass(plan);
+    const projection = buildContinuityProjectionForSections(stateAtStart, enabledSections);
+    const systemPrompt = buildContinuityDeltaSystemPrompt({ settings, stateProjection: projection, enabledSections, prepass, mode: 'fast' });
+    const userPrompt = buildFastContinuityUserPrompt(plan);
+    progress?.('Fast continuity scan running.', 25);
+    let delta = null;
+    try {
+        delta = await requestContinuityDelta(systemPrompt, userPrompt, settings, options, 'fast');
+    } catch (e) {
+        delta = inferFallbackDeltaFromPlan(plan, getState());
+        if (!delta) {
+            flushContinuityFullCheckpoint(batchId, { status: 'failed', strategy: 'fast', error: e?.message || String(e || ''), failedAt: Date.now() });
+            return { status: 'failed_exception', batchId, strategy: 'fast', error: e?.message || String(e || '') };
+        }
+    }
+    if (!delta || !Object.keys(delta.changes || {}).length) delta = inferFallbackDeltaFromPlan(plan, getState()) || delta;
+    return finalizeContinuityScanDelta({ batchId, delta, plan, settings, options, progress, scanStatus: 'complete', meta: { strategy: 'fast', modelCallCount: 1, prepass } });
+}
+
+function getHybridDeltaGroups(stateAtStart = getState()) {
+    const groups = [
+        { id: 'essentials', label: 'Canon, Scene, and Characters', sections: ['canon', 'scene', 'characters'].filter(section => isContinuitySectionEnabled(stateAtStart, section)) },
+        { id: 'details', label: 'Inventory, Knowledge, Relationships, and Threads', sections: ['inventory', 'objectives', 'knowledge', 'secrets', 'relationships', 'threads', 'storyMilestones', 'continuityFlags'].filter(section => isContinuitySectionEnabled(stateAtStart, section)) },
+    ];
+    return groups.filter(group => group.sections.length);
+}
+
+async function runHybridContinuityDeltaScan({ settings, plan, options, stateAtStart }) {
+    const { queuedChunks, skippedChunks } = hasQueuedContinuityWork(plan, settings);
+    const batchId = buildSyntheticBatchId('hybrid', plan);
+    const progress = typeof options.progress === 'function' ? options.progress : null;
+    const groups = getHybridDeltaGroups(stateAtStart);
+    startContinuityBatch({
+        id: batchId,
+        status: queuedChunks.length ? 'running' : 'complete',
+        strategy: 'hybrid',
+        mode: options.automationSafe ? 'auto-recent' : 'manual',
+        scanMode: plan.scanMode,
+        startIndex: plan.startIndex,
+        endIndex: plan.endIndex,
+        sourceMessageCount: plan.sourceMessageCount,
+        totalChunks: plan.chunks.length,
+        queuedChunks: queuedChunks.length,
+        skippedChunks,
+        modelCallCount: groups.length,
+    });
+    if (!queuedChunks.length) return { status: 'skipped_unchanged', batchId, plan, skippedChunks, strategy: 'hybrid' };
+
+    const prepass = buildLocalContinuityPrepass(plan);
+    const concurrency = clampInt(settings.continuityScanReducerConcurrency, 1, 3, 2);
+    progress?.(`Hybrid continuity scan running: ${groups.length} section group(s).`, 20);
+    const results = await runWithConcurrency(groups, concurrency, async group => {
+        const projection = buildContinuityProjectionForSections(stateAtStart, group.sections);
+        const systemPrompt = buildContinuityDeltaSystemPrompt({ settings, stateProjection: projection, enabledSections: group.sections, prepass, mode: 'hybrid' });
+        const userPrompt = buildHybridContinuityUserPrompt(group, plan);
+        try {
+            const delta = await requestContinuityDelta(systemPrompt, userPrompt, settings, options, 'hybrid');
+            return { status: 'complete', group, delta: restrictDeltaToGroup(delta, group) };
+        } catch (e) {
+            return { status: 'failed_exception', group, delta: null, error: e?.message || String(e || '') };
+        }
+    });
+    let delta = mergeReducerDeltas(results);
+    if (!delta || !Object.keys(delta.changes || {}).length) delta = inferFallbackDeltaFromPlan(plan, getState()) || delta;
+    const failures = results.filter(r => String(r?.status || '').startsWith('failed')).length;
+    const scanStatus = failures === groups.length ? 'failed' : failures > 0 ? 'partial' : 'complete';
+    if ((!delta || !Object.keys(delta.changes || {}).length) && scanStatus === 'failed') {
+        flushContinuityFullCheckpoint(batchId, { status: 'failed', strategy: 'hybrid', reducerFailures: failures, failedAt: Date.now() });
+        return { status: 'failed_no_valid_delta', batchId, strategy: 'hybrid', reducerFailures: failures };
+    }
+    return finalizeContinuityScanDelta({ batchId, delta, plan, settings, options, progress, scanStatus, meta: { strategy: 'hybrid', modelCallCount: groups.length, reducerFailures: failures, prepass } });
+}
+
 export async function runContinuityScan(options = {}) {
+    const settings = buildEffectiveContinuitySettings(getSettings(), options);
+    const validation = validateLoreProviderConfiguration('continuity');
+    if (!validation.ok) return { status: 'api_not_configured', error: validation.message };
+    markInterruptedContinuityChunks(settings.continuityScanRunningCheckpointStaleMs || 10 * 60 * 1000);
+
+    const stateAtStart = getState();
+    const plan = buildContinuityScanPlan(settings, stateAtStart);
+    if (!plan.sourceMessageCount || !plan.chunks.length) return { status: 'no_messages', plan };
+
+    const strategy = chooseContinuityScanStrategy(plan, settings, options);
+    if (strategy === 'fast') return runFastContinuityDeltaScan({ settings, plan, options, stateAtStart });
+    if (strategy === 'hybrid') return runHybridContinuityDeltaScan({ settings, plan, options, stateAtStart });
+    return runBulkContinuityScan(options);
+}
+
+async function runBulkContinuityScan(options = {}) {
     const settings = buildEffectiveContinuitySettings(getSettings(), options);
     const validation = validateLoreProviderConfiguration('continuity');
     if (!validation.ok) return { status: 'api_not_configured', error: validation.message };
@@ -801,6 +1214,7 @@ export async function runContinuityScan(options = {}) {
     const skippedChunks = plan.chunks.length - queuedChunks.length;
     const batchId = `continuity_${Date.now()}_${stableStringHash(`${plan.contextKey}|${plan.startIndex}|${plan.endIndex}|${plan.chunkSize}|${plan.overlap}`)}`;
     const stateProjection = buildContinuityProjection(stateAtStart);
+    const extractionProjection = buildContinuityScanHeaderProjection(stateAtStart);
     const concurrency = clampInt(settings.continuityScanConcurrency, 1, 8, 3);
     const reducerConcurrency = clampInt(settings.continuityScanReducerConcurrency, 1, 6, 3);
     const fullEvery = clampInt(settings.continuityScanFullCheckpointEveryChunks, 1, 25, 5);
@@ -840,7 +1254,7 @@ export async function runContinuityScan(options = {}) {
         progress?.(`Continuity scan started: ${queuedChunks.length} chunk(s).`, 5);
         const chunkResults = await runWithConcurrency(queuedChunks, concurrency, async chunk => {
             progress?.(`Continuity observations: ${completed + failed}/${queuedChunks.length} chunks complete.`, Math.min(80, 8 + Math.round(((completed + failed) / queuedChunks.length) * 65)));
-            const result = await extractChunkObservations({ chunk, plan, batchId, settings, stateProjection, signal: options.signal });
+            const result = await extractChunkObservations({ chunk, plan, batchId, settings, stateProjection: extractionProjection, signal: options.signal });
             if (result.status === 'complete') {
                 completed++;
                 observations.push(...(result.observations || []));
@@ -862,7 +1276,7 @@ export async function runContinuityScan(options = {}) {
 
         const enabledGroups = SECTION_GROUPS.filter(group => group.enabled(stateAtStart));
         const reducerResults = await runWithConcurrency(enabledGroups, reducerConcurrency, async group => {
-            return await reduceObservationGroup({ group, observations, plan, settings, stateProjection, signal: options.signal });
+            return await reduceObservationGroup({ group, observations, plan, settings, stateProjection: buildContinuityProjectionForSections(stateAtStart, group.sections), signal: options.signal });
         });
         let delta = mergeReducerDeltas(reducerResults);
         if (!delta || !Object.keys(delta.changes || {}).length) {
@@ -918,4 +1332,8 @@ export const __continuityScanTestHooks = {
     mergeReducerDeltas,
     compactObservation,
     stableStringHash,
+    buildLocalContinuityPrepass,
+    chooseContinuityScanStrategy,
+    buildContinuityProjectionForSections,
+    buildContinuityScanHeaderProjection,
 };

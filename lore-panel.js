@@ -1889,7 +1889,10 @@ function getContinuityScanScopeSummary(settings = getSettings()) {
 }
 
 function getContinuityScanPerformanceSummary(settings = getSettings()) {
-    return `${settings.continuityScanChunkSize || 8}/chunk · ${settings.continuityScanConcurrency || 3} simultaneous`;
+    const strategy = settings.continuityScanStrategy || 'adaptive';
+    const fast = settings.continuityScanFastThreshold || 20;
+    const hybrid = settings.continuityScanHybridThreshold || 80;
+    return `${strategy} · fast ≤${fast} · hybrid ≤${hybrid}`;
 }
 
 function getContinuityScanResultsSummary(state = getState()) {
@@ -1955,12 +1958,29 @@ function createContinuityScanScopeSettingsContent() {
 function createContinuityScanPerformanceSettingsContent() {
     const content = document.createElement('div');
     content.className = 'wandlight-lore-scan-settings-block';
-    content.appendChild(createRangeSettingRow('Chunk size', 'Messages per continuity observation chunk. Smaller chunks reduce prompt size and help smaller Utility models.', 'continuityScanChunkSize', { min: 2, max: 40, fallback: 8 }));
+    content.appendChild(createSelectSettingRow(
+        'Scan strategy',
+        'Adaptive uses one fast delta call for small recent scans, grouped hybrid calls for medium ranges, and the checkpointed bulk pipeline for large backfills.',
+        'continuityScanStrategy',
+        [
+            ['adaptive', 'Adaptive'],
+            ['fast', 'Always fast'],
+            ['hybrid', 'Always hybrid'],
+            ['bulk', 'Always bulk/checkpointed'],
+        ]
+    ));
+    content.appendChild(createRangeSettingRow('Fast threshold', 'Adaptive scans at or below this message count use the single-call fast continuity delta path.', 'continuityScanFastThreshold', { min: 1, max: 200, fallback: 20 }));
+    content.appendChild(createRangeSettingRow('Hybrid threshold', 'Adaptive scans above the fast threshold and at or below this count use grouped hybrid delta calls. Larger scans use the checkpointed bulk path.', 'continuityScanHybridThreshold', { min: 20, max: 500, fallback: 80 }));
+    content.appendChild(createRangeSettingRow('Fast max tokens', 'Maximum output tokens for the fast single-call continuity scan.', 'continuityFastMaxTokens', { min: 512, max: 8192, fallback: 2048 }));
+    content.appendChild(createRangeSettingRow('Hybrid max tokens', 'Maximum output tokens for each grouped hybrid continuity scan call.', 'continuityHybridMaxTokens', { min: 512, max: 8192, fallback: 3072 }));
+    content.appendChild(createRangeSettingRow('Chunk size', 'Messages per continuity observation chunk. Used by the bulk/checkpointed path for large ranges.', 'continuityScanChunkSize', { min: 2, max: 40, fallback: 8 }));
     content.appendChild(createRangeSettingRow('Overlap', 'Messages repeated at chunk boundaries to preserve continuity facts that span intervals.', 'continuityScanOverlap', { min: 0, max: 10, fallback: 1 }));
     content.appendChild(createRangeSettingRow('Simultaneous chunks', 'Maximum continuity observation chunks sent to the Utility provider at the same time.', 'continuityScanConcurrency', { min: 1, max: 8, fallback: 3 }));
     content.appendChild(createRangeSettingRow('Simultaneous reducers', 'Maximum section reducers sent to the Utility provider at the same time after observations are extracted.', 'continuityScanReducerConcurrency', { min: 1, max: 6, fallback: 3 }));
     content.appendChild(createRangeSettingRow('Retry attempts', 'Chunk-level retry attempts after empty, malformed, or failed observation responses.', 'continuityScanRetryAttempts', { min: 0, max: 4, fallback: 2 }));
-    content.appendChild(createRangeSettingRow('Observations per chunk', 'Upper target for compact continuity observations extracted from each chunk.', 'continuityScanObservationsPerChunk', { min: 3, max: 30, fallback: 12 }));
+    content.appendChild(createRangeSettingRow('Observations per chunk', 'Upper target for compact continuity observations extracted from each chunk in the bulk/checkpointed path.', 'continuityScanObservationsPerChunk', { min: 3, max: 30, fallback: 12 }));
+    content.appendChild(createRangeSettingRow('Observation max tokens', 'Maximum output tokens for each bulk observation extraction call.', 'continuityObservationMaxTokens', { min: 512, max: 8192, fallback: 1536 }));
+    content.appendChild(createRangeSettingRow('Reducer max tokens', 'Maximum output tokens for each bulk section reducer call.', 'continuityReducerMaxTokens', { min: 512, max: 8192, fallback: 1536 }));
     content.appendChild(createRangeSettingRow('Save checkpoint every chunks', 'How often the scan writes a full compact checkpoint after lightweight per-chunk observation saves.', 'continuityScanFullCheckpointEveryChunks', { min: 1, max: 25, fallback: 5 }));
 
     const rescanRow = createSelectSettingRow(
@@ -1978,7 +1998,7 @@ function createContinuityScanPerformanceSettingsContent() {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help wandlight-compact-help';
-    help.textContent = 'Chunk checkpoints are saved immediately for recovery. Prompt injection sync is deferred until the final delta is applied or stored for review.';
+    help.textContent = 'Adaptive mode avoids the heavy bulk pipeline for small scans. Chunk checkpoints are still used for large backfills, with prompt injection sync deferred until the final delta is applied or stored for review.';
     content.appendChild(help);
     return content;
 }
@@ -2001,6 +2021,8 @@ function createContinuityScanResultsCard(state) {
     }
 
     card.appendChild(createKeyValue('Status', batch.status || 'unknown', 'Latest scan batch status.'));
+    card.appendChild(createKeyValue('Strategy', batch.strategy || 'bulk', 'Continuity scan strategy used for this result.'));
+    if (batch.modelCallCount !== undefined) card.appendChild(createKeyValue('Model calls', String(batch.modelCallCount || 0), 'Expected direct model calls used by this strategy, excluding JSON repair retries.'));
     card.appendChild(createKeyValue('Range', `${batch.startIndex || 0}-${batch.endIndex || 0}`, 'Message range used for this scan.'));
     card.appendChild(createKeyValue('Chunks', `${batch.completedChunks || 0} complete / ${batch.failedChunks || 0} failed / ${batch.totalChunks || 0} total`, 'Chunk-level checkpoint status.'));
     card.appendChild(createKeyValue('Observations', String(batch.observationCount || 0), 'Compact observations extracted before reducer passes.'));
@@ -2024,7 +2046,7 @@ function createContinuityScanCard(state) {
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
     title.textContent = 'Continuity Scan';
-    addTooltip(title, 'Scans chat with a checkpointed chunk pipeline: parallel observations first, section reducers second, then one ordered continuity delta.');
+    addTooltip(title, 'Adaptive continuity scanning: small scans use one fast delta call, medium scans use grouped section calls, and large scans use the checkpointed bulk pipeline.');
     card.appendChild(title);
 
     card.appendChild(createAutomationModeCard(
@@ -2069,7 +2091,7 @@ function createContinuityScanCard(state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Scan Continuity State', 'Scans the selected message range through checkpointed chunks, then applies one ordered continuity state update. Use State History to undo the scan if needed.', async (btn) => {
+    actions.appendChild(createButton('Scan Continuity State', 'Scans the selected message range with the adaptive continuity scanner, then applies or stores one ordered continuity state update. Use State History to undo the scan if needed.', async (btn) => {
         if (!ensureContinuityProviderReadyForAction('Scan Continuity State')) return;
         await runBusyAction(btn, 'Scanning...', async () => {
             setFeatureProgress('continuity', 'Scanning continuity state...', 5);

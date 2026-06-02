@@ -18,6 +18,7 @@
     "event_anchor": 14,
     "skill_band": 10,
     "relationship_gate": 10,
-    "institution_state": 10
+    "institution_state": 10,
+    "character_state": 12
   }
 }

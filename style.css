@@ -796,6 +796,72 @@
     border-bottom: none;
 }
 
+.wandlight-preset-status-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 7px 8px;
+}
+
+.wandlight-preset-status-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.wandlight-preset-status-header .wandlight-runtime-card-title {
+    margin: 0;
+}
+
+.wandlight-preset-status-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.wandlight-preset-status-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+    padding: 4px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.14);
+    font-size: 0.78em;
+}
+
+.wandlight-preset-status-stat span {
+    opacity: 0.68;
+}
+
+.wandlight-preset-status-stat strong {
+    min-width: 0;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wandlight-preset-status-message {
+    color: var(--wandlight-muted, rgba(241, 234, 216, 0.72));
+    font-size: 0.76em;
+    line-height: 1.28;
+}
+
+.wandlight-preset-status-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.wandlight-preset-status-actions .wandlight-runtime-button {
+    padding: 4px 8px;
+    font-size: 0.78em;
+}
+
 .wandlight-key {
     opacity: 0.68;
     flex: 0 0 42%;

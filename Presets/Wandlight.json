@@ -588,7 +588,13 @@
     "request_image_aspect_ratio": "",
     "request_image_resolution": "",
     "extensions": {
-        "regex_scripts": []
+        "regex_scripts": [],
+        "wandlight": {
+            "presetName": "Wandlight",
+            "presetVersion": "Wandlight-1.3",
+            "version": "1.3",
+            "supportsReplyHeaders": true
+        }
     },
     "bias_presets": [
         {

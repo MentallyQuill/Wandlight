@@ -8,7 +8,7 @@
 
 import { getPanelLoreState, getInjectableLoreEntries, getLoreRelevanceCounts, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag, LORE_LIFECYCLE_STATUSES } from './lore-matrix.js';
 import { LORE_RELEVANCE_TIERS, LORE_RELEVANCE_LABELS, normalizeLoreRelevance, LORE_CATEGORY_VALUES, LORE_PURPOSE_LABELS, normalizeLorePurpose } from './lore-relevance.js';
-import { getDefaultState, DEFAULT_SETTINGS } from './constants.js';
+import { getDefaultState, DEFAULT_SETTINGS, WANDLIGHT_PRESET_NAME, WANDLIGHT_PRESET_VERSION, WANDLIGHT_PRESET_ASSET_PATH } from './constants.js';
 import {
     getState,
     getSettings,
@@ -44,6 +44,9 @@ const DEFAULT_RAIL_LEFT = 20;
 const DEFAULT_COMPACT_RAIL_HEIGHT_ESTIMATE = 420;
 const DEFAULT_EXPANDED_RAIL_HEIGHT_ESTIMATE = 420;
 const LAYOUT_VERSION = 2;
+const WANDLIGHT_PRESET_API_ID = 'openai';
+
+let bundledWandlightPresetCache = null;
 
 const CATEGORY_LABELS = {
     all: 'All',
@@ -949,6 +952,8 @@ function renderSessionTab(container, state) {
     ));
     container.appendChild(toggles);
 
+    container.appendChild(createWandlightPresetStatusCard());
+
     container.appendChild(createCollapsibleSection('session.instructions', 'Instructions', 'workflow guide', false, createInstructionsCard(), { tooltip: 'Minimal workflow reference for using Wandlight during roleplay.' }));
 
     const stats = document.createElement('div');
@@ -1022,6 +1027,324 @@ function createInstructionsCard() {
     wrap.appendChild(close);
 
     return wrap;
+}
+
+function createWandlightPresetStatusCard() {
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-preset-status-card';
+    card.textContent = 'Checking Wandlight preset...';
+    refreshWandlightPresetStatusCard(card);
+    return card;
+}
+
+async function refreshWandlightPresetStatusCard(card) {
+    if (!card) return;
+    card.textContent = '';
+
+    let status;
+    try {
+        status = await getWandlightPresetStatus();
+    } catch (e) {
+        status = {
+            state: 'error',
+            pill: 'Error',
+            message: e?.message || 'Could not check Wandlight preset.',
+            installedVersion: 'unknown',
+            bundledVersion: WANDLIGHT_PRESET_VERSION,
+            canInstall: false,
+        };
+    }
+
+    const header = document.createElement('div');
+    header.className = 'wandlight-preset-status-header';
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Wandlight Preset';
+    addTooltip(title, 'The bundled Wandlight chat-completion preset enables reply headers used by fast Story Context detection.');
+    header.appendChild(title);
+    header.appendChild(createStatusPill(status.pill || 'Unknown', status.message || 'Wandlight preset status'));
+    card.appendChild(header);
+
+    const meta = document.createElement('div');
+    meta.className = 'wandlight-preset-status-meta';
+    meta.appendChild(createCompactPresetStat('Installed', status.installedVersion || 'not found'));
+    meta.appendChild(createCompactPresetStat('Bundled', status.bundledVersion || WANDLIGHT_PRESET_VERSION));
+    card.appendChild(meta);
+
+    const message = document.createElement('div');
+    message.className = 'wandlight-preset-status-message';
+    message.textContent = status.message || '';
+    card.appendChild(message);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-preset-status-actions';
+    if (status.actionLabel) {
+        actions.appendChild(createButton(status.actionLabel, status.actionTooltip || status.actionLabel, async (btn) => {
+            await handleInstallWandlightPreset(btn, card, status);
+        }, status.primaryAction ? 'wandlight-primary-button' : ''));
+    }
+    if (status.canDownload) {
+        actions.appendChild(createButton('Download JSON', 'Download the bundled Wandlight preset for manual import.', async (btn) => {
+            await runBusyAction(btn, 'Downloading...', async () => {
+                const preset = await loadBundledWandlightPreset();
+                downloadJson(preset, `${WANDLIGHT_PRESET_NAME}.json`);
+                toast('Bundled Wandlight preset downloaded.', 'info');
+            });
+        }));
+    }
+    if (actions.childElementCount) card.appendChild(actions);
+}
+
+function createCompactPresetStat(label, value) {
+    const row = document.createElement('div');
+    row.className = 'wandlight-preset-status-stat';
+    const key = document.createElement('span');
+    key.textContent = label;
+    const val = document.createElement('strong');
+    val.textContent = value;
+    row.appendChild(key);
+    row.appendChild(val);
+    return row;
+}
+
+async function getWandlightPresetStatus() {
+    const bundled = await loadBundledWandlightPreset();
+    const bundledMeta = getWandlightPresetMetadata(bundled, { fallbackVersion: WANDLIGHT_PRESET_VERSION });
+    const bundledVersion = bundledMeta.displayVersion || WANDLIGHT_PRESET_VERSION;
+    const pm = getWandlightPresetManager();
+
+    if (!pm) {
+        return {
+            state: 'unavailable',
+            pill: 'Manual',
+            message: 'Preset manager unavailable. Download the bundled JSON and import it manually.',
+            installedVersion: 'unknown',
+            bundledVersion,
+            canDownload: true,
+        };
+    }
+
+    const installed = getInstalledWandlightPreset(pm);
+    if (!installed.preset) {
+        return {
+            state: 'missing',
+            pill: 'Not Installed',
+            message: 'Install the bundled preset, then select it manually in SillyTavern when ready.',
+            installedVersion: 'not found',
+            bundledVersion,
+            actionLabel: 'Install',
+            actionTooltip: 'Import the bundled Wandlight preset into Chat Completion presets without intentionally switching to it.',
+            primaryAction: true,
+            canInstall: true,
+        };
+    }
+
+    const installedMeta = getWandlightPresetMetadata(installed.preset);
+    const installedVersion = installedMeta.displayVersion || 'unknown';
+    const comparison = compareWandlightPresetVersions(installedMeta.displayVersion, bundledVersion);
+
+    if (comparison === null) {
+        return {
+            state: 'unknown',
+            pill: 'Version Unknown',
+            message: 'A Wandlight preset is installed, but its version metadata is missing or unreadable.',
+            installedVersion,
+            bundledVersion,
+            actionLabel: 'Update',
+            actionTooltip: 'Replace the installed Wandlight preset with the bundled version.',
+            primaryAction: true,
+            canInstall: true,
+            installedName: installed.name,
+        };
+    }
+
+    if (comparison < 0) {
+        return {
+            state: 'behind',
+            pill: 'Update Available',
+            message: 'The installed Wandlight preset is older than the bundled preset.',
+            installedVersion,
+            bundledVersion,
+            actionLabel: 'Update',
+            actionTooltip: 'Update the installed Wandlight preset to the bundled version.',
+            primaryAction: true,
+            canInstall: true,
+            installedName: installed.name,
+        };
+    }
+
+    if (comparison > 0) {
+        return {
+            state: 'ahead',
+            pill: 'Newer Installed',
+            message: 'The installed Wandlight preset appears newer than the bundled preset. No update needed.',
+            installedVersion,
+            bundledVersion,
+            installedName: installed.name,
+        };
+    }
+
+    return {
+        state: 'current',
+        pill: 'Current',
+        message: 'The installed Wandlight preset matches the bundled version.',
+        installedVersion,
+        bundledVersion,
+        installedName: installed.name,
+    };
+}
+
+function getWandlightPresetManager() {
+    try {
+        if (typeof SillyTavern === 'undefined' || typeof SillyTavern.getContext !== 'function') return null;
+        const ctx = SillyTavern.getContext();
+        if (!ctx || typeof ctx.getPresetManager !== 'function') return null;
+        return ctx.getPresetManager(WANDLIGHT_PRESET_API_ID) || null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function getInstalledWandlightPreset(pm) {
+    const names = typeof pm?.getAllPresets === 'function' ? pm.getAllPresets() : [];
+    const exactName = Array.isArray(names)
+        ? names.find(name => String(name || '').trim().toLowerCase() === WANDLIGHT_PRESET_NAME.toLowerCase())
+        : '';
+    if (!exactName) return { name: '', preset: null };
+
+    let preset = null;
+    if (typeof pm.getCompletionPresetByName === 'function') {
+        preset = pm.getCompletionPresetByName(exactName) || null;
+    }
+    if (!preset && typeof pm.readPresetExtensionField === 'function') {
+        const wandlightMeta = pm.readPresetExtensionField({ name: exactName, path: 'wandlight' });
+        if (wandlightMeta) preset = { extensions: { wandlight: wandlightMeta } };
+    }
+    return { name: exactName, preset };
+}
+
+async function loadBundledWandlightPreset() {
+    if (bundledWandlightPresetCache) return cloneJson(bundledWandlightPresetCache);
+    const response = await fetch(getLocalAssetSrc(WANDLIGHT_PRESET_ASSET_PATH), { cache: 'no-store' });
+    if (!response.ok) throw new Error('Bundled Wandlight preset could not be loaded.');
+    const preset = ensureWandlightPresetMetadata(await response.json());
+    bundledWandlightPresetCache = preset;
+    return cloneJson(preset);
+}
+
+function ensureWandlightPresetMetadata(preset) {
+    const next = cloneJson(preset || {});
+    next.extensions = isPlainObjectValue(next.extensions) ? next.extensions : {};
+    next.extensions.wandlight = {
+        ...(isPlainObjectValue(next.extensions.wandlight) ? next.extensions.wandlight : {}),
+        presetName: WANDLIGHT_PRESET_NAME,
+        presetVersion: WANDLIGHT_PRESET_VERSION,
+        version: formatComparablePresetVersion(WANDLIGHT_PRESET_VERSION) || '1.3',
+        supportsReplyHeaders: true,
+    };
+    return next;
+}
+
+function getWandlightPresetMetadata(preset, options = {}) {
+    const ext = isPlainObjectValue(preset?.extensions?.wandlight) ? preset.extensions.wandlight : {};
+    const notes = String(preset?.notes || '');
+    const explicit = ext.presetVersion || ext.version || '';
+    const noteMatch = notes.match(/\bWandlight[-\s]+v?(\d+(?:\.\d+){0,3})\b/i);
+    const rawVersion = explicit || (noteMatch ? noteMatch[1] : '') || options.fallbackVersion || '';
+    const comparable = formatComparablePresetVersion(rawVersion);
+    return {
+        displayVersion: comparable ? `Wandlight-${comparable}` : '',
+        comparable,
+        source: explicit ? 'metadata' : noteMatch ? 'notes' : '',
+    };
+}
+
+function formatComparablePresetVersion(value) {
+    const match = String(value || '').trim().match(/(?:Wandlight[-\s]*)?v?(\d+(?:\.\d+){0,3})/i);
+    return match?.[1] || '';
+}
+
+function compareWandlightPresetVersions(installed, bundled) {
+    const a = formatComparablePresetVersion(installed);
+    const b = formatComparablePresetVersion(bundled);
+    if (!a || !b) return null;
+    const left = a.split('.').map(v => Number(v) || 0);
+    const right = b.split('.').map(v => Number(v) || 0);
+    const length = Math.max(left.length, right.length, 3);
+    for (let i = 0; i < length; i += 1) {
+        const av = left[i] || 0;
+        const bv = right[i] || 0;
+        if (av < bv) return -1;
+        if (av > bv) return 1;
+    }
+    return 0;
+}
+
+async function handleInstallWandlightPreset(btn, card, status) {
+    await runBusyAction(btn, status.state === 'missing' ? 'Installing...' : 'Updating...', async () => {
+        if (status.state !== 'missing') {
+            const proceed = await confirmAction(
+                'Update Wandlight preset?',
+                'This will replace the installed Wandlight preset with the bundled version. It will not intentionally switch your active preset.'
+            );
+            if (!proceed) return;
+        }
+
+        const result = await installBundledWandlightPreset();
+        await refreshWandlightPresetStatusCard(card);
+        toast(status.state === 'missing' ? 'Wandlight preset installed.' : 'Wandlight preset updated.');
+        if (result?.selectionTouched) {
+            await showNoticePopup(
+                'Preset saved',
+                'SillyTavern may briefly change the active preset while importing. I restored the previous selection where possible; verify your active preset and connection profile before generating.'
+            );
+        }
+    });
+}
+
+async function installBundledWandlightPreset() {
+    const pm = getWandlightPresetManager();
+    if (!pm || typeof pm.savePreset !== 'function') {
+        throw new Error('SillyTavern preset manager is unavailable.');
+    }
+
+    const preset = await loadBundledWandlightPreset();
+    const previousValue = typeof pm.getSelectedPreset === 'function' ? pm.getSelectedPreset() : '';
+    const previousName = typeof pm.getSelectedPresetName === 'function' ? pm.getSelectedPresetName() : '';
+
+    await pm.savePreset(WANDLIGHT_PRESET_NAME, preset);
+
+    let restored = false;
+    if (previousValue && typeof pm.selectPreset === 'function') {
+        try {
+            const currentName = typeof pm.getSelectedPresetName === 'function' ? pm.getSelectedPresetName() : '';
+            if (currentName !== previousName) {
+                pm.selectPreset(previousValue);
+                restored = true;
+            }
+        } catch (e) {
+            console.warn('[Wandlight] Could not restore previous preset after importing Wandlight preset:', e);
+        }
+    }
+
+    return { selectionTouched: previousName !== WANDLIGHT_PRESET_NAME, restored };
+}
+
+function downloadJson(data, filename) {
+    const blob = new Blob([JSON.stringify(data, null, 4)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function cloneJson(value) {
+    if (typeof structuredClone === 'function') return structuredClone(value);
+    return JSON.parse(JSON.stringify(value));
 }
 
 function createStateHistoryCard(state) {
@@ -7402,6 +7725,19 @@ async function confirmAction(title, message) {
     if (hasPopupConfirm) return await Popup.show.confirm(title, message);
     if (typeof confirm === 'function') return confirm(`${title}\n\n${message}`);
     return true;
+}
+
+async function showNoticePopup(title, message) {
+    const hasPopupAlert = typeof Popup !== 'undefined' && Popup.show && typeof Popup.show.alert === 'function';
+    if (hasPopupAlert) {
+        await Popup.show.alert(title, message);
+        return;
+    }
+    if (typeof alert === 'function') {
+        alert(`${title}\n\n${message}`);
+        return;
+    }
+    toast(message, 'info');
 }
 
 function toast(message, type = 'success') {

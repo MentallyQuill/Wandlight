@@ -7,6 +7,9 @@
 // ── Module key ──────────────────────────────────────────────────────────────────
 export const MODULE_KEY = 'wandlight';
 export const LEGACY_MODULE_KEYS = Object.freeze(['wandlight_continuity']);
+export const WANDLIGHT_PRESET_NAME = 'Wandlight';
+export const WANDLIGHT_PRESET_VERSION = 'Wandlight-1.3';
+export const WANDLIGHT_PRESET_ASSET_PATH = './Presets/Wandlight.json';
 
 /**
  * The extension folder name under data/default-user/extensions/third-party/.

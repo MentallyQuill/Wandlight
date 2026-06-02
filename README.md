@@ -75,6 +75,16 @@ Story Lore Scan uses the Reasoning Provider to extract durable story/AU lore fro
 
 Generated lore is filtered through a strict quality gate by default. Low-value recap facts that belong in a summarizer are discarded before Pending Lore Review. Similar lore is routed as a possible update or merge instead of being silently thrown away as a duplicate.
 
+### Detect Story Context
+
+Story Context detection can use a fast local path before spending a Reasoning Provider call. When enabled, Wandlight scans recent model replies for the standard Wandlight header:
+
+```text
+*Saturday, Jan 25, 1997 | 10:12 AM | Disused Third-Floor Classroom | Overcast - Light Snow*
+```
+
+If a valid header is found, Wandlight sets the Scene Date locally, infers the Harry Potter canon reference point from that date, preserves the current branch/time-travel fields, and skips the model call. If no header is found, it falls back to model-based context detection.
+
 ## API And Model Settings
 
 Wandlight has two model roles:

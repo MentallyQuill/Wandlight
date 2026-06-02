@@ -399,6 +399,65 @@ function getRecentMessages(count = 8) {
     return formatted || '(No messages available)';
 }
 
+const DATE_WITH_OPTIONAL_WEEKDAY_PATTERN = String.raw`(?:(?:Mon(?:day)?|Tue(?:sday)?|Wed(?:nesday)?|Thu(?:rsday)?|Fri(?:day)?|Sat(?:urday)?|Sun(?:day)?)\.?\s*,?\s*)?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+\d{1,2}(?:st|nd|rd|th)?\s*,?\s*\d{4}`;
+const WANDLIGHT_REPLY_HEADER_RE = new RegExp(String.raw`^[*_]{0,3}\s*(${DATE_WITH_OPTIONAL_WEEKDAY_PATTERN})\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(.+?)\s*[*_]{0,3}\s*$`, 'i');
+
+function stripHeaderMarkdown(value) {
+    return String(value || '').trim().replace(/^[*_]{1,3}\s*/, '').replace(/\s*[*_]{1,3}$/, '').trim();
+}
+
+function extractWandlightReplyHeader(text) {
+    const lines = String(text || '').split(/\r?\n/).slice(0, 12);
+    for (const rawLine of lines) {
+        const line = String(rawLine || '').trim();
+        if (!line || line.startsWith('>')) continue;
+        const match = line.match(WANDLIGHT_REPLY_HEADER_RE);
+        if (!match) continue;
+
+        const sceneDate = stripHeaderMarkdown(match[1]);
+        if (!parseSceneDateParts(sceneDate)) continue;
+        const timeOfDay = stripHeaderMarkdown(match[2]);
+        const location = stripHeaderMarkdown(match[3]);
+        const weather = stripHeaderMarkdown(match[4]);
+        if (!timeOfDay || !location || !weather) continue;
+
+        return {
+            sceneDate,
+            timeOfDay,
+            location,
+            weather,
+            rawHeader: line,
+        };
+    }
+    return null;
+}
+
+function inferStoryContextFromReplyHeaders(messages = [], state = getState()) {
+    if (!Array.isArray(messages) || !messages.length) return null;
+
+    const newestFirst = messages.map((message, index) => ({ message, index })).reverse();
+    const searchOrder = newestFirst.filter(({ message }) => !message?.is_user && !message?.is_system);
+    if (!searchOrder.length) return null;
+
+    for (const { message } of searchOrder) {
+        const text = String(message?.mes || message?.content || '').trim();
+        const header = extractWandlightReplyHeader(text);
+        if (!header) continue;
+
+        const context = correctHarryPotterCanonContext({
+            sceneDate: header.sceneDate,
+            subjectiveDate: state?.loreContext?.subjectiveDate || '',
+            canonBoundary: inferHarryPotterCanonBoundary(header.sceneDate) || state?.loreContext?.canonBoundary || state?.canon?.canonBoundary || '',
+            branchId: state?.loreContext?.branchId || 'main',
+            timeTravelMode: state?.loreContext?.timeTravelMode || 'none',
+            summary: `Story context detected from Wandlight reply header: ${header.timeOfDay} at ${header.location}; ${header.weather}.`,
+        });
+        return { ...context, _header: header };
+    }
+
+    return null;
+}
+
 
 function parseSceneDateParts(value) {
     const text = String(value || '');
@@ -417,7 +476,7 @@ function parseSceneDateParts(value) {
         dec: 11, december: 11,
     };
 
-    let match = text.match(/\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)?\.?\s*,?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(\d{4})\b/i);
+    let match = text.match(/\b(?:Mon(?:day)?|Tue(?:sday)?|Wed(?:nesday)?|Thu(?:rsday)?|Fri(?:day)?|Sat(?:urday)?|Sun(?:day)?)?\.?\s*,?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(\d{4})\b/i);
     if (match) {
         return { month: monthMap[match[1].toLowerCase().replace('.', '')], day: Number(match[2]), year: Number(match[3]) };
     }
@@ -481,7 +540,7 @@ function inferContextLocallyFromMessages(messages, state = getState()) {
     const datePatterns = [
         /(?:^|\n)\s*(?:date|day|in[- ]?universe date|scene date)\s*[:\-]\s*([^\n]+)/i,
         /(?:^|\n)\s*#{1,6}\s*([^\n]*(?:\b\d{4}\b|\bJan\.?\b|\bFeb\.?\b|\bMar\.?\b|\bApr\.?\b|\bJun\.?\b|\bJul\.?\b|\bAug\.?\b|\bSep\.?\b|\bSept\.?\b|\bOct\.?\b|\bNov\.?\b|\bDec\.?\b|\bJanuary\b|\bFebruary\b|\bMarch\b|\bApril\b|\bMay\b|\bJune\b|\bJuly\b|\bAugust\b|\bSeptember\b|\bOctober\b|\bNovember\b|\bDecember\b)[^\n]*)/i,
-        /\b((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)?\.?\s*,?\s*(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+\d{1,2}(?:st|nd|rd|th)?\s*,?\s+\d{4})\b/i,
+        /\b((?:Mon(?:day)?|Tue(?:sday)?|Wed(?:nesday)?|Thu(?:rsday)?|Fri(?:day)?|Sat(?:urday)?|Sun(?:day)?)?\.?\s*,?\s*(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+\d{1,2}(?:st|nd|rd|th)?\s*,?\s+\d{4})\b/i,
         /\b(\d{1,2}\/\d{1,2}\/\d{2,4})\b/,
     ];
     for (const pattern of datePatterns) {
@@ -564,12 +623,33 @@ export async function runLoreContextDetection(options = {}) {
         const state = getState();
         const settings = getSettings();
         const progress = typeof options.progress === 'function' ? options.progress : null;
+        progress?.('Reading recent messages...', 10);
+        const messageCount = settings.contextSourceMessageCount || settings.loreSourceMessageCount || 20;
+        const messageObjects = getRecentMessageObjects(messageCount);
+
+        if (settings.contextHeaderDetectionEnabled !== false) {
+            progress?.('Scanning recent reply headers...', 20);
+            const headerContext = inferStoryContextFromReplyHeaders(messageObjects, state);
+            if (headerContext) {
+                const normalized = correctHarryPotterCanonContext({ ...headerContext, lastDetectedAt: Date.now() });
+                setLoreContext(normalized);
+                const canonResult = await maybeProposeCanonLoreFromContext(normalized, progress);
+                progress?.(`Context detected from recent Wandlight reply header.${formatCanonProposalSuffix(canonResult)}`, 100);
+
+                if (settings.debugMode) {
+                    console.log(`${LOG_PREFIX} Lore context detected from reply header:`, normalized);
+                }
+
+                return normalized;
+            }
+            progress?.('No recent reply header found; using model detection...', 30);
+        }
+
         const validation = validateLoreProviderConfiguration();
         if (!validation.ok) {
             progress?.(`API/model settings incomplete: ${validation.message}`, 100);
             return null;
         }
-        progress?.('Reading recent messages...', 10);
 
         if (!settings.debugMode) {
             // In non-debug, only run if not already detected recently
@@ -581,7 +661,7 @@ export async function runLoreContextDetection(options = {}) {
             loreContext: state.loreContext,
         }, null, 0);
 
-        const messages = getRecentMessages(settings.contextSourceMessageCount || settings.loreSourceMessageCount || 20);
+        const messages = formatMessageObjects(messageObjects) || '(No messages available)';
         progress?.('Sending context detection request...', 35);
         const userMessage = `Current state: ${stateSummary}\n\nRecent messages:\n${messages}\n\nDetect the current lore context. Output ONLY a valid JSON object with no markdown fences, no commentary, no explanations:`;
 
@@ -1817,6 +1897,10 @@ export const __bulkLoreTestHooks = {
     classifyGeneratedLoreValue,
     applyGeneratedLoreQualityRouting,
     buildCompactLoreIndexForGeneration,
+    extractWandlightReplyHeader,
+    inferStoryContextFromReplyHeaders,
+    inferHarryPotterCanonBoundary,
+    parseSceneDateParts,
     runWithConcurrency,
 };
 

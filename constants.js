@@ -63,6 +63,7 @@ export const DEFAULT_SETTINGS = {
     continuityAutoInterval: 5, // turns between automatic continuity scans
     contextDetectionMode: 'manual', // 'manual' | 'automatic'
     contextDetectionAutoInterval: 5,
+    contextHeaderDetectionEnabled: true,
     loreGenerationMode: 'manual', // 'manual' | 'automatic'
     loreGenerationAutoInterval: 50,
     loreGenerationAutoMinTurns: 20,

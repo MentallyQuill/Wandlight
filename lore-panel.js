@@ -1222,16 +1222,30 @@ function createContextDetectionCard(state) {
         'contextDetectionMode',
         'contextDetectionAutoInterval',
         'Only runs when you click Detect Story Context.',
-        'Runs automatically after roleplay turns on this interval, using the Reasoning provider.',
+        'Runs automatically after roleplay turns on this interval. When fast header detection is enabled, it scans reply headers first and only uses the Reasoning provider if no header is found.',
         'Automatic story-context detection interval in completed model turns.'
     ));
 
     const settings = getSettings();
+    const fastGrid = document.createElement('div');
+    fastGrid.className = 'wandlight-runtime-grid';
+    fastGrid.appendChild(createToggleCard(
+        'Fast reply-header detection',
+        settings.contextHeaderDetectionEnabled !== false,
+        'Scans recent model replies for the Wandlight date/time/location/weather header. If a valid header is found, Story Context is set locally and the model call is skipped.',
+        (checked) => {
+            const next = getSettings();
+            next.contextHeaderDetectionEnabled = checked;
+            saveSettings(next);
+        }
+    ));
+    card.appendChild(fastGrid);
+
     const sourceRow = document.createElement('label');
     sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
     const sourceText = document.createElement('span');
     sourceText.textContent = `Context source messages: ${settings.contextSourceMessageCount || 20}`;
-    addTooltip(sourceText, 'How many recent chat messages are sent to story-context detection. This is separate from the Lore generation source window.');
+    addTooltip(sourceText, 'How many recent chat messages are scanned for reply headers or sent to model story-context detection. This is separate from the Lore generation source window.');
     const sourceInput = document.createElement('input');
     sourceInput.type = 'range';
     sourceInput.min = '4';
@@ -2038,7 +2052,6 @@ function appendGenerationStatus(card, state, kind = 'lore') {
 }
 
 async function handleDetectStoryContext(btn, options = {}) {
-    if (!ensureLoreProviderReadyForAction('Detect Story Context', 'context')) return false;
     if (btn) {
         let result = false;
         await runBusyAction(btn, 'Detecting...', async () => { result = await performStoryContextDetection(options); });
@@ -7116,7 +7129,6 @@ function createToggleCard(label, checked, tooltip, onChange) {
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.checked = !!checked;
-    input.addEventListener('change', () => onChange(input.checked));
     card.appendChild(input);
 
     const text = document.createElement('span');
@@ -7127,6 +7139,11 @@ function createToggleCard(label, checked, tooltip, onChange) {
     state.className = 'wandlight-toggle-state';
     state.textContent = checked ? 'On' : 'Off';
     card.appendChild(state);
+
+    input.addEventListener('change', () => {
+        state.textContent = input.checked ? 'On' : 'Off';
+        onChange(input.checked);
+    });
 
     return card;
 }

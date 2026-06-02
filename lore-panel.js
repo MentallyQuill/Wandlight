@@ -547,7 +547,7 @@ const GUIDE_CONTENT = Object.freeze({
         subtitle: 'workflow + tools',
         tooltip: 'A guided map of Wandlight runtime tools and configuration areas.',
         lede: 'Use this guide to move through automation, context, continuity, lore generation, review, timeline recovery, and injection controls.',
-        note: 'Durable story memory belongs in Lore. Lightweight current-scene state belongs in Continuity. Injection decides what reaches the model.',
+        note: '',
         tourLabel: 'Start Advanced Walkthrough',
     }),
 });
@@ -1281,14 +1281,17 @@ function createInstructionsCard(guideMode = normalizeExperienceMode(getSettings(
     for (const item of steps) {
         const card = document.createElement('div');
         card.className = 'wandlight-instructions-step-card';
+        const main = document.createElement('div');
+        main.className = 'wandlight-instructions-step-main';
         const title = document.createElement('div');
         title.className = 'wandlight-instructions-step-title';
         title.textContent = item.title;
         const body = document.createElement('div');
         body.className = 'wandlight-instructions-step-body';
         body.textContent = item.body;
-        card.appendChild(title);
-        card.appendChild(body);
+        main.appendChild(title);
+        main.appendChild(body);
+        card.appendChild(main);
         if (item.actionLabel) {
             const action = createButton(item.actionLabel, `Open ${item.title}.`, () => {
                 showGuideStep(item, { highlight: true });
@@ -1300,10 +1303,12 @@ function createInstructionsCard(guideMode = normalizeExperienceMode(getSettings(
 
     wrap.appendChild(flow);
 
-    const close = document.createElement('p');
-    close.className = 'wandlight-instructions-note';
-    close.textContent = guide.note;
-    wrap.appendChild(close);
+    if (String(guide.note || '').trim()) {
+        const close = document.createElement('p');
+        close.className = 'wandlight-instructions-note';
+        close.textContent = guide.note;
+        wrap.appendChild(close);
+    }
 
     return wrap;
 }

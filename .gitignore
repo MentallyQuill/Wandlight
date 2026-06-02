@@ -2,6 +2,9 @@ Reference/
 implementation_plan.md
 *.zip
 
+# Local documentation render harness and temporary browser fixtures.
+.wandlight-doc-renderer/
+
 # Local developer secrets and scratch config.
 # Keep the extension keyring/client files tracked; these patterns are only for
 # active local keys or copied runtime settings.

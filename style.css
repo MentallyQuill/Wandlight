@@ -982,12 +982,10 @@
 .wandlight-lore-timeline-shell {
     width: min(1680px, calc(100vw - 28px));
     height: min(900px, calc(100vh - 28px));
-    border-color: rgba(216, 168, 79, 0.48);
-    background:
-        radial-gradient(circle at 50% 4%, rgba(255, 215, 122, 0.12), transparent 26%),
-        radial-gradient(circle at 18% 40%, rgba(63, 139, 220, 0.08), transparent 28%),
-        linear-gradient(180deg, rgba(11, 14, 21, 0.99), rgba(5, 7, 11, 0.99));
-    box-shadow: 0 20px 62px rgba(0, 0, 0, 0.74), inset 0 0 0 1px rgba(255, 215, 122, 0.08);
+    border-color: rgba(190, 145, 75, 0.28);
+    background: linear-gradient(180deg, rgba(18, 20, 25, 0.98), rgba(10, 12, 16, 0.98));
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.62);
+    font-size: 12px;
 }
 
 .wandlight-new-lore-shell {
@@ -996,28 +994,26 @@
     max-height: min(780px, calc(100vh - 36px));
 }
 
-.wandlight-continuity-header {
-    display: grid;
-    grid-template-columns: minmax(160px, 0.8fr) minmax(240px, 1.2fr) minmax(160px, 0.8fr);
-    align-items: center;
-    gap: 10px;
-    padding: 8px 14px 7px;
-    border-bottom: 1px solid rgba(216, 168, 79, 0.28);
-    background: linear-gradient(90deg, rgba(216, 168, 79, 0.06), rgba(0, 0, 0, 0), rgba(216, 168, 79, 0.06));
-}
-
-.wandlight-continuity-brand,
-.wandlight-continuity-subtitle,
 .wandlight-continuity-filter-label {
     color: rgba(242, 226, 189, 0.74);
-    font-size: 0.76em;
-    letter-spacing: 0.16em;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
-.wandlight-continuity-subtitle {
-    text-align: center;
-    letter-spacing: 0.08em;
+.wandlight-continuity-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 230px;
+}
+
+.wandlight-continuity-status {
+    color: rgba(241, 234, 216, 0.62);
+    font-size: 0.76em;
+    white-space: nowrap;
 }
 
 .wandlight-continuity-header-actions {
@@ -1030,7 +1026,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
     padding: 5px 14px;
     border-bottom: 1px solid rgba(216, 168, 79, 0.16);
 }
@@ -1043,20 +1039,19 @@
 }
 
 .wandlight-continuity-filter-chip {
-    border: 1px solid var(--wl-chip-color, #d8a84f);
-    border-radius: 7px;
+    border: 1px solid rgba(190, 145, 75, 0.22);
+    border-radius: 6px;
     padding: 3px 7px;
-    background: rgba(8, 10, 14, 0.72);
+    background: rgba(20, 18, 20, 0.42);
     color: rgba(242, 226, 189, 0.72);
-    font-size: 0.76em;
+    font-size: 0.72em;
     cursor: pointer;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.34);
 }
 
 .wandlight-continuity-filter-chip-active {
-    background: rgba(216, 168, 79, 0.14);
-    color: #fff2c8;
-    box-shadow: 0 0 12px var(--wl-chip-color, #d8a84f), inset 0 0 0 1px rgba(255, 242, 200, 0.08);
+    border-color: var(--wl-chip-color, rgba(190, 145, 75, 0.42));
+    background: rgba(190, 145, 75, 0.12);
+    color: rgba(255, 242, 200, 0.9);
 }
 
 .wandlight-continuity-stage {
@@ -1065,16 +1060,14 @@
     gap: 8px;
     padding: 6px 10px;
     min-height: 0;
+    align-items: stretch;
 }
 
 .wandlight-continuity-graph-wrap,
 .wandlight-continuity-legend {
-    border: 1px solid rgba(216, 168, 79, 0.22);
+    border: 1px solid rgba(190, 145, 75, 0.18);
     border-radius: 8px;
-    background:
-        radial-gradient(circle at 50% 50%, rgba(216, 168, 79, 0.06), transparent 42%),
-        linear-gradient(180deg, rgba(12, 17, 25, 0.82), rgba(5, 8, 13, 0.9));
-    box-shadow: inset 0 0 0 1px rgba(255, 215, 122, 0.04);
+    background: rgba(10, 12, 16, 0.42);
 }
 
 .wandlight-continuity-graph-wrap {
@@ -1101,23 +1094,21 @@
 
 .wandlight-continuity-svg-bg,
 .wandlight-continuity-minimap-bg {
-    fill: rgba(3, 6, 10, 0.42);
-    stroke: rgba(216, 168, 79, 0.16);
+    fill: rgba(10, 12, 16, 0.34);
+    stroke: rgba(190, 145, 75, 0.14);
 }
 
 .wandlight-continuity-baseline,
 .wandlight-continuity-minimap-line {
-    stroke: #ffd77a;
-    stroke-width: 1.4;
-    filter: drop-shadow(0 0 7px rgba(255, 215, 122, 0.62));
+    stroke: rgba(216, 168, 79, 0.62);
+    stroke-width: 1;
 }
 
 .wandlight-continuity-message-tick {
     stroke: var(--wl-tick-color, #f2e2bd);
     stroke-width: var(--wl-tick-width, 1.5px);
     stroke-linecap: round;
-    opacity: 0.88;
-    filter: drop-shadow(0 0 5px var(--wl-tick-color, #f2e2bd));
+    opacity: 0.72;
 }
 
 .wandlight-continuity-message-hit {
@@ -1136,9 +1127,9 @@
 
 .wandlight-continuity-node-stem {
     stroke: var(--wl-node-color, #d8a84f);
-    stroke-width: 1.3;
-    stroke-dasharray: 2 3;
-    opacity: 0.72;
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+    opacity: 0.48;
 }
 
 .wandlight-continuity-node {
@@ -1146,30 +1137,32 @@
 }
 
 .wandlight-continuity-node-ring {
-    fill: rgba(7, 9, 13, 0.96);
+    fill: rgba(18, 20, 25, 0.96);
     stroke: var(--wl-node-color, #d8a84f);
-    stroke-width: 2;
-    filter: drop-shadow(0 0 11px var(--wl-node-color, #d8a84f));
+    stroke-width: 1.5;
 }
 
 .wandlight-continuity-node-icon {
     fill: #fff2c8;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 800;
     pointer-events: none;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.wandlight-continuity-node-image {
+    pointer-events: none;
+    opacity: 0.86;
 }
 
 .wandlight-continuity-node-selected .wandlight-continuity-node-ring {
-    stroke: #fff2c8;
-    stroke-width: 3;
-    filter: drop-shadow(0 0 18px rgba(255, 215, 122, 0.88));
+    stroke: rgba(255, 242, 200, 0.92);
+    stroke-width: 2.25;
 }
 
 .wandlight-continuity-connection {
     fill: none;
-    stroke: rgba(216, 168, 79, 0.34);
-    stroke-width: 1.2;
+    stroke: rgba(190, 145, 75, 0.26);
+    stroke-width: 1;
     stroke-dasharray: 2 5;
 }
 
@@ -1189,15 +1182,14 @@
 
 .wandlight-continuity-minimap-window {
     fill: rgba(255, 215, 122, 0.08);
-    stroke: #ffd77a;
-    stroke-width: 1.8;
-    filter: drop-shadow(0 0 8px rgba(255, 215, 122, 0.45));
+    stroke: rgba(216, 168, 79, 0.78);
+    stroke-width: 1.5;
     cursor: grab;
 }
 
 .wandlight-continuity-minimap-handle {
-    fill: rgba(255, 215, 122, 0.18);
-    stroke: rgba(255, 242, 200, 0.72);
+    fill: rgba(216, 168, 79, 0.2);
+    stroke: rgba(241, 234, 216, 0.48);
     stroke-width: 1;
     cursor: ew-resize;
 }
@@ -1206,7 +1198,7 @@
     position: relative;
     height: 22px;
     margin: 3px 24px 0;
-    border-top: 1px solid rgba(216, 168, 79, 0.42);
+    border-top: 1px solid rgba(190, 145, 75, 0.32);
 }
 
 .wandlight-continuity-ruler-mark {
@@ -1215,7 +1207,7 @@
     transform: translateX(-50%);
     max-width: 170px;
     overflow: hidden;
-    color: #d8a84f;
+    color: rgba(216, 168, 79, 0.78);
     font-size: 0.66em;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1228,7 +1220,7 @@
     top: -8px;
     width: 1px;
     height: 7px;
-    background: rgba(216, 168, 79, 0.72);
+    background: rgba(190, 145, 75, 0.5);
 }
 
 .wandlight-continuity-graph-controls {
@@ -1244,30 +1236,31 @@
     gap: 5px;
     padding: 6px;
     min-width: 0;
-    max-height: 250px;
+    height: 100%;
+    max-height: none;
     overflow-y: auto;
 }
 
 .wandlight-continuity-metric,
 .wandlight-continuity-legend-box {
-    border: 1px solid rgba(216, 168, 79, 0.18);
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(190, 145, 75, 0.14);
+    border-radius: 7px;
+    background: rgba(20, 18, 20, 0.28);
     padding: 6px;
 }
 
 .wandlight-continuity-metric div,
 .wandlight-continuity-legend-title {
-    color: #d8a84f;
-    font-size: 0.68em;
+    color: rgba(216, 168, 79, 0.82);
+    font-size: 0.66em;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
 .wandlight-continuity-metric strong {
     display: block;
-    color: #ffd77a;
-    font-size: 1.08em;
+    color: rgba(255, 242, 200, 0.9);
+    font-size: 1em;
     font-weight: 700;
     margin: 3px 0;
 }
@@ -1283,8 +1276,8 @@
     gap: 7px;
     min-width: 0;
     margin-top: 5px;
-    color: rgba(242, 226, 189, 0.82);
-    font-size: 0.72em;
+    color: rgba(242, 226, 189, 0.78);
+    font-size: 0.7em;
 }
 
 .wandlight-continuity-legend-dot {
@@ -1293,7 +1286,6 @@
     flex: 0 0 auto;
     border-radius: 999px;
     background: var(--wl-sender-color, #f2e2bd);
-    box-shadow: 0 0 8px var(--wl-sender-color, #f2e2bd);
 }
 
 .wandlight-continuity-word-scale {
@@ -1319,8 +1311,7 @@
 .wandlight-continuity-word-scale-bin span {
     width: 7px;
     border-radius: 2px 2px 0 0;
-    background: linear-gradient(180deg, #fff2c8, #8f6b2f);
-    box-shadow: 0 0 8px rgba(255, 215, 122, 0.34);
+    background: linear-gradient(180deg, rgba(241, 234, 216, 0.82), rgba(190, 145, 75, 0.72));
 }
 
 .wandlight-continuity-word-scale-bin small {
@@ -1343,18 +1334,18 @@
     width: 280px;
     box-sizing: border-box;
     padding: 7px 8px;
-    border: 1px solid rgba(255, 215, 122, 0.36);
+    border: 1px solid rgba(190, 145, 75, 0.28);
     border-radius: 7px;
     background: rgba(7, 9, 13, 0.96);
     color: rgba(242, 226, 189, 0.88);
     font-size: 11px;
     line-height: 1.28;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.58), 0 0 14px rgba(216, 168, 79, 0.18);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
     pointer-events: none;
 }
 
 .wandlight-continuity-tooltip-title {
-    color: #ffd77a;
+    color: rgba(255, 242, 200, 0.9);
     font-weight: 700;
     margin-bottom: 3px;
 }

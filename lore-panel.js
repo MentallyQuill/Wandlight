@@ -197,6 +197,18 @@ const LORE_TIMELINE_NODE_FILTERS = [
     { id: 'resolved_continuity', label: 'Resolved', short: 'OK', color: '#7ca65a' },
 ];
 
+const LORE_TIMELINE_NODE_ICON_PATHS = {
+    canon_lore: '',
+    story_lore: '',
+    canon_divergence: '',
+    character_knowledge: '',
+    location_lore: '',
+    relationship_change: '',
+    timeline_event: '',
+    object_lore: '',
+    resolved_continuity: '',
+};
+
 const LORE_TIMELINE_SENDER_PALETTE = [
     '#f2e2bd',
     '#3f8bdc',
@@ -6095,7 +6107,6 @@ function renderLoreTimeline() {
     const selected = events.find(event => event.id === loreTimelineSelectedId) || events[events.length - 1] || null;
     if (selected) loreTimelineSelectedId = selected.id;
     const selectedNode = model.nodes.find(node => node.event.id === loreTimelineSelectedId) || null;
-    if (selectedNode) keepLoreTimelineIndexVisible(selectedNode.messageIndex, model.messages.length);
     const visibleNodes = model.nodes.filter(node => isLoreTimelineFilterActive(node.type));
     const visibleEventIds = new Set(visibleNodes.map(node => node.event.id));
 
@@ -6103,8 +6114,7 @@ function renderLoreTimeline() {
     shell.className = 'wandlight-lore-timeline-shell';
     overlay.appendChild(shell);
 
-    shell.appendChild(createContinuityThreadHeader(summary));
-    shell.appendChild(createLoreTimelineFilterBar(model));
+    shell.appendChild(createLoreTimelineFilterBar(model, summary));
 
     const stage = document.createElement('div');
     stage.className = 'wandlight-continuity-stage';
@@ -6144,35 +6154,22 @@ function renderLoreTimeline() {
     body.appendChild(detail);
 }
 
-function createContinuityThreadHeader(summary) {
-    const header = document.createElement('div');
-    header.className = 'wandlight-continuity-header';
-
-    const brand = document.createElement('div');
-    brand.className = 'wandlight-continuity-brand';
-    brand.textContent = 'Wandlight Continuity';
-    header.appendChild(brand);
-
-    const subtitle = document.createElement('div');
-    subtitle.className = 'wandlight-continuity-subtitle';
-    subtitle.textContent = `${summary.eventCount || 0} lore nodes | +${summary.counts.added || 0} added | -${summary.counts.deleted || 0} deleted | ${summary.counts.updated || 0} updated`;
-    header.appendChild(subtitle);
-
-    const actions = document.createElement('div');
-    actions.className = 'wandlight-continuity-header-actions';
-    actions.appendChild(createButton('New Lore', 'Create a manual lore draft in Pending Lore Review.', () => openNewLoreDialog(), 'wandlight-primary-button'));
-    actions.appendChild(createButton('Close', 'Close Lore Timeline.', closeLoreTimeline));
-    header.appendChild(actions);
-    return header;
-}
-
-function createLoreTimelineFilterBar(model) {
+function createLoreTimelineFilterBar(model, summary) {
     const bar = document.createElement('div');
     bar.className = 'wandlight-continuity-filter-bar';
+
+    const heading = document.createElement('div');
+    heading.className = 'wandlight-continuity-heading';
     const label = document.createElement('div');
     label.className = 'wandlight-continuity-filter-label';
     label.textContent = 'Lore Timeline Visualizer';
-    bar.appendChild(label);
+    heading.appendChild(label);
+    const status = document.createElement('div');
+    status.className = 'wandlight-continuity-status';
+    status.textContent = `${summary.eventCount || 0} lore nodes | +${summary.counts.added || 0} added | -${summary.counts.deleted || 0} deleted | ${summary.counts.updated || 0} updated`;
+    heading.appendChild(status);
+    bar.appendChild(heading);
+
     const chips = document.createElement('div');
     chips.className = 'wandlight-continuity-filter-chips';
     for (const filter of LORE_TIMELINE_NODE_FILTERS) {
@@ -6192,6 +6189,12 @@ function createLoreTimelineFilterBar(model) {
         chips.appendChild(chip);
     }
     bar.appendChild(chips);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-continuity-header-actions';
+    actions.appendChild(createButton('New Lore', 'Create a manual lore draft in Pending Lore Review.', () => openNewLoreDialog(), 'wandlight-primary-button'));
+    actions.appendChild(createButton('Close', 'Close Lore Timeline.', closeLoreTimeline));
+    bar.appendChild(actions);
     return bar;
 }
 
@@ -6222,13 +6225,38 @@ function buildLoreTimelineVisualizerModel(state, events) {
     const nodes = events.map((event, index) => createLoreTimelineNode(event, index, messageCount));
     const connections = buildLoreTimelineConnections(nodes);
     const milestones = buildLoreTimelineMilestones(state, messageCount);
+    const wordStats = computeTimelineWordStats(messages);
     return {
         messages,
         senders: Array.from(senderMap.values()),
         nodes,
         connections,
         milestones,
-        maxWordCount: Math.max(1, ...messages.map(message => message.wordCount || 1)),
+        maxWordCount: wordStats.max,
+        wordScaleMax: wordStats.scaleMax,
+        wordStats,
+    };
+}
+
+function computeTimelineWordStats(messages = []) {
+    const values = messages
+        .map(message => Math.max(1, Number(message.wordCount) || 1))
+        .sort((a, b) => a - b);
+    if (!values.length) return { max: 1, median: 1, p90: 1, p95: 1, average: 1, scaleMax: 1 };
+    const percentile = pct => values[Math.min(values.length - 1, Math.max(0, Math.floor((values.length - 1) * pct)))];
+    const max = values[values.length - 1];
+    const median = percentile(0.5);
+    const p90 = percentile(0.9);
+    const p95 = percentile(0.95);
+    const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+    const robustCap = Math.max(40, p95, median * 2.5, average * 1.5);
+    return {
+        max,
+        median,
+        p90,
+        p95,
+        average,
+        scaleMax: Math.max(1, Math.min(max, Math.round(robustCap))),
     };
 }
 
@@ -6461,7 +6489,7 @@ function clampMessageIndex(value, messageCount) {
 }
 
 function createLoreTimelineGraph(model, nodes, selectedNode) {
-    const svg = createTimelineSvg(1180, 180, 'wandlight-continuity-main-svg');
+    const svg = createTimelineSvg(1180, 180, 'wandlight-continuity-main-svg', 'xMidYMid meet');
     svg.setAttribute('aria-label', 'Continuity message timeline graph');
     const viewport = loreTimelineViewport || { start: 1, end: Math.max(1, model.messages.length) };
     const width = 1180;
@@ -6480,7 +6508,7 @@ function createLoreTimelineGraph(model, nodes, selectedNode) {
     visibleMessages.forEach((message, i) => {
         if (i % stride !== 0) return;
         const x = indexToX(message.index);
-        const scaled = Math.sqrt(Math.max(1, message.wordCount) / model.maxWordCount);
+        const scaled = Math.sqrt(Math.min(Math.max(1, message.wordCount), model.wordScaleMax || model.maxWordCount) / Math.max(1, model.wordScaleMax || model.maxWordCount));
         const tickHeight = 4 + scaled * 52;
         const line = createTimelineSvgEl('line', {
             x1: x,
@@ -6541,9 +6569,22 @@ function createLoreTimelineGraph(model, nodes, selectedNode) {
         });
         group.appendChild(createTimelineSvgTitle(`${node.label} | message ${node.messageIndex} | ${node.event.summary || node.event.type}`));
         group.appendChild(createTimelineSvgEl('circle', { cx: x, cy: y, r: radius, class: 'wandlight-continuity-node-ring' }));
-        const text = createTimelineSvgEl('text', { x, y: y + 4, class: 'wandlight-continuity-node-icon', 'text-anchor': 'middle' });
-        text.textContent = node.short;
-        group.appendChild(text);
+        const iconHref = getLoreTimelineNodeIconHref(node.type);
+        if (iconHref) {
+            group.appendChild(createTimelineSvgEl('image', {
+                href: iconHref,
+                x: x - radius * 0.58,
+                y: y - radius * 0.58,
+                width: radius * 1.16,
+                height: radius * 1.16,
+                class: 'wandlight-continuity-node-image',
+                preserveAspectRatio: 'xMidYMid meet',
+            }));
+        } else {
+            const text = createTimelineSvgEl('text', { x, y: y + 4, class: 'wandlight-continuity-node-icon', 'text-anchor': 'middle' });
+            text.textContent = node.short;
+            group.appendChild(text);
+        }
         group.addEventListener('click', () => {
             loreTimelineSelectedId = node.event.id;
             renderLoreTimeline();
@@ -6570,6 +6611,11 @@ function createLoreTimelineGraph(model, nodes, selectedNode) {
     return svg;
 }
 
+function getLoreTimelineNodeIconHref(type) {
+    const path = LORE_TIMELINE_NODE_ICON_PATHS[type] || '';
+    return path ? getLocalAssetSrc(path) : '';
+}
+
 function getTimelineNodeY(node, baselineY) {
     const laneGap = 32 + Math.min(18, node.importance * 5);
     return baselineY + node.lane * laneGap;
@@ -6592,7 +6638,7 @@ function createLoreTimelineRuler(model) {
 }
 
 function createLoreTimelineMinimap(model, nodes) {
-    const svg = createTimelineSvg(1180, 44, 'wandlight-continuity-minimap-svg');
+    const svg = createTimelineSvg(1180, 44, 'wandlight-continuity-minimap-svg', 'none');
     const total = Math.max(1, model.messages.length);
     const width = 1180;
     const height = 44;
@@ -6607,7 +6653,7 @@ function createLoreTimelineMinimap(model, nodes) {
     const stride = Math.max(1, Math.ceil(model.messages.length / LORE_TIMELINE_MAX_MINIMAP_TICKS));
     model.messages.forEach((message, i) => {
         if (i % stride !== 0) return;
-        const scaled = Math.sqrt(Math.max(1, message.wordCount) / model.maxWordCount);
+        const scaled = Math.sqrt(Math.min(Math.max(1, message.wordCount), model.wordScaleMax || model.maxWordCount) / Math.max(1, model.wordScaleMax || model.maxWordCount));
         const tickHeight = 2 + scaled * 16;
         svg.appendChild(createTimelineSvgEl('line', {
             x1: indexToX(message.index),
@@ -6755,7 +6801,7 @@ function createLoreTimelineLegend(model, visibleNodes, summary) {
     scaleBox.appendChild(scaleTitle);
     const scale = document.createElement('div');
     scale.className = 'wandlight-continuity-word-scale';
-    for (const bin of buildWordScaleBins(model.messages, model.maxWordCount)) {
+    for (const bin of buildWordScaleBins(model.messages, model.wordScaleMax || model.maxWordCount, model.maxWordCount)) {
         const binEl = document.createElement('div');
         binEl.className = 'wandlight-continuity-word-scale-bin';
         const bar = document.createElement('span');
@@ -6764,7 +6810,7 @@ function createLoreTimelineLegend(model, visibleNodes, summary) {
         const label = document.createElement('small');
         label.textContent = bin.latestLabel;
         binEl.appendChild(label);
-        addTooltip(binEl, `${bin.min}-${bin.max} words | latest realtime date: ${bin.latestLabel}`);
+        addTooltip(binEl, `${bin.label} words | latest realtime date: ${bin.latestLabel}`);
         scale.appendChild(binEl);
     }
     scaleBox.appendChild(scale);
@@ -6772,14 +6818,15 @@ function createLoreTimelineLegend(model, visibleNodes, summary) {
     return legend;
 }
 
-function buildWordScaleBins(messages = [], maxWordCount = 1) {
-    const max = Math.max(1, Number(maxWordCount) || 1);
+function buildWordScaleBins(messages = [], visualMaxWordCount = 1, actualMaxWordCount = visualMaxWordCount) {
+    const max = Math.max(1, Number(visualMaxWordCount) || 1);
+    const actualMax = Math.max(max, Number(actualMaxWordCount) || max);
     const bins = [];
     for (let index = 1; index <= 5; index += 1) {
         const min = index === 1 ? 1 : Math.floor(((index - 1) / 5) * max) + 1;
-        const high = Math.max(min, Math.floor((index / 5) * max));
+        const high = index === 5 ? actualMax : Math.max(min, Math.floor((index / 5) * max));
         const latest = messages
-            .filter(message => (message.wordCount || 0) >= min && (message.wordCount || 0) <= high)
+            .filter(message => (message.wordCount || 0) >= min && (index === 5 || (message.wordCount || 0) <= high))
             .map(message => parseTimelineRealtime(message.timestamp))
             .filter(Boolean)
             .sort((a, b) => b - a)[0] || null;
@@ -6787,6 +6834,7 @@ function buildWordScaleBins(messages = [], maxWordCount = 1) {
             index,
             min,
             max: high,
+            label: index === 5 && actualMax > max ? `${min}+` : `${min}-${high}`,
             latestLabel: latest ? formatTimelineRealtimeDate(latest) : 'No date',
         });
     }
@@ -6831,11 +6879,11 @@ function formatInteger(value) {
     return Number(value || 0).toLocaleString();
 }
 
-function createTimelineSvg(width, height, className) {
+function createTimelineSvg(width, height, className, preserveAspectRatio = 'none') {
     const svg = createTimelineSvgEl('svg', {
         viewBox: `0 0 ${width} ${height}`,
         class: className,
-        preserveAspectRatio: 'none',
+        preserveAspectRatio,
     });
     return svg;
 }

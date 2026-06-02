@@ -6077,6 +6077,7 @@ function refreshLoreTimeline() {
 
 function renderLoreTimeline() {
     if (!loreTimelineOpen) return;
+    hideContinuityTooltip();
     let overlay = document.getElementById(LORE_TIMELINE_ID);
     if (!overlay) {
         overlay = document.createElement('div');
@@ -6152,17 +6153,10 @@ function createContinuityThreadHeader(summary) {
     brand.textContent = 'Wandlight Continuity';
     header.appendChild(brand);
 
-    const titleWrap = document.createElement('div');
-    titleWrap.className = 'wandlight-continuity-title-wrap';
-    const title = document.createElement('div');
-    title.className = 'wandlight-continuity-title';
-    title.textContent = 'The Continuity Thread';
-    titleWrap.appendChild(title);
     const subtitle = document.createElement('div');
     subtitle.className = 'wandlight-continuity-subtitle';
     subtitle.textContent = `${summary.eventCount || 0} lore nodes | +${summary.counts.added || 0} added | -${summary.counts.deleted || 0} deleted | ${summary.counts.updated || 0} updated`;
-    titleWrap.appendChild(subtitle);
-    header.appendChild(titleWrap);
+    header.appendChild(subtitle);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-continuity-header-actions';
@@ -6243,6 +6237,8 @@ function buildLoreTimelineMessages(events = []) {
     if (chat.length) {
         return chat.map((message, index) => {
             const text = getTimelineMessageText(message);
+            const header = extractTimelineWandlightHeader(text);
+            const sampleText = header?.body || text;
             const sender = getTimelineMessageSender(message, index);
             return {
                 id: String(message?.id || message?.swipe_id || `message_${index + 1}`),
@@ -6251,7 +6247,8 @@ function buildLoreTimelineMessages(events = []) {
                 senderName: sender.name,
                 senderType: sender.type,
                 wordCount: countTimelineWords(text),
-                preview: compactTimelineText(text, 160),
+                preview: compactTimelineText(sampleText, 260),
+                detectedDateTime: header?.dateTime || '',
                 timestamp: message?.send_date || message?.extra?.timestamp || '',
             };
         });
@@ -6265,6 +6262,7 @@ function buildLoreTimelineMessages(events = []) {
         senderType: 'system',
         wordCount: 1,
         preview: 'Chat message unavailable in this context.',
+        detectedDateTime: '',
         timestamp: '',
     }));
 }
@@ -6284,6 +6282,20 @@ function getTimelineMessageText(message) {
         if (typeof value === 'string' && value.trim()) return value;
     }
     return '';
+}
+
+function extractTimelineWandlightHeader(text) {
+    const raw = String(text || '');
+    const match = raw.match(/^\s*\*?\s*([A-Za-z]+,\s+[A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})\s*\|\s*(\d{1,2}:\d{2}\s*(?:AM|PM))\s*\|[^*\n]*(?:\*|\n|$)/i);
+    if (!match) return null;
+    const headerText = match[0];
+    const body = raw.slice(headerText.length).replace(/^\s+/, '');
+    return {
+        date: match[1].trim(),
+        time: match[2].trim(),
+        dateTime: `${match[1].trim()} | ${match[2].trim()}`,
+        body,
+    };
 }
 
 function getTimelineMessageSender(message, index) {
@@ -6449,13 +6461,13 @@ function clampMessageIndex(value, messageCount) {
 }
 
 function createLoreTimelineGraph(model, nodes, selectedNode) {
-    const svg = createTimelineSvg(1180, 340, 'wandlight-continuity-main-svg');
+    const svg = createTimelineSvg(1180, 180, 'wandlight-continuity-main-svg');
     svg.setAttribute('aria-label', 'Continuity message timeline graph');
     const viewport = loreTimelineViewport || { start: 1, end: Math.max(1, model.messages.length) };
     const width = 1180;
-    const height = 340;
+    const height = 180;
     const padX = 44;
-    const baselineY = 168;
+    const baselineY = 90;
     const innerWidth = width - padX * 2;
     const visibleSpan = Math.max(1, viewport.end - viewport.start);
     const indexToX = index => padX + ((index - viewport.start) / visibleSpan) * innerWidth;
@@ -6469,7 +6481,7 @@ function createLoreTimelineGraph(model, nodes, selectedNode) {
         if (i % stride !== 0) return;
         const x = indexToX(message.index);
         const scaled = Math.sqrt(Math.max(1, message.wordCount) / model.maxWordCount);
-        const tickHeight = 6 + scaled * 104;
+        const tickHeight = 4 + scaled * 52;
         const line = createTimelineSvgEl('line', {
             x1: x,
             y1: baselineY - tickHeight / 2,
@@ -6478,8 +6490,18 @@ function createLoreTimelineGraph(model, nodes, selectedNode) {
             class: 'wandlight-continuity-message-tick',
             style: `--wl-tick-color:${message.color};--wl-tick-width:${Math.min(4, 1 + scaled * 2.4)}px;`,
         });
-        line.appendChild(createTimelineSvgTitle(`${message.senderName} | message ${message.index} | ${message.wordCount} words | ${message.preview}`));
         svg.appendChild(line);
+        const hit = createTimelineSvgEl('line', {
+            x1: x,
+            y1: baselineY - Math.max(18, tickHeight / 2 + 6),
+            x2: x,
+            y2: baselineY + Math.max(18, tickHeight / 2 + 6),
+            class: 'wandlight-continuity-message-hit',
+        });
+        hit.addEventListener('mouseenter', event => showTimelineMessageTooltip(event, message));
+        hit.addEventListener('mousemove', event => positionContinuityTooltip(event));
+        hit.addEventListener('mouseleave', hideContinuityTooltip);
+        svg.appendChild(hit);
     });
 
     const visibleNodeMap = new Map(nodes.filter(node => node.messageIndex >= viewport.start && node.messageIndex <= viewport.end).map(node => [node.id, node]));
@@ -6501,7 +6523,7 @@ function createLoreTimelineGraph(model, nodes, selectedNode) {
     for (const node of visibleNodeMap.values()) {
         const x = indexToX(node.messageIndex);
         const y = getTimelineNodeY(node, baselineY);
-        const radius = 13 + node.importance * 2;
+        const radius = 9 + node.importance * 1.5;
         svg.appendChild(createTimelineSvgEl('line', {
             x1: x,
             y1: baselineY,
@@ -6549,7 +6571,7 @@ function createLoreTimelineGraph(model, nodes, selectedNode) {
 }
 
 function getTimelineNodeY(node, baselineY) {
-    const laneGap = 58 + Math.min(34, node.importance * 8);
+    const laneGap = 32 + Math.min(18, node.importance * 5);
     return baselineY + node.lane * laneGap;
 }
 
@@ -6570,14 +6592,15 @@ function createLoreTimelineRuler(model) {
 }
 
 function createLoreTimelineMinimap(model, nodes) {
-    const svg = createTimelineSvg(1180, 84, 'wandlight-continuity-minimap-svg');
+    const svg = createTimelineSvg(1180, 44, 'wandlight-continuity-minimap-svg');
     const total = Math.max(1, model.messages.length);
     const width = 1180;
-    const height = 84;
+    const height = 44;
     const padX = 28;
-    const baselineY = 42;
+    const baselineY = 22;
     const innerWidth = width - padX * 2;
     const indexToX = index => padX + ((index - 1) / Math.max(1, total - 1)) * innerWidth;
+    const xToIndex = x => clampMessageIndex(1 + ((Math.max(padX, Math.min(width - padX, x)) - padX) / innerWidth) * Math.max(1, total - 1), total);
     svg.appendChild(createTimelineSvgEl('rect', { x: 0, y: 0, width, height, rx: 10, class: 'wandlight-continuity-minimap-bg' }));
     svg.appendChild(createTimelineSvgEl('line', { x1: padX, y1: baselineY, x2: width - padX, y2: baselineY, class: 'wandlight-continuity-minimap-line' }));
 
@@ -6585,7 +6608,7 @@ function createLoreTimelineMinimap(model, nodes) {
     model.messages.forEach((message, i) => {
         if (i % stride !== 0) return;
         const scaled = Math.sqrt(Math.max(1, message.wordCount) / model.maxWordCount);
-        const tickHeight = 3 + scaled * 30;
+        const tickHeight = 2 + scaled * 16;
         svg.appendChild(createTimelineSvgEl('line', {
             x1: indexToX(message.index),
             y1: baselineY - tickHeight / 2,
@@ -6599,8 +6622,8 @@ function createLoreTimelineMinimap(model, nodes) {
     for (const node of nodes) {
         svg.appendChild(createTimelineSvgEl('circle', {
             cx: indexToX(node.messageIndex),
-            cy: baselineY - 28,
-            r: 4,
+            cy: 7,
+            r: 3,
             class: 'wandlight-continuity-minimap-node',
             style: `--wl-node-color:${node.color};`,
         }));
@@ -6609,17 +6632,40 @@ function createLoreTimelineMinimap(model, nodes) {
     const viewport = loreTimelineViewport || { start: 1, end: total };
     const vx = indexToX(viewport.start);
     const vw = Math.max(10, indexToX(viewport.end) - vx);
-    svg.appendChild(createTimelineSvgEl('rect', { x: vx, y: 8, width: vw, height: 68, rx: 6, class: 'wandlight-continuity-minimap-window' }));
+    svg.appendChild(createTimelineSvgEl('rect', { x: vx, y: 4, width: vw, height: 36, rx: 5, class: 'wandlight-continuity-minimap-window' }));
+    svg.appendChild(createTimelineSvgEl('rect', { x: vx - 5, y: 5, width: 10, height: 34, rx: 3, class: 'wandlight-continuity-minimap-handle wandlight-continuity-minimap-handle-left' }));
+    svg.appendChild(createTimelineSvgEl('rect', { x: vx + vw - 5, y: 5, width: 10, height: 34, rx: 3, class: 'wandlight-continuity-minimap-handle wandlight-continuity-minimap-handle-right' }));
 
     svg.addEventListener('pointerdown', event => {
         event.preventDefault();
         const rect = svg.getBoundingClientRect();
+        const localX = rect.width ? ((event.clientX - rect.left) / rect.width) * width : vx + vw / 2;
+        const handleZone = 12;
         const span = viewport.end - viewport.start + 1;
+        const pointerIndex = xToIndex(localX);
+        const mode = Math.abs(localX - vx) <= handleZone
+            ? 'resize-left'
+            : Math.abs(localX - (vx + vw)) <= handleZone
+                ? 'resize-right'
+                : localX >= vx && localX <= vx + vw
+                    ? 'drag'
+                    : 'center';
+        const dragOffset = pointerIndex - viewport.start;
         let lastRender = 0;
         const updateFromClientX = clientX => {
-            const ratio = rect.width ? Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) : 0.5;
-            const center = Math.round(1 + ratio * (total - 1));
-            setLoreTimelineViewport(center - Math.floor(span / 2), center + Math.ceil(span / 2), total);
+            const currentLocalX = rect.width ? ((clientX - rect.left) / rect.width) * width : vx + vw / 2;
+            const index = xToIndex(currentLocalX);
+            if (mode === 'resize-left') {
+                resizeLoreTimelineViewport('left', index, total);
+            } else if (mode === 'resize-right') {
+                resizeLoreTimelineViewport('right', index, total);
+            } else if (mode === 'drag') {
+                const start = index - dragOffset;
+                setLoreTimelineViewport(start, start + span - 1, total);
+            } else {
+                const start = index - Math.floor(span / 2);
+                setLoreTimelineViewport(start, start + span - 1, total);
+            }
             const now = Date.now();
             if (now - lastRender > 45) {
                 lastRender = now;
@@ -6638,6 +6684,19 @@ function createLoreTimelineMinimap(model, nodes) {
         document.addEventListener('pointerup', onUp, { once: true });
     });
     return svg;
+}
+
+function resizeLoreTimelineViewport(edge, index, messageCount) {
+    ensureLoreTimelineViewport(messageCount);
+    const total = Math.max(1, messageCount || 1);
+    const current = loreTimelineViewport || { start: 1, end: total };
+    if (edge === 'left') {
+        const start = Math.min(index, current.end - LORE_TIMELINE_MIN_VIEW_MESSAGES + 1);
+        setLoreTimelineViewport(start, current.end, total);
+    } else {
+        const end = Math.max(index, current.start + LORE_TIMELINE_MIN_VIEW_MESSAGES - 1);
+        setLoreTimelineViewport(current.start, end, total);
+    }
 }
 
 function createLoreTimelineGraphControls(model) {
@@ -6696,14 +6755,61 @@ function createLoreTimelineLegend(model, visibleNodes, summary) {
     scaleBox.appendChild(scaleTitle);
     const scale = document.createElement('div');
     scale.className = 'wandlight-continuity-word-scale';
-    for (let i = 1; i <= 5; i += 1) {
+    for (const bin of buildWordScaleBins(model.messages, model.maxWordCount)) {
+        const binEl = document.createElement('div');
+        binEl.className = 'wandlight-continuity-word-scale-bin';
         const bar = document.createElement('span');
-        bar.style.height = `${6 + i * 7}px`;
-        scale.appendChild(bar);
+        bar.style.height = `${6 + bin.index * 6}px`;
+        binEl.appendChild(bar);
+        const label = document.createElement('small');
+        label.textContent = bin.latestLabel;
+        binEl.appendChild(label);
+        addTooltip(binEl, `${bin.min}-${bin.max} words | latest realtime date: ${bin.latestLabel}`);
+        scale.appendChild(binEl);
     }
     scaleBox.appendChild(scale);
     legend.appendChild(scaleBox);
     return legend;
+}
+
+function buildWordScaleBins(messages = [], maxWordCount = 1) {
+    const max = Math.max(1, Number(maxWordCount) || 1);
+    const bins = [];
+    for (let index = 1; index <= 5; index += 1) {
+        const min = index === 1 ? 1 : Math.floor(((index - 1) / 5) * max) + 1;
+        const high = Math.max(min, Math.floor((index / 5) * max));
+        const latest = messages
+            .filter(message => (message.wordCount || 0) >= min && (message.wordCount || 0) <= high)
+            .map(message => parseTimelineRealtime(message.timestamp))
+            .filter(Boolean)
+            .sort((a, b) => b - a)[0] || null;
+        bins.push({
+            index,
+            min,
+            max: high,
+            latestLabel: latest ? formatTimelineRealtimeDate(latest) : 'No date',
+        });
+    }
+    return bins;
+}
+
+function parseTimelineRealtime(value) {
+    if (!value) return null;
+    if (typeof value === 'number') {
+        const ms = value < 1000000000000 ? value * 1000 : value;
+        return Number.isFinite(ms) ? ms : null;
+    }
+    const raw = String(value).trim();
+    if (!raw) return null;
+    if (/^\d+$/.test(raw)) return parseTimelineRealtime(Number(raw));
+    const ms = Date.parse(raw);
+    return Number.isFinite(ms) ? ms : null;
+}
+
+function formatTimelineRealtimeDate(value) {
+    const date = new Date(Number(value));
+    if (Number.isNaN(date.getTime())) return 'No date';
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
 function createContinuityMetric(label, value, sublabel) {
@@ -6749,6 +6855,58 @@ function createTimelineSvgTitle(text) {
     const title = createTimelineSvgEl('title');
     title.textContent = text || '';
     return title;
+}
+
+function showTimelineMessageTooltip(event, message) {
+    const tooltip = ensureContinuityTooltip();
+    tooltip.replaceChildren();
+    const title = document.createElement('div');
+    title.className = 'wandlight-continuity-tooltip-title';
+    title.textContent = `Message ${message.index} | ${message.senderName}`;
+    tooltip.appendChild(title);
+
+    const meta = document.createElement('div');
+    meta.className = 'wandlight-continuity-tooltip-meta';
+    meta.textContent = `${message.wordCount || 0} words${message.detectedDateTime ? ` | ${message.detectedDateTime}` : ''}`;
+    tooltip.appendChild(meta);
+
+    const sample = document.createElement('div');
+    sample.className = 'wandlight-continuity-tooltip-sample';
+    sample.textContent = compactTimelineSentences(message.preview || 'No message text available.', 240);
+    tooltip.appendChild(sample);
+    positionContinuityTooltip(event);
+}
+
+function compactTimelineSentences(text, max = 240) {
+    const clean = String(text || '').replace(/\s+/g, ' ').trim();
+    const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g);
+    const sample = sentences?.length ? sentences.slice(0, 2).join(' ').trim() : clean;
+    return compactTimelineText(sample, max);
+}
+
+function ensureContinuityTooltip() {
+    let tooltip = document.querySelector('.wandlight-continuity-tooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.className = 'wandlight-continuity-tooltip';
+        document.body.appendChild(tooltip);
+    }
+    return tooltip;
+}
+
+function positionContinuityTooltip(event) {
+    const tooltip = document.querySelector('.wandlight-continuity-tooltip');
+    if (!tooltip || !event) return;
+    const margin = 12;
+    const width = 280;
+    const x = Math.min(window.innerWidth - width - margin, Math.max(margin, event.clientX + 14));
+    const y = Math.min(window.innerHeight - 120 - margin, Math.max(margin, event.clientY + 14));
+    tooltip.style.left = `${x}px`;
+    tooltip.style.top = `${y}px`;
+}
+
+function hideContinuityTooltip() {
+    document.querySelector('.wandlight-continuity-tooltip')?.remove();
 }
 
 function createLoreTimelineEventRow(event, selected = false) {

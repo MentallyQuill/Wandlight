@@ -5282,10 +5282,12 @@ function createAcceptedLoreEntriesSection(state) {
         const label = getLoreDisplayLabel('category', cat);
         const catCount = getCategoryCount(cat, entries, counts);
         tab.textContent = `${label} (${catCount})`;
+        tab.dataset.category = cat;
         addTooltip(tab, getCategoryTooltip(cat));
         tab.addEventListener('click', () => {
-            setPanelState({ selectedCategory: cat, acceptedLoreVisibleLimit: ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT });
-            refreshPanelBody({ preserveScroll: false });
+            setPanelState({ selectedCategory: cat, acceptedLoreVisibleLimit: ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT }, { deferSave: true });
+            refreshAcceptedLoreCategoryTabs(cat);
+            refreshAcceptedLoreFilterResults({ resetListScroll: true });
         });
         tabs.appendChild(tab);
     }
@@ -5323,8 +5325,8 @@ function createAcceptedLoreEntriesSection(state) {
         sourceSelect.appendChild(opt);
     }
     sourceSelect.addEventListener('change', () => {
-        setPanelState({ sourceFilter: sourceSelect.value, acceptedLoreVisibleLimit: ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT });
-        refreshPanelBody({ preserveScroll: false });
+        setPanelState({ sourceFilter: sourceSelect.value, acceptedLoreVisibleLimit: ACCEPTED_LORE_INITIAL_VISIBLE_LIMIT }, { deferSave: true });
+        refreshAcceptedLoreFilterResults({ resetListScroll: true });
     });
     filterRow.appendChild(sourceSelect);
     controls.appendChild(filterRow);
@@ -5419,6 +5421,24 @@ function refreshAcceptedLoreList(options = {}) {
     renderEntryList(list, getState());
     scheduleAcceptedLoreLayoutUpdate();
     if (options.preserveScroll) list.scrollTop = scrollTop;
+}
+
+function refreshAcceptedLoreCategoryTabs(activeCategory) {
+    if (!panelRoot) return;
+    panelRoot.querySelectorAll('.wandlight-lore-tabs .wandlight-lore-tab').forEach(tab => {
+        tab.classList.toggle('wandlight-lore-tab-active', tab.dataset.category === activeCategory);
+    });
+}
+
+function refreshAcceptedLoreFilterResults(options = {}) {
+    if (!panelRoot) return;
+    const section = panelRoot.querySelector('.wandlight-accepted-lore-section');
+    const list = section?.querySelector?.('.wandlight-lore-entry-list');
+    if (!list) return;
+    renderEntryList(list, getState());
+    if (options.resetListScroll !== false) list.scrollTop = 0;
+    refreshAcceptedLoreBulkToolbar();
+    scheduleAcceptedLoreLayoutUpdate();
 }
 
 function refreshAcceptedLoreRow(entryId) {

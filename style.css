@@ -3913,3 +3913,116 @@
 .wandlight-prompt-placement-card {
     container-type: inline-size;
 }
+
+
+/* Lore tab QoL: Auto-Relevance visual cleanup and larger review scroll areas. */
+.wandlight-auto-relevance-card {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 10px !important;
+}
+
+.wandlight-auto-relevance-card .wandlight-runtime-card-title {
+    margin: 0 !important;
+    font-size: 0.94em !important;
+    line-height: 1.2 !important;
+}
+
+.wandlight-auto-relevance-card > .wandlight-runtime-help {
+    margin: 0 !important;
+    font-size: 0.78em !important;
+    line-height: 1.34 !important;
+}
+
+.wandlight-auto-relevance-card .wandlight-inline-toggle {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    min-height: 30px !important;
+    margin: 0 !important;
+    padding: 6px 8px !important;
+    border: 1px solid var(--wandlight-border-soft, rgba(185, 139, 54, 0.18)) !important;
+    border-radius: 7px !important;
+    background: rgba(10, 12, 16, 0.34) !important;
+    font-size: 0.82em !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+}
+
+.wandlight-auto-relevance-card > .wandlight-runtime-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)) !important;
+    gap: 6px !important;
+    margin: 0 !important;
+}
+
+.wandlight-auto-relevance-card .wandlight-inline-field {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 6px 7px !important;
+    border: 1px solid rgba(126, 145, 165, 0.24) !important;
+    border-radius: 7px !important;
+    background: rgba(10, 12, 16, 0.28) !important;
+    font-size: 0.78em !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+}
+
+.wandlight-auto-relevance-card .wandlight-inline-field span {
+    min-width: 0 !important;
+    opacity: 0.74 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.wandlight-auto-relevance-card .wandlight-inline-field input,
+.wandlight-auto-relevance-card .wandlight-inline-field select {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+    font-size: 0.95em !important;
+}
+
+.wandlight-auto-relevance-card .wandlight-key-value {
+    margin: 0 !important;
+    padding: 6px 8px !important;
+    border: 1px solid rgba(126, 145, 165, 0.18) !important;
+    border-radius: 7px !important;
+    background: rgba(10, 12, 16, 0.26) !important;
+    font-size: 0.78em !important;
+}
+
+.wandlight-auto-relevance-card .wandlight-primary-actions {
+    margin: 0 !important;
+}
+
+.wandlight-auto-relevance-suggestions {
+    max-height: 220px !important;
+    overflow-y: auto !important;
+    padding-right: 4px !important;
+    margin: 0 !important;
+}
+
+.wandlight-auto-relevance-suggestion-row {
+    grid-template-columns: minmax(0, 1fr) auto auto !important;
+    padding: 5px 6px !important;
+    border-color: rgba(126, 145, 165, 0.26) !important;
+    background: rgba(10, 12, 16, 0.24) !important;
+}
+
+.wandlight-auto-relevance-suggestion-summary {
+    font-size: 0.78em !important;
+}
+
+.wandlight-runtime-drawer .wandlight-lore-pending-collapsible .wandlight-pending-lore-list,
+.wandlight-lore-pending-collapsible .wandlight-pending-lore-list {
+    min-height: min(440px, calc(var(--wandlight-drawer-body-available, 620px) - 180px)) !important;
+    max-height: min(560px, calc(var(--wandlight-drawer-body-available, 620px) - 60px)) !important;
+}

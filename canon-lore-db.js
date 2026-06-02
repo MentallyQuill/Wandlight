@@ -655,6 +655,253 @@ function fastFilterCanonDuplicates(entries = [], existingEntries = []) {
     return { entries: accepted, dropped };
 }
 
+function deriveSceneSchoolYear(sceneIso) {
+    if (!sceneIso) return null;
+    const match = String(sceneIso).match(/^(\d{4})-(\d{2})-\d{2}$/);
+    if (!match) return null;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const schoolStartYear = month >= 9 ? year : year - 1;
+    const schoolYear = schoolStartYear - 1990;
+    return schoolYear >= 1 && schoolYear <= 7 ? schoolYear : null;
+}
+
+function normalizedEntryArray(value) {
+    if (Array.isArray(value)) {
+        return value.map(item => String(item || '').trim()).filter(Boolean);
+    }
+    return value ? [String(value).trim()].filter(Boolean) : [];
+}
+
+function textFromCanonEntry(entry = {}) {
+    const content = entry.content || {};
+    return [
+        entry.id,
+        entry.title,
+        entry.fact,
+        entry.generationHint,
+        entry.lorePurpose,
+        entry.kind,
+        entry.category,
+        content.fact,
+        content.injection,
+        content.notes,
+        ...(Array.isArray(content.constraints) ? content.constraints : []),
+        ...(Array.isArray(content.antiLore) ? content.antiLore : []),
+        ...(Array.isArray(entry.tags) ? entry.tags : []),
+    ].filter(Boolean).join(' ').toLowerCase();
+}
+
+function entryHasAnyText(entry, needles = []) {
+    const text = textFromCanonEntry(entry);
+    return needles.some(needle => text.includes(needle));
+}
+
+function entryMatchesSchoolYear(entry = {}, schoolYear = null) {
+    if (!schoolYear) return false;
+    const values = [
+        entry.date?.schoolYear,
+        entry.canonTiming?.schoolYear,
+        entry.scope?.schoolYear,
+        entry.scope?.schoolYears,
+        entry.schoolYear,
+        entry.year,
+    ].flatMap(normalizedEntryArray);
+    return values.some(value => {
+        const lower = value.toLowerCase();
+        return lower === String(schoolYear)
+            || lower === `year ${schoolYear}`
+            || lower === `hogwarts year ${schoolYear}`;
+    });
+}
+
+function buildExistingCanonKeySets(currentState = getState()) {
+    const acceptedEntries = Array.isArray(currentState?.loreMatrix) ? currentState.loreMatrix : [];
+    const pendingEntries = Array.isArray(currentState?.pendingLoreEntries) ? currentState.pendingLoreEntries : [];
+    const sets = {
+        acceptedIds: new Set(),
+        acceptedTitles: new Set(),
+        pendingIds: new Set(),
+        pendingTitles: new Set(),
+    };
+    const addEntry = (entry, idSet, titleSet) => {
+        const idKey = canonicalKey(entry?.id);
+        const titleKey = canonicalKey(entry?.title || entry?.name);
+        if (idKey) idSet.add(idKey);
+        if (titleKey) titleSet.add(titleKey);
+    };
+    acceptedEntries.forEach(entry => addEntry(entry, sets.acceptedIds, sets.acceptedTitles));
+    pendingEntries.forEach(entry => addEntry(entry, sets.pendingIds, sets.pendingTitles));
+    return sets;
+}
+
+function getCanonPreviewDuplicateMeta(entry = {}, keySets = buildExistingCanonKeySets()) {
+    const idKey = canonicalKey(entry.id);
+    const titleKey = canonicalKey(entry.title || entry.name);
+    if ((idKey && keySets.pendingIds.has(idKey)) || (titleKey && keySets.pendingTitles.has(titleKey))) {
+        return { duplicateStatus: 'pending', duplicateReason: 'Already in Pending Lore' };
+    }
+    if ((idKey && keySets.acceptedIds.has(idKey)) || (titleKey && keySets.acceptedTitles.has(titleKey))) {
+        return { duplicateStatus: 'accepted', duplicateReason: 'Already in Lore Matrix' };
+    }
+    return { duplicateStatus: 'new', duplicateReason: '' };
+}
+
+function isCanonGuardrailEntry(entry = {}) {
+    const purpose = String(entry.lorePurpose || '').toLowerCase();
+    const kind = String(entry.kind || entry.gateType || '').toLowerCase();
+    const category = String(entry.category || '').toLowerCase();
+    const priority = Number(entry.priority) || 0;
+    return purpose.includes('gate')
+        || purpose.includes('constraint')
+        || purpose.includes('exclusion')
+        || kind.includes('gate')
+        || kind.includes('guard')
+        || kind.includes('constraint')
+        || category.includes('future_guard')
+        || (priority >= 85 && entryHasAnyText(entry, ['do not', 'should not', 'before ', 'has not', 'does not know']));
+}
+
+function isCanonSecretEntry(entry = {}) {
+    const truthStatus = String(entry.truthStatus || '').toLowerCase();
+    const revealPolicy = String(entry.revealPolicy || '').toLowerCase();
+    const category = String(entry.category || '').toLowerCase();
+    return truthStatus.includes('hidden')
+        || revealPolicy.includes('private')
+        || revealPolicy.includes('do_not_reveal')
+        || revealPolicy.includes('do not reveal')
+        || category.includes('secret')
+        || entryHasAnyText(entry, [' secret', 'hidden', 'horcrux', 'unknown to', 'does not know', 'cannot know']);
+}
+
+function isCanonEventEntry(entry = {}) {
+    const category = String(entry.category || '').toLowerCase();
+    const kind = String(entry.kind || entry.gateType || '').toLowerCase();
+    const purpose = String(entry.lorePurpose || '').toLowerCase();
+    return category.includes('event')
+        || category.includes('timeline')
+        || kind.includes('event')
+        || kind.includes('anchor')
+        || purpose.includes('timeline')
+        || purpose.includes('event');
+}
+
+function isCanonSpellOrSkillEntry(entry = {}) {
+    const category = String(entry.category || '').toLowerCase();
+    const kind = String(entry.kind || entry.gateType || '').toLowerCase();
+    return category.includes('spell')
+        || category.includes('skill')
+        || kind.includes('spell')
+        || kind.includes('skill')
+        || normalizedEntryArray(entry.scope?.spells).length > 0;
+}
+
+function isCanonItemEntry(entry = {}) {
+    const category = String(entry.category || '').toLowerCase();
+    const kind = String(entry.kind || entry.gateType || '').toLowerCase();
+    return category.includes('item')
+        || category.includes('artifact')
+        || category.includes('object')
+        || kind.includes('artifact')
+        || kind.includes('object')
+        || normalizedEntryArray(entry.scope?.objects).length > 0;
+}
+
+function getPresentCharacterNames(currentState = getState()) {
+    const scene = currentState?.scene || currentState?.currentScene || currentState?.loreContext || {};
+    return [
+        scene.presentCharacters,
+        scene.nearbyCharacters,
+        scene.characters,
+    ].flatMap(normalizedEntryArray).map(name => name.toLowerCase());
+}
+
+function isCanonPresentCharacterEntry(entry = {}, currentState = getState()) {
+    const present = getPresentCharacterNames(currentState);
+    if (!present.length) return false;
+    const scoped = [
+        entry.scope?.characters,
+        entry.characters,
+        entry.subjects,
+    ].flatMap(normalizedEntryArray).map(name => name.toLowerCase());
+    return scoped.some(name => present.some(presentName => name === presentName || name.includes(presentName) || presentName.includes(name)));
+}
+
+function dedupeIds(ids = []) {
+    return [...new Set(ids.filter(Boolean))];
+}
+
+function buildCanonPreviewPacks(entries = [], { schoolYear = null, sceneIso = '', currentState = getState() } = {}) {
+    const yearLabel = schoolYear ? `Year ${schoolYear}` : 'Current Story';
+    const definitions = [
+        {
+            id: 'essential_guardrails',
+            label: 'Essential Guardrails',
+            description: 'High-value exclusions, knowledge gates, and timing constraints.',
+            match: entry => isCanonGuardrailEntry(entry),
+        },
+        {
+            id: 'year_secrets',
+            label: `${yearLabel} Secrets`,
+            description: 'Hidden knowledge, reveal timing, and facts characters should not casually know.',
+            match: entry => isCanonSecretEntry(entry) && (!schoolYear || entryMatchesSchoolYear(entry, schoolYear) || dateInRange(sceneIso, entry)),
+        },
+        {
+            id: 'year_events',
+            label: `${yearLabel} Events`,
+            description: 'Major dated events and timeline anchors for this school year.',
+            match: entry => isCanonEventEntry(entry) && (!schoolYear || entryMatchesSchoolYear(entry, schoolYear) || dateInRange(sceneIso, entry)),
+        },
+        {
+            id: 'spells_skills',
+            label: 'Spells & Skills',
+            description: 'Spell availability, skill bands, and who can plausibly use what.',
+            match: entry => isCanonSpellOrSkillEntry(entry),
+        },
+        {
+            id: 'items_access',
+            label: 'Items & Access',
+            description: 'Artifacts, restricted items, and access constraints.',
+            match: entry => isCanonItemEntry(entry),
+        },
+        {
+            id: 'present_characters',
+            label: 'Present Characters',
+            description: 'Canon context tied to characters detected in the scene.',
+            match: entry => isCanonPresentCharacterEntry(entry, currentState),
+        },
+    ];
+
+    const addable = entry => entry?.extensions?.canonPreview?.duplicateStatus === 'new';
+    const packs = definitions.map(definition => {
+        const packEntries = entries.filter(definition.match);
+        const ids = dedupeIds(packEntries.map(entry => entry.id));
+        return {
+            id: definition.id,
+            label: definition.label,
+            description: definition.description,
+            entryIds: ids,
+            totalCount: ids.length,
+            newCount: packEntries.filter(addable).length,
+            duplicateCount: packEntries.filter(entry => !addable(entry)).length,
+        };
+    }).filter(pack => pack.totalCount > 0);
+
+    if (entries.length) {
+        packs.push({
+            id: 'all_matches',
+            label: 'All Matching Canon',
+            description: 'Every canon entry matching the current context window.',
+            entryIds: dedupeIds(entries.map(entry => entry.id)),
+            totalCount: entries.length,
+            newCount: entries.filter(addable).length,
+            duplicateCount: entries.filter(entry => !addable(entry)).length,
+        });
+    }
+
+    return packs;
+}
+
 
 
 export async function queryCanonLoreDatabase(context = null, options = {}) {
@@ -695,9 +942,171 @@ export async function queryCanonLoreDatabase(context = null, options = {}) {
     };
 }
 
+export async function previewCanonLoreForContext(context = null, options = {}) {
+    const settings = getSettings();
+    if (settings.canonLoreDatabaseEnabled === false) {
+        return { status: 'disabled', entries: [], packs: [], matchedCount: 0, sceneIso: '' };
+    }
+
+    const currentState = getState();
+    const effectiveContext = context || currentState?.loreContext || {};
+    const sceneDate = effectiveContext.sceneDate || currentState?.canon?.inUniverseDate || '';
+    const sceneIso = parseCanonDbDate(sceneDate);
+
+    if (!sceneIso) {
+        return { status: 'no_date', entries: [], packs: [], matchedCount: 0, sceneIso: '' };
+    }
+
+    const db = await loadCanonLoreDatabase();
+    const maxCandidates = Math.max(10, Math.min(500, Number(options.maxCandidates ?? 300) || 300));
+    const candidateItems = db.entries
+        .filter(entry => isSpecificLorePurpose(normalizeLorePurpose(entry.lorePurpose || entry.purpose, entry)))
+        .filter(entry => entry.injectableByDefault !== false)
+        .filter(entry => dateInRange(sceneIso, entry))
+        .map(entry => ({ entry, score: scoreCanonEntry(entry, currentState, effectiveContext, sceneIso, db.scoring) }))
+        .filter(item => item.score > 0)
+        .sort(sortCanonCandidates)
+        .slice(0, maxCandidates);
+
+    const keySets = buildExistingCanonKeySets(currentState);
+    const compactEntries = candidateItems.map(item => {
+        const compact = compactPendingCanonEntryForStorage({
+            ...item.entry,
+            source: item.entry.source || CANON_DB_SOURCE,
+        });
+        const duplicateMeta = getCanonPreviewDuplicateMeta(compact, keySets);
+        compact.extensions = {
+            ...(compact.extensions || {}),
+            canonPreview: {
+                score: item.score,
+                duplicateStatus: duplicateMeta.duplicateStatus,
+                duplicateReason: duplicateMeta.duplicateReason,
+            },
+        };
+        return compact;
+    });
+
+    const entries = preprocessPendingLoreEntries(compactEntries, currentState, settings).map(entry => {
+        const duplicateMeta = getCanonPreviewDuplicateMeta(entry, keySets);
+        const previewMeta = entry.extensions?.canonPreview || {};
+        return {
+            ...entry,
+            extensions: {
+                ...(entry.extensions || {}),
+                canonPreview: {
+                    ...previewMeta,
+                    duplicateStatus: duplicateMeta.duplicateStatus,
+                    duplicateReason: duplicateMeta.duplicateReason,
+                },
+            },
+        };
+    });
+    const schoolYear = deriveSceneSchoolYear(sceneIso);
+    const packs = buildCanonPreviewPacks(entries, { schoolYear, sceneIso, currentState });
+    const newCount = entries.filter(entry => entry.extensions?.canonPreview?.duplicateStatus === 'new').length;
+
+    return {
+        status: entries.length ? 'preview' : 'empty',
+        source: CANON_DB_SOURCE,
+        entries,
+        packs,
+        matchedCount: entries.length,
+        newCount,
+        duplicateCount: entries.length - newCount,
+        sceneIso,
+        schoolYear,
+        databaseVersion: db.version,
+        databaseId: db.databaseId,
+    };
+}
+
+export async function addCanonLorePreviewEntriesToPending(entryIds = [], context = null, options = {}) {
+    const selectedIds = new Set((Array.isArray(entryIds) ? entryIds : []).map(id => String(id || '')).filter(Boolean));
+    if (!selectedIds.size) {
+        return { status: 'empty', entries: [], proposedCount: 0, selectedCount: 0 };
+    }
+
+    const settings = getSettings();
+    const currentState = getState();
+    const preview = await previewCanonLoreForContext(context, options);
+    if (preview.status !== 'preview') {
+        return { ...preview, proposedCount: 0, selectedCount: selectedIds.size };
+    }
+
+    const selectedEntries = preview.entries.filter(entry => selectedIds.has(String(entry.id || '')));
+    const addableEntries = selectedEntries.filter(entry => entry.extensions?.canonPreview?.duplicateStatus === 'new');
+    if (!addableEntries.length) {
+        return {
+            ...preview,
+            status: 'duplicates_only',
+            entries: [],
+            proposedCount: 0,
+            selectedCount: selectedEntries.length,
+            skippedDuplicateCount: selectedEntries.length,
+        };
+    }
+
+    const existing = [
+        ...(Array.isArray(currentState.loreMatrix) ? currentState.loreMatrix : []),
+        ...(Array.isArray(currentState.pendingLoreEntries) ? currentState.pendingLoreEntries : []),
+    ];
+    const filtered = fastFilterCanonDuplicates(addableEntries, existing);
+    const entries = preprocessPendingLoreEntries(filtered.entries, currentState, settings);
+
+    if (!entries.length) {
+        return {
+            ...preview,
+            status: 'duplicates_only',
+            entries: [],
+            proposedCount: 0,
+            selectedCount: selectedEntries.length,
+            skippedDuplicateCount: selectedEntries.length,
+            dropped: filtered.dropped,
+        };
+    }
+
+    if (options.snapshot !== false) {
+        pushStateSnapshot(currentState, 'Add selected canon lore preview to pending review', settings.maxSnapshots);
+    }
+
+    const pending = Array.isArray(currentState.pendingLoreEntries) ? currentState.pendingLoreEntries : [];
+    currentState.pendingLoreEntries = [...pending, ...entries].slice(-250);
+    currentState.pendingLoreMeta = {
+        id: `canon-preview-${Date.now()}`,
+        contextKey: buildLoreGenerationKey(currentState),
+        source: CANON_DB_SOURCE,
+        status: 'pending',
+        summary: `Selected canon database packs added ${entries.length} entries for ${preview.sceneIso}.`,
+        rawEntryCount: selectedEntries.length,
+        validEntryCount: entries.length,
+        createdAt: Date.now(),
+    };
+
+    currentState.canonLoreDatabase = {
+        ...(currentState.canonLoreDatabase || {}),
+        lastQueriedAt: Date.now(),
+        lastSceneDate: preview.sceneIso || '',
+        lastCanonBoundary: context?.canonBoundary || currentState?.loreContext?.canonBoundary || '',
+        lastMatchedCount: preview.matchedCount || 0,
+        lastProposedCount: entries.length,
+        lastStatus: `Selected ${selectedEntries.length} canon entries; added ${entries.length} new pending entries.`,
+    };
+    saveState(currentState);
+
+    return {
+        ...preview,
+        status: 'proposed',
+        entries,
+        proposedCount: entries.length,
+        selectedCount: selectedEntries.length,
+        skippedDuplicateCount: Math.max(0, selectedEntries.length - entries.length),
+        dropped: filtered.dropped,
+    };
+}
+
 export async function proposeCanonLoreForContext(context = null, options = {}) {
     const settings = getSettings();
-    if (settings.canonLoreDatabaseEnabled === false || settings.canonLoreAutoPropose === false) {
+    if (settings.canonLoreDatabaseEnabled === false) {
         return { status: 'disabled', entries: [], proposedCount: 0 };
     }
 

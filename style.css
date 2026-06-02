@@ -2244,6 +2244,135 @@
     white-space: nowrap;
 }
 
+.wandlight-canon-preview-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+.wandlight-canon-preview-summary {
+    font-size: 0.76em;
+    color: #d7b56d;
+    line-height: 1.3;
+}
+
+.wandlight-canon-pack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 5px;
+}
+
+.wandlight-canon-pack-button {
+    min-width: 0;
+    border: 1px solid rgba(126, 145, 165, 0.34);
+    border-radius: 7px;
+    background: rgba(22, 28, 36, 0.72);
+    color: var(--SmartThemeBodyColor, #e8e1d3);
+    padding: 6px 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.wandlight-canon-pack-button:hover {
+    background: rgba(34, 43, 54, 0.9);
+    border-color: rgba(155, 176, 196, 0.58);
+}
+
+.wandlight-canon-pack-active {
+    border-color: rgba(215, 181, 109, 0.72);
+    background: rgba(63, 52, 31, 0.48);
+}
+
+.wandlight-canon-pack-label {
+    font-size: 0.76em;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.wandlight-canon-pack-meta {
+    font-size: 0.68em;
+    color: #aebcca;
+    line-height: 1.2;
+}
+
+.wandlight-canon-preview-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+}
+
+.wandlight-canon-preview-selected-count {
+    font-size: 0.72em;
+    color: #c6d2dd;
+    margin-right: 2px;
+}
+
+.wandlight-canon-preview-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: min(340px, 42vh);
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.wandlight-canon-preview-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 7px;
+    align-items: start;
+    padding: 6px 7px;
+    border: 1px solid rgba(126, 145, 165, 0.22);
+    border-radius: 7px;
+    background: rgba(10, 14, 20, 0.38);
+    cursor: pointer;
+}
+
+.wandlight-canon-preview-row-selected {
+    border-color: rgba(120, 170, 220, 0.58);
+    background: rgba(35, 55, 76, 0.42);
+}
+
+.wandlight-canon-preview-row-disabled {
+    opacity: 0.64;
+    cursor: default;
+}
+
+.wandlight-canon-preview-row input[type="checkbox"] {
+    margin-top: 2px;
+}
+
+.wandlight-canon-preview-row-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.wandlight-canon-preview-row-title {
+    font-size: 0.78em;
+    font-weight: 700;
+    color: #e4dccb;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.wandlight-canon-preview-row-text {
+    font-size: 0.72em;
+    color: #b9c6cf;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.wandlight-canon-preview-row-meta {
+    gap: 3px;
+}
+
 .wandlight-lore-source-filter {
     max-width: 148px;
     min-width: 112px;

@@ -27,7 +27,7 @@ import { buildContinuityPreview, buildLorePreview, getCompressionSourceSignature
 import { onExtractionTriggered } from './extractor.js';
 import { runLoreContextDetection, runBulkLoreGeneration } from './lore-generator.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
-import { proposeCanonLoreForContext, getLoreTaxonomySync } from './canon-lore-db.js';
+import { proposeCanonLoreForContext, previewCanonLoreForContext, addCanonLorePreviewEntriesToPending, getLoreTaxonomySync } from './canon-lore-db.js';
 import { runAutoRelevance, applyAutoRelevanceSuggestions, clearAutoRelevanceSuggestions, rejectAutoRelevanceSuggestions } from './auto-relevance.js';
 
 const PANEL_ID = 'wandlight-lore-panel';
@@ -123,6 +123,12 @@ let searchRenderTimer = null;
 let deferredStateSaveTimer = null;
 let deferredStateSaveRef = null;
 let loreGenerationUiRunning = false;
+let canonPreviewUiState = {
+    contextKey: '',
+    preview: null,
+    selectedPackId: '',
+    selectedEntryIds: [],
+};
 
 function getLoreRegistry(registryName) {
     const taxonomy = getLoreTaxonomySync();
@@ -918,36 +924,20 @@ function createCanonSuggestionPanel(state) {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Local database lookup. No API/model cost. Requires Story Context so Wandlight knows the date, canon boundary, and branch.';
+    help.textContent = 'Preview local canon packs for the current Story Context, choose only the entries you want, then add them to Pending Lore Review. No API/model cost.';
     panel.appendChild(help);
-
-    const maxRow = document.createElement('label');
-    maxRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
-    const maxText = document.createElement('span');
-    maxText.textContent = `Max suggestions: ${settings.canonLoreMaxEntries || 10}`;
-    addTooltip(maxText, 'Maximum local canon database entries proposed into Pending Lore Review. This does not accept them automatically.');
-    const maxInput = document.createElement('input');
-    maxInput.type = 'range';
-    maxInput.min = '1';
-    maxInput.max = '200';
-    maxInput.step = '1';
-    maxInput.value = String(settings.canonLoreMaxEntries || 10);
-    maxInput.addEventListener('input', () => {
-        const next = getSettings();
-        next.canonLoreMaxEntries = Math.max(1, Math.min(200, parseInt(maxInput.value, 10) || 10));
-        saveSettings(next);
-        maxText.textContent = `Max suggestions: ${next.canonLoreMaxEntries}`;
-    });
-    maxRow.appendChild(maxText);
-    maxRow.appendChild(maxInput);
-    panel.appendChild(maxRow);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
-    actions.appendChild(createButton('Suggest Canon Lore', 'Queries the local Lore Database with the current Story Context and proposes matching entries into Pending Lore Review.', async (btn) => {
-        await handleSuggestCanonLore(btn);
+    actions.appendChild(createButton('Preview Canon Packs', 'Queries the local Lore Database and groups matching entries into selectable packs with counts.', async (btn) => {
+        await handlePreviewCanonLorePacks(btn);
     }, 'wandlight-primary-button'));
+    actions.appendChild(createButton('Quick Add Top Matches', `Legacy one-click flow: proposes up to ${settings.canonLoreMaxEntries || 10} top matches into Pending Lore Review.`, async (btn) => {
+        await handleSuggestCanonLore(btn);
+    }, 'wandlight-secondary-button'));
     panel.appendChild(actions);
+
+    panel.appendChild(createCanonPreviewSection(state));
 
     const advanced = createCollapsibleSection(
         'lore.canonSuggestionSettings',
@@ -974,9 +964,9 @@ function createCanonSuggestionSettingsContent(state) {
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid';
     grid.appendChild(createToggleCard(
-        'Enable Canon Database',
+        'Use Local Canon Database',
         settings.canonLoreDatabaseEnabled !== false,
-        'Allows Wandlight to query local pre-generated canon lore files when Story Context has a parseable date.',
+        'Allows manual previews, quick add, and optional auto-suggest to query local pre-generated canon lore files.',
         (checked) => {
             const next = getSettings();
             next.canonLoreDatabaseEnabled = checked;
@@ -987,7 +977,7 @@ function createCanonSuggestionSettingsContent(state) {
     grid.appendChild(createToggleCard(
         'Auto-suggest after Context detection',
         settings.canonLoreAutoPropose !== false,
-        'When enabled, Detect Story Context automatically proposes matching local canon entries into Pending Lore Review.',
+        'When enabled, a Story Context detection run also performs the quick top-match canon proposal. It does not affect manual previews.',
         (checked) => {
             const next = getSettings();
             next.canonLoreAutoPropose = checked;
@@ -997,11 +987,244 @@ function createCanonSuggestionSettingsContent(state) {
     ));
     content.appendChild(grid);
 
+    const capRow = document.createElement('label');
+    capRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    const capText = document.createElement('span');
+    capText.textContent = `Quick/auto add cap: ${settings.canonLoreMaxEntries || 10}`;
+    addTooltip(capText, 'Maximum entries used only by Quick Add Top Matches and auto-suggest after Story Context detection. Pack preview counts are not capped by this slider.');
+    const capInput = document.createElement('input');
+    capInput.type = 'range';
+    capInput.min = '1';
+    capInput.max = '200';
+    capInput.step = '1';
+    capInput.value = String(settings.canonLoreMaxEntries || 10);
+    capInput.addEventListener('input', () => {
+        const next = getSettings();
+        next.canonLoreMaxEntries = Math.max(1, Math.min(200, parseInt(capInput.value, 10) || 10));
+        saveSettings(next);
+        capText.textContent = `Quick/auto add cap: ${next.canonLoreMaxEntries}`;
+    });
+    capRow.appendChild(capText);
+    capRow.appendChild(capInput);
+    content.appendChild(capRow);
+
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Canon suggestions are proposed for review, not automatically accepted. Duplicate IDs/titles are skipped cheaply before insertion.';
+    help.textContent = 'Auto-suggest runs only when Story Context detection runs. With the default automatic context interval, that is interval-based, not every message. Manual pack preview can be run any time.';
     content.appendChild(help);
     return content;
+}
+
+function getCanonPreviewContextKey(context = {}) {
+    return [
+        context.sceneDate || '',
+        context.subjectiveDate || '',
+        context.canonBoundary || '',
+        context.branchId || '',
+        context.timeTravelMode || '',
+    ].map(value => String(value || '').trim()).join('|');
+}
+
+function getCanonPreviewSelectedIds() {
+    return new Set(Array.isArray(canonPreviewUiState.selectedEntryIds) ? canonPreviewUiState.selectedEntryIds : []);
+}
+
+function setCanonPreviewSelectedIds(ids = []) {
+    canonPreviewUiState.selectedEntryIds = Array.from(new Set((ids || []).map(id => String(id || '')).filter(Boolean)));
+}
+
+function getCanonPreviewEntrySummary(entry = {}) {
+    const content = entry.content || {};
+    return content.injection
+        || content.fact
+        || entry.fact
+        || (Array.isArray(content.constraints) ? content.constraints[0] : '')
+        || (Array.isArray(content.antiLore) ? content.antiLore[0] : '')
+        || '';
+}
+
+function getCanonPreviewEntryMap(preview = null) {
+    return new Map((preview?.entries || []).map(entry => [String(entry.id || ''), entry]));
+}
+
+function isCanonPreviewEntryAddable(entry = {}) {
+    return (entry.extensions?.canonPreview?.duplicateStatus || 'new') === 'new';
+}
+
+function createCanonPreviewSection(state) {
+    const section = document.createElement('div');
+    section.className = 'wandlight-canon-preview-section';
+    const preview = canonPreviewUiState.preview;
+    const currentContextKey = getCanonPreviewContextKey(state?.loreContext || {});
+    const isStale = !!(preview && canonPreviewUiState.contextKey && canonPreviewUiState.contextKey !== currentContextKey);
+
+    if (!preview) {
+        section.appendChild(createEmptyMessage('No canon pack preview yet. Preview packs to choose entries before adding them to Pending Lore Review.'));
+        return section;
+    }
+
+    if (preview.status === 'disabled') {
+        section.appendChild(createEmptyMessage('The local canon database is disabled in Canon Suggestion Settings.'));
+        return section;
+    }
+    if (preview.status === 'no_date') {
+        section.appendChild(createEmptyMessage('No parseable Scene date. Detect or enter Story Context before previewing canon packs.'));
+        return section;
+    }
+    if (!preview.entries?.length) {
+        section.appendChild(createEmptyMessage('No canon database entries matched this Story Context.'));
+        return section;
+    }
+
+    const summary = document.createElement('div');
+    summary.className = 'wandlight-canon-preview-summary';
+    const yearText = preview.schoolYear ? `Year ${preview.schoolYear} | ` : '';
+    summary.textContent = `${yearText}${preview.sceneIso || 'unknown date'} | ${preview.matchedCount || preview.entries.length} matches | ${preview.newCount || 0} new | ${preview.duplicateCount || 0} already present`;
+    section.appendChild(summary);
+
+    if (isStale) {
+        const stale = document.createElement('div');
+        stale.className = 'wandlight-runtime-help wandlight-warning-text';
+        stale.textContent = 'This preview was built for earlier Story Context. Refresh Canon Packs before adding entries.';
+        section.appendChild(stale);
+    }
+
+    const packs = Array.isArray(preview.packs) ? preview.packs : [];
+    const activePack = packs.find(pack => pack.id === canonPreviewUiState.selectedPackId)
+        || packs.find(pack => pack.newCount > 0)
+        || packs[0]
+        || null;
+    if (activePack && canonPreviewUiState.selectedPackId !== activePack.id) {
+        canonPreviewUiState.selectedPackId = activePack.id;
+    }
+
+    const packGrid = document.createElement('div');
+    packGrid.className = 'wandlight-canon-pack-grid';
+    packs.forEach(pack => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `wandlight-canon-pack-button ${pack.id === activePack?.id ? 'wandlight-canon-pack-active' : ''}`.trim();
+        addTooltip(btn, pack.description || 'Canon preview pack.');
+
+        const label = document.createElement('span');
+        label.className = 'wandlight-canon-pack-label';
+        label.textContent = `${pack.label} (${pack.totalCount || 0})`;
+        btn.appendChild(label);
+
+        const meta = document.createElement('span');
+        meta.className = 'wandlight-canon-pack-meta';
+        meta.textContent = `${pack.newCount || 0} new${pack.duplicateCount ? `, ${pack.duplicateCount} present` : ''}`;
+        btn.appendChild(meta);
+
+        btn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            canonPreviewUiState.selectedPackId = pack.id;
+            refreshPanelBody({ preserveScroll: true });
+        });
+        packGrid.appendChild(btn);
+    });
+    section.appendChild(packGrid);
+
+    if (!activePack) {
+        section.appendChild(createEmptyMessage('No canon packs are available for this preview.'));
+        return section;
+    }
+
+    const entryMap = getCanonPreviewEntryMap(preview);
+    const packEntries = (activePack.entryIds || []).map(id => entryMap.get(String(id))).filter(Boolean);
+    const addablePackIds = packEntries.filter(isCanonPreviewEntryAddable).map(entry => entry.id);
+    const selectedIds = getCanonPreviewSelectedIds();
+    const selectedAddableCount = Array.from(selectedIds).filter(id => isCanonPreviewEntryAddable(entryMap.get(String(id)) || {})).length;
+
+    const controls = document.createElement('div');
+    controls.className = 'wandlight-canon-preview-actions';
+    const count = document.createElement('span');
+    count.className = 'wandlight-canon-preview-selected-count';
+    count.textContent = `${selectedAddableCount} selected`;
+    controls.appendChild(count);
+    controls.appendChild(createButton('Select Pack', `Selects all ${activePack.newCount || 0} new entries in ${activePack.label}.`, () => {
+        setCanonPreviewSelectedIds([...selectedIds, ...addablePackIds]);
+        refreshPanelBody({ preserveScroll: true });
+    }, 'wandlight-small-button'));
+    controls.appendChild(createButton('Clear', 'Clears the current canon preview selection.', () => {
+        setCanonPreviewSelectedIds([]);
+        refreshPanelBody({ preserveScroll: true });
+    }, 'wandlight-small-button'));
+    const addSelected = createButton('Add Selected to Pending Lore', 'Adds selected canon preview entries to the existing Pending Lore Review list for full inspection before accepting.', async (btn) => {
+        await handleAddCanonPreviewEntries(btn, Array.from(getCanonPreviewSelectedIds()));
+    }, 'wandlight-primary-button');
+    addSelected.disabled = isStale || selectedAddableCount <= 0;
+    controls.appendChild(addSelected);
+    const addPack = createButton('Add Pack to Pending Lore', `Adds all new entries in ${activePack.label} to Pending Lore Review.`, async (btn) => {
+        await handleAddCanonPreviewEntries(btn, addablePackIds);
+    }, 'wandlight-secondary-button');
+    addPack.disabled = isStale || addablePackIds.length <= 0;
+    controls.appendChild(addPack);
+    section.appendChild(controls);
+
+    const list = document.createElement('div');
+    list.className = 'wandlight-canon-preview-list';
+    const visibleEntries = packEntries.slice(0, 80);
+    visibleEntries.forEach(entry => {
+        list.appendChild(createCanonPreviewEntryRow(entry, selectedIds, isStale));
+    });
+    if (packEntries.length > visibleEntries.length) {
+        const note = document.createElement('div');
+        note.className = 'wandlight-runtime-help wandlight-compact-help';
+        note.textContent = `Showing first ${visibleEntries.length} of ${packEntries.length}. Select Pack still selects every new entry in this pack.`;
+        list.appendChild(note);
+    }
+    section.appendChild(list);
+    return section;
+}
+
+function createCanonPreviewEntryRow(entry, selectedIds, isStale = false) {
+    const id = String(entry?.id || '');
+    const duplicateStatus = entry?.extensions?.canonPreview?.duplicateStatus || 'new';
+    const duplicateReason = entry?.extensions?.canonPreview?.duplicateReason || '';
+    const addable = !isStale && duplicateStatus === 'new';
+    const row = document.createElement('label');
+    row.className = `wandlight-canon-preview-row ${selectedIds.has(id) ? 'wandlight-canon-preview-row-selected' : ''} ${addable ? '' : 'wandlight-canon-preview-row-disabled'}`.trim();
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = selectedIds.has(id);
+    checkbox.disabled = !addable;
+    checkbox.addEventListener('change', (event) => {
+        event.stopPropagation();
+        const next = getCanonPreviewSelectedIds();
+        if (checkbox.checked) next.add(id);
+        else next.delete(id);
+        setCanonPreviewSelectedIds(Array.from(next));
+        refreshPanelBody({ preserveScroll: true });
+    });
+    row.appendChild(checkbox);
+
+    const main = document.createElement('div');
+    main.className = 'wandlight-canon-preview-row-main';
+    const title = document.createElement('div');
+    title.className = 'wandlight-canon-preview-row-title';
+    title.textContent = entry?.title || 'Canon lore';
+    main.appendChild(title);
+
+    const text = document.createElement('div');
+    text.className = 'wandlight-canon-preview-row-text';
+    text.textContent = getCanonPreviewEntrySummary(entry);
+    main.appendChild(text);
+
+    const meta = document.createElement('div');
+    meta.className = 'wandlight-lore-entry-meta wandlight-canon-preview-row-meta';
+    if (entry?.category) meta.appendChild(createBadge(entry.category, 'Canon entry category.'));
+    if (entry?.lorePurpose) meta.appendChild(createBadge(LORE_PURPOSE_LABELS[entry.lorePurpose] || entry.lorePurpose, 'Why this canon entry would be useful.'));
+    if (entry?.relevance) meta.appendChild(createBadge(entry.relevance, 'Recommended relevance tier for Pending Lore Review.'));
+    meta.appendChild(createBadge(`P${Number(entry?.priority || 50)}`, 'Canon database priority.'));
+    if (duplicateStatus !== 'new') {
+        meta.appendChild(createBadge(duplicateStatus, duplicateReason || 'Already present by id/title.'));
+    }
+    main.appendChild(meta);
+
+    row.appendChild(main);
+    return row;
 }
 
 function createStoryLoreGenerationPanel(state) {
@@ -1345,6 +1568,113 @@ function hasUsableStoryContext(context = {}) {
     ].map(value => String(value || '').trim()).find(Boolean);
 }
 
+async function ensureStoryContextForCanonAction(actionLabel = 'Canon lore') {
+    let state = getState();
+    if (hasUsableStoryContext(state?.loreContext || {})) {
+        return state;
+    }
+
+    const proceed = await confirmAction(
+        'No Story Context detected',
+        `${actionLabel} needs the story date, canon boundary, and branch. Run Detect Story Context now?`
+    );
+    if (!proceed) {
+        setFeatureProgress('canon', `${actionLabel} cancelled: no Story Context.`, 0);
+        return null;
+    }
+
+    setFeatureProgress('canon', 'Detecting Story Context before querying canon lore...', 5);
+    const detected = await performStoryContextDetection({ stayOnTab: 'lore' });
+    state = getState();
+    if (!detected || !hasUsableStoryContext(state?.loreContext || {})) {
+        setFeatureProgress('canon', 'No Story Context available. Canon lore was not queried.', 100);
+        toast('Canon lore needs Story Context before it can run.', 'warning');
+        return null;
+    }
+    return state;
+}
+
+async function handlePreviewCanonLorePacks(btn) {
+    await runBusyAction(btn, 'Previewing...', async () => {
+        const state = await ensureStoryContextForCanonAction('Canon pack preview');
+        if (!state) return;
+
+        setFeatureProgress('canon', 'Previewing canon packs from local database...', 20);
+        const result = await previewCanonLoreForContext(state?.loreContext || {}, { maxCandidates: 500 });
+        canonPreviewUiState = {
+            contextKey: getCanonPreviewContextKey(getState()?.loreContext || {}),
+            preview: result,
+            selectedPackId: (result?.packs || []).find(pack => pack.newCount > 0)?.id || result?.packs?.[0]?.id || '',
+            selectedEntryIds: [],
+        };
+
+        refreshPanelBody({ preserveScroll: false });
+        refreshHeader();
+
+        if (result?.status === 'preview') {
+            setFeatureProgress('canon', `Previewed ${result.packs?.length || 0} canon packs with ${result.newCount || 0} new entries.`, 100);
+            resetFeatureProgress('canon');
+            toast(`Previewed ${result.packs?.length || 0} canon packs. Select entries to add to Pending Lore Review.`, 'info');
+        } else if (result?.status === 'no_date') {
+            setFeatureProgress('canon', 'No parseable Story Context date. Detect or enter a scene date first.', 100);
+            toast('Canon pack preview needs a parseable Scene date first.', 'warning');
+        } else if (result?.status === 'disabled') {
+            setFeatureProgress('canon', 'Canon database is disabled.', 100);
+            toast('Canon database is disabled.', 'warning');
+        } else {
+            setFeatureProgress('canon', 'No matching canon packs for this context.', 100);
+            resetFeatureProgress('canon');
+            toast('Canon database found no matching entries for this context.', 'info');
+        }
+    });
+}
+
+async function handleAddCanonPreviewEntries(btn, entryIds = []) {
+    const ids = Array.from(new Set((entryIds || []).map(id => String(id || '')).filter(Boolean)));
+    if (!ids.length) {
+        toast('Select at least one new canon preview entry first.', 'warning');
+        return;
+    }
+
+    await runBusyAction(btn, 'Adding...', async () => {
+        const state = await ensureStoryContextForCanonAction('Adding canon preview entries');
+        if (!state) return;
+
+        setFeatureProgress('canon', 'Adding selected canon entries to Pending Lore Review...', 35);
+        const result = await addCanonLorePreviewEntriesToPending(ids, state?.loreContext || {}, { maxCandidates: 500 });
+        if (result?.status === 'proposed') {
+            canonPreviewUiState = {
+                contextKey: '',
+                preview: null,
+                selectedPackId: '',
+                selectedEntryIds: [],
+            };
+            setSectionCollapsed('lore.pendingReview', false);
+            setPanelState({ activeTab: 'lore' }, { deferSave: true });
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+            setFeatureProgress('canon', `Added ${result.proposedCount || 0} canon entries to Pending Lore Review.`, 100);
+            resetFeatureProgress('canon');
+            toast(`Added ${result.proposedCount || 0} canon entries to Pending Lore Review.`);
+        } else if (result?.status === 'duplicates_only') {
+            setFeatureProgress('canon', 'Selected canon entries were already pending or accepted.', 100);
+            resetFeatureProgress('canon');
+            refreshHeader();
+            toast('Selected canon entries were already pending or accepted.', 'info');
+        } else if (result?.status === 'disabled') {
+            setFeatureProgress('canon', 'Canon database is disabled.', 100);
+            toast('Canon database is disabled.', 'warning');
+        } else if (result?.status === 'no_date') {
+            setFeatureProgress('canon', 'No parseable Story Context date. Canon entries were not added.', 100);
+            toast('Canon entries need a parseable Scene date first.', 'warning');
+        } else {
+            setFeatureProgress('canon', 'No selected canon entries were added.', 100);
+            resetFeatureProgress('canon');
+            toast('No selected canon entries were added.', 'info');
+        }
+    });
+}
+
 async function handleSuggestCanonLore(btn) {
     await runBusyAction(btn, 'Suggesting...', async () => {
         let state = getState();
@@ -1507,9 +1837,9 @@ function createCanonLoreDatabaseCard(state) {
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid';
     grid.appendChild(createToggleCard(
-        'Enable Canon Database',
+        'Use Local Canon Database',
         settings.canonLoreDatabaseEnabled !== false,
-        'Allows Wandlight to query local pre-generated canon lore files when Story Context has a parseable date.',
+        'Allows manual previews, quick queries, and optional auto-suggest to query local pre-generated canon lore files.',
         (checked) => {
             const next = getSettings();
             next.canonLoreDatabaseEnabled = checked;
@@ -1518,9 +1848,9 @@ function createCanonLoreDatabaseCard(state) {
         }
     ));
     grid.appendChild(createToggleCard(
-        'Auto-Propose After Detection',
+        'Auto-suggest After Detection',
         settings.canonLoreAutoPropose !== false,
-        'When enabled, Detect Story Context automatically proposes matching local canon entries into Pending Lore Review.',
+        'When enabled, a Story Context detection run also performs the quick top-match canon proposal. It does not affect manual pack previews.',
         (checked) => {
             const next = getSettings();
             next.canonLoreAutoPropose = checked;
@@ -1533,8 +1863,8 @@ function createCanonLoreDatabaseCard(state) {
     const maxRow = document.createElement('label');
     maxRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
     const maxText = document.createElement('span');
-    maxText.textContent = `Max canon proposals: ${settings.canonLoreMaxEntries || 12}`;
-    addTooltip(maxText, 'Maximum local canon database entries proposed after context detection or manual database query.');
+    maxText.textContent = `Quick/auto add cap: ${settings.canonLoreMaxEntries || 12}`;
+    addTooltip(maxText, 'Maximum entries used only by quick query and auto-suggest after Story Context detection. Pack preview counts are not capped by this slider.');
     const maxInput = document.createElement('input');
     maxInput.type = 'range';
     maxInput.min = '1';
@@ -1545,7 +1875,7 @@ function createCanonLoreDatabaseCard(state) {
         const next = getSettings();
         next.canonLoreMaxEntries = Math.max(1, Math.min(200, parseInt(maxInput.value, 10) || 12));
         saveSettings(next);
-        maxText.textContent = `Max canon proposals: ${next.canonLoreMaxEntries}`;
+        maxText.textContent = `Quick/auto add cap: ${next.canonLoreMaxEntries}`;
     });
     maxRow.appendChild(maxText);
     maxRow.appendChild(maxInput);
@@ -1553,7 +1883,7 @@ function createCanonLoreDatabaseCard(state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Query Canon Database', 'Uses the current Story Context fields to query local canon lore and propose matching entries into Pending Lore Review.', async (btn) => {
+    actions.appendChild(createButton('Quick Add Top Matches', 'Uses the current Story Context fields to query local canon lore and propose the capped top matches into Pending Lore Review.', async (btn) => {
         await runBusyAction(btn, 'Querying...', async () => {
             setFeatureProgress('context', 'Querying local canon lore database...', 80);
             const result = await proposeCanonLoreForContext(getState()?.loreContext || {}, {

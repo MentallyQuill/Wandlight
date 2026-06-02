@@ -648,7 +648,7 @@ function createExperienceModeSwitch(settings = getSettings()) {
     basic.textContent = 'Basic';
     basic.setAttribute('role', 'radio');
     basic.setAttribute('aria-checked', mode === 'basic' ? 'true' : 'false');
-    addTooltip(basic, 'Switch to Basic Experience: essential controls with curated defaults.');
+    addTooltip(basic, 'Switch to Basic Experience.');
     basic.addEventListener('click', (event) => {
         event.stopPropagation();
         selectExperienceMode('basic');
@@ -661,7 +661,7 @@ function createExperienceModeSwitch(settings = getSettings()) {
     advanced.textContent = 'Advanced';
     advanced.setAttribute('role', 'radio');
     advanced.setAttribute('aria-checked', mode === 'advanced' ? 'true' : 'false');
-    addTooltip(advanced, 'Switch to Advanced Experience: full Wandlight toolset and restored custom settings.');
+    addTooltip(advanced, 'Switch to Advanced Experience.');
     advanced.addEventListener('click', (event) => {
         event.stopPropagation();
         selectExperienceMode('advanced');
@@ -1021,7 +1021,7 @@ function renderSessionTab(container, state) {
 
     container.appendChild(createSectionHeader(
         'Session Controls',
-        'Set how Wandlight behaves during roleplay. These controls are intentionally kept out of the extension settings panel.'
+        'Set how Wandlight behaves during roleplay.'
     ));
 
     if (!isBasicExperience(settings)) {
@@ -3696,7 +3696,7 @@ function renderBasicInjectionTab(container, state, settings = getSettings()) {
 
     container.appendChild(createSectionHeader(
         'Injection',
-        'Basic mode sends accepted Lore by relevance tier. Continuity injection and prompt placement settings stay hidden in Basic Experience.'
+        'Choose which accepted lore tiers Wandlight sends into the next roleplay prompt.'
     ));
 
     const toggles = document.createElement('div');
@@ -3717,7 +3717,7 @@ function renderBasicInjectionTab(container, state, settings = getSettings()) {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Basic defaults to Lore injection on and Continuity injection off. Use Advanced Experience for prompt placement, continuity injection, and compression prompt templates.';
+    help.textContent = 'Lore is organized by scene relevance so current details stay close while background details can stay compact.';
     container.appendChild(help);
 
     for (const tier of ['high', 'normal', 'low']) {
@@ -3737,7 +3737,7 @@ function createBasicLoreTierInjectionCard(tier, state, settings) {
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
     title.textContent = `${label}-Relevance Lore`;
-    addTooltip(title, `${label}-Relevance lore injection controls for Basic Experience.`);
+    addTooltip(title, `${label}-Relevance lore injection controls.`);
     card.appendChild(title);
 
     const help = document.createElement('div');
@@ -9411,8 +9411,8 @@ function getExperienceLabel(settings) {
 
 function getExperienceTooltip(settings) {
     return normalizeExperienceMode(settings?.experienceMode) === 'advanced'
-        ? 'Advanced Experience shows the full Wandlight toolset and restores your custom advanced settings.'
-        : 'Basic Experience shows the essential Wandlight workflow with curated safe defaults.';
+        ? 'Advanced Experience gives you detailed control over Wandlight behavior.'
+        : 'Basic Experience keeps Wandlight focused on the main roleplay workflow.';
 }
 
 function getCategoryCount(cat, entries, counts) {

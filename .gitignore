@@ -1,3 +1,30 @@
 Reference/
 implementation_plan.md
 *.zip
+
+# Local developer secrets and scratch config.
+# Keep the extension keyring/client files tracked; these patterns are only for
+# active local keys or copied runtime settings.
+.env
+.env.*
+!.env.example
+*.local
+*.local.*
+*.secret
+*.secrets
+secrets/
+dev-secrets*.json
+api-keys*.json
+openai-key*.txt
+anthropic-key*.txt
+deepseek-key*.txt
+*.pem
+*.key
+
+# SillyTavern runtime/user data, in case it is copied into this repository
+# during local development. Do not ignore settings.html.
+data/
+Backups/
+User Avatars/
+settings.json
+secrets.json

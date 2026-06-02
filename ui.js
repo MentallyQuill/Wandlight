@@ -92,37 +92,6 @@ function setupLoreProviderPanel(container) {
 
     setupProviderControls(container, 'continuity', 'Utility');
     setupProviderControls(container, 'lore', 'Reasoning');
-
-    const settings = getSettings();
-    const tempInput = container.querySelector('#wandlight_lore_temperature');
-    const topPInput = container.querySelector('#wandlight_lore_top_p');
-    const maxTokensInput = container.querySelector('#wandlight_lore_max_tokens');
-
-    if (tempInput) tempInput.value = settings.loreTemperature ?? 0.7;
-    if (topPInput) topPInput.value = settings.loreTopP ?? 0.98;
-    if (maxTokensInput) maxTokensInput.value = settings.loreMaxTokens ?? 8192;
-
-    if (tempInput) {
-        tempInput.addEventListener('change', () => {
-            const next = getSettings();
-            next.loreTemperature = parseFloat(tempInput.value) || 0.7;
-            saveLoreProviderSettings(next);
-        });
-    }
-    if (topPInput) {
-        topPInput.addEventListener('change', () => {
-            const next = getSettings();
-            next.loreTopP = parseFloat(topPInput.value) || 0.98;
-            saveLoreProviderSettings(next);
-        });
-    }
-    if (maxTokensInput) {
-        maxTokensInput.addEventListener('change', () => {
-            const next = getSettings();
-            next.loreMaxTokens = parseInt(maxTokensInput.value, 10) || 8192;
-            saveLoreProviderSettings(next);
-        });
-    }
 }
 
 function settingPrefix(kind) {
@@ -131,6 +100,13 @@ function settingPrefix(kind) {
 
 function secretNameForProvider(kind) {
     return `${settingPrefix(kind)}OpenAI`;
+}
+
+function parseNumericSetting(input, fallback, min, max, integer = false) {
+    const parsed = Number(input?.value);
+    if (!Number.isFinite(parsed)) return fallback;
+    const clamped = Math.min(max, Math.max(min, parsed));
+    return integer ? Math.round(clamped) : clamped;
 }
 
 function setupProviderControls(container, kind, label) {
@@ -149,26 +125,29 @@ function setupProviderControls(container, kind, label) {
     const openaiKeySaveBtn = container.querySelector(`#wandlight_${prefix}_openai_key_save`);
     const openaiKeyClearBtn = container.querySelector(`#wandlight_${prefix}_openai_key_clear`);
     const openaiKeyStatus = container.querySelector(`#wandlight_${prefix}_openai_key_status`);
-    const openaiJsonMode = container.querySelector(`#wandlight_${prefix}_openai_json_mode`);
-    const openaiSTProxy = container.querySelector(`#wandlight_${prefix}_openai_st_proxy`);
     const fetchModelsBtn = container.querySelector(`#wandlight_${prefix}_fetch_models`);
     const testConnectionBtn = container.querySelector(`#wandlight_${prefix}_test_connection`);
     const connectionStatus = container.querySelector(`#wandlight_${prefix}_connection_status`);
+    const temperatureInput = container.querySelector(`#wandlight_${prefix}_temperature`);
+    const topPInput = container.querySelector(`#wandlight_${prefix}_top_p`);
+    const maxTokensInput = container.querySelector(`#wandlight_${prefix}_max_tokens`);
 
     const providerKey = `${prefix}Provider`;
     const profileKey = `${prefix}ProfileId`;
     const presetKey = `${prefix}CompletionPresetId`;
     const baseUrlKey = `${prefix}OpenAIBaseUrl`;
     const modelKey = `${prefix}OpenAIModel`;
-    const jsonModeKey = `${prefix}OpenAIUseJsonMode`;
-    const proxyKey = `${prefix}OpenAIUseSTProxy`;
+    const temperatureKey = `${prefix}Temperature`;
+    const topPKey = `${prefix}TopP`;
+    const maxTokensKey = `${prefix}MaxTokens`;
 
     if (providerSelect) providerSelect.value = settings[providerKey] || 'st';
     if (openaiBaseUrl) openaiBaseUrl.value = settings[baseUrlKey] || '';
     if (openaiModelSearch) openaiModelSearch.value = settings[modelKey] || '';
     if (openaiModel) openaiModel.value = settings[modelKey] || '';
-    if (openaiJsonMode) openaiJsonMode.checked = settings[jsonModeKey] === true;
-    if (openaiSTProxy) openaiSTProxy.checked = !!settings[proxyKey];
+    if (temperatureInput) temperatureInput.value = settings[temperatureKey] ?? 0.7;
+    if (topPInput) topPInput.value = settings[topPKey] ?? 0.98;
+    if (maxTokensInput) maxTokensInput.value = settings[maxTokensKey] ?? 8192;
 
     function refreshProviderRows() {
         const provider = providerSelect?.value || 'st';
@@ -313,21 +292,20 @@ function setupProviderControls(container, kind, label) {
         });
     }
 
-    if (openaiJsonMode) {
-        openaiJsonMode.addEventListener('change', () => {
+    function wireNumericInput(input, key, fallback, min, max, integer = false) {
+        if (!input) return;
+        input.addEventListener('change', () => {
             const next = getSettings();
-            next[jsonModeKey] = openaiJsonMode.checked;
+            const value = parseNumericSetting(input, fallback, min, max, integer);
+            input.value = String(value);
+            next[key] = value;
             saveLoreProviderSettings(next);
         });
     }
 
-    if (openaiSTProxy) {
-        openaiSTProxy.addEventListener('change', () => {
-            const next = getSettings();
-            next[proxyKey] = openaiSTProxy.checked;
-            saveLoreProviderSettings(next);
-        });
-    }
+    wireNumericInput(temperatureInput, temperatureKey, 0.7, 0, 2);
+    wireNumericInput(topPInput, topPKey, 0.98, 0, 1);
+    wireNumericInput(maxTokensInput, maxTokensKey, 8192, 64, 16384, true);
 
     async function refreshKeyStatus() {
         if (!openaiKeyStatus) return;

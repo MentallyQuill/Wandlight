@@ -75,6 +75,19 @@ Story Lore Scan uses the Reasoning Provider to extract durable story/AU lore fro
 
 Generated lore is filtered through a strict quality gate by default. Low-value recap facts that belong in a summarizer are discarded before Pending Lore Review. Similar lore is routed as a possible update or merge instead of being silently thrown away as a duplicate.
 
+## API And Model Settings
+
+Wandlight has two model roles:
+
+- Utility Provider: frequent, cheaper calls for compression and continuity scans.
+- Reasoning Provider: deeper calls for story context detection and Story Lore Scan.
+
+Each role can use the current SillyTavern model, a SillyTavern connection profile, or a direct OpenAI-compatible endpoint. Direct OpenAI-compatible endpoints use Wandlight's encrypted local keyring.
+
+Each provider role has its own generation parameters: temperature, top-p, and max tokens. Both roles use the same defaults: temperature `0.7`, top-p `0.98`, and max tokens `8192`.
+
+Wandlight no longer exposes explicit JSON mode or SillyTavern proxy toggles. JSON mode was too provider-specific for reliable connection tests, and Wandlight already uses JSON-focused prompts plus repair handling. For SillyTavern-managed routing, use Current SillyTavern Model or Connection Profile instead of the direct OpenAI-compatible endpoint.
+
 ## Auto-Relevance
 
 Auto-Relevance periodically scans recent chat messages and accepted lore. It does not mutate Mute or Pin. It promotes/demotes accepted entries between High, Normal, and Low relevance.

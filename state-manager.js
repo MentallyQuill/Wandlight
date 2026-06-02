@@ -212,6 +212,28 @@ export function getSettings() {
         merged.compressionLevelDefaultsMigrated20260602 = true;
     }
 
+    // One-time API/model settings migration. Provider generation parameters are
+    // now shown per provider, with matching defaults. Retire fragile OpenAI
+    // JSON/proxy toggles from old saved settings so they cannot keep breaking
+    // connection tests after the UI no longer exposes them.
+    if (stored.providerParameterDefaultsMigrated20260602 !== true) {
+        if (stored.continuityTemperature === undefined) merged.continuityTemperature = 0.7;
+        if (stored.continuityTopP === undefined) merged.continuityTopP = 0.98;
+        if (stored.continuityMaxTokens === undefined || Number(stored.continuityMaxTokens) === 4096) {
+            merged.continuityMaxTokens = 8192;
+        }
+        if (stored.loreTemperature === undefined) merged.loreTemperature = 0.7;
+        if (stored.loreTopP === undefined) merged.loreTopP = 0.98;
+        if (stored.loreMaxTokens === undefined || Number(stored.loreMaxTokens) === 2048) {
+            merged.loreMaxTokens = 8192;
+        }
+        merged.continuityOpenAIUseJsonMode = false;
+        merged.continuityOpenAIUseSTProxy = false;
+        merged.loreOpenAIUseJsonMode = false;
+        merged.loreOpenAIUseSTProxy = false;
+        merged.providerParameterDefaultsMigrated20260602 = true;
+    }
+
     // Write back merged defaults so the object is complete going forward
     extensionSettings[MODULE_KEY] = merged;
     removeLegacyBuckets(extensionSettings);

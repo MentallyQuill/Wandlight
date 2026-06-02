@@ -77,8 +77,31 @@
                                     <button id="wandlight_continuity_openai_key_clear" class="menu_button interactable" title="Remove the stored utility API key."><i class="fa-solid fa-trash"></i> Clear</button>
                                 </div>
                                 <small id="wandlight_continuity_openai_key_status" style="opacity: 0.6; margin-top: 2px; display: block;"></small>
-                                <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85em;"><input id="wandlight_continuity_openai_json_mode" type="checkbox"> Use JSON mode (advanced; leave off unless your provider supports response_format)</label>
-                                <label style="display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 0.85em;"><input id="wandlight_continuity_openai_st_proxy" type="checkbox"> Use SillyTavern proxy when available (advanced; leave off unless your ST proxy is configured)</label>
+                            </div>
+
+                            <label style="font-size: 0.9em; font-weight: bold; margin-top: 8px;">Utility Generation Parameters</label>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 100px;">
+                                    <label style="font-size: 0.78em; opacity: 0.7;">Temperature</label>
+                                    <input id="wandlight_continuity_temperature" class="text_pole" type="number"
+                                        min="0" max="2" step="0.05" value="0.7"
+                                        title="Temperature for Wandlight utility calls: compression and continuity scans."
+                                        style="width: 100%;">
+                                </div>
+                                <div style="flex: 1; min-width: 100px;">
+                                    <label style="font-size: 0.78em; opacity: 0.7;">Top P</label>
+                                    <input id="wandlight_continuity_top_p" class="text_pole" type="number"
+                                        min="0" max="1" step="0.05" value="0.98"
+                                        title="Top-p sampling value for Wandlight utility calls."
+                                        style="width: 100%;">
+                                </div>
+                                <div style="flex: 1; min-width: 100px;">
+                                    <label style="font-size: 0.78em; opacity: 0.7;">Max Tokens</label>
+                                    <input id="wandlight_continuity_max_tokens" class="text_pole" type="number"
+                                        min="64" max="16384" step="64" value="8192"
+                                        title="Maximum response tokens for Wandlight utility calls."
+                                        style="width: 100%;">
+                                </div>
                             </div>
 
                             <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
@@ -122,38 +145,36 @@
                                     <button id="wandlight_lore_openai_key_clear" class="menu_button interactable" title="Remove the stored reasoning API key."><i class="fa-solid fa-trash"></i> Clear</button>
                                 </div>
                                 <small id="wandlight_lore_openai_key_status" style="opacity: 0.6; margin-top: 2px; display: block;"></small>
-                                <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85em;"><input id="wandlight_lore_openai_json_mode" type="checkbox"> Use JSON mode (advanced; leave off unless your provider supports response_format)</label>
-                                <label style="display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 0.85em;"><input id="wandlight_lore_openai_st_proxy" type="checkbox"> Use SillyTavern proxy when available (advanced; leave off unless your ST proxy is configured)</label>
+                            </div>
+
+                            <label style="font-size: 0.9em; font-weight: bold; margin-top: 8px;">Reasoning Generation Parameters</label>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 100px;">
+                                    <label style="font-size: 0.78em; opacity: 0.7;">Temperature</label>
+                                    <input id="wandlight_lore_temperature" class="text_pole" type="number"
+                                        min="0" max="2" step="0.05" value="0.7"
+                                        title="Temperature for Wandlight reasoning calls: story context and lore generation."
+                                        style="width: 100%;">
+                                </div>
+                                <div style="flex: 1; min-width: 100px;">
+                                    <label style="font-size: 0.78em; opacity: 0.7;">Top P</label>
+                                    <input id="wandlight_lore_top_p" class="text_pole" type="number"
+                                        min="0" max="1" step="0.05" value="0.98"
+                                        title="Top-p sampling value for Wandlight reasoning calls."
+                                        style="width: 100%;">
+                                </div>
+                                <div style="flex: 1; min-width: 100px;">
+                                    <label style="font-size: 0.78em; opacity: 0.7;">Max Tokens</label>
+                                    <input id="wandlight_lore_max_tokens" class="text_pole" type="number"
+                                        min="64" max="16384" step="64" value="8192"
+                                        title="Maximum response tokens for Wandlight reasoning calls."
+                                        style="width: 100%;">
+                                </div>
                             </div>
 
                             <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
                                 <button id="wandlight_lore_test_connection" class="menu_button interactable" title="Sends a tiny JSON test request through the selected Reasoning provider."><i class="fa-solid fa-plug-circle-check"></i> Test Reasoning</button>
                                 <small id="wandlight_lore_connection_status" style="opacity: 0.7;"></small>
-                            </div>
-                        </div>
-
-                        <label style="font-size: 0.9em; font-weight: bold; margin-top: 4px;">Generation Parameters</label>
-                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                            <div style="flex: 1; min-width: 100px;">
-                                <label style="font-size: 0.78em; opacity: 0.7;">Temperature</label>
-                                <input id="wandlight_lore_temperature" class="text_pole" type="number"
-                                    min="0" max="2" step="0.05" value="0.7"
-                                    title="Temperature for Wandlight reasoning calls: story context and lore generation."
-                                    style="width: 100%;">
-                            </div>
-                            <div style="flex: 1; min-width: 100px;">
-                                <label style="font-size: 0.78em; opacity: 0.7;">Top P</label>
-                                <input id="wandlight_lore_top_p" class="text_pole" type="number"
-                                    min="0" max="1" step="0.05" value="0.98"
-                                    title="Top-p sampling value for Wandlight reasoning calls: story context and lore generation."
-                                    style="width: 100%;">
-                            </div>
-                            <div style="flex: 1; min-width: 100px;">
-                                <label style="font-size: 0.78em; opacity: 0.7;">Max Tokens</label>
-                                <input id="wandlight_lore_max_tokens" class="text_pole" type="number"
-                                    min="64" max="16384" step="64" value="8192"
-                                    title="Maximum response tokens for Wandlight lore context and lore-generation calls."
-                                    style="width: 100%;">
                             </div>
                         </div>
 

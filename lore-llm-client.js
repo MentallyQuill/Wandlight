@@ -39,11 +39,9 @@ function getProviderSettings(kind = 'lore') {
         openAIBaseUrl: settings[`${prefix}OpenAIBaseUrl`] || '',
         openAIModel: settings[`${prefix}OpenAIModel`] || '',
         openAIKeySet: !!settings[`${prefix}OpenAIKeySet`],
-        openAIUseJsonMode: settings[`${prefix}OpenAIUseJsonMode`] === true,
-        openAIUseSTProxy: !!settings[`${prefix}OpenAIUseSTProxy`],
         temperature: Number(settings[`${prefix}Temperature`] ?? 0.7),
         topP: Number(settings[`${prefix}TopP`] ?? 0.98),
-        maxTokens: Number(settings[`${prefix}MaxTokens`] || (k === 'continuity' ? 4096 : 8192)),
+        maxTokens: Number(settings[`${prefix}MaxTokens`] || 8192),
         secretName: `${prefix}OpenAI`,
     };
 }
@@ -277,8 +275,8 @@ export function validateLoreProviderConfiguration(kind = 'lore') {
             if (!String(cfg.openAIModel || '').trim()) {
                 return { ok: false, provider: cfg.provider, kind: cfg.kind, message: `${cfg.title} OpenAI-compatible model is missing. Type or select a model ID.` };
             }
-            if (!cfg.openAIUseSTProxy && !getCachedApiKey(cfg) && !cfg.openAIKeySet) {
-                return { ok: false, provider: cfg.provider, kind: cfg.kind, message: `${cfg.title} OpenAI-compatible API key is missing. Store an API key or enable an ST proxy.` };
+            if (!getCachedApiKey(cfg) && !cfg.openAIKeySet) {
+                return { ok: false, provider: cfg.provider, kind: cfg.kind, message: `${cfg.title} OpenAI-compatible API key is missing. Store an API key first.` };
             }
             return { ok: true, provider: cfg.provider, kind: cfg.kind };
         }
@@ -324,7 +322,6 @@ export async function testLoreConnection(kind = 'lore') {
 }
 
 async function buildOpenAIHeaders(cfg) {
-    if (cfg.openAIUseSTProxy) return { 'Content-Type': 'application/json' };
     const headers = { 'Content-Type': 'application/json' };
     const apiKey = await getApiKey(cfg);
     if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
@@ -332,13 +329,6 @@ async function buildOpenAIHeaders(cfg) {
 }
 
 function buildOpenAIEndpoint(cfg) {
-    if (cfg.openAIUseSTProxy) {
-        try {
-            const ctx = getSillyTavernContext();
-            const proxyUrl = ctx?.openaiProxyUrl;
-            if (proxyUrl) return normalizeOpenAIChatEndpoint(proxyUrl);
-        } catch (_) {}
-    }
     return normalizeOpenAIChatEndpoint(cfg.openAIBaseUrl);
 }
 
@@ -354,11 +344,9 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
         ],
         temperature: Number(cfg.temperature ?? 0.7),
         top_p: Number(cfg.topP ?? 0.98),
-        max_tokens: Number(options.maxTokens || cfg.maxTokens || (cfg.kind === 'continuity' ? 4096 : 8192)),
+        max_tokens: Number(options.maxTokens || cfg.maxTokens || 8192),
         stream: false,
     };
-
-    if (cfg.openAIUseJsonMode) requestBody.response_format = { type: 'json_object' };
 
     async function post(body) {
         if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
@@ -376,11 +364,6 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
     }
 
     let attempt = await post(requestBody);
-
-    if (!attempt.response.ok && requestBody.response_format && /response_format|json_object/i.test(attempt.text)) {
-        delete requestBody.response_format;
-        attempt = await post(requestBody);
-    }
 
     if (!attempt.response.ok && /max_tokens/i.test(attempt.text)) {
         requestBody.max_completion_tokens = requestBody.max_tokens;
@@ -417,18 +400,14 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
                 // the request is retried again without this field below.
                 reasoning_effort: 'low',
             };
-            const originalMax = Number(requestBody.max_tokens || requestBody.max_completion_tokens || options.maxTokens || cfg.maxTokens || (cfg.kind === 'continuity' ? 4096 : 8192));
-            const expandedMax = Math.max(originalMax * 2, cfg.kind === 'continuity' ? 4096 : 8192);
+            const originalMax = Number(requestBody.max_tokens || requestBody.max_completion_tokens || options.maxTokens || cfg.maxTokens || 8192);
+            const expandedMax = Math.max(originalMax * 2, 8192);
             if (requestBody.max_completion_tokens !== undefined) retryBody.max_completion_tokens = Math.min(8192, expandedMax);
             else retryBody.max_tokens = Math.min(8192, expandedMax);
 
             let retry = await post(retryBody);
             if (!retry.response.ok && /reasoning_effort/i.test(retry.text)) {
                 delete retryBody.reasoning_effort;
-                retry = await post(retryBody);
-            }
-            if (!retry.response.ok && retryBody.response_format && /response_format|json_object/i.test(retry.text)) {
-                delete retryBody.response_format;
                 retry = await post(retryBody);
             }
             if (retry.response.ok) {
@@ -457,7 +436,7 @@ async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}
             systemPrompt: sp,
             prompt: up,
             prefill: options.prefill || '',
-            responseLength: Math.max(128, Math.min(8192, Math.ceil(Number(responseLength || (cfg.kind === 'continuity' ? 4096 : 8192)) * lengthMultiplier))),
+            responseLength: Math.max(128, Math.min(8192, Math.ceil(Number(responseLength || 8192) * lengthMultiplier))),
             bypassAll: true,
         });
         const content = typeof result === 'string' ? result : extractChatCompletionText(result);
@@ -511,7 +490,7 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
         return await service.sendRequest(
             cfg.profileId,
             messages,
-            Math.max(128, Math.min(8192, Math.ceil(Number(options.maxTokens || cfg.maxTokens || (cfg.kind === 'continuity' ? 4096 : 8192)) * lengthMultiplier))),
+            Math.max(128, Math.min(8192, Math.ceil(Number(options.maxTokens || cfg.maxTokens || 8192) * lengthMultiplier))),
             {
                 stream: false,
                 extractData: true,
@@ -562,14 +541,6 @@ async function fetchOpenAICompatibleModels(cfg) {
     const baseUrl = normalizeOpenAIBaseUrl(cfg.openAIBaseUrl);
     let modelsUrl = `${baseUrl}/models`;
     const headers = await buildOpenAIHeaders(cfg);
-
-    if (cfg.openAIUseSTProxy) {
-        try {
-            const ctx = getSillyTavernContext();
-            const proxyUrl = ctx?.openaiProxyUrl;
-            if (proxyUrl) modelsUrl = `${normalizeOpenAIBaseUrl(proxyUrl)}/models`;
-        } catch (_) {}
-    }
 
     const response = await fetch(modelsUrl, { method: 'GET', headers, credentials: 'omit' });
     if (!response.ok) {

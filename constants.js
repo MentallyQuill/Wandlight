@@ -298,11 +298,13 @@ Direct injection block:
     continuityOpenAIKeySalt: '',
     continuityOpenAIKeyIv: '',
     continuityOpenAIKeySet: false,
+    // Deprecated compatibility flags. Wandlight now uses plain direct
+    // OpenAI-compatible calls for this provider path.
     continuityOpenAIUseJsonMode: false,
     continuityOpenAIUseSTProxy: false,
     continuityTemperature: 0.7,
     continuityTopP: 0.98,
-    continuityMaxTokens: 4096,
+    continuityMaxTokens: 8192,
 
     // Reasoning provider: used by Detect Story Context / Generate Pending Lore. Internal key retained for backward compatibility.
     loreProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
@@ -316,10 +318,12 @@ Direct injection block:
     loreOpenAIKeySalt: '',
     loreOpenAIKeyIv: '',
     loreOpenAIKeySet: false,
+    // Deprecated compatibility flags. Wandlight now relies on JSON-focused
+    // prompts and repair rather than forcing provider-specific JSON mode.
     loreOpenAIUseJsonMode: false,
     loreOpenAIUseSTProxy: false,
 
-    // Lore generation parameters (separate from main RP model settings)
+    // Reasoning generation parameters (separate from main RP model settings)
     loreTemperature: 0.7,
     loreTopP: 0.98,
     loreMaxTokens: 8192,

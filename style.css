@@ -3584,7 +3584,7 @@
     width: 38px;
     height: 36px;
     padding: 1px;
-    border-radius: 8px;
+    border-radius: 6px;
     background:
         radial-gradient(circle at 50% 44%, rgba(215, 181, 109, 0.16), transparent 56%),
         linear-gradient(180deg, rgba(0, 0, 0, 0.22), rgba(18, 12, 18, 0.42));

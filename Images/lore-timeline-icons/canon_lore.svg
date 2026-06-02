@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Canon lore">
+  <path fill="#d8a84f" d="M10 15c7 0 13 2 18 6v36c-5-4-11-6-18-6a4 4 0 0 1-4-4V19a4 4 0 0 1 4-4Zm18 8c-4-4-9-6-16-6v28c6 0 11 2 16 5V23Zm26-8a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4c-7 0-13 2-18 6V21c5-4 11-6 18-6Zm-2 2c-7 0-12 2-16 6v27c5-3 10-5 16-5V17Z"/>
+  <path fill="#fff2c8" fill-opacity=".42" d="M31 20h2v39h-2z"/>
+</svg>

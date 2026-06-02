@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Relationship change">
+  <path fill="#d8a84f" d="M23 18a14 14 0 1 0 0 28h9v-8h-9a6 6 0 1 1 0-12h9v-8h-9Zm9 10H22v8h10v-8Zm9-10h-9v8h9a6 6 0 1 1 0 12h-9v8h9a14 14 0 1 0 0-28Zm-9 10v8h10v-8H32Z"/>
+  <path fill="#fff2c8" fill-opacity=".35" d="M28 30h8v4h-8z"/>
+</svg>

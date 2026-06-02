@@ -198,15 +198,15 @@ const LORE_TIMELINE_NODE_FILTERS = [
 ];
 
 const LORE_TIMELINE_NODE_ICON_PATHS = {
-    canon_lore: '',
-    story_lore: '',
-    canon_divergence: '',
-    character_knowledge: '',
-    location_lore: '',
-    relationship_change: '',
-    timeline_event: '',
-    object_lore: '',
-    resolved_continuity: '',
+    canon_lore: './Images/lore-timeline-icons/canon_lore.svg',
+    story_lore: './Images/lore-timeline-icons/story_lore.svg',
+    canon_divergence: './Images/lore-timeline-icons/canon_divergence.svg',
+    character_knowledge: './Images/lore-timeline-icons/character_knowledge.svg',
+    location_lore: './Images/lore-timeline-icons/location_lore.svg',
+    relationship_change: './Images/lore-timeline-icons/relationship_change.svg',
+    timeline_event: './Images/lore-timeline-icons/timeline_event.svg',
+    object_lore: './Images/lore-timeline-icons/object_lore.svg',
+    resolved_continuity: './Images/lore-timeline-icons/resolved_continuity.svg',
 };
 
 const LORE_TIMELINE_SENDER_PALETTE = [

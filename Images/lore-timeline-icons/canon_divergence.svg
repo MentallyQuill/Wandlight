@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Canon divergence">
+  <path fill="#d8a84f" d="M29 6h6v18c0 5 2 8 6 11l8 6v-7l11 12-11 12v-8L37 42c-6-4-8-9-8-18V6Z"/>
+  <path fill="#d8a84f" d="M29 24c0 9-2 14-8 18L9 50v8L4 52l-6-6 11-12v7l8-6c4-3 6-6 6-11h6Z"/>
+  <path fill="#101218" d="M32 26c0 8 3 14 9 18l6 4v-4l5 5-5 5v-4l-8-5c-7-5-10-11-10-19h3Zm-3 0c0 8-3 14-10 19l-8 5v4l-5-5 5-5v4l6-4c6-4 9-10 9-18h3Z"/>
+</svg>

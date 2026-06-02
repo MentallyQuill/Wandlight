@@ -4059,6 +4059,27 @@
     margin-bottom: 4px;
 }
 
+.wandlight-continuity-emotion-freshness .wandlight-setting-row {
+    margin: 3px 0;
+    font-size: 0.76em;
+    gap: 6px;
+}
+
+.wandlight-continuity-emotion-freshness .wandlight-setting-row span {
+    min-width: 126px;
+}
+
+.wandlight-continuity-emotion-freshness select,
+.wandlight-continuity-emotion-freshness .text_pole {
+    width: auto;
+    min-width: 150px;
+    max-width: 220px;
+    min-height: 22px;
+    padding: 2px 22px 2px 6px;
+    font-size: 0.76em;
+    line-height: 1.15;
+}
+
 .wandlight-lore-scan-results-summary {
     margin-bottom: 5px;
     color: #d7b56d;

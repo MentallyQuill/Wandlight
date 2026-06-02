@@ -571,6 +571,7 @@ function renderDrawer(state, direction = 'right') {
     addTooltip(resizeHandle, 'Drag to resize the active drawer. The size is remembered across tabs.');
     drawer.appendChild(resizeHandle);
 
+    updateDrawerScrollMetrics(drawer);
     return drawer;
 }
 
@@ -625,7 +626,35 @@ function renderPanelBody(container, state) {
         renderInjectionTab(tabBody, state);
     }
 
+    installNestedScrollHandoff(tabBody);
     if (activeTab === 'lore') scheduleAcceptedLoreLayoutUpdate();
+}
+
+function installNestedScrollHandoff(tabBody) {
+    if (!tabBody) return;
+    const nestedScrolls = tabBody.querySelectorAll([
+        '.wandlight-accepted-lore-scroll-region',
+        '.wandlight-pending-lore-list',
+        '.wandlight-injection-preview',
+        '.wandlight-continuity-json-editor',
+        'textarea'
+    ].join(','));
+
+    for (const nested of nestedScrolls) {
+        nested.addEventListener('wheel', (e) => {
+            const outer = nested.closest('.wandlight-runtime-tab-body');
+            if (!outer || outer === nested || !e.deltaY) return;
+
+            const canScrollDown = nested.scrollTop + nested.clientHeight < nested.scrollHeight - 1;
+            const canScrollUp = nested.scrollTop > 0;
+            const shouldHandoff = (e.deltaY > 0 && !canScrollDown) || (e.deltaY < 0 && !canScrollUp);
+            if (!shouldHandoff) return;
+
+            outer.scrollTop += e.deltaY;
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+    }
 }
 
 function getRailMetrics(state, settings = getSettings()) {
@@ -749,6 +778,7 @@ function clampRuntimeShellToViewport() {
     panelRoot.style.setProperty('--wandlight-rail-width', `${railWidth}px`);
     panelRoot.style.setProperty('--wandlight-drawer-width', `${getConstrainedDrawerWidth(panelState, resolveDrawerDirection(panelState))}px`);
     panelRoot.style.setProperty('--wandlight-drawer-height', `${getConstrainedDrawerHeight(panelState)}px`);
+    updateDrawerScrollMetrics();
     saveState(state);
 }
 
@@ -5193,43 +5223,42 @@ function updateAcceptedLoreScrollRegionHeight() {
     if (!panelRoot) return;
     const drawer = panelRoot.querySelector('.wandlight-runtime-drawer');
     if (!drawer) return;
+
+    updateDrawerScrollMetrics(drawer);
+
     const list = drawer.querySelector('.wandlight-accepted-lore-scroll-region');
     if (!list) return;
 
     const acceptedSection = list.closest('.wandlight-accepted-lore-section');
     const acceptedDetails = list.closest('.wandlight-lore-accepted-collapsible');
     const content = acceptedDetails?.querySelector(':scope > .wandlight-collapsible-content');
-    const summary = acceptedDetails?.querySelector(':scope > .wandlight-collapsible-summary');
-    if (!acceptedSection || !acceptedDetails?.open || !content) return;
 
-    const panelRect = drawer.getBoundingClientRect();
-    const bodyRect = drawer.querySelector('.wandlight-lore-panel-body')?.getBoundingClientRect?.() || panelRect;
-    const tabRect = drawer.querySelector('.wandlight-runtime-tab-body-lore')?.getBoundingClientRect?.() || bodyRect;
-    const detailsRect = acceptedDetails.getBoundingClientRect();
-    const bottomBoundary = Math.min(panelRect.bottom, bodyRect.bottom, tabRect.bottom) - 8;
+    // Earlier layout code made the accepted-lore section stretch to the bottom of
+    // the drawer. That works for a fixed Lore tab, but it clips later sections
+    // when every Lore section is expanded. The drawer tab is now the outer
+    // scroller; accepted lore remains a bounded nested scroller. Clear any stale
+    // inline sizing before applying the bounded-scroll CSS variables.
+    for (const el of [acceptedDetails, content, acceptedSection, list]) {
+        if (!el) continue;
+        el.style.removeProperty('height');
+        el.style.removeProperty('flex');
+        el.style.removeProperty('max-height');
+    }
 
-    const detailsHeight = Math.max(160, Math.floor(bottomBoundary - detailsRect.top));
-    const summaryHeight = Math.ceil(summary?.getBoundingClientRect?.().height || 30);
-    const contentHeight = Math.max(120, detailsHeight - summaryHeight);
+    list.style.setProperty('overflow-y', 'auto');
+    list.style.setProperty('overscroll-behavior', 'contain');
+}
 
-    acceptedDetails.style.setProperty('height', `${detailsHeight}px`, 'important');
-    acceptedDetails.style.setProperty('flex', `0 0 ${detailsHeight}px`, 'important');
-    acceptedDetails.style.setProperty('max-height', 'none', 'important');
-    content.style.setProperty('height', `${contentHeight}px`, 'important');
-    content.style.setProperty('flex', `0 0 ${contentHeight}px`, 'important');
-    content.style.setProperty('max-height', 'none', 'important');
-    acceptedSection.style.setProperty('height', `${Math.max(100, contentHeight)}px`, 'important');
-    acceptedSection.style.setProperty('flex', `1 1 ${Math.max(100, contentHeight)}px`, 'important');
-    acceptedSection.style.setProperty('max-height', 'none', 'important');
-
-    const refreshedListRect = list.getBoundingClientRect();
-    const availableHeight = Math.floor(bottomBoundary - refreshedListRect.top);
-    const safeHeight = Math.max(120, availableHeight);
-
-    list.style.setProperty('height', `${safeHeight}px`, 'important');
-    list.style.setProperty('flex', `0 0 ${safeHeight}px`, 'important');
-    list.style.setProperty('max-height', 'none', 'important');
-    list.style.setProperty('overflow-y', 'scroll', 'important');
+function updateDrawerScrollMetrics(drawer = panelRoot?.querySelector?.('.wandlight-runtime-drawer')) {
+    if (!drawer) return;
+    const drawerRect = drawer.getBoundingClientRect?.();
+    const headerRect = drawer.querySelector('.wandlight-runtime-drawer-header')?.getBoundingClientRect?.();
+    const drawerHeight = Number(drawerRect?.height) || Number.parseFloat(drawer.style.height) || 640;
+    const headerHeight = Number(headerRect?.height) || 48;
+    const bodyHeight = Math.max(120, Math.floor(drawerHeight - headerHeight - 18));
+    const nestedMax = Math.max(140, Math.min(420, Math.floor(bodyHeight * 0.52)));
+    drawer.style.setProperty('--wandlight-drawer-body-available', `${bodyHeight}px`);
+    drawer.style.setProperty('--wandlight-nested-scroll-max', `${nestedMax}px`);
 }
 
 if (typeof window !== 'undefined') {
@@ -6030,8 +6059,10 @@ function refreshPanelBody(options = {}) {
         return;
     }
 
-    const activeScroll = getActiveScrollElement();
-    const scrollTop = options.preserveScroll && activeScroll ? activeScroll.scrollTop : 0;
+    const activeNestedScroll = getActiveNestedScrollElement();
+    const nestedScrollTop = options.preserveScroll && activeNestedScroll ? activeNestedScroll.scrollTop : 0;
+    const tabScroll = getActiveTabScrollElement();
+    const tabScrollTop = options.preserveScroll && tabScroll ? tabScroll.scrollTop : 0;
     const drawer = panelRoot.querySelector('.wandlight-runtime-drawer');
     const drawerScrollTop = options.preserveScroll && drawer ? (drawer.scrollTop || 0) : 0;
     const pageScrollElement = typeof document !== 'undefined' ? document.scrollingElement || document.documentElement : null;
@@ -6047,10 +6078,13 @@ function refreshPanelBody(options = {}) {
     refreshHeader();
 
     if (options.preserveScroll) {
-        const newScroll = getActiveScrollElement();
-        if (newScroll) newScroll.scrollTop = scrollTop;
+        const newTabScroll = getActiveTabScrollElement();
+        if (newTabScroll) newTabScroll.scrollTop = tabScrollTop;
+        const newNestedScroll = getActiveNestedScrollElement();
+        if (newNestedScroll) newNestedScroll.scrollTop = nestedScrollTop;
         if (drawer) drawer.scrollTop = drawerScrollTop;
     }
+    updateDrawerScrollMetrics(drawer);
 
     if ((options.preserveScroll || options.preserveWindowScroll) && pageScrollElement && pageScrollTop !== null) {
         const restorePageScroll = () => {
@@ -6062,10 +6096,17 @@ function refreshPanelBody(options = {}) {
     }
 }
 
-function getActiveScrollElement() {
+function getActiveTabScrollElement() {
     if (!panelRoot) return null;
-    return panelRoot.querySelector('.wandlight-lore-entry-list')
-        || panelRoot.querySelector('.wandlight-runtime-tab-body');
+    return panelRoot.querySelector('.wandlight-runtime-tab-body');
+}
+
+function getActiveNestedScrollElement() {
+    if (!panelRoot) return null;
+    return panelRoot.querySelector('.wandlight-accepted-lore-scroll-region')
+        || panelRoot.querySelector('.wandlight-pending-lore-list')
+        || panelRoot.querySelector('.wandlight-injection-preview')
+        || panelRoot.querySelector('.wandlight-continuity-json-editor');
 }
 
 // Drag and resize -------------------------------------------------------------
@@ -6158,6 +6199,7 @@ function onResizeMove(e) {
     drawer.style.height = `${height}px`;
     panelRoot.style.setProperty('--wandlight-drawer-width', `${width}px`);
     panelRoot.style.setProperty('--wandlight-drawer-height', `${height}px`);
+    updateDrawerScrollMetrics(drawer);
     updateAcceptedLoreScrollRegionHeight();
 }
 

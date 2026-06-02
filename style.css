@@ -3670,3 +3670,109 @@
 .wandlight-runtime-drawer .wandlight-lore-panel-body {
     background: transparent !important;
 }
+
+/* Runtime drawer scroll containment -------------------------------------------------
+   Phase 6: each tab gets a reliable outer scroller based on the resized drawer
+   height. Long tabs no longer clip at the drawer bottom. Existing internal
+   scroll regions, such as Accepted Lore Entries and Pending Lore Review, remain
+   bounded nested scroll containers instead of stretching the whole Lore tab. */
+.wandlight-runtime-drawer {
+    overflow: hidden !important;
+}
+
+.wandlight-runtime-drawer .wandlight-lore-panel-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+}
+
+.wandlight-runtime-drawer .wandlight-runtime-tab-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-gutter: stable !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(215, 181, 109, 0.62) rgba(10, 12, 16, 0.38) !important;
+    padding-right: 8px !important;
+    box-sizing: border-box !important;
+}
+
+.wandlight-runtime-drawer .wandlight-runtime-tab-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.wandlight-runtime-drawer .wandlight-runtime-tab-body::-webkit-scrollbar-track {
+    background: rgba(10, 12, 16, 0.38);
+    border-radius: 999px;
+}
+
+.wandlight-runtime-drawer .wandlight-runtime-tab-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(215, 181, 109, 0.74), rgba(92, 23, 36, 0.58));
+    border-radius: 999px;
+    border: 2px solid rgba(10, 12, 16, 0.42);
+}
+
+.wandlight-runtime-drawer .wandlight-runtime-tab-body-lore {
+    display: block !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+.wandlight-runtime-drawer .wandlight-runtime-tab-body > .wandlight-runtime-card,
+.wandlight-runtime-drawer .wandlight-runtime-tab-body > .wandlight-collapsible-card,
+.wandlight-runtime-drawer .wandlight-runtime-tab-body > .wandlight-section-header {
+    flex: 0 0 auto !important;
+}
+
+.wandlight-runtime-drawer .wandlight-lore-accepted-collapsible[open],
+.wandlight-runtime-drawer .wandlight-lore-accepted-collapsible[open] > .wandlight-collapsible-content,
+.wandlight-runtime-drawer .wandlight-accepted-lore-section {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+}
+
+.wandlight-runtime-drawer .wandlight-lore-accepted-collapsible[open] > .wandlight-collapsible-content,
+.wandlight-runtime-drawer .wandlight-accepted-lore-section {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.wandlight-runtime-drawer .wandlight-accepted-lore-section .wandlight-lore-controls,
+.wandlight-runtime-drawer .wandlight-accepted-lore-section .wandlight-lore-bulk-toolbar,
+.wandlight-runtime-drawer .wandlight-accepted-lore-section .wandlight-lore-list-summary,
+.wandlight-runtime-drawer .wandlight-accepted-lore-section .wandlight-lore-show-more {
+    flex: 0 0 auto !important;
+}
+
+.wandlight-runtime-drawer .wandlight-accepted-lore-scroll-region {
+    height: auto !important;
+    min-height: 150px !important;
+    max-height: var(--wandlight-nested-scroll-max, min(420px, 46vh)) !important;
+    flex: 0 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+    scrollbar-gutter: stable both-edges !important;
+}
+
+.wandlight-runtime-drawer .wandlight-pending-lore-list,
+.wandlight-runtime-drawer .wandlight-injection-preview,
+.wandlight-runtime-drawer .wandlight-continuity-json-editor {
+    max-height: var(--wandlight-nested-scroll-max, min(420px, 46vh)) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+}

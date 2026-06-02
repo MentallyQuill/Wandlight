@@ -12,6 +12,7 @@ import { getSettings, getState, saveState } from './state-manager.js';
 import { normalizeLoreMatrix } from './lore-matrix.js';
 import { computeLocalLoreRelevance, normalizeLoreRelevance, relevanceWeight } from './lore-relevance.js';
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
+import { captureLoreTimelineState, recordLoreTimelineEvent } from './lore-timeline.js';
 
 let turnCounter = 0;
 
@@ -239,6 +240,7 @@ export function applyAutoRelevanceSuggestions(ids = null) {
     const apply = suggestions.filter(s => !idSet || idSet.has(s.id));
     if (!apply.length) return { status: 'no_suggestions', applied: 0 };
     const byId = new Map(apply.map(s => [s.id, s]));
+    const beforeTimeline = captureLoreTimelineState(state);
     let applied = 0;
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []).map(entry => {
         const suggestion = byId.get(entry.id);
@@ -260,6 +262,15 @@ export function applyAutoRelevanceSuggestions(ids = null) {
         };
     });
     state.autoRelevanceSuggestions = suggestions.filter(s => !byId.has(s.id));
+    if (applied > 0) {
+        recordLoreTimelineEvent(state, {
+            before: beforeTimeline,
+            after: captureLoreTimelineState(state),
+            type: 'auto_relevance',
+            source: 'auto_relevance',
+            summary: `Applied ${applied} Auto-Relevance suggestion${applied === 1 ? '' : 's'}.`,
+        });
+    }
     saveState(state, { syncPrompt: true });
     return { status: 'applied', applied };
 }
@@ -343,6 +354,7 @@ export async function runAutoRelevance(options = {}) {
 
     let changed = 0;
     const byId = new Map(actionable.map(item => [item.entry.id, item]));
+    const beforeTimeline = captureLoreTimelineState(state);
     state.loreMatrix = entries.map(entry => {
         const item = byId.get(entry.id);
         if (!item) return entry;
@@ -374,6 +386,15 @@ export async function runAutoRelevance(options = {}) {
         recentMessageChars: recentText.length,
         ranAt: Date.now(),
     };
+    if (changed > 0) {
+        recordLoreTimelineEvent(state, {
+            before: beforeTimeline,
+            after: captureLoreTimelineState(state),
+            type: 'auto_relevance',
+            source: 'auto_relevance',
+            summary: `Auto-Relevance applied ${changed} high-confidence change${changed === 1 ? '' : 's'}.`,
+        });
+    }
     if (changed || options.force) saveState(state, { syncPrompt: changed > 0 });
     return { status: changed ? 'changed' : 'unchanged', changed, suggested: 0, promotions: promotionCount, demotions: demotionCount, considered: candidates.length, modelStatus: adjudicated.status };
 }

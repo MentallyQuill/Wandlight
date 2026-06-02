@@ -20,7 +20,8 @@ import {
     rejectPendingLoreEntries,
     acceptPendingLoreEntry,
     rejectPendingLoreEntry,
-    undoLastChange,
+    appendPendingLoreEntries,
+    restoreLoreTimelineEntriesToPending,
     setLoreContext,
 } from './state-manager.js';
 import { buildContinuityPreview, buildLorePreview, getCompressionSourceSignature } from './memo-builder.js';
@@ -29,9 +30,17 @@ import { runLoreContextDetection, runBulkLoreGeneration } from './lore-generator
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
 import { proposeCanonLoreForContext, previewCanonLoreForContext, addCanonLorePreviewEntriesToPending, getLoreTaxonomySync } from './canon-lore-db.js';
 import { runAutoRelevance, applyAutoRelevanceSuggestions, clearAutoRelevanceSuggestions, rejectAutoRelevanceSuggestions } from './auto-relevance.js';
+import {
+    captureLoreTimelineState,
+    recordLoreTimelineEvent,
+    getLoreTimelineEvents,
+    getLoreTimelineSummary,
+    getRecoverableTimelineEntries,
+} from './lore-timeline.js';
 
 const PANEL_ID = 'wandlight-lore-panel';
 const LORE_WORKBENCH_ID = 'wandlight-lore-workbench';
+const LORE_TIMELINE_ID = 'wandlight-lore-timeline';
 const MIN_PANEL_WIDTH = 420;
 const MIN_PANEL_HEIGHT = 360;
 const MIN_DRAWER_WIDTH = 360;
@@ -123,7 +132,7 @@ function getBrandLogoSrc(railMode) {
 }
 
 const TAB_TOOLTIPS = {
-    session: 'Runtime overview, instructions, undo history, and destructive cleanup actions.',
+    session: 'Runtime overview, preset status, instructions, and destructive cleanup actions.',
     continuity: 'Scan, automatically track, view, and edit lightweight live continuity state: scene/timeline, active characters, key items, and active goals/threads.',
     context: 'Detect, automatically update, view, and edit story context: scene date, canon reference point, branch, and source range.',
     lore: 'Generate pending lore, review generated entries, and manage accepted lore with search, filters, tags, pinning, and muting.',
@@ -182,6 +191,8 @@ let loreWorkbenchMode = 'accepted';
 let loreWorkbenchSelectedId = '';
 let loreWorkbenchPendingQuery = '';
 let loreWorkbenchFocusSelector = '';
+let loreTimelineOpen = false;
+let loreTimelineSelectedId = '';
 let canonPreviewUiState = {
     contextKey: '',
     preview: null,
@@ -970,7 +981,6 @@ function renderSessionTab(container, state) {
     stats.appendChild(createKeyValue('Total chars injected', `${injectionStats.totalChars} chars`, 'Combined character count of Continuity Injection plus Lore Injection using current Injection tab toggles and handling modes.'));
     container.appendChild(stats);
 
-    container.appendChild(createCollapsibleSection('session.stateHistory', 'State History', getCountLabel(state?.stateHistory || [], 'undo point'), false, createStateHistoryCard(state), { tooltip: 'Undo history for Wandlight state.' }));
     container.appendChild(createCollapsibleSection('session.dangerZone', 'Danger Zone', 'Destructive cleanup actions', false, createDangerZoneCard(state), { tooltip: 'Destructive cleanup actions for this chat.', className: 'wandlight-danger-zone-collapsible' }));
 }
 
@@ -1347,74 +1357,6 @@ function cloneJson(value) {
     return JSON.parse(JSON.stringify(value));
 }
 
-function createStateHistoryCard(state) {
-    const card = document.createElement('div');
-    card.className = 'wandlight-runtime-card';
-
-    const title = document.createElement('div');
-    title.className = 'wandlight-runtime-card-title';
-    title.textContent = 'State History';
-    addTooltip(title, 'Previously called snapshots. This is the undo history for Wandlight continuity state, not a branching timeline.');
-    card.appendChild(title);
-
-    const historyCount = Array.isArray(state?.stateHistory) ? state.stateHistory.length : 0;
-    const latest = historyCount ? state.stateHistory[historyCount - 1] : null;
-    card.appendChild(createKeyValue('Undo points', String(historyCount), 'Number of saved state-history points currently available.'));
-    card.appendChild(createKeyValue('Latest undo point', latest ? (latest.summary || 'Unnamed change') : 'none', 'Most recent state-history entry.'));
-
-    const settings = getSettings();
-    const limitRow = document.createElement('label');
-    limitRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
-    const limitText = document.createElement('span');
-    limitText.textContent = `History limit: ${settings.maxSnapshots || 20}`;
-    addTooltip(limitText, 'Maximum number of undo points Wandlight keeps for this chat. Higher values use more chat metadata storage.');
-    const limitInput = document.createElement('input');
-    limitInput.type = 'range';
-    limitInput.min = '5';
-    limitInput.max = '100';
-    limitInput.step = '1';
-    limitInput.value = String(settings.maxSnapshots || 20);
-    limitInput.addEventListener('input', () => {
-        const next = getSettings();
-        next.maxSnapshots = Math.max(5, Math.min(100, parseInt(limitInput.value, 10) || 20));
-        saveSettings(next);
-        limitText.textContent = `History limit: ${next.maxSnapshots}`;
-    });
-    limitRow.appendChild(limitText);
-    limitRow.appendChild(limitInput);
-    card.appendChild(limitRow);
-
-    const actions = document.createElement('div');
-    actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Undo Last Change', 'Restores the most recent state-history point. This is a destructive one-step undo, not forward/back timeline travel.', async () => {
-        const proceed = await confirmAction('Undo last Wandlight change?', 'This restores the most recent state-history point and removes that undo point from history. Continue?');
-        if (!proceed) return;
-        const result = undoLastChange(getState());
-        saveState(result.state);
-        resetAllFeatureProgressNow();
-        refreshPanelBody({ preserveScroll: false });
-        refreshHeader();
-        toast(result.undone ? 'Last Wandlight change undone.' : 'No state-history point is available.', result.undone ? 'success' : 'warning');
-    }));
-    actions.appendChild(createButton('Clear History', 'Deletes the undo history only. Current lore and continuity state are not changed.', async () => {
-        const proceed = await confirmAction('Clear Wandlight state history?', 'This deletes undo history but does not delete current lore or continuity state. Continue?');
-        if (!proceed) return;
-        const current = getState();
-        current.stateHistory = [];
-        saveState(current);
-        refreshPanelBody({ preserveScroll: false });
-        toast('State history cleared.', 'info');
-    }));
-    card.appendChild(actions);
-
-    const help = document.createElement('div');
-    help.className = 'wandlight-runtime-help';
-    help.textContent = 'True back/forward timeline navigation would require a new non-destructive history cursor. This panel exposes the current implemented undo system accurately.';
-    card.appendChild(help);
-
-    return card;
-}
-
 function createDangerZoneCard(state) {
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-danger-zone-card';
@@ -1422,7 +1364,7 @@ function createDangerZoneCard(state) {
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title wandlight-danger-zone-title';
     title.textContent = 'Danger Zone';
-    addTooltip(title, 'Destructive cleanup actions for the current chat. Delete All Lore and Reset Generation are undoable through State History. Total Reset clears State History and is not undoable.');
+    addTooltip(title, 'Destructive cleanup actions for the current chat. Deleted accepted lore can be recovered through Lore Timeline when payloads are retained. Total Reset clears all Wandlight data.');
     card.appendChild(title);
 
     card.appendChild(createKeyValue('Accepted lore', String((state?.loreMatrix || []).length), 'Lore entries currently stored in the accepted lore matrix.'));
@@ -1433,10 +1375,11 @@ function createDangerZoneCard(state) {
     actions.className = 'wandlight-primary-actions';
 
     actions.appendChild(createButton('Delete All Lore', 'Deletes accepted lore, pending lore, and pin/mute selections. Lightweight continuity state is left intact.', async () => {
-        const proceed = await confirmAction('Are you sure? Delete all Wandlight lore?', 'You are about to delete every accepted lore entry, every pending lore entry, and all pin/mute selections for this chat. Lightweight continuity state will remain. A state-history snapshot will be saved first. This cannot be reversed except by Undo Last Change. Continue?');
+        const proceed = await confirmAction('Are you sure? Delete all Wandlight lore?', 'You are about to delete every accepted lore entry, every pending lore entry, and all pin/mute selections for this chat. Lightweight continuity state will remain. Accepted lore can be restored to Pending Review through Lore Timeline when retained. Continue?');
         if (!proceed) return;
         const current = getState();
-        pushStateSnapshot(current, 'Delete all lore', getSettings().maxSnapshots);
+        const beforeTimeline = captureLoreTimelineState(current);
+        const deleted = normalizeLoreMatrix(current.loreMatrix || []).length;
         current.loreMatrix = [];
         current.pendingLoreEntries = [];
         current.pendingLoreMeta = null;
@@ -1445,6 +1388,15 @@ function createDangerZoneCard(state) {
             current.lorePanel.selectedEntryId = '';
             current.lorePanel.reviewSelectedIds = [];
         }
+        if (deleted > 0) {
+            recordLoreTimelineEvent(current, {
+                before: beforeTimeline,
+                after: captureLoreTimelineState(current),
+                type: 'delete_all',
+                source: 'danger_zone',
+                summary: `Deleted all accepted lore (${deleted} entr${deleted === 1 ? 'y' : 'ies'}).`,
+            });
+        }
         saveState(current);
         refreshPanelBody({ preserveScroll: false });
         refreshHeader();
@@ -1452,11 +1404,10 @@ function createDangerZoneCard(state) {
     }, 'wandlight-danger-button'));
 
     actions.appendChild(createButton('Reset Generation State', 'Clears detected lore context, pending generated lore, pending deltas, and generation ledger. Accepted lore remains intact.', async () => {
-        const proceed = await confirmAction('Are you sure? Reset generation state?', 'You are about to clear detected context, pending generated lore, pending continuity changes, and the lore-generation ledger. Accepted lore entries will remain. A state-history snapshot will be saved first. Continue?');
+        const proceed = await confirmAction('Are you sure? Reset generation state?', 'You are about to clear detected context, pending generated lore, pending continuity changes, and the lore-generation ledger. Accepted lore entries and Lore Timeline will remain. Continue?');
         if (!proceed) return;
         const current = getState();
         const defaults = getDefaultState();
-        pushStateSnapshot(current, 'Reset generation state', getSettings().maxSnapshots);
         current.loreContext = defaults.loreContext;
         current.pendingLoreEntries = [];
         current.pendingLoreMeta = null;
@@ -1471,8 +1422,8 @@ function createDangerZoneCard(state) {
         toast('Generation state reset.', 'info');
     }, 'wandlight-danger-button'));
 
-    actions.appendChild(createButton('Total Reset', 'Resets Wandlight continuity state for this chat to defaults and clears State History. Panel size and position are preserved.', async () => {
-        const proceed = await confirmAction('Are you sure? Total reset?', 'You are about to reset all Wandlight data for this chat: lightweight continuity state, accepted lore, pending lore, generation state, and State History. Window position and size are preserved. Because State History will also be cleared, this action cannot be undone. Continue?');
+    actions.appendChild(createButton('Total Reset', 'Resets Wandlight continuity state for this chat to defaults and clears Lore Timeline. Panel size and position are preserved.', async () => {
+        const proceed = await confirmAction('Are you sure? Total reset?', 'You are about to reset all Wandlight data for this chat: lightweight continuity state, accepted lore, pending lore, generation state, and Lore Timeline. Window position and size are preserved. Because recovery data will also be cleared, this action cannot be undone. Continue?');
         if (!proceed) return;
         const current = getState();
         const defaults = getDefaultState();
@@ -1492,7 +1443,7 @@ function createDangerZoneCard(state) {
         saveState(defaults);
         refreshPanelBody({ preserveScroll: false });
         refreshHeader();
-        toast('Wandlight state reset. State History cleared.', 'info');
+        toast('Wandlight state reset. Lore Timeline cleared.', 'info');
     }, 'wandlight-danger-button'));
 
     card.appendChild(actions);
@@ -2385,8 +2336,6 @@ async function handleDetectStoryContext(btn, options = {}) {
 
 async function performStoryContextDetection(options = {}) {
     setFeatureProgress('context', 'Reading chat and detecting story context...', 8);
-    const current = getState();
-    pushStateSnapshot(current, 'Detect lore context', getSettings().maxSnapshots);
     const detected = await runLoreContextDetection({ progress: (message, percent) => setFeatureProgress('context', message, percent) });
     const after = getState();
     if (options.stayOnTab) setPanelState({ activeTab: options.stayOnTab }, { deferSave: true });
@@ -3300,7 +3249,7 @@ function createContinuityScanCard(state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Scan Continuity State', 'Scans the selected message range with the adaptive continuity scanner, then applies or stores one ordered continuity state update. Use State History to undo the scan if needed.', async (btn) => {
+    actions.appendChild(createButton('Scan Continuity State', 'Scans the selected message range with the adaptive continuity scanner, then applies or stores one ordered continuity state update.', async (btn) => {
         if (!ensureContinuityProviderReadyForAction('Scan Continuity State')) return;
         await runBusyAction(btn, 'Scanning...', async () => {
             setFeatureProgress('continuity', 'Scanning continuity state...', 5);
@@ -5257,7 +5206,6 @@ function createPendingLoreBulkControls(pendingLore, state) {
     }));
     actions.appendChild(createButton('Apply All', 'Accepts every pending lore entry in the current batch.', () => {
         const current = getState();
-        pushStateSnapshot(current, 'Accept pending lore entries', getSettings().maxSnapshots);
         const count = (current.pendingLoreEntries || []).length;
         acceptPendingLoreEntries();
         clearPendingReviewSelection();
@@ -5344,7 +5292,6 @@ function applySelectedPendingLore() {
         return;
     }
     const current = getState();
-    pushStateSnapshot(current, `Accept ${indexes.length} selected lore entries`, getSettings().maxSnapshots);
     for (const idx of indexes) acceptPendingLoreEntry(idx);
     clearPendingReviewSelection();
     refreshPanelBody({ preserveScroll: true });
@@ -5456,8 +5403,6 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     actionsRow.className = 'wandlight-primary-actions wandlight-pending-entry-actions';
     const applyLabel = targetId ? 'Apply Update' : 'Apply';
     actionsRow.appendChild(createButton(applyLabel, targetId ? 'Accepts this generated update and merges it into the targeted accepted lore entry.' : 'Accepts this single lore entry and merges it into the accepted lore matrix.', () => {
-        const current = getState();
-        pushStateSnapshot(current, `Accept lore entry: ${entry.title || index + 1}`, getSettings().maxSnapshots);
         acceptPendingLoreEntry(index);
         togglePendingReviewSelection(getLoreReviewId(entry), false);
         refreshPanelBody({ preserveScroll: true });
@@ -5468,7 +5413,6 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     if (targetId) {
         actionsRow.appendChild(createButton('Apply as New', 'Accepts this generated lore as a separate new entry instead of updating the routed target.', () => {
             const current = getState();
-            pushStateSnapshot(current, `Accept lore as new: ${entry.title || index + 1}`, getSettings().maxSnapshots);
             const pending = normalizeLoreMatrix(current.pendingLoreEntries || []);
             if (pending[index]) {
                 const generationMeta = pending[index].extensions?.wandlightGeneration || {};
@@ -5610,7 +5554,7 @@ function createAcceptedLoreBulkControls(state) {
     addAction('Unpin', 'Removes selected accepted lore entries from pinned lore.', ids => bulkSetAcceptedPinned(ids, false), 'wandlight-small-button', 'Selected entries will no longer be pinned. They may still inject if unmuted and active.');
     addAction('Mute', 'Mutes selected accepted lore entries so they are excluded from injection.', ids => bulkSetAcceptedMuted(ids, true), 'wandlight-small-button', 'Selected entries will be muted and excluded from injection.');
     addAction('Unmute', 'Unmutes selected accepted lore entries.', ids => bulkSetAcceptedMuted(ids, false), 'wandlight-small-button', 'Selected entries will be unmuted and may be injected again.');
-    addAction('Delete', 'Deletes selected accepted lore entries from this chat after confirmation.', ids => bulkDeleteAcceptedLore(ids), 'wandlight-small-button wandlight-danger-button', 'Selected entries will be permanently removed from accepted lore for this chat. This cannot be undone unless you use State History.');
+    addAction('Delete', 'Deletes selected accepted lore entries from this chat after confirmation.', ids => bulkDeleteAcceptedLore(ids), 'wandlight-small-button wandlight-danger-button', 'Deleted accepted lore can be restored to Pending Review from Lore Timeline while the recovery payload is retained.');
     wrap.appendChild(actionRow);
 
     const editRow = document.createElement('div');
@@ -5737,6 +5681,8 @@ function createBulkSelect(label, values, tooltip, onChange, disabled = false, di
 function labelToField(label) {
     if (label === 'Category') return 'category';
     if (label === 'Canon') return 'canonStatus';
+    if (label === 'Relevance') return 'relevance';
+    if (label === 'Priority') return 'priority';
     if (label === 'Truth') return 'truthStatus';
     if (label === 'Reveal') return 'revealPolicy';
     return 'category';
@@ -5745,6 +5691,7 @@ function labelToField(label) {
 function bulkUpdateAcceptedLore(ids, updater) {
     if (!ids?.length || typeof updater !== 'function') return false;
     const state = getState();
+    const beforeTimeline = captureLoreTimelineState(state);
     const idSet = new Set(ids);
     let count = 0;
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []).map(entry => {
@@ -5752,6 +5699,15 @@ function bulkUpdateAcceptedLore(ids, updater) {
         count += 1;
         return normalizeLoreEntry({ ...updater(entry), userEdited: true });
     });
+    if (count) {
+        recordLoreTimelineEvent(state, {
+            before: beforeTimeline,
+            after: captureLoreTimelineState(state),
+            type: 'bulk_edit',
+            source: 'manual',
+            summary: `Bulk edited ${count} accepted lore entr${count === 1 ? 'y' : 'ies'}.`,
+        });
+    }
     saveState(state);
     refreshAcceptedLoreList({ preserveScroll: true });
     refreshAcceptedLoreBulkToolbar();
@@ -5764,6 +5720,7 @@ function bulkUpdateAcceptedLore(ids, updater) {
 function bulkSetAcceptedPinned(ids, pinned) {
     const state = getState();
     if (!state.loreSelection) state.loreSelection = { pinnedIds: [], suppressedIds: [] };
+    const beforeTimeline = captureLoreTimelineState(state);
     const idSet = new Set(ids);
     const acceptedIds = new Set(normalizeLoreMatrix(state.loreMatrix || []).map(entry => entry.id));
     const pinSet = new Set((state.loreSelection.pinnedIds || []).filter(id => acceptedIds.has(id)));
@@ -5779,6 +5736,13 @@ function bulkSetAcceptedPinned(ids, pinned) {
     }
     state.loreSelection.pinnedIds = Array.from(pinSet);
     state.loreSelection.suppressedIds = Array.from(suppressedSet);
+    recordLoreTimelineEvent(state, {
+        before: beforeTimeline,
+        after: captureLoreTimelineState(state),
+        type: pinned ? 'pin' : 'unpin',
+        source: 'manual',
+        summary: `${pinned ? 'Pinned' : 'Unpinned'} ${idSet.size} accepted lore entr${idSet.size === 1 ? 'y' : 'ies'}.`,
+    });
     saveState(state);
     refreshAcceptedLoreList({ preserveScroll: true });
     refreshAcceptedLoreBulkToolbar();
@@ -5790,6 +5754,7 @@ function bulkSetAcceptedPinned(ids, pinned) {
 function bulkSetAcceptedMuted(ids, muted) {
     const state = getState();
     if (!state.loreSelection) state.loreSelection = { pinnedIds: [], suppressedIds: [] };
+    const beforeTimeline = captureLoreTimelineState(state);
     const idSet = new Set(ids);
     const acceptedIds = new Set(normalizeLoreMatrix(state.loreMatrix || []).map(entry => entry.id));
     const pinSet = new Set((state.loreSelection.pinnedIds || []).filter(id => acceptedIds.has(id)));
@@ -5805,6 +5770,13 @@ function bulkSetAcceptedMuted(ids, muted) {
     }
     state.loreSelection.pinnedIds = Array.from(pinSet);
     state.loreSelection.suppressedIds = Array.from(suppressedSet);
+    recordLoreTimelineEvent(state, {
+        before: beforeTimeline,
+        after: captureLoreTimelineState(state),
+        type: muted ? 'mute' : 'unmute',
+        source: 'manual',
+        summary: `${muted ? 'Muted' : 'Unmuted'} ${idSet.size} accepted lore entr${idSet.size === 1 ? 'y' : 'ies'}.`,
+    });
     saveState(state);
     refreshAcceptedLoreList({ preserveScroll: true });
     refreshAcceptedLoreBulkToolbar();
@@ -5825,6 +5797,7 @@ function bulkAddTagToAcceptedLore(ids, tag) {
 
 function bulkDeleteAcceptedLore(ids) {
     const state = getState();
+    const beforeTimeline = captureLoreTimelineState(state);
     const idSet = new Set(ids);
     const before = Array.isArray(state.loreMatrix) ? state.loreMatrix.length : 0;
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []).filter(entry => !idSet.has(entry.id));
@@ -5837,12 +5810,22 @@ function bulkDeleteAcceptedLore(ids) {
         state.lorePanel.acceptedSelectedIds = (state.lorePanel.acceptedSelectedIds || []).filter(id => acceptedIds.has(id));
         if (idSet.has(state.lorePanel.selectedEntryId)) state.lorePanel.selectedEntryId = '';
     }
+    const deleted = before - state.loreMatrix.length;
+    if (deleted > 0) {
+        recordLoreTimelineEvent(state, {
+            before: beforeTimeline,
+            after: captureLoreTimelineState(state),
+            type: 'delete',
+            source: 'manual',
+            summary: `Deleted ${deleted} accepted lore entr${deleted === 1 ? 'y' : 'ies'}.`,
+        });
+    }
     saveState(state);
     refreshAcceptedLoreList({ preserveScroll: true });
     refreshAcceptedLoreBulkToolbar();
     refreshHeader();
     refreshLoreWorkbench();
-    toast(`Deleted ${before - state.loreMatrix.length} accepted lore entr${before - state.loreMatrix.length === 1 ? 'y' : 'ies'}.`, 'success');
+    toast(`Deleted ${deleted} accepted lore entr${deleted === 1 ? 'y' : 'ies'}.`, 'success');
 }
 
 function createEditableLoreEntryEditor(entry) {
@@ -5871,6 +5854,16 @@ function createEditableLoreEntryEditor(entry) {
     const factInput = makeField('Lore text / fact', entry.fact || entry.content?.fact || '', true);
     const injectionInput = makeField('Injection override', entry.content?.injection || '', true);
     const notesInput = makeField('Notes', entry.notes || entry.content?.notes || '', true);
+    const metaGrid = document.createElement('div');
+    metaGrid.className = 'wandlight-new-lore-meta-grid wandlight-lore-editor-meta-grid';
+    editor.appendChild(metaGrid);
+    const categorySelect = createNewLoreSelect(metaGrid, 'Category', getLoreRegistryValues('categories', LORE_CATEGORY_VALUES), entry.category || 'other');
+    const canonSelect = createNewLoreSelect(metaGrid, 'Canon', getLoreRegistryValues('canonStatuses', ['canon', 'au']), entry.canon || entry.canonStatus || 'canon');
+    const relevanceSelect = createNewLoreSelect(metaGrid, 'Relevance', LORE_RELEVANCE_TIERS, entry.relevance || 'normal', value => RELEVANCE_META[value]?.label || value);
+    const prioritySelect = createNewLoreSelect(metaGrid, 'Priority', LORE_PRIORITY_VALUES.map(String), String(entry.priority || 50));
+    const truthSelect = createNewLoreSelect(metaGrid, 'Truth', getLoreRegistryValues('truthStatuses', ['true', 'rumor', 'contested', 'hidden']), entry.truthStatus || 'true');
+    const revealSelect = createNewLoreSelect(metaGrid, 'Reveal', getLoreRegistryValues('revealPolicies', ['private', 'public', 'do_not_reveal']), entry.revealPolicy || 'private');
+    const tagsInput = makeField('Tags', (entry.tags || []).join(', '), false);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
@@ -5885,6 +5878,14 @@ function createEditableLoreEntryEditor(entry) {
             title,
             fact,
             notes,
+            category: categorySelect.value,
+            canon: canonSelect.value,
+            canonStatus: canonSelect.value,
+            relevance: normalizeLoreRelevance(relevanceSelect.value),
+            priority: Number(prioritySelect.value) || 50,
+            truthStatus: truthSelect.value,
+            revealPolicy: revealSelect.value,
+            tags: tagsInput.value,
             content: {
                 ...(raw.content || {}),
                 fact,
@@ -5910,6 +5911,8 @@ function renderLoreTab(container, state) {
         'Lore',
         'Suggest canon lore from the local database, generate story-specific lore with the model, review pending entries, and manage accepted lore.'
     ));
+    container.appendChild(createLoreTimelineCard(state));
+
     container.appendChild(createCollapsibleSection(
         'lore.generation',
         'Lore Generation',
@@ -5949,6 +5952,449 @@ function renderLoreTab(container, state) {
         createAcceptedLoreEntriesSection(state),
         { tooltip: 'Search, filter, bulk edit, tag, pin, mute, and edit accepted lore entries.', className: 'wandlight-lore-accepted-collapsible' }
     ));
+}
+
+function createLoreTimelineCard(state) {
+    const summary = getLoreTimelineSummary(state);
+    const counts = summary.counts || {};
+    const latest = summary.latest;
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-lore-timeline-card';
+
+    const top = document.createElement('div');
+    top.className = 'wandlight-lore-timeline-card-top';
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = 'Lore Timeline';
+    addTooltip(title, 'Story-aware audit trail for accepted lore changes and recoverable lore versions.');
+    top.appendChild(title);
+    top.appendChild(createStatusPill(summary.eventCount ? `${summary.eventCount} events` : 'No events', 'Lore timeline event count for this chat.'));
+    card.appendChild(top);
+
+    const stats = document.createElement('div');
+    stats.className = 'wandlight-lore-timeline-stats';
+    stats.appendChild(createCompactPresetStat('Added', `+${counts.added || 0}`));
+    stats.appendChild(createCompactPresetStat('Deleted', `-${counts.deleted || 0}`));
+    stats.appendChild(createCompactPresetStat('Updated', String(counts.updated || 0)));
+    stats.appendChild(createCompactPresetStat('Restored', String(counts.restored || 0)));
+    card.appendChild(stats);
+
+    const rail = document.createElement('div');
+    rail.className = 'wandlight-lore-timeline-mini-rail';
+    const events = getLoreTimelineEvents(state).slice(-18);
+    if (events.length) {
+        for (const event of events) {
+            const tick = document.createElement('span');
+            tick.className = `wandlight-lore-timeline-mini-tick ${getLoreTimelineEventClass(event)}`.trim();
+            addTooltip(tick, event.summary || event.type);
+            rail.appendChild(tick);
+        }
+    } else {
+        const empty = document.createElement('span');
+        empty.className = 'wandlight-lore-timeline-mini-empty';
+        empty.textContent = 'No accepted-lore changes recorded yet.';
+        rail.appendChild(empty);
+    }
+    card.appendChild(rail);
+
+    const foot = document.createElement('div');
+    foot.className = 'wandlight-lore-timeline-card-foot';
+    const latestText = document.createElement('div');
+    latestText.className = 'wandlight-lore-timeline-latest';
+    latestText.textContent = latest ? `Last: ${latest.summary || latest.type}` : 'Manual creations, accepted lore changes, and recoveries will appear here.';
+    foot.appendChild(latestText);
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-lore-timeline-actions';
+    actions.appendChild(createButton('New Lore', 'Create a manual lore draft in Pending Lore Review.', () => {
+        openNewLoreDialog();
+    }, 'wandlight-primary-button'));
+    actions.appendChild(createButton('Open Timeline', 'Open the full Lore Timeline workbench.', () => {
+        openLoreTimeline();
+    }));
+    foot.appendChild(actions);
+    card.appendChild(foot);
+    return card;
+}
+
+function getLoreTimelineEventClass(event = {}) {
+    const counts = event.counts || {};
+    if (counts.deleted > 0 || /delete|remove/i.test(event.type || '')) return 'wandlight-lore-timeline-event-delete';
+    if (counts.restored > 0 || /restore|recover/i.test(event.type || '')) return 'wandlight-lore-timeline-event-restore';
+    if (counts.updated > 0 || counts.pinned > 0 || counts.muted > 0 || /edit|relevance|pin|mute|metadata/i.test(event.type || '')) return 'wandlight-lore-timeline-event-update';
+    if (counts.pending > 0 || /pending|generate/i.test(event.type || '')) return 'wandlight-lore-timeline-event-pending';
+    return 'wandlight-lore-timeline-event-add';
+}
+
+function openLoreTimeline() {
+    loreTimelineOpen = true;
+    const events = getLoreTimelineEvents(getState());
+    if (!loreTimelineSelectedId || !events.some(event => event.id === loreTimelineSelectedId)) {
+        loreTimelineSelectedId = events[events.length - 1]?.id || '';
+    }
+    renderLoreTimeline();
+}
+
+function closeLoreTimeline() {
+    loreTimelineOpen = false;
+    const existing = document.getElementById(LORE_TIMELINE_ID);
+    existing?.remove();
+}
+
+function refreshLoreTimeline() {
+    if (loreTimelineOpen) renderLoreTimeline();
+}
+
+function renderLoreTimeline() {
+    if (!loreTimelineOpen) return;
+    let overlay = document.getElementById(LORE_TIMELINE_ID);
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = LORE_TIMELINE_ID;
+        overlay.className = 'wandlight-lore-timeline-overlay';
+        document.body.appendChild(overlay);
+    }
+    overlay.replaceChildren();
+
+    const state = getState();
+    const events = getLoreTimelineEvents(state);
+    const summary = getLoreTimelineSummary(state);
+    const selected = events.find(event => event.id === loreTimelineSelectedId) || events[events.length - 1] || null;
+    if (selected) loreTimelineSelectedId = selected.id;
+
+    const shell = document.createElement('div');
+    shell.className = 'wandlight-lore-timeline-shell';
+    overlay.appendChild(shell);
+
+    const header = document.createElement('div');
+    header.className = 'wandlight-lore-workbench-header';
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'wandlight-lore-workbench-title-wrap';
+    const title = document.createElement('div');
+    title.className = 'wandlight-lore-workbench-title';
+    title.textContent = 'Lore Timeline';
+    titleWrap.appendChild(title);
+    const subtitle = document.createElement('div');
+    subtitle.className = 'wandlight-lore-workbench-subtitle';
+    subtitle.textContent = `${summary.eventCount} events | +${summary.counts.added || 0} added | -${summary.counts.deleted || 0} deleted | ${summary.counts.updated || 0} updated`;
+    titleWrap.appendChild(subtitle);
+    header.appendChild(titleWrap);
+    const close = createButton('Close', 'Close Lore Timeline.', closeLoreTimeline);
+    header.appendChild(close);
+    shell.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'wandlight-lore-timeline-body';
+    shell.appendChild(body);
+
+    const list = document.createElement('div');
+    list.className = 'wandlight-lore-timeline-event-list';
+    if (!events.length) {
+        list.appendChild(createEmptyMessage('No lore timeline events yet. Create, accept, edit, or delete lore to begin the audit trail.'));
+    } else {
+        for (const event of [...events].reverse()) {
+            list.appendChild(createLoreTimelineEventRow(event, event.id === loreTimelineSelectedId));
+        }
+    }
+    body.appendChild(list);
+
+    const detail = document.createElement('div');
+    detail.className = 'wandlight-lore-timeline-detail';
+    detail.appendChild(createLoreTimelineEventDetail(selected));
+    body.appendChild(detail);
+}
+
+function createLoreTimelineEventRow(event, selected = false) {
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = `wandlight-lore-timeline-event-row ${getLoreTimelineEventClass(event)}`.trim();
+    if (selected) row.classList.add('wandlight-lore-timeline-event-row-selected');
+    row.addEventListener('click', () => {
+        loreTimelineSelectedId = event.id;
+        renderLoreTimeline();
+    });
+
+    const marker = document.createElement('span');
+    marker.className = 'wandlight-lore-timeline-event-marker';
+    row.appendChild(marker);
+
+    const main = document.createElement('span');
+    main.className = 'wandlight-lore-timeline-event-main';
+    const summary = document.createElement('span');
+    summary.className = 'wandlight-lore-timeline-event-summary';
+    summary.textContent = event.summary || event.type;
+    main.appendChild(summary);
+    const meta = document.createElement('span');
+    meta.className = 'wandlight-lore-timeline-event-meta';
+    const message = event.messageRange?.latest ? `msg ${event.messageRange.latest}` : 'no message anchor';
+    meta.textContent = `${formatShortDate(event.timestamp)} | ${message} | ${event.source || 'manual'}`;
+    main.appendChild(meta);
+    row.appendChild(main);
+
+    const counts = document.createElement('span');
+    counts.className = 'wandlight-lore-timeline-event-counts';
+    counts.textContent = formatTimelineCounts(event.counts);
+    row.appendChild(counts);
+    return row;
+}
+
+function createLoreTimelineEventDetail(event) {
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-lore-timeline-detail-card';
+    if (!event) {
+        wrap.appendChild(createEmptyMessage('Select a timeline event to inspect affected entries.'));
+        return wrap;
+    }
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = event.summary || event.type;
+    wrap.appendChild(title);
+
+    wrap.appendChild(createKeyValue('When', formatLongDate(event.timestamp), 'When this lore event was recorded.'));
+    wrap.appendChild(createKeyValue('Message', event.messageRange?.latest ? `Latest ${event.messageRange.latest}` : 'No anchor', 'Approximate chat message anchor at the time of the lore change.'));
+    wrap.appendChild(createKeyValue('Source', event.source || 'manual', 'Source or workflow that created this lore event.'));
+    if (event.sceneDate || event.canonBoundary) {
+        wrap.appendChild(createKeyValue('Story context', [event.sceneDate, event.canonBoundary].filter(Boolean).join(' | '), 'Story context at the time of the event.'));
+    }
+    wrap.appendChild(createKeyValue('Counts', formatTimelineCounts(event.counts), 'Lore changes recorded in this event.'));
+
+    const refs = Array.isArray(event.refs) ? event.refs : [];
+    const refBox = document.createElement('div');
+    refBox.className = 'wandlight-lore-timeline-ref-box';
+    const refTitle = document.createElement('div');
+    refTitle.className = 'wandlight-runtime-help';
+    refTitle.textContent = refs.length ? `Affected entries (${refs.length})` : 'No entry references stored.';
+    refBox.appendChild(refTitle);
+    for (const ref of refs.slice(0, 24)) {
+        const chip = document.createElement('span');
+        chip.className = 'wandlight-lore-timeline-ref-chip';
+        chip.textContent = ref.title || ref.id;
+        addTooltip(chip, `${ref.category || 'lore'} | ${ref.relevance || 'normal'} | ${ref.canon || 'canon'}`);
+        refBox.appendChild(chip);
+    }
+    if (refs.length > 24) {
+        const more = document.createElement('span');
+        more.className = 'wandlight-lore-timeline-ref-chip';
+        more.textContent = `+${refs.length - 24} more`;
+        refBox.appendChild(more);
+    }
+    wrap.appendChild(refBox);
+
+    const recoverable = getRecoverableTimelineEntries(event);
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    const restore = createButton(
+        recoverable.length ? `Restore ${recoverable.length} to Pending` : 'Nothing to Restore',
+        'Restores recoverable deleted or prior-version entries into Pending Lore Review for editing and acceptance.',
+        async () => {
+            if (!recoverable.length) return;
+            const proceed = await confirmAction('Restore lore to Pending Review?', `This will add ${recoverable.length} recovered lore entr${recoverable.length === 1 ? 'y' : 'ies'} to Pending Lore Review. Accepted lore will not be changed.`);
+            if (!proceed) return;
+            const result = restoreLoreTimelineEntriesToPending(event.id);
+            refreshPanelBody({ preserveScroll: true });
+            refreshHeader();
+            refreshLoreTimeline();
+            refreshLoreWorkbench();
+            toast(`Restored ${result.restored || 0} lore entr${(result.restored || 0) === 1 ? 'y' : 'ies'} to Pending Review.`, result.restored ? 'success' : 'warning');
+        },
+        recoverable.length ? 'wandlight-primary-button' : ''
+    );
+    restore.disabled = recoverable.length === 0;
+    actions.appendChild(restore);
+    wrap.appendChild(actions);
+
+    if (recoverable.length) {
+        const preview = document.createElement('div');
+        preview.className = 'wandlight-lore-timeline-recovery-preview';
+        for (const item of recoverable.slice(0, 10)) {
+            const line = document.createElement('div');
+            line.className = 'wandlight-lore-timeline-recovery-row';
+            line.textContent = `${item.recoveryKind}: ${item.entry.title || item.entry.id}`;
+            preview.appendChild(line);
+        }
+        wrap.appendChild(preview);
+    }
+
+    return wrap;
+}
+
+function formatTimelineCounts(counts = {}) {
+    const parts = [];
+    if (counts.added) parts.push(`+${counts.added}`);
+    if (counts.deleted) parts.push(`-${counts.deleted}`);
+    if (counts.updated) parts.push(`${counts.updated} updated`);
+    if (counts.pinned) parts.push(`${counts.pinned} pin`);
+    if (counts.muted) parts.push(`${counts.muted} mute`);
+    if (counts.pending) parts.push(`${counts.pending} pending`);
+    if (counts.restored) parts.push(`${counts.restored} restored`);
+    return parts.join(' | ') || 'no visible changes';
+}
+
+function formatShortDate(timestamp) {
+    const date = new Date(Number(timestamp) || Date.now());
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function formatLongDate(timestamp) {
+    const date = new Date(Number(timestamp) || Date.now());
+    return date.toLocaleString();
+}
+
+function openNewLoreDialog() {
+    const existing = document.querySelector('.wandlight-new-lore-overlay');
+    existing?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'wandlight-new-lore-overlay';
+    document.body.appendChild(overlay);
+
+    const shell = document.createElement('div');
+    shell.className = 'wandlight-new-lore-shell';
+    overlay.appendChild(shell);
+
+    const header = document.createElement('div');
+    header.className = 'wandlight-lore-workbench-header';
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'wandlight-lore-workbench-title-wrap';
+    const title = document.createElement('div');
+    title.className = 'wandlight-lore-workbench-title';
+    title.textContent = 'New Lore Entry';
+    titleWrap.appendChild(title);
+    const subtitle = document.createElement('div');
+    subtitle.className = 'wandlight-lore-workbench-subtitle';
+    subtitle.textContent = 'Creates a pending draft for review, editing, and acceptance.';
+    titleWrap.appendChild(subtitle);
+    header.appendChild(titleWrap);
+    header.appendChild(createButton('Close', 'Close without creating lore.', () => overlay.remove()));
+    shell.appendChild(header);
+
+    const form = document.createElement('div');
+    form.className = 'wandlight-new-lore-form';
+    shell.appendChild(form);
+
+    const titleInput = createNewLoreInput(form, 'Title', 'Short descriptive title', '', false);
+    const factInput = createNewLoreInput(form, 'Lore Text', 'The durable fact, rule, constraint, or state to remember', '', true);
+    const injectionInput = createNewLoreInput(form, 'Injection Override', 'Optional model-facing phrasing; blank uses Lore Text', '', true);
+    const notesInput = createNewLoreInput(form, 'Notes', 'Optional private notes for the user', '', true);
+
+    const metaGrid = document.createElement('div');
+    metaGrid.className = 'wandlight-new-lore-meta-grid';
+    form.appendChild(metaGrid);
+    const categorySelect = createNewLoreSelect(metaGrid, 'Category', getLoreRegistryValues('categories', LORE_CATEGORY_VALUES), 'knowledge');
+    const canonSelect = createNewLoreSelect(metaGrid, 'Canon', getLoreRegistryValues('canonStatuses', ['canon', 'au']), 'au');
+    const relevanceSelect = createNewLoreSelect(metaGrid, 'Relevance', LORE_RELEVANCE_TIERS, 'normal', value => RELEVANCE_META[value]?.label || value);
+    const prioritySelect = createNewLoreSelect(metaGrid, 'Priority', LORE_PRIORITY_VALUES.map(String), '50');
+    const truthSelect = createNewLoreSelect(metaGrid, 'Truth', getLoreRegistryValues('truthStatuses', ['true', 'rumor', 'contested', 'hidden']), 'true');
+    const revealSelect = createNewLoreSelect(metaGrid, 'Reveal', getLoreRegistryValues('revealPolicies', ['private', 'public', 'do_not_reveal']), 'private');
+    const tagsInput = createNewLoreInput(form, 'Tags', 'Comma-separated tags', '', false);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-primary-actions';
+    actions.appendChild(createButton('Create Pending Lore', 'Adds this draft to Pending Lore Review.', () => {
+        const title = titleInput.value.trim();
+        const fact = factInput.value.trim();
+        if (!title || !fact) {
+            toast('New lore needs both a title and lore text.', 'warning');
+            return;
+        }
+
+        const entry = normalizeLoreEntry({
+            title,
+            fact,
+            category: categorySelect.value,
+            canon: canonSelect.value,
+            canonStatus: canonSelect.value,
+            relevance: relevanceSelect.value,
+            priority: Number(prioritySelect.value) || 50,
+            truthStatus: truthSelect.value,
+            revealPolicy: revealSelect.value,
+            tags: tagsInput.value,
+            source: 'manual',
+            sourceInfo: {
+                work: 'Manual Lore',
+                notes: 'Created manually by the user.',
+                confidence: 1,
+            },
+            content: {
+                fact,
+                injection: injectionInput.value.trim() || fact,
+                notes: notesInput.value.trim(),
+            },
+            userEditable: true,
+            userEdited: true,
+            extensions: {
+                wandlightManualDraft: {
+                    createdAt: Date.now(),
+                    reviewRoute: 'manual_pending',
+                },
+            },
+        });
+
+        const result = appendPendingLoreEntries([entry], {
+            source: 'manual',
+            status: 'pending',
+            summary: `Manual lore draft: ${entry.title}`,
+            normalizedEntryCount: 1,
+            rawEntryCount: 1,
+        }, { snapshot: false, snapshotLabel: 'Create manual lore draft' });
+        recordLoreTimelineEvent(result.state, {
+            type: 'manual_create_pending',
+            source: 'manual',
+            summary: `Created manual pending lore: ${entry.title}`,
+            counts: { pending: 1 },
+            refs: [{ id: entry.id, title: entry.title, category: entry.category, relevance: entry.relevance, canon: entry.canon }],
+            patch: { pendingEntries: [entry] },
+            reversible: false,
+            force: true,
+        });
+        saveState(result.state);
+        overlay.remove();
+        refreshPanelBody({ preserveScroll: true });
+        refreshHeader();
+        refreshLoreTimeline();
+        refreshLoreWorkbench();
+        toast('Manual lore draft added to Pending Review.', 'success');
+    }, 'wandlight-primary-button'));
+    actions.appendChild(createButton('Cancel', 'Close without creating lore.', () => overlay.remove()));
+    form.appendChild(actions);
+
+    requestAnimationFrame(() => titleInput.focus());
+}
+
+function createNewLoreInput(container, labelText, tooltip, value = '', multiline = false) {
+    const label = document.createElement('label');
+    label.className = 'wandlight-new-lore-field';
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    addTooltip(span, tooltip);
+    label.appendChild(span);
+    const input = multiline ? document.createElement('textarea') : document.createElement('input');
+    input.className = multiline ? 'wandlight-lore-editor-textarea' : 'wandlight-lore-editor-input';
+    if (!multiline) input.type = 'text';
+    input.value = value || '';
+    label.appendChild(input);
+    container.appendChild(label);
+    return input;
+}
+
+function createNewLoreSelect(container, labelText, values, selected, display = null) {
+    const label = document.createElement('label');
+    label.className = 'wandlight-new-lore-field';
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    label.appendChild(span);
+    const select = document.createElement('select');
+    select.className = 'wandlight-lore-editor-input';
+    for (const value of values) {
+        const option = document.createElement('option');
+        option.value = String(value);
+        option.textContent = display ? display(value) : getLoreDisplayLabel(labelToField(labelText), value);
+        if (String(value) === String(selected)) option.selected = true;
+        select.appendChild(option);
+    }
+    label.appendChild(select);
+    container.appendChild(label);
+    return select;
 }
 
 function createAutoRelevanceCard(state) {
@@ -6890,7 +7336,6 @@ function createEntryCard(entry, state) {
                 const pending = normalizeLoreMatrix(current?.pendingLoreEntries || []);
                 const idx = pending.findIndex(pe => pe.id === entry.id);
                 if (idx >= 0) {
-                    pushStateSnapshot(current, `Accept lore entry: ${entry.title}`, getSettings().maxSnapshots);
                     acceptPendingLoreEntry(idx);
                     refreshPanelBody({ preserveScroll: true });
                     refreshHeader();
@@ -7034,6 +7479,7 @@ function normalizeTag(value) {
 function updateLoreEntryById(entryId, updater, options = {}) {
     const state = getState();
     if (!entryId || typeof updater !== 'function') return false;
+    const beforeTimeline = captureLoreTimelineState(state);
 
     for (const key of ['loreMatrix', 'pendingLoreEntries']) {
         const list = Array.isArray(state[key]) ? state[key] : [];
@@ -7043,6 +7489,15 @@ function updateLoreEntryById(entryId, updater, options = {}) {
             updated.userEdited = true;
             list[idx] = updated;
             state[key] = list;
+            if (key === 'loreMatrix') {
+                recordLoreTimelineEvent(state, {
+                    before: beforeTimeline,
+                    after: captureLoreTimelineState(state),
+                    type: options.timelineType || 'edit',
+                    source: options.timelineSource || 'manual',
+                    summary: options.timelineSummary || `Edited lore entry: ${updated.title || updated.id}.`,
+                });
+            }
             if (options.deferSave) scheduleStateSave(state);
             else saveState(state);
             return true;
@@ -7093,6 +7548,7 @@ function flushScheduledStateSave() {
 function togglePinEntry(entryId, options = {}) {
     const state = getState();
     if (!state?.loreSelection) return;
+    const beforeTimeline = captureLoreTimelineState(state);
     const sel = state.loreSelection;
     sel.pinnedIds = Array.isArray(sel.pinnedIds) ? sel.pinnedIds : [];
     sel.suppressedIds = Array.isArray(sel.suppressedIds) ? sel.suppressedIds : [];
@@ -7104,6 +7560,13 @@ function togglePinEntry(entryId, options = {}) {
         const supIdx = sel.suppressedIds.indexOf(entryId);
         if (supIdx >= 0) sel.suppressedIds.splice(supIdx, 1);
     }
+    recordLoreTimelineEvent(state, {
+        before: beforeTimeline,
+        after: captureLoreTimelineState(state),
+        type: idx >= 0 ? 'unpin' : 'pin',
+        source: 'manual',
+        summary: `${idx >= 0 ? 'Unpinned' : 'Pinned'} lore entry.`,
+    });
     if (options.deferSave) scheduleStateSave(state);
     else saveState(state);
 }
@@ -7111,6 +7574,7 @@ function togglePinEntry(entryId, options = {}) {
 function toggleSuppressEntry(entryId, options = {}) {
     const state = getState();
     if (!state?.loreSelection) return;
+    const beforeTimeline = captureLoreTimelineState(state);
     const sel = state.loreSelection;
     sel.pinnedIds = Array.isArray(sel.pinnedIds) ? sel.pinnedIds : [];
     sel.suppressedIds = Array.isArray(sel.suppressedIds) ? sel.suppressedIds : [];
@@ -7122,6 +7586,13 @@ function toggleSuppressEntry(entryId, options = {}) {
         const pinIdx = sel.pinnedIds.indexOf(entryId);
         if (pinIdx >= 0) sel.pinnedIds.splice(pinIdx, 1);
     }
+    recordLoreTimelineEvent(state, {
+        before: beforeTimeline,
+        after: captureLoreTimelineState(state),
+        type: idx >= 0 ? 'unmute' : 'mute',
+        source: 'manual',
+        summary: `${idx >= 0 ? 'Unmuted' : 'Muted'} lore entry.`,
+    });
     if (options.deferSave) scheduleStateSave(state);
     else saveState(state);
 }

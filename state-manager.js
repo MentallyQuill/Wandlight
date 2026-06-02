@@ -11,6 +11,7 @@ import { MODULE_KEY, LEGACY_MODULE_KEYS, DEFAULT_SETTINGS, getDefaultState, SCHE
 import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey, applyLoreLifecycleEvaluation } from './lore-matrix.js';
 import { normalizeLoreRelevance, normalizeLoreCanon, normalizeLoreCategory, computeLocalLoreRelevance, normalizeLorePurpose, computeSpecificityScore } from './lore-relevance.js';
 import { preprocessPendingLoreEntries } from './pending-lore-preprocessor.js';
+import { normalizeLoreTimeline, captureLoreTimelineState, recordLoreTimelineEvent, restoreTimelineEntriesToPending } from './lore-timeline.js';
 
 const MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST = 200000;
 const migratedStateRefs = new WeakSet();
@@ -850,6 +851,8 @@ function sanitizeLoreArraysForStorage(state) {
         });
     }
 
+    state.loreTimeline = normalizeLoreTimeline(state.loreTimeline || {});
+
     if (state.pendingLoreEntries.length === 0) {
         state.pendingLoreMeta = null;
     }
@@ -1114,6 +1117,12 @@ export function migrateState(state) {
         state._version = 16;
     }
 
+    // Schema v18: lore event timeline replaces visible full-state history for lore recovery
+    if (state._version < 18) {
+        state.loreTimeline = normalizeLoreTimeline(state.loreTimeline || getDefaultState().loreTimeline);
+        state._version = 18;
+    }
+
     // ── Always normalize lore fields post-migration ────────────────────────
     // First compact known-heavy canon DB payloads and oversized pending batches so
     // a poisoned chat can recover instead of freezing during panel render/save.
@@ -1122,6 +1131,7 @@ export function migrateState(state) {
     state.loreContext = normalizeLoreContext(state.loreContext || {});
     state.loreMatrix = normalizeLoreMatrix(state.loreMatrix || []);
     state.pendingLoreEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
+    state.loreTimeline = normalizeLoreTimeline(state.loreTimeline || {});
     sanitizeLoreArraysForStorage(state);
 
     normalizeContinuityStructure(state);
@@ -2734,6 +2744,20 @@ function applyAcceptedLoreSelectionRecommendations(state, entries = []) {
 }
 
 
+function getPendingLoreTimelineSource(meta = {}, entries = []) {
+    const source = String(meta?.source || entries?.[0]?.source || entries?.[0]?.sourceInfo?.work || '').toLowerCase();
+    if (source.includes('canon')) return 'canon_database';
+    if (source.includes('timeline')) return 'timeline_recovery';
+    if (source.includes('manual') || source.includes('user')) return 'manual';
+    if (source.includes('story') || source.includes('generation') || source.includes('bulk')) return 'story_generation';
+    return 'pending_review';
+}
+
+function recordAcceptedLoreTimelineMutation(state, before, type, source, summary) {
+    const after = captureLoreTimelineState(state);
+    recordLoreTimelineEvent(state, { before, after, type, source, summary });
+}
+
 
 /**
  * Accepts pending lore entries by merging them into loreMatrix.
@@ -2749,7 +2773,9 @@ export function acceptPendingLoreEntries() {
 
     if (pending.length === 0) return state;
 
+    const beforeTimeline = captureLoreTimelineState(state);
     const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
+    const source = getPendingLoreTimelineSource(state.pendingLoreMeta, pending);
 
     const prepared = pending.map(entry => preparePendingLoreEntryForAcceptance(entry, existing));
     const merged = mergeLoreEntries(existing, prepared);
@@ -2777,6 +2803,7 @@ export function acceptPendingLoreEntries() {
         validEntryCount: pending.length,
     };
 
+    recordAcceptedLoreTimelineMutation(state, beforeTimeline, 'accept_pending', source, `Accepted ${pending.length} pending lore entr${pending.length === 1 ? 'y' : 'ies'}.`);
     saveState(state);
     return state;
 }
@@ -2828,8 +2855,10 @@ export function acceptPendingLoreEntry(entryIndex) {
         return { state, accepted: null };
     }
 
+    const beforeTimeline = captureLoreTimelineState(state);
     const acceptedEntry = preparePendingLoreEntryForAcceptance(pending[entryIndex], existing);
     const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
+    const source = getPendingLoreTimelineSource(state.pendingLoreMeta, [acceptedEntry]);
 
     // Merge the single entry into the uncapped lore matrix. UI paging handles scale.
     const merged = mergeLoreEntries(existing, [acceptedEntry]);
@@ -2860,6 +2889,7 @@ export function acceptPendingLoreEntry(entryIndex) {
         acceptedEntryCount: (state.loreGeneration.attempts[contextKey]?.acceptedEntryCount || 0) + 1,
     };
 
+    recordAcceptedLoreTimelineMutation(state, beforeTimeline, 'accept_pending_entry', source, `Accepted pending lore: ${acceptedEntry.title || acceptedEntry.id}.`);
     saveState(state);
     return { state, accepted: acceptedEntry };
 }
@@ -2918,6 +2948,13 @@ export function rejectPendingLoreEntry(entryIndex) {
  * @param {Object} defaults - Default object to merge
  * @returns {Object} target with defaults filled in
  */
+export function restoreLoreTimelineEntriesToPending(eventId, entryIds = null) {
+    const state = getState();
+    const result = restoreTimelineEntriesToPending(state, eventId, entryIds);
+    if (result.restored > 0) saveState(state);
+    return { state, ...result };
+}
+
 function mergeDefaults(target, defaults) {
     if (!target || typeof target !== 'object' || Array.isArray(target)) {
         return { ...defaults };

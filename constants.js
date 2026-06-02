@@ -48,7 +48,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 17;
+export const SCHEMA_VERSION = 18;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -255,7 +255,6 @@ Direct injection block:
     // Runtime-window collapsible sections. true = collapsed.
     collapsedSections: {
         'session.instructions': true,
-        'session.stateHistory': true,
         'session.dangerZone': true,
         'context.canonDatabase': true,
         'context.automation': true,
@@ -522,6 +521,10 @@ export function getDefaultState() {
             y: 220,
             width: 560,
             height: 640,
+        },
+        loreTimeline: {
+            schemaVersion: 1,
+            events: [],
         },
 
         // Lore selection (user overrides for active loring)

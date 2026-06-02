@@ -575,17 +575,6 @@ function renderDrawer(state, direction = 'right') {
     titleWrap.appendChild(status);
     header.appendChild(titleWrap);
 
-    const collapseBtn = createIconButton('>', 'Collapse the active drawer and leave the rail visible.', 'wandlight-lore-panel-collapse-btn wandlight-runtime-drawer-collapse', (e) => {
-        e.stopPropagation();
-        setDrawerOpen(false);
-    });
-    header.appendChild(collapseBtn);
-
-    const closeBtn = createIconButton('x', 'Close the Wandlight rail and drawer.', 'wandlight-lore-panel-close-btn wandlight-runtime-drawer-close', (e) => {
-        e.stopPropagation();
-        hideLorePanel();
-    });
-    header.appendChild(closeBtn);
     drawer.appendChild(header);
 
     const body = document.createElement('div');

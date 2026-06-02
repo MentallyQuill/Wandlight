@@ -3832,3 +3832,84 @@
     justify-content: center;
     text-align: center;
 }
+
+
+/* Phase 17: drawer header cleanup + Injection Prompt Placement layout -----------
+   Header buttons were removed in JS; this keeps the title/status area full-width.
+   Prompt Placement uses a wider protected label column and wrapping controls so
+   row labels cannot overlap Position/Depth/Role controls when the drawer narrows. */
+.wandlight-runtime-drawer-header .wandlight-lore-panel-title-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.wandlight-runtime-drawer-header .wandlight-runtime-drawer-collapse,
+.wandlight-runtime-drawer-header .wandlight-runtime-drawer-close,
+.wandlight-runtime-drawer-header .wandlight-lore-panel-collapse-btn,
+.wandlight-runtime-drawer-header .wandlight-lore-panel-close-btn {
+    display: none !important;
+}
+
+.wandlight-prompt-placement-line {
+    grid-template-columns: minmax(142px, 170px) minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: start;
+}
+
+.wandlight-prompt-placement-method-line {
+    grid-template-columns: minmax(142px, 170px) minmax(0, 1fr);
+}
+
+.wandlight-prompt-placement-line-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-top: 3px;
+    box-sizing: border-box;
+}
+
+.wandlight-prompt-placement-control-wrap {
+    display: grid;
+    grid-template-columns: minmax(116px, max-content) minmax(72px, max-content) minmax(96px, max-content);
+    gap: 5px 8px;
+    align-items: center;
+    justify-content: start;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.wandlight-prompt-placement-method-line .wandlight-prompt-placement-control-wrap {
+    grid-template-columns: minmax(190px, max-content);
+}
+
+.wandlight-prompt-placement-card .wandlight-inline-field {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.wandlight-prompt-placement-card .wandlight-inline-field span {
+    white-space: nowrap;
+}
+
+@container (max-width: 430px) {
+    .wandlight-prompt-placement-line,
+    .wandlight-prompt-placement-method-line {
+        grid-template-columns: 1fr;
+    }
+
+    .wandlight-prompt-placement-control-wrap,
+    .wandlight-prompt-placement-method-line .wandlight-prompt-placement-control-wrap {
+        grid-template-columns: 1fr;
+    }
+
+    .wandlight-prompt-placement-card .wandlight-inline-field {
+        grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+    }
+}
+
+.wandlight-prompt-placement-card {
+    container-type: inline-size;
+}

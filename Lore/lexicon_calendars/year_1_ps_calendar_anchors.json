@@ -100,7 +100,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -196,7 +199,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -292,7 +298,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -391,7 +400,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -491,7 +503,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -588,7 +603,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -687,7 +705,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -783,7 +804,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -882,7 +906,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -981,7 +1008,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -1080,7 +1110,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -1177,7 +1210,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -1274,7 +1310,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -1374,7 +1413,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -1472,7 +1514,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -1570,7 +1615,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -1672,7 +1720,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 80
     }
   ]
 }

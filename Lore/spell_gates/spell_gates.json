@@ -90,7 +90,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,
@@ -185,7 +188,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,
@@ -277,7 +283,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -388,7 +397,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,
@@ -481,7 +493,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,
@@ -574,7 +589,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     }
   ]
 }

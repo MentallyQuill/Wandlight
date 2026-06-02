@@ -13,10 +13,8 @@
   "files": [
     "chronology/school_years.json",
     "chronology/major_events.json",
-    "characters/core_students.json",
     "characters/adults_and_factions.json",
     "characters/death_states.json",
-    "events/school_year_windows.json",
     "items/artifacts_and_objects.json",
     "knowledge/secret_knowledge.json",
     "knowledge_gates/core_knowledge_gates.json",
@@ -25,7 +23,6 @@
     "skills/school_year_skill_bands.json",
     "ages/core_character_ages.json",
     "behavior_gates/core_behaviors.json",
-    "places/hogwarts_and_britain.json",
     "places/institution_states.json",
     "expanded_books/book_1_philosophers_stone_expansion.json",
     "expanded_books/book_2_chamber_of_secrets_expansion.json",

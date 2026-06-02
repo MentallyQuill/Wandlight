@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 14;
+export const SCHEMA_VERSION = 15;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -184,19 +184,19 @@ export const DEFAULT_SETTINGS = {
     loreHighInjectionMode: 'direct', // 'direct' | 'compressed'
     loreNormalInjectionMode: 'compressed',
     loreLowInjectionMode: 'compressed',
-    loreHighCompressionLevel: 1,
-    loreNormalCompressionLevel: 2,
-    loreLowCompressionLevel: 4,
+    loreHighCompressionLevel: 3,
+    loreNormalCompressionLevel: 3,
+    loreLowCompressionLevel: 3,
     loreHighCompressionTurnInterval: 4,
     loreNormalCompressionTurnInterval: 8,
     loreLowCompressionTurnInterval: 16,
     loreHighMaxEntries: 30,
     loreNormalMaxEntries: 60,
     loreLowMaxEntries: 120,
-    loreCompressionLevel: 2, // legacy aggregate compatibility
+    loreCompressionLevel: 3, // legacy aggregate compatibility
     loreCompressionTurnInterval: 8,
     continuityInjectionMode: 'direct', // 'direct' | 'compressed'
-    continuityCompressionLevel: 2,
+    continuityCompressionLevel: 3,
 
     // Advanced compression prompt templates. Variables: {{kind}}, {{compressionLevel}},
     // {{compressionLabel}}, {{directTokens}}, {{targetTokens}}, {{hardTokenLimit}},
@@ -233,9 +233,9 @@ Target length: at most {{targetTokens}} tokens / {{targetCharacters}} characters
 Hard maximum visible output: {{hardTokenLimit}} tokens / {{hardCharacterLimit}} characters.
 
 Rules:
-- Preserve secrets, knowledge boundaries, canon/AU constraints, current-scene relevant facts, and active hazards.
+- Preserve secrets, knowledge boundaries, canon or story-established constraints, current-scene relevant facts, and active hazards.
 - Preserve pinned/protected lore more fully than ordinary lore.
-- Merge redundant entries where possible and drop low-value wording.
+- Merge redundant entries where possible and drop low-value wording. Drop generic reference/glossary facts if they appear; preserve only specific constraints, dates, knowledge boundaries, status changes, and story-established facts.
 - At compression level 3 or higher, prefer compact bullets and phrase fragments over prose.
 - Do not invent facts.
 - Output only the compressed injection text. No markdown fences or commentary.
@@ -276,7 +276,7 @@ Direct injection block:
     // Continuity scan prompt overrides. These are appended to the extractor prompt only
     // when the corresponding section is enabled/tracked for the current chat.
     continuitySectionPrompts: {
-        canonScene: 'Extract only explicitly established scene and timeline details: era, in-universe date, canon boundary, location, time of day, weather, ambience, present/nearby characters, and current activity. Do not invent missing fields. Durable AU/canon divergences belong in Story Lore, not Continuity.',
+        canonScene: 'Extract only explicitly established scene and timeline details: era, in-universe date, canon boundary, location, time of day, weather, ambience, present/nearby characters, and current activity. Do not invent missing fields. Durable story-established canon changes belong in Story Lore, not Continuity.',
         characters: 'Track active character state when clearly supported: role, current location, clothing, posture, physical condition, current emotional state, carried key items, and immediate goals. Do not summarize relationship history or durable knowledge here; Story Lore owns that memory.',
         threads: 'Track only active immediate threads that affect the next scene or next few replies. Durable plot history, milestones, secrets, and relationship history belong in Story Lore.',
         inventory: 'Track only consequential currently relevant items: carried key items, ownership, location, and immediate object status. Item history belongs in Story Lore.',

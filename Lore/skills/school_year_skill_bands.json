@@ -73,7 +73,10 @@
       "gateType": "skill_band",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -148,7 +151,10 @@
       "gateType": "skill_band",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -223,7 +229,10 @@
       "gateType": "skill_band",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -298,7 +307,10 @@
       "gateType": "skill_band",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -373,7 +385,10 @@
       "gateType": "skill_band",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -448,7 +463,10 @@
       "gateType": "skill_band",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -533,7 +551,10 @@
       "gateType": "skill_band",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     }
   ]
 }

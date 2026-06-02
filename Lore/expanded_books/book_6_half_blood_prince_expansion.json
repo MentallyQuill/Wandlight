@@ -83,7 +83,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Half-Blood Prince:summer",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -168,7 +171,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Half-Blood Prince:term_start",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -252,7 +258,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Half-Blood Prince:autumn",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -337,7 +346,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Half-Blood Prince:autumn",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -423,7 +435,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Half-Blood Prince:winter",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -508,7 +523,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Half-Blood Prince:winter",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -594,7 +612,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Half-Blood Prince:spring",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -680,7 +701,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Half-Blood Prince:spring",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -764,7 +788,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Half-Blood Prince:climax",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -861,7 +888,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1997-08-31"
         }
-      }
+      },
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     }
   ]
 }

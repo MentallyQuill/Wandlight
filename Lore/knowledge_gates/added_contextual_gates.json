@@ -82,7 +82,10 @@
     "locked": true,
     "userEditable": true,
     "canon": "canon",
-    "relevance": "normal"
+    "relevance": "normal",
+    "lorePurpose": "knowledge_gate",
+    "injectableByDefault": true,
+    "specificityScore": 95
   },
   {
     "schemaVersion": 2,
@@ -160,7 +163,10 @@
     "locked": true,
     "userEditable": true,
     "canon": "canon",
-    "relevance": "normal"
+    "relevance": "normal",
+    "lorePurpose": "temporal_gate",
+    "injectableByDefault": true,
+    "specificityScore": 100
   },
   {
     "schemaVersion": 2,
@@ -223,7 +229,10 @@
     "locked": true,
     "userEditable": true,
     "canon": "canon",
-    "relevance": "low"
+    "relevance": "low",
+    "lorePurpose": "behavior_constraint",
+    "injectableByDefault": true,
+    "specificityScore": 75
   },
   {
     "schemaVersion": 2,
@@ -285,7 +294,10 @@
     "locked": true,
     "userEditable": true,
     "canon": "canon",
-    "relevance": "low"
+    "relevance": "low",
+    "lorePurpose": "ability_gate",
+    "injectableByDefault": true,
+    "specificityScore": 100
   },
   {
     "schemaVersion": 2,
@@ -358,6 +370,9 @@
           "dumbledore_death_occurs"
         ]
       }
-    }
+    },
+    "lorePurpose": "status_change",
+    "injectableByDefault": true,
+    "specificityScore": 95
   }
 ]

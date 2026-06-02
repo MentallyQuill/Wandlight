@@ -94,7 +94,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -187,7 +190,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -283,7 +289,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -371,7 +380,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -466,7 +478,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -514,7 +529,7 @@
       "visibility": {},
       "content": {
         "fact": "Snape’s full motivations and loyalty are hidden until near the end of Year 7.",
-        "injection": "Do not reveal Snape’s full loyalty, Lily motivation, or Dumbledore plan before late Year 7 unless AU lore explicitly reveals it.",
+        "injection": "Do not reveal Snape’s full loyalty, Lily motivation, or Dumbledore plan before late Year 7 unless accepted story lore explicitly reveals it.",
         "constraints": [
           "Protect Snape’s late-canon reveal."
         ],
@@ -564,7 +579,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     }
   ]
 }

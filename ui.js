@@ -869,7 +869,7 @@ function wireLoreMatrixEditor() {
             pushStateSnapshot(state, 'Edit lore matrix via JSON editor', getSettings().maxSnapshots);
 
             // Normalize and mark every entry as user-edited + locked so model-generated
-            // entries with the same id cannot overwrite the user's AU/fanon edits.
+            // entries with the same id cannot overwrite the user's story-specific edits.
             const normalized = normalizeLoreMatrix(parsed).map(entry => ({
                 ...entry,
                 source: entry.source === 'model-generated' ? 'user' : entry.source,

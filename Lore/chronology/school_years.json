@@ -74,7 +74,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -160,7 +163,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 65
     },
     {
       "schemaVersion": 2,
@@ -236,7 +242,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -312,7 +321,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -388,7 +400,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -464,7 +479,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -550,7 +568,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     }
   ]
 }

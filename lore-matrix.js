@@ -13,6 +13,8 @@ import {
     normalizeLoreCategory,
     sortLoreEntriesForInjection,
     computeLocalLoreRelevance,
+    normalizeLorePurpose,
+    computeSpecificityScore,
 } from './lore-relevance.js';
 
 const DEFAULT_CATEGORIES = [
@@ -45,7 +47,7 @@ const VALID_TIME_TRAVEL_MODES = new Set([
 ]);
 
 const KNOWN_TOP_LEVEL_FIELDS = new Set([
-    'schemaVersion', 'id', 'title', 'name', 'kind', 'gateType', 'category', 'canonStatus', 'canon', 'relevance', 'truthStatus',
+    'schemaVersion', 'id', 'title', 'name', 'kind', 'gateType', 'category', 'canonStatus', 'canon', 'relevance', 'lorePurpose', 'specificityScore', 'injectableByDefault', 'truthStatus',
     'revealPolicy', 'tags', 'priority', 'status', 'protected', 'locked', 'userEditable', 'userEdited',
     'date', 'canonTiming', 'activation', 'expiration', 'lifecycle', 'scope', 'visibility', 'content', 'effects', 'source', 'sourceInfo', 'ui', 'extensions',
     // legacy aliases
@@ -451,6 +453,9 @@ export function normalizeLoreEntry(input = {}) {
     const priority = asPriority(input.priority);
     const source = deriveSourceString(sourceInfo, input);
     const relevance = normalizeLoreRelevance(input.relevance || input.lifecycle?.status || input.lifecycle?.computedStatus || input.status || 'normal');
+    const lorePurpose = normalizeLorePurpose(input.lorePurpose || input.purpose, { ...input, kind, gateType: input.gateType || kind, category }) || (canon === 'au' ? 'branch_fact' : 'rule_constraint');
+    const specificityScore = Number.isFinite(Number(input.specificityScore)) ? Math.max(0, Math.min(100, Number(input.specificityScore))) : computeSpecificityScore({ ...input, kind, gateType: input.gateType || kind, category, lorePurpose, content, scope, date });
+    const injectableByDefault = input.injectableByDefault === undefined ? true : asBoolean(input.injectableByDefault, true);
     const activeWhen = deriveActiveWhen(scope, input);
     const publicVersion = content.publicVersion;
     const whoKnowsTruth = Array.from(new Set([...asStringArray(input.whoKnowsTruth), ...stringMapKeys(visibility.knownBy)]));
@@ -466,6 +471,9 @@ export function normalizeLoreEntry(input = {}) {
         tags,
         category,
         relevance,
+        lorePurpose,
+        specificityScore,
+        injectableByDefault,
         canon,
         canonStatus,
         truthStatus,
@@ -713,7 +721,7 @@ export function evaluateLoreEntryLifecycle(entry, state = {}) {
     }
 
     // canonStatus is descriptive metadata, not an activation switch.
-    // A user-approved divergent/AU lore entry may still be the correct active fact
+    // A user-approved story-established canon change may still be the correct active fact
     // for this chat. Branch-specific exclusion is handled by branchId checks above.
 
     const hardFromCmp = e.canonTiming?.hardValidFrom ? compareStateDate(state, e.canonTiming.hardValidFrom) : 0;
@@ -1067,6 +1075,7 @@ export function getInjectableLoreEntries(state, limit = 0, relevance = null) {
     const tier = relevance ? normalizeLoreRelevance(relevance) : null;
     const injectable = all
         .filter(entry => entry.status !== 'archived' && entry.status !== 'disabled')
+        .filter(entry => entry.injectableByDefault !== false)
         .filter(entry => !suppressed.has(entry.id))
         .filter(entry => !tier || normalizeLoreRelevance(entry.relevance) === tier)
         .map(entry => ({

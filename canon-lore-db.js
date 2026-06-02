@@ -1,6 +1,6 @@
 /**
  * canon-lore-db.js — Wandlight Continuity
- * Local date-aware lore database loader for schema-v2 canon/reference entries.
+ * Local date-aware lore database loader for schema-v2 specific canon lore entries.
  *
  * The database is registry-driven:
  * - Lore/manifest.json lists files and registry locations.
@@ -16,6 +16,7 @@ import { LOG_PREFIX } from './constants.js';
 import { getState, getSettings, saveState, pushStateSnapshot } from './state-manager.js';
 import { normalizeLoreMatrix, buildLoreGenerationKey } from './lore-matrix.js';
 import { preprocessPendingLoreEntries } from './pending-lore-preprocessor.js';
+import { normalizeLorePurpose, computeSpecificityScore, isSpecificLorePurpose } from './lore-relevance.js';
 
 const MANIFEST_URL = new URL('./Lore/manifest.json', import.meta.url);
 const LEGACY_INDEX_URL = new URL('./Lore/index.json', import.meta.url);
@@ -29,7 +30,7 @@ export const DEFAULT_LORE_TAXONOMY = Object.freeze({
     schemaVersion: 2,
     categories: {
         canon: { label: 'Canon', color: '#7f1d1d', textColor: '#f8e7c9', description: 'Canon-aligned information.' },
-        au: { label: 'AU', color: '#4c1d95', textColor: '#f3e8ff', description: 'Alternate-universe divergence.' },
+        au: { label: 'AU', color: '#4c1d95', textColor: '#f3e8ff', description: 'Story-specific change from main canon.' },
         secret: { label: 'Secret', color: '#581c87', textColor: '#f5d0fe', description: 'Hidden or private information.' },
         relationship: { label: 'Relationship', color: '#9d174d', textColor: '#fce7f3', description: 'Relationship state.' },
         timeline: { label: 'Timeline', color: '#92400e', textColor: '#ffedd5', description: 'Date-sensitive timeline information.' },
@@ -313,7 +314,16 @@ function scoreCanonEntry(entry, state, context, sceneIso, scoring = DEFAULT_SCOR
     const weights = scoring.weights || DEFAULT_SCORING.weights;
     const kindBoosts = scoring.kindBoosts || DEFAULT_SCORING.kindBoosts;
 
-    if (dateInRange(sceneIso, entry)) score += Number(weights.dateMatch) || 30;
+    const lorePurpose = normalizeLorePurpose(entry.lorePurpose || entry.purpose, entry);
+    const specificPurpose = isSpecificLorePurpose(lorePurpose);
+    if (!specificPurpose || entry.injectableByDefault === false) return -1000;
+    if (dateInRange(sceneIso, entry)) {
+        const from = parseCanonDbDate(entry.date?.validFrom || entry.validFrom);
+        const to = parseCanonDbDate(entry.date?.validTo || entry.validTo);
+        const span = from && to ? Math.max(0, (Date.parse(to) - Date.parse(from)) / 86400000) : 9999;
+        const base = Number(weights.dateMatch) || 30;
+        score += span <= 14 ? base : span <= 60 ? Math.round(base * 0.75) : span <= 365 ? Math.round(base * 0.45) : 4;
+    }
 
     const present = state?.scene?.presentCharacters || [];
     const nearby = state?.scene?.nearbyCharacters || [];
@@ -331,6 +341,11 @@ function scoreCanonEntry(entry, state, context, sceneIso, scoring = DEFAULT_SCOR
     score += overlapScore([entry.title, entry.fact, entry.content?.injection, ...(entry.content?.constraints || [])], [location, canonBoundary, era].concat(present, topics), 2);
     score += overlapScore(flattenScope(scope), present.concat([location, canonBoundary, era], topics), 2);
 
+    const purposeBoosts = {
+        temporal_gate: 10, knowledge_gate: 16, ability_gate: 8, status_change: 12, event_anchor: 14, branch_fact: 14,
+        relationship_state: 12, secret: 18, objective: 12, item_state: 10, location_state: 6, rule_constraint: 10, behavior_constraint: 10, age_gate: 2,
+    };
+    score += purposeBoosts[lorePurpose] || 0;
     score += Number(kindBoosts[entry.kind]) || 0;
     if (entry.kind === 'future_guard' || entry.category === 'future_guard') score += Number(weights.futureGuard) || 20;
     if (entry.category === 'event' || entry.category === 'timeline') score += 8;
@@ -451,6 +466,9 @@ function compactCanonLoreEntryForPending(entry) {
         gateType: normalized.gateType || normalized.kind || 'fact',
         category: normalized.category || 'other',
         relevance: normalized.relevance || 'normal',
+        lorePurpose: normalizeLorePurpose(normalized.lorePurpose || normalized.purpose, normalized),
+        specificityScore: Number.isFinite(Number(normalized.specificityScore)) ? Math.max(0, Math.min(100, Number(normalized.specificityScore))) : computeSpecificityScore(normalized),
+        injectableByDefault: normalized.injectableByDefault !== false,
         canon: normalized.canon || normalized.canonStatus || 'canon',
         canonStatus: normalized.canon || normalized.canonStatus || 'canon',
         truthStatus: normalized.truthStatus || 'true',
@@ -517,6 +535,9 @@ function compactPendingCanonEntryForStorage(entry) {
         gateType: normalized.gateType || normalized.kind || 'fact',
         category: normalized.category || 'other',
         relevance: normalized.relevance || 'normal',
+        lorePurpose: normalizeLorePurpose(normalized.lorePurpose || normalized.purpose, normalized),
+        specificityScore: Number.isFinite(Number(normalized.specificityScore)) ? Math.max(0, Math.min(100, Number(normalized.specificityScore))) : computeSpecificityScore(normalized),
+        injectableByDefault: normalized.injectableByDefault !== false,
         canon: normalized.canon || normalized.canonStatus || 'canon',
         canonStatus: normalized.canon || normalized.canonStatus || 'canon',
         truthStatus: normalized.truthStatus || 'true',
@@ -654,6 +675,8 @@ export async function queryCanonLoreDatabase(context = null, options = {}) {
     const db = await loadCanonLoreDatabase();
     const max = Math.max(1, Math.min(200, Number(options.maxEntries ?? settings.canonLoreMaxEntries) || 10));
     const candidates = db.entries
+        .filter(entry => isSpecificLorePurpose(normalizeLorePurpose(entry.lorePurpose || entry.purpose, entry)))
+        .filter(entry => entry.injectableByDefault !== false)
         .filter(entry => dateInRange(sceneIso, entry))
         .map(entry => ({ entry, score: scoreCanonEntry(entry, state, effectiveContext, sceneIso, db.scoring) }))
         .filter(item => item.score > 0);

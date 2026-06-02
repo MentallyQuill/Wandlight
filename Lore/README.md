@@ -137,7 +137,7 @@ Each entry should use this structure:
 
   "content": {
     "fact": "Before summer 1996, Hermione should not know about Horcruxes.",
-    "injection": "Do not let Hermione mention or explain Horcruxes before summer 1996 unless the AU explicitly introduced them early.",
+    "injection": "Do not let Hermione mention or explain Horcruxes before summer 1996 unless the our story explicitly introduced them early.",
     "constraints": [
       "The word Horcrux should not appear in Hermione's dialogue in Year 4."
     ],
@@ -438,7 +438,7 @@ Better:
 Before summer 1996, Hermione should not know about Horcruxes or explain Voldemort's soul-fragment strategy.
 ```
 
-Wandlight works best when the database focuses on chronology, knowledge gates, future guards, spell plausibility, age, behavior, and AU divergence.
+Wandlight works best when the database focuses on chronology, knowledge gates, future guards, spell plausibility, age, behavior, and story-established change.
 
 ## Relevance-tier schema
 
@@ -594,3 +594,22 @@ Category: fixed category list
 Mute: injection exclusion
 Pin: compression/priority protection
 ```
+
+
+## Strict Specific-Lore Policy
+
+The bundled database should contain only specific lore: timing gates, knowledge boundaries, status changes, event anchors, skill/ability gates, relationship states, item states, branch/story facts, and concrete constraints that help a model avoid temporal or continuity mistakes. It should not contain reference/glossary entries or obvious facts the model already knows.
+
+Required authoring fields for bundled injectable entries:
+
+```json
+{
+  "lorePurpose": "knowledge_gate|event_anchor|status_change|ability_gate|age_gate|relationship_state|item_state|location_state|temporal_gate|rule_constraint|behavior_constraint|branch_fact|secret|objective",
+  "specificityScore": 0,
+  "injectableByDefault": true
+}
+```
+
+Do not author entries whose only purpose is to define ordinary canon terms or basic identities. Remove or reject entries such as “wands are standard tools,” “Hogwarts is the British wizarding school,” or “Ron is a Gryffindor.”
+
+Model-facing injection text should not rely on unexplained metadata jargon such as “AU divergence.” Use story-facing language: “unless our story has established otherwise,” “unless this chat has established a different outcome,” or “unless accepted story lore says otherwise.”

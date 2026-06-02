@@ -82,7 +82,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -165,7 +168,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -258,7 +264,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -341,7 +350,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 95
     }
   ]
 }

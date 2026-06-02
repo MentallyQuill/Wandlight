@@ -43,9 +43,9 @@ function tierSettingKey(tier, suffix) { return tier ? `lore${capTier(tier)}${suf
 
 function getCompressionLevel(settings, kind) {
     const parsed = parseCompressionKind(kind);
-    if (parsed.base === 'continuity') return Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 2));
+    if (parsed.base === 'continuity') return Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 3));
     const raw = parsed.tier ? settings[tierSettingKey(parsed.tier, 'CompressionLevel')] : settings.loreCompressionLevel;
-    return Math.max(1, Math.min(5, Number(raw) || (parsed.tier === 'high' ? 1 : parsed.tier === 'low' ? 4 : 2)));
+    return Math.max(1, Math.min(5, Number(raw) || 3));
 }
 
 function getInjectionMode(settings, kind) {
@@ -269,8 +269,8 @@ function compressLine(text, settings, kind) {
     const mode = kind === 'continuity' ? (settings.continuityInjectionMode || 'direct') : (settings.loreInjectionMode || 'direct');
     if (mode !== 'compressed') return text;
     const level = kind === 'continuity'
-        ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 2))
-        : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 2));
+        ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 3))
+        : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 3));
     const limits = [420, 320, 240, 170, 110];
     return truncateForInjection(text, limits[level - 1]);
 }
@@ -340,9 +340,9 @@ export function getMemoSignature(state, mode = null, kind = 'combined') {
         loreHighMode: settings.loreHighInjectionMode || 'direct',
         loreNormalMode: settings.loreNormalInjectionMode || 'compressed',
         loreLowMode: settings.loreLowInjectionMode || 'compressed',
-        loreLevel: settings.loreCompressionLevel || 2,
+        loreLevel: settings.loreCompressionLevel || 3,
         continuityMode: settings.continuityInjectionMode || 'direct',
-        continuityLevel: settings.continuityCompressionLevel || 2,
+        continuityLevel: settings.continuityCompressionLevel || 3,
         injectContinuity: settings.injectContinuity !== false && settings.injectMemo !== false,
         injectLore: !!settings.injectLore,
         continuityConfig: state?.continuityConfig || {},

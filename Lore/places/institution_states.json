@@ -78,7 +78,10 @@
       "gateType": "institution_state",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -158,7 +161,10 @@
       "gateType": "institution_state",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -245,7 +251,10 @@
       "gateType": "institution_state",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 50
     },
     {
       "schemaVersion": 2,
@@ -332,7 +341,10 @@
       "gateType": "institution_state",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 60
     }
   ]
 }

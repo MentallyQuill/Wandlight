@@ -7,7 +7,7 @@
  */
 
 import { getPanelLoreState, getInjectableLoreEntries, getLoreRelevanceCounts, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag, LORE_LIFECYCLE_STATUSES } from './lore-matrix.js';
-import { LORE_RELEVANCE_TIERS, LORE_RELEVANCE_LABELS, normalizeLoreRelevance, LORE_CATEGORY_VALUES } from './lore-relevance.js';
+import { LORE_RELEVANCE_TIERS, LORE_RELEVANCE_LABELS, normalizeLoreRelevance, LORE_CATEGORY_VALUES, LORE_PURPOSE_LABELS, normalizeLorePurpose } from './lore-relevance.js';
 import { getDefaultState, DEFAULT_SETTINGS } from './constants.js';
 import {
     getState,
@@ -1011,7 +1011,7 @@ function createStoryLoreGenerationPanel(state) {
     const header = document.createElement('div');
     header.className = 'wandlight-lore-generation-panel-title';
     header.textContent = 'Scan Story Lore';
-    addTooltip(header, 'Uses the Reasoning provider to scan chat messages and create story/AU lore entries for Pending Lore Review. The scan can cover recent messages, a custom range, or the entire chat.');
+    addTooltip(header, 'Uses the Reasoning provider to scan chat messages and create story-specific lore entries for Pending Lore Review. The scan can cover recent messages, a custom range, or the entire chat.');
     panel.appendChild(header);
 
     const help = document.createElement('div');
@@ -1021,7 +1021,7 @@ function createStoryLoreGenerationPanel(state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
-    const scanBtn = createButton('Scan Story Lore', 'Scans the configured message range, processes chunks in parallel, and appends generated story/AU lore into Pending Lore Review as chunks complete.', async (btn) => {
+    const scanBtn = createButton('Scan Story Lore', 'Scans the configured message range, processes chunks in parallel, and appends generated story-specific lore into Pending Lore Review as chunks complete.', async (btn) => {
         await handleBulkGeneratePendingLore(btn);
     }, 'wandlight-primary-button');
     if (loreGenerationUiRunning || activeLoreGenerationController) {
@@ -1203,7 +1203,7 @@ function createLoreScanQualitySettingsContent() {
     modeRow.className = 'wandlight-setting-row wandlight-lore-scan-setting-row';
     const modeLabel = document.createElement('span');
     modeLabel.textContent = 'Scan breadth';
-    addTooltip(modeLabel, 'Auto uses bootstrap mode for manual first-runs when accepted story/AU lore is sparse, then incremental mode for maintenance. Bootstrap targets broad story coverage; incremental targets only new or changed facts.');
+    addTooltip(modeLabel, 'Auto uses bootstrap mode for manual first-runs when accepted story-specific lore is sparse, then incremental mode for maintenance. Bootstrap targets broad story coverage; incremental targets only new or changed facts.');
     const modeSelect = document.createElement('select');
     modeSelect.className = 'text_pole';
     [
@@ -1601,14 +1601,14 @@ function createContextEditorCard(state) {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help';
-    help.textContent = 'Canon reference point means the latest canon knowledge the roleplay should treat as established, such as “through Prisoner of Azkaban” or “before the Triwizard Tournament.” If it stays “not detected,” set it manually or leave it blank for AU/original scenes.';
+    help.textContent = 'Canon reference point means the latest canon knowledge the roleplay should treat as established, such as “through Prisoner of Azkaban” or “before the Triwizard Tournament.” If it stays “not detected,” set it manually or leave it blank for story-original scenes.';
     card.appendChild(help);
 
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid wandlight-context-grid';
     grid.appendChild(createTextSettingField('Scene date', state?.loreContext?.sceneDate || '', 'Example: September 1, 1996. Used for date-sensitive lore.', (value) => updateLoreContextField('sceneDate', value)));
     grid.appendChild(createTextSettingField('Canon reference point', state?.loreContext?.canonBoundary || '', 'Example: Through Chapter 14 of Half-Blood Prince. Used to avoid using future canon prematurely.', (value) => updateLoreContextField('canonBoundary', value)));
-    grid.appendChild(createTextSettingField('Branch', state?.loreContext?.branchId || 'main', 'Use “main” for the primary timeline, or a custom branch name for AU/time-travel branches.', (value) => updateLoreContextField('branchId', value || 'main')));
+    grid.appendChild(createTextSettingField('Branch', state?.loreContext?.branchId || 'main', 'Use “main” for the primary timeline, or a custom branch name for story/time-travel branches.', (value) => updateLoreContextField('branchId', value || 'main')));
     card.appendChild(grid);
 
     card.appendChild(createKeyValue('Last detected', state?.loreContext?.lastDetectedAt ? new Date(state.loreContext.lastDetectedAt).toLocaleString() : 'never', 'When Story Context was last detected automatically. Manual edits also affect generation immediately.'));
@@ -2188,7 +2188,7 @@ function createCanonSceneEditorCard(state) {
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
     title.textContent = 'Scene and Timeline';
-    addTooltip(title, 'Lightweight live scene and timeline fields. Durable AU/canon divergences belong in Story Lore.');
+    addTooltip(title, 'Lightweight live scene and timeline fields. Durable story-established canon changes belong in Story Lore.');
     card.appendChild(title);
 
     const grid = document.createElement('div');
@@ -2456,16 +2456,7 @@ function renderInjectionTab(container, state) {
     const placementStatus = `${settings.injectionTransport === 'interceptor' ? 'Legacy prepend' : 'Extension Prompt'} · C ${formatPlacementSummary(settings, 'continuity')} · H ${formatPlacementSummary(settings, 'loreHigh')} · N ${formatPlacementSummary(settings, 'loreNormal')} · L ${formatPlacementSummary(settings, 'loreLow')}`;
     container.appendChild(createCollapsibleSection('injection.promptPlacement', 'Prompt Placement', placementStatus, false, createInjectionPlacementCard(settings), { tooltip: 'Role, position, and depth used for prompt injection.' }));
 
-    container.appendChild(createCollapsibleSection(
-        'injection.continuityHandling',
-        'Continuity Handling',
-        `${settings.continuityInjectionMode || 'direct'} · ${getCompressionStatusTextForSummary(state, 'continuity')}`,
-        (settings.continuityInjectionMode || 'direct') === 'compressed',
-        createContinuityHandlingCard(state, settings),
-        { tooltip: 'Direct or model-compressed handling for Continuity injection.' }
-    ));
-
-    container.appendChild(createInjectionPreviewCard('Continuity Injection', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This is the actual Continuity block currently configured for prompt injection. It can be placed at a different depth because it is separated from Lore.'));
+    container.appendChild(createInjectionPreviewCard('Continuity Injection', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This is the actual Continuity block currently configured for prompt injection. It can be placed at a different depth because it is separated from Lore.', createContinuityHandlingDropdown(state, settings)));
     container.appendChild(createInjectionPreviewCard('High-Relevance Lore Injection', 'wandlight-lore-high-injection-preview', loreHighPreview, settings.injectLore !== false && settings.loreHighInjectionEnabled !== false, 'Lore injected in the high-relevance prompt group.', createLoreTierHandlingDropdown('high', state, settings)));
     container.appendChild(createInjectionPreviewCard('Normal-Relevance Lore Injection', 'wandlight-lore-normal-injection-preview', loreNormalPreview, settings.injectLore !== false && settings.loreNormalInjectionEnabled !== false, 'Lore injected in the normal-relevance prompt group.', createLoreTierHandlingDropdown('normal', state, settings)));
     container.appendChild(createInjectionPreviewCard('Low-Relevance Lore Injection', 'wandlight-lore-low-injection-preview', loreLowPreview, settings.injectLore !== false && settings.loreLowInjectionEnabled !== false, 'Lore injected in the low-relevance prompt group.', createLoreTierHandlingDropdown('low', state, settings)));
@@ -2479,6 +2470,18 @@ function renderInjectionTab(container, state) {
         createCompressionPromptEditorCard(),
         { tooltip: 'Editable prompt templates used by Compress Continuity Now and tiered Compress Lore actions.' }
     ));
+}
+
+
+function createContinuityHandlingDropdown(state, settings) {
+    return createCollapsibleSection(
+        'injection.continuityHandling',
+        'Continuity Handling',
+        `${settings.continuityInjectionMode || 'direct'} · ${getCompressionStatusTextForSummary(state, 'continuity')}`,
+        (settings.continuityInjectionMode || 'direct') === 'compressed',
+        createContinuityHandlingCard(state, settings),
+        { tooltip: 'Direct or model-compressed handling for Continuity injection.' }
+    );
 }
 
 function createContinuityHandlingCard(state, settings) {
@@ -2587,7 +2590,7 @@ function createLoreTierModeButton(tier, mode, label, tooltip) {
 function createCompressionLevelControl(kind, settings) {
     const parsed = parseLoreCompressionKind(kind);
     const levelKey = parsed.base === 'continuity' ? 'continuityCompressionLevel' : parsed.tier ? tierSettingKey(parsed.tier, 'CompressionLevel') : 'loreCompressionLevel';
-    const fallback = parsed.tier === 'high' ? 1 : parsed.tier === 'low' ? 4 : 2;
+    const fallback = 3;
     const levelValue = Math.max(1, Math.min(5, Number(settings[levelKey]) || fallback));
     const label = document.createElement('label');
     label.className = 'wandlight-slider-row';
@@ -2601,7 +2604,7 @@ function createCompressionLevelControl(kind, settings) {
     range.value = String(levelValue);
     range.addEventListener('input', () => {
         const next = getSettings();
-        next[levelKey] = Number(range.value) || 2;
+        next[levelKey] = Number(range.value) || 3;
         saveSettings(next);
         text.textContent = `Compression level: ${next[levelKey]} (${getCompressionProfile(next[levelKey]).label})`;
         refreshInjectionPreviewOnly();
@@ -2718,8 +2721,8 @@ function getCompressionBudgetSummary(kind, state) {
     const settings = getSettings();
     const parsed = parseLoreCompressionKind(kind);
     const level = parsed.base === 'continuity'
-        ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 2))
-        : parsed.tier ? getLoreTierLevel(settings, parsed.tier) : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 2));
+        ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 3))
+        : parsed.tier ? getLoreTierLevel(settings, parsed.tier) : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 3));
     const directText = parsed.base === 'continuity'
         ? buildContinuityPreview(state, 'direct')
         : parsed.tier ? buildLorePreview(state, 'direct', parsed.tier) : buildLorePreview(state, 'direct');
@@ -3017,10 +3020,10 @@ async function runModelCompression(kind = 'lore', btn = null) {
         }
 
         const level = parsedKind.base === 'continuity'
-            ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 2))
+            ? Math.max(1, Math.min(5, Number(settings.continuityCompressionLevel) || 3))
             : parsedKind.tier
                 ? getLoreTierLevel(settings, parsedKind.tier)
-                : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 2));
+                : Math.max(1, Math.min(5, Number(settings.loreCompressionLevel) || 3));
 
         const context = JSON.stringify({
             sceneDate: state?.loreContext?.sceneDate || state?.canon?.inUniverseDate || '',
@@ -3105,7 +3108,7 @@ async function runModelCompression(kind = 'lore', btn = null) {
         else if (parsedKind.tier) freshState.loreCompressionStatusByRelevance[parsedKind.tier] = nextStatus;
         else freshState.loreCompressionStatus = nextStatus;
         saveState(freshState);
-        refreshPanelBody({ preserveScroll: false });
+        refreshPanelBody({ preserveScroll: true, preserveWindowScroll: true });
         toast(`${parsedKind.base === 'continuity' ? 'Continuity' : parsedKind.tier ? `${RELEVANCE_META[parsedKind.tier]?.label || parsedKind.tier} lore` : 'Lore'} compression updated: ${compressedTokens} tokens / ${cleaned.length} chars from ${budget.directTokens} tokens / ${budget.directCharacters} chars.`);
         return cleaned;
     } catch (e) {
@@ -3117,7 +3120,7 @@ async function runModelCompression(kind = 'lore', btn = null) {
             saveState(freshState);
         }
         toast(`${kind === 'continuity' ? 'Continuity' : 'Lore'} compression failed: ${e?.message || e}`, 'error');
-        refreshPanelBody({ preserveScroll: false });
+        refreshPanelBody({ preserveScroll: true, preserveWindowScroll: true });
         return null;
     } finally {
         if (btn) {
@@ -3253,7 +3256,7 @@ function getCompressionStatusKeyForKind(kind = 'lore') {
     return 'loreCompressionStatus';
 }
 function getLoreTierMode(settings, tier) { return settings[tierSettingKey(tier, 'InjectionMode')] || (tier === 'high' ? 'direct' : 'compressed'); }
-function getLoreTierLevel(settings, tier) { return Math.max(1, Math.min(5, Number(settings[tierSettingKey(tier, 'CompressionLevel')]) || (tier === 'high' ? 1 : tier === 'low' ? 4 : 2))); }
+function getLoreTierLevel(settings, tier) { return Math.max(1, Math.min(5, Number(settings[tierSettingKey(tier, 'CompressionLevel')]) || 3)); }
 
 function getCompressionStatusTextForKind(state, kind = 'lore') {
     const settings = getSettings();
@@ -3662,7 +3665,8 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     const meta = document.createElement('div');
     meta.className = 'wandlight-lore-entry-meta';
     meta.appendChild(createRegistryBadge('category', entry.category || 'other', `Category: ${entry.category || 'other'}. Pending cards use the same compact metadata style as accepted cards.`));
-    meta.appendChild(createRegistryBadge('canonStatus', entry.canon || entry.canonStatus || 'canon', `Canon/AU: ${entry.canon || entry.canonStatus || 'canon'}.`));
+    meta.appendChild(createLorePurposeBadge(entry));
+    meta.appendChild(createRegistryBadge('canonStatus', entry.canon || entry.canonStatus || 'canon', `Canon/Story: ${entry.canon || entry.canonStatus || 'canon'}.`));
     meta.appendChild(createBadge(`P${Number(entry.priority || 50)}`, 'Priority used for sorting, injection preference, and canon-lore suggestion limits.'));
     meta.appendChild(createSpellMetadataBadges(entry));
     if (entry.confidence !== undefined) meta.appendChild(createBadge(`confidence ${entry.confidence}`, 'Model-provided confidence for this entry.'));
@@ -4090,7 +4094,7 @@ function createEditableLoreEntryEditor(entry) {
 function renderLoreTab(container, state) {
     container.appendChild(createSectionHeader(
         'Lore',
-        'Suggest canon lore from the local database, generate story/AU lore with the model, review pending entries, and manage accepted lore.'
+        'Suggest canon lore from the local database, generate story-specific lore with the model, review pending entries, and manage accepted lore.'
     ));
     container.appendChild(createCollapsibleSection(
         'lore.generation',
@@ -4098,7 +4102,7 @@ function renderLoreTab(container, state) {
         'canon suggestions + story generation',
         true,
         createLoreGenerationCard(state),
-        { tooltip: 'Suggest canon lore from the local database or generate story/AU lore from recent chat messages.', className: 'wandlight-lore-generation-collapsible' }
+        { tooltip: 'Suggest canon lore from the local database or generate story-specific lore from recent chat messages.', className: 'wandlight-lore-generation-collapsible' }
     ));
 
     container.appendChild(createCollapsibleSection(
@@ -4829,6 +4833,13 @@ function createEditablePriorityBadge(entry) {
     return wrap;
 }
 
+
+function createLorePurposeBadge(entry) {
+    const purpose = normalizeLorePurpose(entry?.lorePurpose || entry?.purpose, entry) || 'unspecified';
+    const label = LORE_PURPOSE_LABELS[purpose] || String(purpose || 'unspecified').replace(/[_-]+/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
+    return createBadge(`Purpose: ${label}`, 'Lore purpose explains why this is specific Wandlight lore rather than a generic reference fact.');
+}
+
 function createSpellMetadataBadges(entry) {
     const row = document.createDocumentFragment();
     const spells = Array.from(new Set([
@@ -4949,13 +4960,15 @@ function createEntryCard(entry, state) {
     metaRow.className = 'wandlight-lore-entry-meta';
     if (isExpanded) {
         metaRow.appendChild(createEditableLoreMetaBadge(entry, 'category', entry.category || 'other', null, `Category: ${entry.category || 'canon'}. Use dropdown to change.`));
-        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canon || entry.canonStatus || 'canon', null, `Canon/AU: ${entry.canon || entry.canonStatus || 'canon'}. Use dropdown to change.`));
+        metaRow.appendChild(createLorePurposeBadge(entry));
+        metaRow.appendChild(createEditableLoreMetaBadge(entry, 'canonStatus', entry.canon || entry.canonStatus || 'canon', null, `Canon/Story: ${entry.canon || entry.canonStatus || 'canon'}. Use dropdown to change.`));
         metaRow.appendChild(createEditableLoreMetaBadge(entry, 'truthStatus', entry.truthStatus || 'true', null, `Truth/reveal status: ${entry.truthStatus || 'true'}. Use dropdown to change.`));
         metaRow.appendChild(createEditableLoreMetaBadge(entry, 'revealPolicy', entry.revealPolicy || 'private', null, `Reveal policy: ${entry.revealPolicy || 'private'}. Use dropdown to change.`));
         metaRow.appendChild(createEditablePriorityBadge(entry));
     } else {
         metaRow.appendChild(createRegistryBadge('category', entry.category || 'other', `Category: ${entry.category || 'canon'}. Expand the entry to edit.`));
-        metaRow.appendChild(createRegistryBadge('canonStatus', entry.canon || entry.canonStatus || 'canon', `Canon/AU: ${entry.canon || entry.canonStatus || 'canon'}. Expand the entry to edit.`));
+        metaRow.appendChild(createLorePurposeBadge(entry));
+        metaRow.appendChild(createRegistryBadge('canonStatus', entry.canon || entry.canonStatus || 'canon', `Canon/Story: ${entry.canon || entry.canonStatus || 'canon'}. Expand the entry to edit.`));
         metaRow.appendChild(createBadge(`P${Number(entry.priority || 50)}`, 'Priority. Expand the entry to edit.'));
     }
     metaRow.appendChild(createSpellMetadataBadges(entry));

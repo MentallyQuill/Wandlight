@@ -104,7 +104,10 @@
           "notes": "Dumbledore Headmaster state is bounded by his death.",
           "appliedIn": "Wandlight relevance-tier regression repair pass"
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "id": "canon_snape_potions_defense_role",
@@ -195,177 +198,10 @@
       "protected": false,
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
-    },
-    {
-      "id": "canon_order_of_the_phoenix_faction",
-      "title": "Order of the Phoenix",
-      "tags": [
-        "Order",
-        "faction",
-        "Voldemort",
-        "resistance"
-      ],
-      "category": "faction",
-      "fact": "The Order of the Phoenix is a secret organization opposing Voldemort and his followers, especially relevant from the renewed war period onward.",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "validFrom": "1995-06-24",
-      "validTo": "1998-08-31",
-      "branchId": "main",
-      "whoKnowsTruth": [
-        "Order members"
-      ],
-      "publicVersion": "Most of the public does not know the Order's membership or operations.",
-      "revealPolicy": "private",
-      "activeWhen": {
-        "erasAny": [
-          "Year 5",
-          "Year 6",
-          "Year 7",
-          "war"
-        ],
-        "locationsAny": [],
-        "charactersPresentAny": [
-          "Dumbledore",
-          "Sirius",
-          "Lupin",
-          "Moody"
-        ],
-        "tagsAny": [
-          "Order"
-        ]
-      },
-      "priority": 78,
-      "status": "active",
-      "source": "canon-lore-db:characters/adults_and_factions.json",
-      "locked": true,
-      "content": {},
-      "scope": {
-        "characters": [
-          "Albus Dumbledore",
-          "Sirius Black",
-          "Remus Lupin",
-          "Alastor Moody"
-        ],
-        "factions": [
-          "Order of the Phoenix"
-        ],
-        "topics": [
-          "secret organization",
-          "Voldemort resistance",
-          "war"
-        ],
-        "eras": [
-          "Second Wizarding War"
-        ],
-        "schoolYears": [
-          "Year 5",
-          "Year 6",
-          "Year 7"
-        ],
-        "books": [
-          "Order of the Phoenix",
-          "Half-Blood Prince",
-          "Deathly Hallows"
-        ]
-      },
-      "date": {
-        "validFrom": "1995-06-24",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null
-      },
-      "kind": "faction_state",
-      "gateType": "faction_state",
-      "protected": false,
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "low"
-    },
-    {
-      "id": "canon_death_eaters_faction",
-      "title": "Death Eaters",
-      "tags": [
-        "Death Eaters",
-        "Voldemort",
-        "villains",
-        "faction"
-      ],
-      "category": "faction",
-      "fact": "Death Eaters are Voldemort's followers and become an escalating public threat after his return is acknowledged.",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "validFrom": "1995-06-24",
-      "validTo": "1998-08-31",
-      "branchId": "main",
-      "whoKnowsTruth": [],
-      "publicVersion": "Death Eaters are dangerous Voldemort-aligned witches and wizards.",
-      "revealPolicy": "public",
-      "activeWhen": {
-        "erasAny": [
-          "Year 5",
-          "Year 6",
-          "Year 7",
-          "war"
-        ],
-        "locationsAny": [],
-        "charactersPresentAny": [
-          "Voldemort",
-          "Malfoy",
-          "Bellatrix"
-        ],
-        "tagsAny": [
-          "Death Eaters",
-          "villains"
-        ]
-      },
-      "priority": 82,
-      "status": "active",
-      "source": "canon-lore-db:characters/adults_and_factions.json",
-      "locked": true,
-      "content": {},
-      "scope": {
-        "characters": [
-          "Lord Voldemort",
-          "Draco Malfoy",
-          "Bellatrix Lestrange"
-        ],
-        "factions": [
-          "Death Eaters"
-        ],
-        "topics": [
-          "Voldemort followers",
-          "war",
-          "dark magic",
-          "public threat"
-        ],
-        "eras": [
-          "Second Wizarding War"
-        ],
-        "schoolYears": [
-          "Year 5",
-          "Year 6",
-          "Year 7"
-        ],
-        "books": [
-          "Order of the Phoenix",
-          "Half-Blood Prince",
-          "Deathly Hallows"
-        ]
-      },
-      "date": {
-        "validFrom": "1995-06-24",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null
-      },
-      "kind": "faction_state",
-      "gateType": "faction_state",
-      "protected": false,
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 80
     }
   ]
 }

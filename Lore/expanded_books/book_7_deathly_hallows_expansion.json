@@ -86,7 +86,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:summer",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -175,7 +178,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:summer",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -262,7 +268,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -350,7 +359,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -437,7 +449,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -523,7 +538,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:winter",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "relationship_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -619,7 +637,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-02-28"
         }
-      }
+      },
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -707,7 +728,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:winter",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -798,7 +822,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:spring",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -884,7 +911,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:spring",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "location_state",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -972,7 +1002,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:climax",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -1060,7 +1093,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:climax",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "location_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -1148,7 +1184,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:road_trip",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -1236,7 +1275,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -1322,7 +1364,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1410,7 +1455,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1495,7 +1543,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -1578,7 +1629,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:battle",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -1674,7 +1728,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
         }
-      }
+      },
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -1758,7 +1815,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Deathly Hallows:aftermath",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 80
     }
   ]
 }

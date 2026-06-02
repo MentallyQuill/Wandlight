@@ -91,7 +91,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 85
     },
     {
       "schemaVersion": 2,
@@ -174,7 +177,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -215,7 +221,7 @@
       "visibility": {},
       "content": {
         "fact": "The Ministry has not yet fallen to Death Eater control.",
-        "injection": "Do not write the Ministry as openly Death Eater-controlled unless AU divergence says so.",
+        "injection": "Do not write the Ministry as openly Death Eater-controlled unless our story has established otherwise.",
         "constraints": [
           "Protect the Ministry fall timing."
         ],
@@ -265,7 +271,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 50
     },
     {
       "schemaVersion": 2,
@@ -314,7 +323,7 @@
       "visibility": {},
       "content": {
         "fact": "The Deathly Hallows framework is not an active trio quest .",
-        "injection": "Do not frame the trio’s decisions around the Deathly Hallows unless AU has introduced them early.",
+        "injection": "Do not frame the trio’s decisions around the Deathly Hallows unless our story has introduced them early.",
         "constraints": [
           "Prevent future Year 7 quest leakage."
         ],
@@ -363,7 +372,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 65
     },
     {
       "schemaVersion": 2,
@@ -445,7 +457,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 70
     }
   ]
 }

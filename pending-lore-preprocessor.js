@@ -4,7 +4,7 @@
  */
 
 import { normalizeLoreEntry, normalizeLoreMatrix } from './lore-matrix.js';
-import { normalizeLoreCanon, normalizeLoreCategory, computeLocalLoreRelevance } from './lore-relevance.js';
+import { normalizeLoreCanon, normalizeLoreCategory, computeLocalLoreRelevance, normalizeLorePurpose, computeSpecificityScore } from './lore-relevance.js';
 
 function sourceText(entry = {}) {
     return [entry.source, entry.sourceInfo?.work, entry.sourceInfo?.book, entry.extensions?.wandlightGeneration?.mode]
@@ -49,6 +49,9 @@ export function preprocessPendingLoreEntry(rawEntry = {}, state = {}, options = 
         canon,
         canonStatus: canon,
         category: normalizeLoreCategory(normalized.category),
+        lorePurpose: normalizeLorePurpose(normalized.lorePurpose || normalized.purpose, normalized),
+        specificityScore: Number.isFinite(Number(normalized.specificityScore)) ? Math.max(0, Math.min(100, Number(normalized.specificityScore))) : computeSpecificityScore(normalized),
+        injectableByDefault: normalized.injectableByDefault !== false,
         relevance: recommendedRelevance,
         lifecycle: {
             ...(normalized.lifecycle || {}),
@@ -64,6 +67,8 @@ export function preprocessPendingLoreEntry(rawEntry = {}, state = {}, options = 
                 ...(normalized.extensions?.wandlightPendingReview || {}),
                 relevanceRecommendation: recommendedRelevance,
                 relevanceScore: local.score,
+                lorePurpose: local.lorePurpose || normalizeLorePurpose(normalized.lorePurpose || normalized.purpose, normalized),
+                specificityScore: local.specificityScore || computeSpecificityScore(normalized),
                 temporalRole: local.temporalRole,
                 canonRecommendation: canon,
                 currentBranchId: branch,

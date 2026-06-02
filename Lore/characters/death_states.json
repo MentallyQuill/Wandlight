@@ -65,7 +65,7 @@
         "fact": "Quirinus Quirrell is dead after the Philosopher's Stone confrontation.",
         "injection": "Quirinus Quirrell is dead after the Philosopher's Stone confrontation.",
         "constraints": [
-          "Do not treat Quirinus Quirrell as alive after 1992-06-04 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Quirinus Quirrell as alive after 1992-06-04 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -103,7 +103,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -167,7 +170,7 @@
         "fact": "Barty Crouch Sr. is dead after his appearance near Hogwarts in late Year 4.",
         "injection": "Barty Crouch Sr. is dead after his appearance near Hogwarts in late Year 4.",
         "constraints": [
-          "Do not treat Barty Crouch Sr. as alive after 1995-05-27 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Barty Crouch Sr. as alive after 1995-05-27 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -205,7 +208,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -269,7 +275,7 @@
         "fact": "Cedric Diggory is dead after the Third Task graveyard event unless the current branch explicitly changes that outcome.",
         "injection": "Cedric Diggory is dead after the Third Task graveyard event unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Cedric Diggory as alive after 1995-06-24 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Cedric Diggory as alive after 1995-06-24 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -307,7 +313,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -370,7 +379,7 @@
         "fact": "Sirius Black is dead after the Department of Mysteries battle unless the current branch explicitly changes that outcome.",
         "injection": "Sirius Black is dead after the Department of Mysteries battle unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Sirius Black as alive after 1996-06-18 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Sirius Black as alive after 1996-06-18 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -408,7 +417,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -470,7 +482,7 @@
         "fact": "Albus Dumbledore is dead after the Astronomy Tower event unless the current branch explicitly changes that outcome.",
         "injection": "Albus Dumbledore is dead after the Astronomy Tower event unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Albus Dumbledore as alive after 1997-06-30 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Albus Dumbledore as alive after 1997-06-30 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -508,7 +520,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -569,7 +584,7 @@
         "fact": "Charity Burbage is dead after the Malfoy Manor meeting near the start of Year 7.",
         "injection": "Charity Burbage is dead after the Malfoy Manor meeting near the start of Year 7.",
         "constraints": [
-          "Do not treat Charity Burbage as alive after 1997-07-21 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Charity Burbage as alive after 1997-07-21 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -607,7 +622,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -668,7 +686,7 @@
         "fact": "Hedwig is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
         "injection": "Hedwig is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Hedwig as alive after 1997-07-27 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Hedwig as alive after 1997-07-27 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -706,7 +724,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -767,7 +788,7 @@
         "fact": "Alastor “Mad-Eye” Moody is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
         "injection": "Alastor “Mad-Eye” Moody is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Alastor Moody as alive after 1997-07-27 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Alastor Moody as alive after 1997-07-27 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -805,7 +826,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -866,7 +890,7 @@
         "fact": "Peter Pettigrew is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
         "injection": "Peter Pettigrew is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Peter Pettigrew as alive after 1998-04-08 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Peter Pettigrew as alive after 1998-04-08 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -904,7 +928,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -965,7 +992,7 @@
         "fact": "Dobby is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
         "injection": "Dobby is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Dobby as alive after 1998-04-08 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Dobby as alive after 1998-04-08 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -1003,7 +1030,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1064,7 +1094,7 @@
         "fact": "Fred Weasley is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "injection": "Fred Weasley is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Fred Weasley as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Fred Weasley as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -1102,7 +1132,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1163,7 +1196,7 @@
         "fact": "Remus Lupin is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "injection": "Remus Lupin is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Remus Lupin as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Remus Lupin as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -1201,7 +1234,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1262,7 +1298,7 @@
         "fact": "Nymphadora Tonks is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "injection": "Nymphadora Tonks is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Nymphadora Tonks as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Nymphadora Tonks as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -1300,7 +1336,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1361,7 +1400,7 @@
         "fact": "Severus Snape is dead after the Battle of Hogwarts and his final memories unless the current branch explicitly changes that outcome.",
         "injection": "Severus Snape is dead after the Battle of Hogwarts and his final memories unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Severus Snape as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Severus Snape as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -1399,7 +1438,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1460,7 +1502,7 @@
         "fact": "Bellatrix Lestrange is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "injection": "Bellatrix Lestrange is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Bellatrix Lestrange as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Bellatrix Lestrange as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -1498,7 +1540,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1559,7 +1604,7 @@
         "fact": "Lord Voldemort is dead after the final duel at the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "injection": "Lord Voldemort is dead after the final duel at the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Lord Voldemort as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Lord Voldemort as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -1597,7 +1642,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1658,7 +1706,7 @@
         "fact": "Colin Creevey is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "injection": "Colin Creevey is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
         "constraints": [
-          "Do not treat Colin Creevey as alive after 1998-05-02 unless accepted AU lore explicitly says otherwise."
+          "Do not treat Colin Creevey as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
         "antiLore": [],
         "notes": ""
@@ -1696,7 +1744,10 @@
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
         }
-      }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     }
   ]
 }

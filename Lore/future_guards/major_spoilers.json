@@ -38,9 +38,9 @@
       "visibility": {},
       "content": {
         "fact": "Horcruxes are not active trio knowledge .",
-        "injection": "Do not let Harry, Ron, or Hermione mention or understand Horcruxes before summer 1996 unless accepted AU lore says otherwise.",
+        "injection": "Do not let Harry, Ron, or Hermione mention or understand Horcruxes before summer 1996 unless accepted story lore has established otherwise.",
         "constraints": [
-          "Do not let Harry, Ron, or Hermione mention or understand Horcruxes before summer 1996 unless accepted AU lore says otherwise."
+          "Do not let Harry, Ron, or Hermione mention or understand Horcruxes before summer 1996 unless accepted story lore has established otherwise."
         ],
         "antiLore": [],
         "notes": ""
@@ -87,7 +87,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 65
     },
     {
       "schemaVersion": 2,
@@ -178,7 +181,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 85
     },
     {
       "schemaVersion": 2,
@@ -267,7 +273,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -344,7 +353,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -432,7 +444,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 85
     },
     {
       "schemaVersion": 2,
@@ -472,9 +487,9 @@
       "visibility": {},
       "content": {
         "fact": "Harry’s cohort is normally tied to Hogwarts school years.",
-        "injection": "Do not place the trio on the Horcrux hunt unless AU divergence explicitly says so.",
+        "injection": "Do not place the trio on the Horcrux hunt unless our story has established otherwise.",
         "constraints": [
-          "Do not place the trio on the Horcrux hunt unless AU divergence explicitly says so."
+          "Do not place the trio on the Horcrux hunt unless our story has established otherwise."
         ],
         "antiLore": [],
         "notes": ""
@@ -521,7 +536,10 @@
       "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 65
     }
   ]
 }

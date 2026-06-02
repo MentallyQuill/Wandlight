@@ -46,6 +46,8 @@ function summarizeEntryForModel(item) {
         pinned: !!item.pinned,
         canon: e.canon || e.canonStatus || 'canon',
         category: e.category || 'other',
+        lorePurpose: e.lorePurpose || '',
+        specificityScore: Number(e.specificityScore || 0),
         dateWindow: [date.validFrom || e.validFrom || '', date.validTo || e.validTo || ''].filter(Boolean).join(' to '),
         scope: {
             characters: (scope.characters || []).slice?.(0, 8) || [],
@@ -67,10 +69,12 @@ Task:
 - Review a compact candidate set of accepted lore entries.
 - Assign only a relevance tier: high, normal, or low.
 - Relevance is about current story usefulness, not Canon/AU status and not injection on/off.
-- High = current scene, immediately relevant characters/locations/items/secrets/events, or facts that directly constrain the next reply.
-- Normal = recent background, near-future/near-past, important branch facts, or medium-context lore.
-- Low = long-term background, distant past/future, or not currently needed.
+- High = specific lore that directly constrains the next reply: current scene, immediately relevant characters/locations/items/secrets/events, or a current timing/knowledge/status gate.
+- Normal = specific recent background, near-future/near-past, important story facts, or medium-context lore.
+- Low = specific but long-term background, distant past/future, or not currently needed.
+- Never promote generic reference/glossary/basic canon facts to High. If an entry lacks a specific lorePurpose, keep it Low.
 - Respect pinned entries: do not demote them unless clearly irrelevant.
+- Treat priority as ordering inside a tier, not as a reason to make generic facts High.
 - Output only JSON: {"changes":[{"id":"...","relevance":"high|normal|low","confidence":0.0-1.0,"reason":"short"}]}
 - Include an entry only when you recommend a change from currentRelevance and confidence is meaningful.`;
     const payload = {
@@ -149,6 +153,7 @@ function buildScoredCandidates(entries, state, settings, suppressed, pinned) {
     const recentText = getRecentChatText(settings.autoRelevanceRecentMessages || 20);
     const scoringOptions = { ...settings, recentText };
     return entries
+        .filter(entry => entry.injectableByDefault !== false)
         .filter(entry => settings.autoRelevanceEvaluateMuted === true || !suppressed.has(entry.id))
         .map(entry => {
             const local = computeLocalLoreRelevance(entry, { ...state, autoRelevanceContext: { recentText } }, scoringOptions);
@@ -160,8 +165,8 @@ function buildScoredCandidates(entries, state, settings, suppressed, pinned) {
                 // Demotion confidence must not be so conservative that high/normal
                 // entries only ever move upward. Use distance below the current
                 // tier threshold rather than raw score/70.
-                const threshold = current === 'high' ? 70 : current === 'normal' ? 28 : 0;
-                const denominator = current === 'high' ? 70 : current === 'normal' ? 28 : 1;
+                const threshold = current === 'high' ? 78 : current === 'normal' ? 30 : 0;
+                const denominator = current === 'high' ? 78 : current === 'normal' ? 30 : 1;
                 const distance = Math.max(0, threshold - local.score);
                 confidence = Math.max(0, Math.min(0.98, 0.62 + Math.min(0.36, (distance / denominator) * 0.36)));
                 if (!local.recentHit) confidence = Math.min(0.98, confidence + 0.08);
@@ -186,11 +191,11 @@ function dedupeCandidates(items, cap) {
 
 function selectCandidates(scored, settings, candidateCap) {
     const promotionLane = [...scored]
-        .filter(item => item.delta > 0 || item.local.score >= 70)
+        .filter(item => item.delta > 0 || item.local.score >= 78)
         .sort((a, b) => b.local.score - a.local.score || Number(b.entry.priority || 50) - Number(a.entry.priority || 50));
 
     const demotionLane = [...scored]
-        .filter(item => item.delta < 0 || (['high', 'normal'].includes(item.current) && item.local.score < 24))
+        .filter(item => item.delta < 0 || (['high', 'normal'].includes(item.current) && item.local.score < 26))
         .sort((a, b) => a.local.score - b.local.score || relevanceWeight(b.current) - relevanceWeight(a.current));
 
     const half = Math.max(1, Math.floor(candidateCap / 2));

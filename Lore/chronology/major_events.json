@@ -2,81 +2,6 @@
   "entries": [
     {
       "schemaVersion": 2,
-      "id": "event_harry_enters_hogwarts",
-      "title": "Harry starts Hogwarts",
-      "kind": "event_anchor",
-      "category": "event",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 80,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1991-09-01",
-        "validTo": "1992-08-31",
-        "precision": "date",
-        "schoolYear": 1,
-        "book": "Philosopher's Stone"
-      },
-      "scope": {
-        "topics": [
-          "timeline",
-          "canon state"
-        ],
-        "schoolYears": [
-          1
-        ],
-        "books": [
-          "Philosopher's Stone"
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Harry is a first-year Gryffindor student after September 1991.",
-        "injection": "Harry is a first-year Gryffindor student after September 1991.",
-        "constraints": [],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "timeline",
-          "year-1"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Philosopher's Stone",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "hardValidFrom": "1991-09-01",
-        "hardValidTo": "1992-08-31",
-        "precision": "date",
-        "schoolYear": 1,
-        "book": "Philosopher's Stone"
-      },
-      "gateType": "event_anchor",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal"
-    },
-    {
-      "schemaVersion": 2,
       "id": "event_quirrell_stone_aftermath",
       "title": "Quirrell and Stone incident resolved",
       "kind": "event_anchor",
@@ -155,7 +80,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 65
     },
     {
       "schemaVersion": 2,
@@ -240,7 +168,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 65
     },
     {
       "schemaVersion": 2,
@@ -331,7 +262,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 65
     },
     {
       "schemaVersion": 2,
@@ -406,7 +340,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 35
     },
     {
       "schemaVersion": 2,
@@ -497,7 +434,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -572,7 +512,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -657,7 +600,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -739,7 +685,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 65
     },
     {
       "schemaVersion": 2,
@@ -814,7 +763,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -896,7 +848,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 55
     },
     {
       "schemaVersion": 2,
@@ -987,7 +942,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 55
     },
     {
       "schemaVersion": 2,
@@ -1062,7 +1020,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -1153,7 +1114,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -1239,7 +1203,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 35
     },
     {
       "schemaVersion": 2,
@@ -1330,7 +1297,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 55
     },
     {
       "schemaVersion": 2,
@@ -1421,7 +1391,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 35
     },
     {
       "schemaVersion": 2,
@@ -1512,7 +1485,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 45
     },
     {
       "schemaVersion": 2,
@@ -1594,7 +1570,10 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "event_anchor",
+      "injectableByDefault": true,
+      "specificityScore": 35
     }
   ]
 }

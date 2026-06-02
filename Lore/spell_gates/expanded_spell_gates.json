@@ -2,175 +2,6 @@
   "entries": [
     {
       "schemaVersion": 2,
-      "id": "spell_gate_lumos_nox",
-      "title": "Lumos and Nox basic spell gate",
-      "kind": "spell_gate",
-      "category": "spell",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "private",
-      "priority": 45,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1991-09-01",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": 1,
-        "book": "Philosopher's Stone"
-      },
-      "scope": {
-        "characters": [],
-        "topics": [
-          "basic spells",
-          "first year"
-        ],
-        "spells": [
-          "Lumos",
-          "Nox"
-        ],
-        "schoolYears": [
-          1
-        ],
-        "books": [
-          "Philosopher's Stone"
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Lumos/Nox are basic wand-light spells appropriate for first-year students onward.",
-        "injection": "Lumos and Nox are basic first-year-level spells; they do not imply advanced combat skill.",
-        "constraints": [
-          "Safe for early Hogwarts students."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "spell-gate",
-          "basic-spells",
-          "year-1"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Philosopher's Stone",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1991-09-01",
-        "canonExpectedUntil": "1998-08-31",
-        "precision": "date",
-        "schoolYear": 1,
-        "book": "Philosopher's Stone"
-      },
-      "gateType": "spell_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "low"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "spell_gate_wingardium_leviosa",
-      "title": "Levitation Charm learning gate",
-      "kind": "spell_gate",
-      "category": "spell",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "private",
-      "priority": 50,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1991-10-01",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": 1,
-        "book": "Philosopher's Stone"
-      },
-      "scope": {
-        "characters": [
-          "Hermione Granger",
-          "Ron Weasley",
-          "Harry Potter"
-        ],
-        "topics": [
-          "charms",
-          "first year"
-        ],
-        "spells": [
-          "Wingardium Leviosa"
-        ],
-        "schoolYears": [
-          1
-        ],
-        "books": [
-          "Philosopher's Stone"
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "The Levitation Charm is first-year curriculum and is familiar after early Charms lessons.",
-        "injection": "Wingardium Leviosa is plausible for first-years after early Charms instruction.",
-        "constraints": [
-          "Do not assume all students have mastered it."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "spell-gate",
-          "charms",
-          "year-1"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Philosopher's Stone",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1991-10-01",
-        "canonExpectedUntil": "1998-08-31",
-        "precision": "date",
-        "schoolYear": 1,
-        "book": "Philosopher's Stone"
-      },
-      "gateType": "spell_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "low"
-    },
-    {
-      "schemaVersion": 2,
       "id": "spell_gate_riddikulus",
       "title": "Riddikulus Boggart lesson gate",
       "kind": "spell_gate",
@@ -216,7 +47,7 @@
         "fact": "Riddikulus is taught during Lupin’s Year 3 Defense class.",
         "injection": "Riddikulus is plausible for third-years after Lupin’s Boggart lesson, but not as routine first-/second-year knowledge.",
         "constraints": [
-          "Date-gate Boggart handling to Year 3 instruction unless AU says otherwise."
+          "Date-gate Boggart handling to Year 3 instruction unless our story establishes otherwise."
         ],
         "antiLore": [],
         "notes": ""
@@ -253,7 +84,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 65
     },
     {
       "schemaVersion": 2,
@@ -336,7 +170,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -419,7 +256,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -466,7 +306,7 @@
         "fact": "Apparition lessons are for eligible older students around Year 6; legal Apparition requires coming of age.",
         "injection": "Students should not casually Apparate before eligibility and training; Apparition is tightly age- and license-gated.",
         "constraints": [
-          "Block underage casual Apparition unless AU explicitly changes the rule."
+          "Block underage casual Apparition unless our story explicitly changes the rule."
         ],
         "antiLore": [],
         "notes": ""
@@ -503,7 +343,10 @@
       "gateType": "spell_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 75
     }
   ]
 }

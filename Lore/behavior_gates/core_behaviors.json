@@ -80,7 +80,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -162,7 +165,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -255,100 +261,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "behavior_hermione_granger_year_4",
-      "title": "Hermione Granger behavior - Year 4",
-      "kind": "behavior_gate",
-      "category": "character",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 80,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1994-09-01",
-        "validTo": "1995-08-31",
-        "precision": "date",
-        "schoolYear": 4,
-        "book": "Goblet of Fire"
-      },
-      "scope": {
-        "characters": [
-          "Hermione Granger"
-        ],
-        "topics": [
-          "behavior",
-          "personality",
-          "year 4"
-        ],
-        "books": [
-          "Goblet of Fire"
-        ],
-        "schoolYears": [
-          4
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Hermione is highly studious, morally driven, and invested in causes such as house-elf welfare. She is protective of Harry but does not know future war secrets.",
-        "injection": "Hermione is highly studious, morally driven, and invested in causes such as house-elf welfare; She is protective of Harry but does not know future war secrets; Do not let her explain Horcruxes or Deathly Hallows in Year 4.",
-        "constraints": [
-          "Do not let her explain Horcruxes or Deathly Hallows in Year 4."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Hermione",
-          "year-4",
-          "behavior"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Goblet of Fire",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1994-09-01",
-        "canonExpectedUntil": "1995-08-31",
-        "precision": "date",
-        "schoolYear": 4,
-        "book": "Goblet of Fire"
-      },
-      "activation": {
-        "requiresMissingEvents": [
-          "horcruxes_revealed_to_trio"
-        ]
-      },
-      "expiration": {
-        "expiresWhenEventsHappen": [
-          "horcruxes_revealed_to_trio"
-        ],
-        "autoMuteOnExpire": true
-      },
-      "gateType": "behavior_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -430,7 +346,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -512,7 +431,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 75
     },
     {
       "schemaVersion": 2,
@@ -594,7 +516,10 @@
       "gateType": "behavior_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -694,7 +619,10 @@
           "dumbledore_death_occurs"
         ],
         "autoMuteOnExpire": false
-      }
+      },
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 75
     }
   ]
 }

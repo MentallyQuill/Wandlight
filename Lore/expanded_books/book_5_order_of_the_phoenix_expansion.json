@@ -84,7 +84,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:summer",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -169,7 +172,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:summer",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "location_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -253,7 +259,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:summer",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -338,7 +347,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:term_start",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -427,7 +439,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:autumn",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -517,7 +532,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:winter",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -600,7 +618,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:winter",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -684,7 +705,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:winter",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -767,7 +791,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:spring",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -851,7 +878,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:spring",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "schemaVersion": 2,
@@ -939,7 +969,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:climax",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -1023,7 +1056,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:aftermath",
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 80
     },
     {
       "schemaVersion": 2,
@@ -1107,7 +1143,10 @@
       },
       "source": "wandlight-expanded-lore-v1:Order of the Phoenix:aftermath",
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 60
     }
   ]
 }

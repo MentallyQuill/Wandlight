@@ -1,87 +1,6 @@
 {
   "entries": [
     {
-      "id": "canon_wands_general_rule",
-      "title": "Wands: ordinary magical tool",
-      "tags": [
-        "wands",
-        "magic",
-        "objects",
-        "school"
-      ],
-      "category": "item",
-      "fact": "Wands are the standard tool most British witches and wizards use to focus and perform magic.",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "validFrom": "1991-09-01",
-      "validTo": "1998-08-31",
-      "branchId": "main",
-      "whoKnowsTruth": [],
-      "publicVersion": "Wands are normal magical implements.",
-      "revealPolicy": "public",
-      "activeWhen": {
-        "erasAny": [],
-        "locationsAny": [
-          "Hogwarts",
-          "classroom"
-        ],
-        "charactersPresentAny": [],
-        "tagsAny": [
-          "wands",
-          "magic"
-        ]
-      },
-      "priority": 55,
-      "status": "active",
-      "source": "canon-lore-db:items/artifacts_and_objects.json",
-      "locked": true,
-      "content": {},
-      "scope": {
-        "locations": [
-          "Hogwarts",
-          "classroom"
-        ],
-        "objects": [
-          "wands"
-        ],
-        "topics": [
-          "ordinary magical tool",
-          "magic",
-          "school equipment"
-        ],
-        "schoolYears": [
-          "Year 1",
-          "Year 2",
-          "Year 3",
-          "Year 4",
-          "Year 5",
-          "Year 6",
-          "Year 7"
-        ],
-        "books": [
-          "Philosopher's Stone",
-          "Chamber of Secrets",
-          "Prisoner of Azkaban",
-          "Goblet of Fire",
-          "Order of the Phoenix",
-          "Half-Blood Prince",
-          "Deathly Hallows"
-        ]
-      },
-      "date": {
-        "validFrom": "1991-09-01",
-        "validTo": "1998-08-31",
-        "precision": "date",
-        "schoolYear": null
-      },
-      "kind": "artifact_state",
-      "gateType": "artifact_state",
-      "protected": false,
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "low"
-    },
-    {
       "id": "canon_marauders_map_known_item",
       "title": "Marauder's Map",
       "tags": [
@@ -176,7 +95,10 @@
       "protected": false,
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "id": "canon_invisibility_cloak_known_item",
@@ -268,7 +190,10 @@
       "protected": false,
       "userEditable": true,
       "canon": "canon",
-      "relevance": "low"
+      "relevance": "low",
+      "lorePurpose": "item_state",
+      "injectableByDefault": true,
+      "specificityScore": 60
     },
     {
       "id": "canon_horcrux_concept_secret",
@@ -359,7 +284,10 @@
             "horcruxes_revealed_to_trio"
           ]
         }
-      }
+      },
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 60
     }
   ]
 }

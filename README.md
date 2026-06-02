@@ -71,7 +71,7 @@ Suggest Canon Lore reads the bundled local `Lore/` database. It preprocesses can
 
 ### Scan Story Lore
 
-Story Lore Scan uses the Reasoning Provider to extract durable story/AU facts from chat messages. It outputs compact candidate facts and converts them to pending lore entries with Canon/AU, Category, Priority, and Relevance metadata.
+Story Lore Scan uses the Reasoning Provider to extract durable story/AU facts from chat messages. It outputs compact candidate facts and converts them to pending lore entries with Canon/Story, Category, Priority, and Relevance metadata.
 
 ## Auto-Relevance
 
@@ -100,7 +100,7 @@ Wandlight now has separate injection groups:
 - Normal-Relevance Lore
 - Low-Relevance Lore
 
-Each lore relevance tier has independent settings inside that tier's preview section:
+Continuity and each lore relevance tier have their handling settings inside that group's preview section:
 
 - enabled/disabled
 - prompt position/depth/role
@@ -108,7 +108,7 @@ Each lore relevance tier has independent settings inside that tier's preview sec
 - Compress Now
 - compression interval
 - max entries
-- compression level
+- compression level, defaulting to level 3
 - injection preview
 
 Compression Prompts live below the preview sections.
@@ -121,9 +121,9 @@ Lore compression is split by relevance tier.
 
 | Tier | Default compression posture |
 |---|---|
-| High | Direct or lightly compressed; preserve exact scene-critical details. |
-| Normal | Balanced compression; preserve recent/background constraints. |
-| Low | Aggressive compression; summarize broad background lore. |
+| High | Defaults to level 3 when compressed; preserve exact scene-critical details. |
+| Normal | Defaults to level 3; preserve recent/background constraints. |
+| Low | Defaults to level 3; summarize broad background lore compactly. |
 
 Changing High-Relevance lore should not invalidate Low-Relevance compression, and vice versa. Each tier has its own compression signature and cache.
 
@@ -157,3 +157,12 @@ See `Lore/README.md` for schema guidance.
 ## License
 
 See `LICENSE`.
+
+
+## Specific Lore Policy
+
+Wandlight Lore is no longer treated as an encyclopedia or glossary. Bundled lore is meant to solve timing, knowledge-boundary, branch/story-memory, and long-chat continuity problems that models commonly mishandle. Basic reference facts such as “wands are standard tools,” “Hogwarts is the British wizarding school,” or “Ron is a Gryffindor” are intentionally removed from the bundled injectable lore database.
+
+Accepted lore now carries an internal `lorePurpose` such as `knowledge_gate`, `event_anchor`, `status_change`, `ability_gate`, `relationship_state`, `item_state`, `behavior_constraint`, or `age_gate`. Auto-Relevance and Suggest Canon Lore use this purpose metadata before promoting an entry. High Relevance requires both a specific lore purpose and a strong current-story match; broad date validity or a character name alone is not enough.
+
+Injected text should speak in story terms, not metadata jargon. Prefer “unless our story has established otherwise” or “unless accepted story lore has established a different outcome.” Avoid model-facing phrases like “unless AU divergence says so.”

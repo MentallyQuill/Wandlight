@@ -95,7 +95,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,
@@ -192,7 +195,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,
@@ -283,7 +289,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,
@@ -369,7 +378,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,
@@ -466,7 +478,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,
@@ -552,106 +567,10 @@
       "gateType": "knowledge_gate",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "knowledge_gate_draco_mission_public_before_tower",
-      "title": "Draco mission secrecy gate",
-      "kind": "knowledge_gate",
-      "category": "knowledge",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "do_not_reveal",
-      "priority": 90,
-      "protected": true,
-      "locked": true,
-      "date": {
-        "validFrom": "1991-09-01",
-        "validTo": "1997-06-29",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "scope": {
-        "characters": [
-          "Harry Potter",
-          "Hermione Granger",
-          "Ron Weasley",
-          "general Hogwarts students"
-        ],
-        "topics": [
-          "Draco mission",
-          "knowledge gate"
-        ],
-        "books": [],
-        "schoolYears": []
-      },
-      "visibility": {
-        "notKnownByBefore": {
-          "Harry Potter": "1997-06-30",
-          "Hermione Granger": "1997-06-30",
-          "Ron Weasley": "1997-06-30",
-          "general Hogwarts students": "1997-06-30"
-        }
-      },
-      "content": {
-        "fact": "Draco’s exact mission is not public knowledge.",
-        "injection": "Harry Potter, Hermione Granger, Ron Weasley, general Hogwarts students should not know or casually discuss Draco mission unless this story established it.",
-        "constraints": [
-          "Block premature knowledge of Draco mission."
-        ],
-        "antiLore": [
-          "Do not have Harry Potter explain Draco mission .",
-          "Do not have Hermione Granger explain Draco mission .",
-          "Do not have Ron Weasley explain Draco mission ."
-        ],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Draco mission",
-          "knowledge-gate",
-          "future-guard"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1991-09-01",
-        "canonExpectedUntil": "1997-06-29",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "activation": {
-        "requiresMissingEvents": [
-          "dumbledore_death_occurs"
-        ]
-      },
-      "expiration": {
-        "expiresWhenEventsHappen": [
-          "dumbledore_death_occurs"
-        ],
-        "autoMuteOnExpire": true
-      },
-      "gateType": "knowledge_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal"
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     }
   ]
 }

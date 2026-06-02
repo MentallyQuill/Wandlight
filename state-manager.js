@@ -9,7 +9,7 @@
 
 import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
 import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey, applyLoreLifecycleEvaluation } from './lore-matrix.js';
-import { normalizeLoreRelevance, normalizeLoreCanon, normalizeLoreCategory, computeLocalLoreRelevance } from './lore-relevance.js';
+import { normalizeLoreRelevance, normalizeLoreCanon, normalizeLoreCategory, computeLocalLoreRelevance, normalizeLorePurpose, computeSpecificityScore } from './lore-relevance.js';
 import { preprocessPendingLoreEntries } from './pending-lore-preprocessor.js';
 
 const MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST = 200000;
@@ -145,6 +145,21 @@ export function getSettings() {
     if (merged.autoRelevanceMode === 'off') {
         merged.autoRelevanceEnabled = false;
         merged.autoRelevanceMode = 'suggest';
+    }
+
+    // One-time compression-level default migration. Preserve user-customized values;
+    // only move old defaults from earlier tier profiles to the new uniform level 3.
+    if (stored.compressionLevelDefaultsMigrated20260602 !== true) {
+        const migrateLevel = (key, oldValues, newValue = 3) => {
+            const current = stored[key];
+            if (current === undefined || oldValues.includes(Number(current))) merged[key] = newValue;
+        };
+        migrateLevel('continuityCompressionLevel', [2]);
+        migrateLevel('loreCompressionLevel', [2]);
+        migrateLevel('loreHighCompressionLevel', [1]);
+        migrateLevel('loreNormalCompressionLevel', [2]);
+        migrateLevel('loreLowCompressionLevel', [4]);
+        merged.compressionLevelDefaultsMigrated20260602 = true;
     }
 
     // Write back merged defaults so the object is complete going forward
@@ -586,6 +601,9 @@ function compactLoreEntryForStorage(entry) {
         gateType: normalized.gateType || normalized.kind || 'fact',
         category: normalized.category || 'other',
         relevance: normalizeLoreRelevance(normalized.relevance || 'normal'),
+        lorePurpose: normalizeLorePurpose(normalized.lorePurpose || normalized.purpose, normalized),
+        specificityScore: Number.isFinite(Number(normalized.specificityScore)) ? Math.max(0, Math.min(100, Number(normalized.specificityScore))) : computeSpecificityScore(normalized),
+        injectableByDefault: normalized.injectableByDefault !== false,
         canon: normalizeLoreCanon(normalized.canon || normalized.canonStatus, normalized.source || normalized.sourceInfo?.work || ''),
         canonStatus: normalizeLoreCanon(normalized.canon || normalized.canonStatus, normalized.source || normalized.sourceInfo?.work || ''),
         truthStatus: normalized.truthStatus || 'true',
@@ -950,6 +968,27 @@ export function migrateState(state) {
         })) : [];
         state.autoRelevanceLastRun = state.autoRelevanceLastRun || null;
         state._version = 14;
+    }
+
+    // ── Schema v15: strict specific-lore purpose metadata ───────────────────
+    if (state._version < 15) {
+        if (Array.isArray(state.loreMatrix)) {
+            state.loreMatrix = state.loreMatrix.map(entry => ({
+                ...entry,
+                lorePurpose: normalizeLorePurpose(entry?.lorePurpose || entry?.purpose, entry),
+                specificityScore: Number.isFinite(Number(entry?.specificityScore)) ? Math.max(0, Math.min(100, Number(entry.specificityScore))) : computeSpecificityScore(entry),
+                injectableByDefault: entry?.injectableByDefault !== false,
+            }));
+        }
+        if (Array.isArray(state.pendingLoreEntries)) {
+            state.pendingLoreEntries = state.pendingLoreEntries.map(entry => ({
+                ...entry,
+                lorePurpose: normalizeLorePurpose(entry?.lorePurpose || entry?.purpose, entry),
+                specificityScore: Number.isFinite(Number(entry?.specificityScore)) ? Math.max(0, Math.min(100, Number(entry.specificityScore))) : computeSpecificityScore(entry),
+                injectableByDefault: entry?.injectableByDefault !== false,
+            }));
+        }
+        state._version = 15;
     }
 
     // ── Always normalize lore fields post-migration ────────────────────────

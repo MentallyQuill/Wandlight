@@ -36,6 +36,7 @@ import {
 
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
 import { proposeCanonLoreForContext } from './canon-lore-db.js';
+import { normalizeLorePurpose, computeSpecificityScore } from './lore-relevance.js';
 
 // ── Guard flags ─────────────────────────────────────────────────────────────────
 
@@ -856,23 +857,25 @@ function buildBulkCandidateSystemPrompt(settings = getSettings(), profile = {}) 
     return `You are Wandlight Continuity's bulk story-lore extractor.
 
 Task:
-- Extract compact, durable story/AU candidate facts from a message interval.
+- Extract compact, durable story-specific candidate facts from a message interval.
 - This is a bulk backfill pass. Prefer coverage and recoverability over polished prose.
 - Do not output full lore-entry schema. Output compact candidate facts only.
-- Do not create generic Harry Potter encyclopedia facts unless the story messages make them current, divergent, private, or plot-relevant.
-- Capture new/original characters, canon characters as used by this story, relationships, possessions/items, spells/skills, secrets/knowledge boundaries, locations, factions, goals/threads, timeline anchors, and AU divergences.
-- Use priorityHint: high only for active secrets, identity constraints, major relationship/current-goal facts, critical possessions, current injuries/conditions, or major AU divergences; medium for durable useful facts; low for flavor/background.
-- Use relevanceHint: high for facts from the current scene or immediate next-scene constraints; normal for durable recent-background/story facts; low for long-term background or flavor.
-- Story-scan output is AU/story lore by default unless the message explicitly restates a canon fact.
+- Do not create generic Harry Potter encyclopedia facts, obvious canon identity facts, broad setting definitions, or glossary/reference facts.
+- Only capture specific lore that protects timing, knowledge boundaries, statuses, secrets, relationships, possessions/items, goals, branch/story-established changes, or facts likely to be forgotten in a long chat.
+- Capture new/original characters, canon characters as used by this story, relationships, possessions/items, spells/skills, secrets/knowledge boundaries, locations, factions, goals/threads, timeline anchors, and story-established canon changes.
+- Use priorityHint: high only for active secrets, identity constraints, major relationship/current-goal facts, critical possessions, current injuries/conditions, or major story-established changes; medium for durable useful facts; low for minor but specific constraints.
+- Use relevanceHint: high for facts from the current scene or immediate next-scene constraints; normal for durable recent-background/story facts; low for long-term specific constraints.
+- Story-scan output is story-specific lore by default unless the message explicitly restates a canon fact.
+- Every fact must include lorePurpose using one of: temporal_gate, knowledge_gate, ability_gate, status_change, event_anchor, branch_fact, relationship_state, secret, objective, item_state, location_state, rule_constraint, behavior_constraint.
 
 Output requirements:
 - Return ONLY valid JSON. No markdown fences. No commentary.
 - Required shape: {"chunkSummary":"string","facts":[...]}
 - Produce up to ${factsPerChunk} facts when supported by the chunk. Sparse chunks may produce fewer.
-- Every fact must include: category, subject, fact, priorityHint, relevanceHint, messageRefs.
+- Every fact must include: category, subject, fact, lorePurpose, priorityHint, relevanceHint, messageRefs.
 - messageRefs must be message numbers from the bracketed message labels.
 - Keep facts atomic: one durable claim per fact.
-- Use categories: character, relationship, item, spell, knowledge, place, faction, goal, timeline, event, secret, artifact, skill, rule.
+- Use categories: character, relationship, item, spell, knowledge, place, faction, goal, timeline, event, secret, artifact, skill, rule. Do not emit reference/glossary/general facts.
 
 Generation mode: ${profile.mode || 'bootstrap'}.
 Target total entries for this scan: ${profile.targetTotal || 40}.`;
@@ -905,6 +908,7 @@ function normalizeCandidateFact(raw = {}, chunk = {}) {
         fact,
         priorityHint: String(raw.priorityHint || raw.priority || 'medium').trim().toLowerCase(),
         relevanceHint: String(raw.relevanceHint || raw.relevance || '').trim().toLowerCase(),
+        lorePurpose: String(raw.lorePurpose || raw.purpose || '').trim().toLowerCase(),
         canon: String(raw.canon || raw.canonMode || 'au').trim().toLowerCase(),
         confidence: Number.isFinite(Number(raw.confidence)) ? Number(raw.confidence) : 0.75,
         messageRefs: messageRefs.map(v => Number(v)).filter(n => Number.isFinite(n) && n > 0),
@@ -1033,6 +1037,8 @@ function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, pr
     const titleFact = fact.replace(/\s+/g, ' ').replace(/[\r\n]+/g, ' ').slice(0, 96);
     const title = `${subject}: ${titleFact}`.slice(0, 140);
     const messageRefs = Array.isArray(candidate.messageRefs) ? candidate.messageRefs : [];
+    const lorePurpose = normalizeLorePurpose(candidate.lorePurpose || candidate.purpose, { kind: category === 'spell' ? 'spell_gate' : category === 'relationship' ? 'relationship_gate' : category === 'item' || category === 'artifact' ? 'artifact_state' : category === 'event' ? 'event_anchor' : category === 'timeline' ? 'event_anchor' : category === 'secret' ? 'knowledge_gate' : 'fact', category });
+    const specificityScore = computeSpecificityScore({ category, kind: category, lorePurpose, content: { fact }, scope: inferScopeFromCandidate(candidate), date: {} });
     return {
         id: `story_bulk_${cleanIdPart(subject)}_${hash}`,
         title,
@@ -1042,6 +1048,9 @@ function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, pr
         canon: candidateCanonToLoreCanon(candidate),
         canonStatus: candidateCanonToLoreCanon(candidate),
         relevance: candidateRelevanceToLoreRelevance(candidate, profile),
+        lorePurpose,
+        specificityScore,
+        injectableByDefault: true,
         truthStatus: category === 'secret' ? 'hidden' : 'true',
         revealPolicy: category === 'secret' ? 'private' : 'public',
         priority: priorityFromHint(candidate.priorityHint, category),
@@ -1071,6 +1080,7 @@ function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, pr
                 evidenceMessageRefs: messageRefs,
                 candidateCategory: candidate.category || category,
                 relevanceHint: candidate.relevanceHint || '',
+                lorePurpose,
                 canonHint: candidate.canon || '',
                 generatedAt: Date.now(),
                 targetTotal: profile.targetTotal || 0,

@@ -75,10 +75,51 @@ function shouldRunTurnInterval(counterName, interval) {
     const key = `_${counterName}Counter`;
     if (typeof onGenerationEndedAutomation[key] === 'undefined') onGenerationEndedAutomation[key] = 0;
     onGenerationEndedAutomation[key]++;
-    const threshold = Math.max(1, Math.min(20, Number(interval) || 1));
+    const threshold = Math.max(1, Math.min(100, Number(interval) || 1));
     if (onGenerationEndedAutomation[key] < threshold) return false;
     onGenerationEndedAutomation[key] = 0;
     return true;
+}
+
+function getChatTextStats() {
+    try {
+        const ctx = SillyTavern.getContext();
+        const chat = Array.isArray(ctx?.chat) ? ctx.chat : [];
+        const texts = chat.map(message => String(message?.mes || message?.content || '').trim()).filter(Boolean);
+        const text = texts.join('\n');
+        const wordCount = (text.match(/\b[\w'-]+\b/g) || []).length;
+        return { messageCount: chat.length, wordCount };
+    } catch (_) {
+        return { messageCount: 0, wordCount: 0 };
+    }
+}
+
+function shouldRunLoreGenerationAutomation(settings = getSettings()) {
+    const key = '_loreGenerationHybridCounter';
+    const baselineKey = '_loreGenerationWordBaseline';
+    if (typeof onGenerationEndedAutomation[key] === 'undefined') onGenerationEndedAutomation[key] = 0;
+    const stats = getChatTextStats();
+    if (typeof onGenerationEndedAutomation[baselineKey] === 'undefined') {
+        onGenerationEndedAutomation[baselineKey] = stats.wordCount;
+    }
+
+    onGenerationEndedAutomation[key]++;
+    const turns = onGenerationEndedAutomation[key];
+    const minTurns = Math.max(1, Math.min(100, Number(settings.loreGenerationAutoMinTurns) || 20));
+    const maxTurns = Math.max(minTurns, Math.min(100, Number(settings.loreGenerationAutoInterval) || 50));
+    const configuredWordThreshold = Number(settings.loreGenerationAutoWordThreshold);
+    const wordThreshold = Math.max(0, Number.isFinite(configuredWordThreshold) ? configuredWordThreshold : 2500);
+    const newWords = Math.max(0, stats.wordCount - Number(onGenerationEndedAutomation[baselineKey] || 0));
+    const enoughWords = wordThreshold > 0 && newWords >= wordThreshold;
+    const maxTurnReached = turns >= maxTurns;
+
+    if ((turns >= minTurns && enoughWords) || maxTurnReached) {
+        onGenerationEndedAutomation[key] = 0;
+        onGenerationEndedAutomation[baselineKey] = stats.wordCount;
+        return true;
+    }
+
+    return false;
 }
 
 export async function onGenerationEndedAutomation() {
@@ -105,7 +146,7 @@ export async function onGenerationEndedAutomation() {
     }
 
     if ((settings.loreGenerationMode || 'manual') === 'automatic'
-        && shouldRunTurnInterval('loreGeneration', settings.loreGenerationAutoInterval || 10)) {
+        && shouldRunLoreGenerationAutomation(settings)) {
         try {
             const validation = validateLoreProviderConfiguration('lore');
             if (!validation.ok) results.lore = { status: 'api_not_configured', error: validation.message };
@@ -131,4 +172,7 @@ globalThis._wandlightIsExtractionRunning = isExtractionRunning;
 /** Resets the automatic continuity throttle counter. Called on chat change. */
 export function resetExtractionCounter() {
     onExtractionTriggered._counter = 0;
+    onGenerationEndedAutomation._contextDetectionCounter = 0;
+    onGenerationEndedAutomation._loreGenerationHybridCounter = 0;
+    onGenerationEndedAutomation._loreGenerationWordBaseline = undefined;
 }

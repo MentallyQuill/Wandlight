@@ -1785,16 +1785,9 @@ function createStoryLoreSettingsContent() {
     wrap.appendChild(createCollapsibleSection(
         'lore.story.automation',
         'Automation',
-        settings.loreGenerationMode === 'automatic' ? `every ${settings.loreGenerationAutoInterval || 10} turns` : 'manual',
+        getStoryLoreAutomationSummary(settings),
         false,
-        createAutomationModeCard(
-            'Story Lore Scan',
-            'loreGenerationMode',
-            'loreGenerationAutoInterval',
-            'Only scans when you click Scan Story Lore.',
-            'Runs automatically after roleplay turns on this interval, using the Reasoning provider. Generated lore still waits in Pending Lore Review.',
-            'Automatic story-lore scan interval in completed model turns.'
-        ),
+        createStoryLoreAutomationSettingsContent(),
         { tooltip: 'Optional automatic story-lore scanning after roleplay turns.', className: 'wandlight-compact-subsection' }
     ));
 
@@ -1814,6 +1807,33 @@ function getLoreScanPerformanceSummary(settings = getSettings()) {
 
 function getLoreScanQualitySummary(settings = getSettings()) {
     return `${settings.loreBulkFactsPerChunk || 14} facts/chunk · ${(settings.loreGenerationBreadthMode || 'auto')}`;
+}
+
+function getStoryLoreAutomationSummary(settings = getSettings()) {
+    if (settings.loreGenerationMode !== 'automatic') return 'manual';
+    const words = Number(settings.loreGenerationAutoWordThreshold || 2500);
+    const maxTurns = Number(settings.loreGenerationAutoInterval || 50);
+    return `~${words} words or ${maxTurns} turns`;
+}
+
+function createStoryLoreAutomationSettingsContent() {
+    const content = document.createElement('div');
+    content.className = 'wandlight-story-lore-automation-content';
+    content.appendChild(createAutomationModeCard(
+        'Story Lore Scan',
+        'loreGenerationMode',
+        'loreGenerationAutoInterval',
+        'Only scans when you click Scan Story Lore.',
+        'Runs automatically after enough new story text accumulates or the maximum turn interval is reached. Generated lore still waits in Pending Lore Review.',
+        'Maximum completed model turns between automatic story-lore scans.'
+    ));
+    content.appendChild(createRangeSettingRow('Minimum turns', 'Automatic story lore waits at least this many completed model turns unless the maximum turn interval is reached.', 'loreGenerationAutoMinTurns', { min: 1, max: 100, fallback: 20 }));
+    content.appendChild(createRangeSettingRow('Word threshold', 'Automatic story lore runs after roughly this many new chat words have accumulated, once the minimum turn count has passed. Set to 0 to use turn interval only.', 'loreGenerationAutoWordThreshold', { min: 0, max: 10000, fallback: 2500, suffix: ' words' }));
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help wandlight-compact-help';
+    help.textContent = 'Automatic story-lore scans are intentionally conservative because they are expensive and produce review work.';
+    content.appendChild(help);
+    return content;
 }
 
 function createLoreScanScopeSettingsContent() {
@@ -1936,10 +1956,32 @@ function createLoreScanQualitySettingsContent() {
     grid.appendChild(createToggleCard(
         'Duplicate Guard',
         settings.loreDuplicateGuard !== false,
-        'When enabled, generated entries that have duplicate IDs, duplicate titles, or very similar facts to accepted lore are filtered before Pending Lore Review.',
+        'When enabled, exact duplicate generated entries are filtered and similar entries are routed for update/merge review.',
         (checked) => {
             const next = getSettings();
             next.loreDuplicateGuard = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+        }
+    ));
+    grid.appendChild(createToggleCard(
+        'Similarity Routing',
+        settings.loreSimilarityRouting !== false,
+        'When enabled, similar generated lore is kept as a possible update or merge instead of being thrown away as a duplicate.',
+        (checked) => {
+            const next = getSettings();
+            next.loreSimilarityRouting = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+        }
+    ));
+    grid.appendChild(createToggleCard(
+        'Strict Quality Gate',
+        settings.loreStrictQualityGate !== false,
+        'When enabled, low-value recap facts are filtered before Pending Lore Review.',
+        (checked) => {
+            const next = getSettings();
+            next.loreStrictQualityGate = checked;
             saveSettings(next);
             refreshPanelBody({ preserveScroll: true });
         }
@@ -2220,6 +2262,8 @@ function createBulkLoreLedgerStatusCard(state) {
     const failed = batch.failedChunks || 0;
     const candidateCount = batch.candidateCount || 0;
     const pendingCount = batch.pendingEntryCount || (state?.pendingLoreEntries || []).length || 0;
+    const qualityDropped = batch.droppedQualityCount || state?.pendingLoreMeta?.droppedQualityCount || 0;
+    const routedSimilar = batch.routedSimilarCount || state?.pendingLoreMeta?.routedSimilarCount || 0;
 
     const summary = document.createElement('div');
     summary.className = 'wandlight-runtime-help wandlight-lore-scan-results-summary';
@@ -2233,6 +2277,8 @@ function createBulkLoreLedgerStatusCard(state) {
     grid.appendChild(createKeyValue('Failed', String(failed), 'Chunks that failed after retry attempts and can be retried with What to rescan: Retry failed only.'));
     grid.appendChild(createKeyValue('Facts', String(candidateCount), 'Compact extracted candidate facts stored for this scan.'));
     grid.appendChild(createKeyValue('Pending', String(pendingCount), 'Pending Lore Review entries after scan commits.'));
+    if (qualityDropped) grid.appendChild(createKeyValue('Quality filtered', String(qualityDropped), 'Generated candidates discarded by the strict quality gate as low-value recap or insufficiently specific lore.'));
+    if (routedSimilar) grid.appendChild(createKeyValue('Routed updates', String(routedSimilar), 'Similar generated candidates kept as possible updates or merges instead of discarded as duplicates.'));
     card.appendChild(grid);
     return card;
 }
@@ -2248,11 +2294,34 @@ async function handleBulkGeneratePendingLore(btn) {
     refreshPanelBody({ preserveScroll: true });
     await runBusyAction(btn, 'Scanning...', async () => {
         setFeatureProgress('lore', 'Starting story lore scan...', 5);
-        const result = await runBulkLoreGeneration({
+        let result = await runBulkLoreGeneration({
             force: true,
             signal: activeLoreGenerationController?.signal,
             progress: (message, percent) => setFeatureProgress('lore', message, percent),
         });
+        if (result?.status === 'pending_lore_exists') {
+            const pendingCount = result.pendingCount || 0;
+            const sameContext = result.sameContext !== false;
+            const proceed = await confirmAction(
+                'Pending lore already exists',
+                sameContext
+                    ? `There are ${pendingCount} unresolved pending lore entr${pendingCount === 1 ? 'y' : 'ies'} for this context. Continue and append/merge new scan results into Pending Lore Review?`
+                    : `There are ${pendingCount} unresolved pending lore entr${pendingCount === 1 ? 'y' : 'ies'} from another context. Continue by marking the old batch replaced and starting a fresh scan?`
+            );
+            if (!proceed) {
+                setFeatureProgress('lore', 'Story lore scan cancelled: pending lore still needs review.', 0);
+                toast('Review or dismiss existing pending lore before scanning again.', 'info');
+                return;
+            }
+            setFeatureProgress('lore', sameContext ? 'Continuing scan and appending to pending lore...' : 'Replacing stale pending lore and starting scan...', 5);
+            result = await runBulkLoreGeneration({
+                force: true,
+                signal: activeLoreGenerationController?.signal,
+                progress: (message, percent) => setFeatureProgress('lore', message, percent),
+                allowPendingAppend: sameContext,
+                replacePending: !sameContext,
+            });
+        }
         refreshHeader();
 
         if (result?.status === 'cancelled') {
@@ -2265,9 +2334,11 @@ async function handleBulkGeneratePendingLore(btn) {
             refreshPanelBody({ preserveScroll: false });
             const failedText = result.failedChunkCount ? ` ${result.failedChunkCount} chunk${result.failedChunkCount === 1 ? '' : 's'} failed and can be retried.` : '';
             const skippedText = result.skippedChunks ? ` ${result.skippedChunks} unchanged chunk${result.skippedChunks === 1 ? '' : 's'} skipped.` : '';
+            const qualityText = result.droppedQualityCount ? ` ${result.droppedQualityCount} low-value candidate${result.droppedQualityCount === 1 ? '' : 's'} filtered.` : '';
+            const routedText = result.routedSimilarCount ? ` ${result.routedSimilarCount} similar candidate${result.routedSimilarCount === 1 ? '' : 's'} routed for update review.` : '';
             setFeatureProgress('lore', `Story lore scan ${result.status}: ${result.completedChunkCount || 0} chunks, ${result.candidateCount || 0} candidate facts, ${result.pendingEntryCount || 0} pending entries.`, 100);
             resetFeatureProgress('lore');
-            toast(`Story lore scan ${result.status}. ${result.candidateCount || 0} candidate facts extracted; ${result.pendingEntryCount || 0} pending lore entries now available.${failedText}${skippedText}`);
+            toast(`Story lore scan ${result.status}. ${result.candidateCount || 0} candidate facts extracted; ${result.pendingEntryCount || 0} pending lore entries now available.${failedText}${skippedText}${qualityText}${routedText}`);
         } else if (result?.status === 'skipped_unchanged') {
             refreshPanelBody({ preserveScroll: true });
             setFeatureProgress('lore', `Story lore scan skipped ${result.skippedChunks || 0} unchanged chunks.`, 100);
@@ -2539,12 +2610,12 @@ function createAutomationModeCard(titleText, modeKey, intervalKey, manualTooltip
     const input = document.createElement('input');
     input.type = 'range';
     input.min = '1';
-    input.max = '20';
+    input.max = '100';
     input.step = '1';
     input.value = String(settings[intervalKey] || 5);
     input.addEventListener('input', () => {
         const next = getSettings();
-        next[intervalKey] = Math.max(1, Math.min(20, parseInt(input.value, 10) || 5));
+        next[intervalKey] = Math.max(1, Math.min(100, parseInt(input.value, 10) || 5));
         saveSettings(next);
         label.textContent = `Every ${next[intervalKey]} turns`;
     });
@@ -4465,9 +4536,28 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     meta.appendChild(createLorePurposeBadge(entry));
     meta.appendChild(createRegistryBadge('canonStatus', entry.canon || entry.canonStatus || 'canon', `Canon/Story: ${entry.canon || entry.canonStatus || 'canon'}.`));
     meta.appendChild(createBadge(`P${Number(entry.priority || 50)}`, 'Priority used for sorting, injection preference, and canon-lore suggestion limits.'));
+    const generation = entry.extensions?.wandlightGeneration || {};
+    const reviewMeta = entry.extensions?.wandlightPendingReview || {};
+    if (generation.operation) meta.appendChild(createBadge(`Op: ${generation.operation}`, 'Generated lore operation proposed by the story-lore scan.'));
+    if (generation.qualityRoute || reviewMeta.qualityRoute) meta.appendChild(createBadge(`Quality: ${generation.qualityRoute || reviewMeta.qualityRoute}`, generation.qualityReason || reviewMeta.qualityReason || 'Generated-lore quality route.'));
+    if (generation.similarityRoute || reviewMeta.reviewRoute) meta.appendChild(createBadge(`Route: ${generation.similarityRoute || reviewMeta.reviewRoute}`, generation.similarityReason || reviewMeta.similarityReason || 'Similarity/update routing result.'));
+    if (generation.recommendedPin) meta.appendChild(createBadge('pin suggested', 'Generator recommends pinning/protecting this entry after acceptance.'));
+    if (generation.recommendedMute) meta.appendChild(createBadge('mute suggested', 'Generator recommends storing but muting this entry after acceptance.'));
     meta.appendChild(createSpellMetadataBadges(entry));
     if (entry.confidence !== undefined) meta.appendChild(createBadge(`confidence ${entry.confidence}`, 'Model-provided confidence for this entry.'));
     card.appendChild(meta);
+
+    const targetId = generation.targetEntryId || reviewMeta.targetEntryId || '';
+    if (targetId) {
+        const target = normalizeLoreMatrix(getState()?.loreMatrix || []).find(item => item.id === targetId);
+        const targetBox = document.createElement('div');
+        targetBox.className = 'wandlight-runtime-help wandlight-pending-target-help';
+        targetBox.textContent = target
+            ? `Targets existing lore: ${target.title || target.id}${target.fact ? ` - ${target.fact}` : ''}`
+            : `Targets existing lore id: ${targetId}`;
+        addTooltip(targetBox, generation.similarityReason || reviewMeta.similarityReason || 'Accepting this candidate will update or merge into the target if it still exists and is not locked.');
+        card.appendChild(targetBox);
+    }
 
     if (Array.isArray(entry.tags) && entry.tags.length) {
         const tags = createReadOnlyTags(entry.tags);
@@ -4481,9 +4571,25 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
     addTooltip(fact, 'The fact that will be merged into the accepted lore matrix if applied.');
     card.appendChild(fact);
 
+    if (entry.content?.injection && entry.content.injection !== entry.fact) {
+        const injection = document.createElement('div');
+        injection.className = 'wandlight-runtime-help wandlight-pending-injection-preview';
+        injection.textContent = `Injection: ${entry.content.injection}`;
+        addTooltip(injection, 'Model-facing lore text that will be injected after acceptance.');
+        card.appendChild(injection);
+    }
+    if (Array.isArray(entry.content?.constraints) && entry.content.constraints.length) {
+        const constraints = document.createElement('div');
+        constraints.className = 'wandlight-runtime-help wandlight-pending-constraints-preview';
+        constraints.textContent = `Constraints: ${entry.content.constraints.join(' ')}`;
+        addTooltip(constraints, 'Specific constraints captured by generated lore.');
+        card.appendChild(constraints);
+    }
+
     const actionsRow = document.createElement('div');
     actionsRow.className = 'wandlight-primary-actions wandlight-pending-entry-actions';
-    actionsRow.appendChild(createButton('Apply', 'Accepts this single lore entry and merges it into the accepted lore matrix.', () => {
+    const applyLabel = targetId ? 'Apply Update' : 'Apply';
+    actionsRow.appendChild(createButton(applyLabel, targetId ? 'Accepts this generated update and merges it into the targeted accepted lore entry.' : 'Accepts this single lore entry and merges it into the accepted lore matrix.', () => {
         const current = getState();
         pushStateSnapshot(current, `Accept lore entry: ${entry.title || index + 1}`, getSettings().maxSnapshots);
         acceptPendingLoreEntry(index);
@@ -4492,6 +4598,41 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
         refreshHeader();
         toast('Lore entry accepted.');
     }, 'wandlight-primary-button'));
+    if (targetId) {
+        actionsRow.appendChild(createButton('Apply as New', 'Accepts this generated lore as a separate new entry instead of updating the routed target.', () => {
+            const current = getState();
+            pushStateSnapshot(current, `Accept lore as new: ${entry.title || index + 1}`, getSettings().maxSnapshots);
+            const pending = normalizeLoreMatrix(current.pendingLoreEntries || []);
+            if (pending[index]) {
+                const generationMeta = pending[index].extensions?.wandlightGeneration || {};
+                const reviewMeta = pending[index].extensions?.wandlightPendingReview || {};
+                pending[index] = normalizeLoreEntry({
+                    ...pending[index],
+                    extensions: {
+                        ...(pending[index].extensions || {}),
+                        wandlightGeneration: {
+                            ...generationMeta,
+                            operation: 'create',
+                            targetEntryId: '',
+                            similarityRoute: 'kept_separate',
+                        },
+                        wandlightPendingReview: {
+                            ...reviewMeta,
+                            reviewRoute: 'kept_separate',
+                            targetEntryId: '',
+                        },
+                    },
+                });
+                current.pendingLoreEntries = pending;
+                saveState(current, { syncPrompt: false });
+            }
+            acceptPendingLoreEntry(index);
+            togglePendingReviewSelection(getLoreReviewId(entry), false);
+            refreshPanelBody({ preserveScroll: true });
+            refreshHeader();
+            toast('Lore entry accepted as new.');
+        }));
+    }
     actionsRow.appendChild(createButton('Dismiss', 'Rejects this single lore entry without changing accepted lore.', () => {
         rejectPendingLoreEntry(index);
         togglePendingReviewSelection(getLoreReviewId(entry), false);

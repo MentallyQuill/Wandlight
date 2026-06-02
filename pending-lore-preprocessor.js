@@ -39,7 +39,7 @@ export function preprocessPendingLoreEntry(rawEntry = {}, state = {}, options = 
     const manualRelevance = normalized.extensions?.autoRelevance?.mode === 'manual'
         || normalized.extensions?.wandlightPendingReview?.manualRelevance === true
         || options.preserveRelevance === true;
-    const shouldPreserveRelevance = manualRelevance || storyGenerated;
+    const shouldPreserveRelevance = manualRelevance;
     const recommendedRelevance = shouldPreserveRelevance && rawEntry.relevance
         ? normalized.relevance
         : local.relevance;
@@ -71,6 +71,7 @@ export function preprocessPendingLoreEntry(rawEntry = {}, state = {}, options = 
                 specificityScore: local.specificityScore || computeSpecificityScore(normalized),
                 temporalRole: local.temporalRole,
                 canonRecommendation: canon,
+                modelRelevanceHint: storyGenerated ? (normalized.extensions?.wandlightGeneration?.relevanceHint || rawEntry.relevance || '') : '',
                 currentBranchId: branch,
                 preprocessedAt: Date.now(),
                 preservedStaticRelevance: shouldPreserveRelevance && !!rawEntry.relevance,

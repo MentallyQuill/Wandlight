@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 16;
+export const SCHEMA_VERSION = 17;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -64,7 +64,9 @@ export const DEFAULT_SETTINGS = {
     contextDetectionMode: 'manual', // 'manual' | 'automatic'
     contextDetectionAutoInterval: 5,
     loreGenerationMode: 'manual', // 'manual' | 'automatic'
-    loreGenerationAutoInterval: 10,
+    loreGenerationAutoInterval: 50,
+    loreGenerationAutoMinTurns: 20,
+    loreGenerationAutoWordThreshold: 2500,
     contextSourceMessageCount: 20,
     continuitySourceMessageCount: 10,
 
@@ -104,11 +106,14 @@ export const DEFAULT_SETTINGS = {
     loreGenerationChunkSize: 10,
     loreGenerationBreadthMode: 'auto', // 'auto' | 'bootstrap' | 'incremental'
     loreBootstrapTargetEntries: 40,
-    loreIncrementalTargetEntries: 8,
+    loreIncrementalTargetEntries: 5,
     loreBootstrapStoryLoreThreshold: 12,
     loreBootstrapDefaultsMigrated20260531: true,
+    loreAutomationDefaultsMigrated20260602: true,
     loreReplacementGuard: true,
     loreDuplicateGuard: true,
+    loreSimilarityRouting: true,
+    loreStrictQualityGate: true,
     loreTagCount: 4,
 
     // Bulk story lore scan/backfill behavior
@@ -120,7 +125,7 @@ export const DEFAULT_SETTINGS = {
     loreBulkConcurrency: 3,
     loreBulkRescanMode: 'skip_unchanged', // 'skip_unchanged' | 'retry_failed' | 'stale_only' | 'rescan_all'
     loreBulkRetryAttempts: 2,
-    loreBulkFactsPerChunk: 14,
+    loreBulkFactsPerChunk: 8,
     loreBulkConsolidateAsPending: true,
     loreBulkConsolidationChunkWindow: 5,
     loreBulkConsolidationFactWindow: 80,

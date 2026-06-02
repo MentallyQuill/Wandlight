@@ -150,6 +150,34 @@ export function getSettings() {
         merged.loreBootstrapDefaultsMigrated20260531 = true;
     }
 
+    // One-time migration for stricter, less expensive story-lore automation.
+    // Older defaults treated generated lore like lightweight continuity and ran
+    // too often for roleplay sessions with short turns.
+    if (stored.loreAutomationDefaultsMigrated20260602 !== true) {
+        if (stored.loreGenerationAutoInterval === undefined || Number(stored.loreGenerationAutoInterval) === 10) {
+            merged.loreGenerationAutoInterval = 50;
+        }
+        if (stored.loreGenerationAutoMinTurns === undefined) {
+            merged.loreGenerationAutoMinTurns = 20;
+        }
+        if (stored.loreGenerationAutoWordThreshold === undefined) {
+            merged.loreGenerationAutoWordThreshold = 2500;
+        }
+        if (stored.loreBulkFactsPerChunk === undefined || Number(stored.loreBulkFactsPerChunk) === 14) {
+            merged.loreBulkFactsPerChunk = 8;
+        }
+        if (stored.loreIncrementalTargetEntries === undefined || Number(stored.loreIncrementalTargetEntries) === 8) {
+            merged.loreIncrementalTargetEntries = 5;
+        }
+        if (stored.loreSimilarityRouting === undefined) {
+            merged.loreSimilarityRouting = true;
+        }
+        if (stored.loreStrictQualityGate === undefined) {
+            merged.loreStrictQualityGate = true;
+        }
+        merged.loreAutomationDefaultsMigrated20260602 = true;
+    }
+
     // One-time prompt-depth default migration for the relevance-tiered injection UI.
     // Preserve user-customized values; only move old defaults one layer closer.
     if (stored.relevancePromptDepthDefaultsMigrated20260602 !== true) {
@@ -527,6 +555,18 @@ function prePruneLoreEntryForNormalization(entry) {
             endIndex: Number.isFinite(Number(generation.endIndex)) ? Number(generation.endIndex) : 0,
             messageHash: truncateText(generation.messageHash, 32),
             evidenceMessageRefs: prePruneStringArray(generation.evidenceMessageRefs, 20, 32),
+            operation: truncateText(generation.operation, 24),
+            targetEntryId: truncateText(generation.targetEntryId, 140),
+            qualityRoute: truncateText(generation.qualityRoute, 40),
+            qualityReason: truncateText(generation.qualityReason, 240),
+            similarityRoute: truncateText(generation.similarityRoute, 40),
+            similarityReason: truncateText(generation.similarityReason, 240),
+            durabilityReason: truncateText(generation.durabilityReason, 240),
+            recommendedPin: !!generation.recommendedPin,
+            recommendedMute: !!generation.recommendedMute,
+            acceptedAsOperation: truncateText(generation.acceptedAsOperation, 24),
+            acceptedTargetEntryId: truncateText(generation.acceptedTargetEntryId, 140),
+            acceptedAt: Number.isFinite(Number(generation.acceptedAt)) ? Number(generation.acceptedAt) : 0,
             candidateCategory: truncateText(generation.candidateCategory, 60),
             generatedAt: Number.isFinite(Number(generation.generatedAt)) ? Number(generation.generatedAt) : 0,
             targetTotal: Number.isFinite(Number(generation.targetTotal)) ? Number(generation.targetTotal) : 0,
@@ -595,6 +635,18 @@ function compactLoreExtensionsForStorage(normalized) {
             endIndex: Number.isFinite(Number(generation.endIndex)) ? Number(generation.endIndex) : 0,
             messageHash: truncateText(generation.messageHash, 32),
             evidenceMessageRefs: compactStringArray(generation.evidenceMessageRefs, 20, 32),
+            operation: truncateText(generation.operation, 24),
+            targetEntryId: truncateText(generation.targetEntryId, 140),
+            qualityRoute: truncateText(generation.qualityRoute, 40),
+            qualityReason: truncateText(generation.qualityReason, 240),
+            similarityRoute: truncateText(generation.similarityRoute, 40),
+            similarityReason: truncateText(generation.similarityReason, 240),
+            durabilityReason: truncateText(generation.durabilityReason, 240),
+            recommendedPin: !!generation.recommendedPin,
+            recommendedMute: !!generation.recommendedMute,
+            acceptedAsOperation: truncateText(generation.acceptedAsOperation, 24),
+            acceptedTargetEntryId: truncateText(generation.acceptedTargetEntryId, 140),
+            acceptedAt: Number.isFinite(Number(generation.acceptedAt)) ? Number(generation.acceptedAt) : 0,
             candidateCategory: truncateText(generation.candidateCategory, 60),
             generatedAt: Number.isFinite(Number(generation.generatedAt)) ? Number(generation.generatedAt) : 0,
             targetTotal: Number.isFinite(Number(generation.targetTotal)) ? Number(generation.targetTotal) : 0,
@@ -2423,6 +2475,8 @@ export function appendPendingLoreEntries(entries, meta = {}, options = {}) {
     const rawEntryCount = Math.max(0, Number(oldMeta.rawEntryCount) || 0) + Math.max(0, Number(meta.rawEntryCount ?? incoming.length) || incoming.length);
     const normalizedEntryCount = Math.max(0, Number(oldMeta.normalizedEntryCount) || 0) + Math.max(0, Number(meta.normalizedEntryCount ?? incoming.length) || incoming.length);
     const duplicateCount = Math.max(0, Number(oldMeta.droppedDuplicateCount) || 0) + Math.max(0, Number(meta.droppedDuplicateCount) || 0);
+    const qualityCount = Math.max(0, Number(oldMeta.droppedQualityCount) || 0) + Math.max(0, Number(meta.droppedQualityCount) || 0);
+    const routedSimilarCount = Math.max(0, Number(oldMeta.routedSimilarCount) || 0) + Math.max(0, Number(meta.routedSimilarCount) || 0);
     const failedChunkCount = Math.max(0, Number(meta.failedChunkCount ?? oldMeta.failedChunkCount) || 0);
     const completedChunkCount = Math.max(0, Number(meta.completedChunkCount ?? oldMeta.completedChunkCount) || 0);
     const chunkCount = Math.max(0, Number(meta.chunkCount ?? oldMeta.chunkCount) || 0);
@@ -2441,6 +2495,8 @@ export function appendPendingLoreEntries(entries, meta = {}, options = {}) {
         validEntryCount: merged.length,
         droppedEntryCount: Math.max(0, rawEntryCount - merged.length),
         droppedDuplicateCount: duplicateCount,
+        droppedQualityCount: qualityCount,
+        routedSimilarCount,
         failedChunkCount,
         emptyChunkCount: Math.max(0, Number(meta.emptyChunkCount ?? oldMeta.emptyChunkCount) || 0),
         chunkCount,
@@ -2468,6 +2524,8 @@ export function appendPendingLoreEntries(entries, meta = {}, options = {}) {
         rawEntryCount,
         normalizedEntryCount,
         droppedDuplicateCount: duplicateCount,
+        droppedQualityCount: qualityCount,
+        routedSimilarCount,
         generationMode: state.pendingLoreMeta.generationMode,
         targetEntryCount: state.pendingLoreMeta.targetEntryCount,
         lastSource: state.pendingLoreMeta.source,
@@ -2555,6 +2613,104 @@ export function markPendingLoreReplaced(newContextKey) {
     return state;
 }
 
+function uniqueMergedStrings(...arrays) {
+    const seen = new Set();
+    const out = [];
+    for (const array of arrays) {
+        for (const raw of Array.isArray(array) ? array : []) {
+            const text = String(raw || '').trim();
+            if (!text) continue;
+            const key = text.toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            out.push(text);
+        }
+    }
+    return out;
+}
+
+function preparePendingLoreEntryForAcceptance(pendingEntry, existingEntries = []) {
+    const pending = normalizeLoreEntry(pendingEntry);
+    const generation = pending.extensions?.wandlightGeneration || {};
+    const review = pending.extensions?.wandlightPendingReview || {};
+    const operation = String(generation.operation || review.reviewRoute || '').toLowerCase();
+    const targetId = String(generation.targetEntryId || review.targetEntryId || '').trim();
+    if (!targetId || !['update', 'merge', 'supersede', 'conflict', 'possible_update', 'possible_merge'].includes(operation)) return pending;
+
+    const current = normalizeLoreMatrix(existingEntries).find(entry => entry.id === targetId);
+    if (!current || current.locked) return pending;
+
+    const mergeMode = operation === 'merge' || operation === 'possible_merge';
+    const currentContent = current.content || {};
+    const pendingContent = pending.content || {};
+    const mergedFact = mergeMode && current.fact && pending.fact && !String(current.fact).includes(pending.fact)
+        ? `${current.fact} ${pending.fact}`.trim()
+        : (pending.fact || current.fact);
+    const mergedInjection = mergeMode && currentContent.injection && pendingContent.injection && !String(currentContent.injection).includes(pendingContent.injection)
+        ? `${currentContent.injection} ${pendingContent.injection}`.trim()
+        : (pendingContent.injection || currentContent.injection || mergedFact);
+
+    return normalizeLoreEntry({
+        ...current,
+        ...pending,
+        id: current.id,
+        title: mergeMode ? current.title : (pending.title || current.title),
+        locked: current.locked,
+        userEdited: current.userEdited || pending.userEdited,
+        protected: current.protected || pending.protected,
+        tags: uniqueMergedStrings(current.tags, pending.tags),
+        scope: {
+            ...(current.scope || {}),
+            ...(pending.scope || {}),
+            characters: uniqueMergedStrings(current.scope?.characters, pending.scope?.characters),
+            locations: uniqueMergedStrings(current.scope?.locations, pending.scope?.locations),
+            factions: uniqueMergedStrings(current.scope?.factions, pending.scope?.factions),
+            topics: uniqueMergedStrings(current.scope?.topics, pending.scope?.topics),
+            objects: uniqueMergedStrings(current.scope?.objects, pending.scope?.objects),
+            spells: uniqueMergedStrings(current.scope?.spells, pending.scope?.spells),
+            schoolYears: uniqueMergedStrings(current.scope?.schoolYears, pending.scope?.schoolYears),
+            books: uniqueMergedStrings(current.scope?.books, pending.scope?.books),
+            eras: uniqueMergedStrings(current.scope?.eras, pending.scope?.eras),
+        },
+        content: {
+            ...currentContent,
+            ...pendingContent,
+            fact: mergedFact,
+            injection: mergedInjection,
+            constraints: uniqueMergedStrings(currentContent.constraints, pendingContent.constraints),
+            antiLore: uniqueMergedStrings(currentContent.antiLore, pendingContent.antiLore),
+            notes: [currentContent.notes, pendingContent.notes].filter(Boolean).join(' '),
+        },
+        extensions: {
+            ...(current.extensions || {}),
+            ...(pending.extensions || {}),
+            wandlightGeneration: {
+                ...(pending.extensions?.wandlightGeneration || {}),
+                acceptedAsOperation: operation,
+                acceptedTargetEntryId: current.id,
+                acceptedAt: Date.now(),
+            },
+        },
+    });
+}
+
+function applyAcceptedLoreSelectionRecommendations(state, entries = []) {
+    if (!state.loreSelection || typeof state.loreSelection !== 'object') state.loreSelection = { pinnedIds: [], suppressedIds: [] };
+    const pinSet = new Set(Array.isArray(state.loreSelection.pinnedIds) ? state.loreSelection.pinnedIds : []);
+    const muteSet = new Set(Array.isArray(state.loreSelection.suppressedIds) ? state.loreSelection.suppressedIds : []);
+    for (const entry of normalizeLoreMatrix(entries)) {
+        const generation = entry.extensions?.wandlightGeneration || {};
+        if (generation.recommendedMute) {
+            muteSet.add(entry.id);
+            pinSet.delete(entry.id);
+        } else if (generation.recommendedPin || entry.protected) {
+            pinSet.add(entry.id);
+        }
+    }
+    state.loreSelection.pinnedIds = Array.from(pinSet);
+    state.loreSelection.suppressedIds = Array.from(muteSet);
+}
+
 
 
 /**
@@ -2573,11 +2729,13 @@ export function acceptPendingLoreEntries() {
 
     const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
 
-    const merged = mergeLoreEntries(existing, pending);
+    const prepared = pending.map(entry => preparePendingLoreEntryForAcceptance(entry, existing));
+    const merged = mergeLoreEntries(existing, prepared);
 
     // Accepted lore is intentionally uncapped. The Lore tab uses paged rendering
     // so large matrices stay usable without deleting lower-priority entries.
     state.loreMatrix = merged;
+    applyAcceptedLoreSelectionRecommendations(state, prepared);
     state.pendingLoreEntries = [];
     state.pendingLoreMeta = null;
 
@@ -2648,13 +2806,14 @@ export function acceptPendingLoreEntry(entryIndex) {
         return { state, accepted: null };
     }
 
-    const acceptedEntry = pending[entryIndex];
+    const acceptedEntry = preparePendingLoreEntryForAcceptance(pending[entryIndex], existing);
     const contextKey = state.pendingLoreMeta?.contextKey || buildLoreGenerationKey(state);
 
     // Merge the single entry into the uncapped lore matrix. UI paging handles scale.
     const merged = mergeLoreEntries(existing, [acceptedEntry]);
 
     state.loreMatrix = merged;
+    applyAcceptedLoreSelectionRecommendations(state, [acceptedEntry]);
 
     // Remove the accepted entry from pending
     state.pendingLoreEntries = pending.filter((_, i) => i !== entryIndex);

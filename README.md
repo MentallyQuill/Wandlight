@@ -71,7 +71,9 @@ Suggest Canon Lore reads the bundled local `Lore/` database. It preprocesses can
 
 ### Scan Story Lore
 
-Story Lore Scan uses the Reasoning Provider to extract durable story/AU facts from chat messages. It outputs compact candidate facts and converts them to pending lore entries with Canon/Story, Category, Priority, and Relevance metadata.
+Story Lore Scan uses the Reasoning Provider to extract durable story/AU lore from chat messages. It now asks for lore operations rather than simple fact snippets: create, update, merge, supersede, or conflict. Generated entries are expected to include concise titles, model-facing injection text, constraints/anti-lore when useful, durability reasons, evidence message refs, Canon/Story, Category, Priority, and locally recomputed Relevance metadata.
+
+Generated lore is filtered through a strict quality gate by default. Low-value recap facts that belong in a summarizer are discarded before Pending Lore Review. Similar lore is routed as a possible update or merge instead of being silently thrown away as a duplicate.
 
 ## Auto-Relevance
 
@@ -164,5 +166,13 @@ See `LICENSE`.
 Wandlight Lore is no longer treated as an encyclopedia or glossary. Bundled lore is meant to solve timing, knowledge-boundary, branch/story-memory, and long-chat continuity problems that models commonly mishandle. Basic reference facts such as “wands are standard tools,” “Hogwarts is the British wizarding school,” or “Ron is a Gryffindor” are intentionally removed from the bundled injectable lore database.
 
 Accepted lore now carries an internal `lorePurpose` such as `knowledge_gate`, `event_anchor`, `status_change`, `ability_gate`, `relationship_state`, `item_state`, `behavior_constraint`, or `age_gate`. Auto-Relevance and Suggest Canon Lore use this purpose metadata before promoting an entry. High Relevance requires both a specific lore purpose and a strong current-story match; broad date validity or a character name alone is not enough.
+
+## Generated Lore Policy
+
+Generated Story Lore follows the same philosophy as the bundled database. It should protect durable continuity, not summarize chat history.
+
+Good generated entries capture recurring object behavior, knowledge boundaries, secrets, status changes, relationship states, AU/canon-branch changes, active objectives, timeline anchors, or concrete rules. Weak recap entries such as "Hermione found a book" are filtered unless they carry durable consequences.
+
+Automatic Story Lore Scan is conservative by default because it is slow and expensive. Manual scans remain available for deliberate backfills. When automatic mode is enabled, Wandlight waits for enough new story text or a longer turn fallback before scanning.
 
 Injected text should speak in story terms, not metadata jargon. Prefer “unless our story has established otherwise” or “unless accepted story lore has established a different outcome.” Avoid model-facing phrases like “unless AU divergence says so.”

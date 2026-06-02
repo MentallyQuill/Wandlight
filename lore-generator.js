@@ -25,6 +25,8 @@ import {
     markInterruptedLoreBulkChunks,
     patchPendingLoreMeta,
     markPendingLoreStale,
+    markPendingLoreReplaced,
+    saveState,
 } from './state-manager.js';
 
 import {
@@ -32,6 +34,7 @@ import {
     normalizeLoreMatrix,
     buildLoreGenerationKey,
     filterDuplicateLoreEntries,
+    routeSimilarLoreEntries,
 } from './lore-matrix.js';
 
 import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-client.js';
@@ -749,6 +752,29 @@ function formatScanMessages(messages = []) {
         .join('\n\n');
 }
 
+function compactLoreIndexLine(entry = {}, prefix = 'accepted') {
+    const scope = entry.scope || {};
+    const subjects = [
+        ...(Array.isArray(scope.characters) ? scope.characters : []),
+        ...(Array.isArray(scope.objects) ? scope.objects : []),
+        ...(Array.isArray(scope.spells) ? scope.spells : []),
+        ...(Array.isArray(scope.locations) ? scope.locations : []),
+    ].slice(0, 4).join(', ');
+    const fact = String(entry.content?.fact || entry.fact || '').replace(/\s+/g, ' ').slice(0, 180);
+    return `- [${prefix}] ${entry.id || ''} | ${entry.title || ''} | ${entry.category || ''}/${entry.lorePurpose || ''} | ${subjects || 'general'} | ${fact}`;
+}
+
+function buildCompactLoreIndexForGeneration(state = {}, limit = 80) {
+    const accepted = normalizeLoreMatrix(state?.loreMatrix || [])
+        .filter(entry => isAcceptedStoryLoreEntry(entry))
+        .slice(-limit);
+    const pending = normalizeLoreMatrix(state?.pendingLoreEntries || []).slice(-Math.max(10, Math.floor(limit / 3)));
+    const lines = [];
+    for (const entry of accepted) lines.push(compactLoreIndexLine(entry, 'accepted'));
+    for (const entry of pending) lines.push(compactLoreIndexLine(entry, 'pending'));
+    return lines.join('\n').slice(0, 16000);
+}
+
 function buildLoreBulkScanPlan(settings = getSettings(), state = getState()) {
     const allMessages = getAllMessageObjects().map((message, idx) => normalizeScanMessage(message, idx));
     const totalMessages = allMessages.length;
@@ -847,6 +873,7 @@ function buildEffectiveBulkSettings(baseSettings = getSettings(), options = {}) 
         effective.loreBulkRescanMode = String(options.rescanModeOverride || 'skip_unchanged').toLowerCase();
         effective.loreBulkConcurrency = clampInt(effective.loreBulkConcurrency, 1, 3, 2);
         effective.loreBulkFactsPerChunk = clampInt(effective.loreBulkFactsPerChunk, 3, 12, 8);
+        effective.loreSourceMessageCount = Math.max(Number(effective.loreSourceMessageCount) || 40, 120);
     }
 
     return effective;
@@ -857,9 +884,9 @@ function buildBulkCandidateSystemPrompt(settings = getSettings(), profile = {}) 
     return `You are Wandlight's bulk story-lore extractor.
 
 Task:
-- Extract compact, durable story-specific candidate facts from a message interval.
-- This is a bulk backfill pass. Prefer coverage and recoverability over polished prose.
-- Do not output full lore-entry schema. Output compact candidate facts only.
+- Extract compact, durable story-specific lore operations from a message interval.
+- This is a bulk backfill pass. Prefer high-value durable lore over coverage.
+- Do not output full lore-entry schema. Output compact operation candidates only.
 - Do not create generic Harry Potter encyclopedia facts, obvious canon identity facts, broad setting definitions, or glossary/reference facts.
 - Only capture specific lore that protects timing, knowledge boundaries, statuses, secrets, relationships, possessions/items, goals, branch/story-established changes, or facts likely to be forgotten in a long chat.
 - Capture new/original characters, canon characters as used by this story, relationships, possessions/items, spells/skills, secrets/knowledge boundaries, locations, factions, goals/threads, timeline anchors, and story-established canon changes.
@@ -867,12 +894,25 @@ Task:
 - Use relevanceHint: high for facts from the current scene or immediate next-scene constraints; normal for durable recent-background/story facts; low for long-term specific constraints.
 - Story-scan output is story-specific lore by default unless the message explicitly restates a canon fact.
 - Every fact must include lorePurpose using one of: temporal_gate, knowledge_gate, ability_gate, status_change, event_anchor, branch_fact, relationship_state, secret, objective, item_state, location_state, rule_constraint, behavior_constraint.
+- Use operation:
+  - create: genuinely new durable lore.
+  - update: changes or refines an existing durable state.
+  - merge: adds durable details to an existing entry.
+  - supersede: replaces an older state with a newer state.
+  - conflict: contradicts accepted/pending lore and needs user review.
+  - none: no durable lore in this interval.
+- If similar existing lore exists, prefer update/merge/supersede/conflict and include targetEntryId when known.
+- Include a concise title, 3-8 words, label-like, not a full sentence and not an evidence recap.
+- Include injection as model-facing instruction text. It should be usable directly in a roleplay prompt.
+- Include constraints and antiLore when they help prevent mistakes.
+- Include durabilityReason explaining why this belongs in lore rather than a summary.
+- It is acceptable to return zero facts when nothing durable happened.
 
 Output requirements:
 - Return ONLY valid JSON. No markdown fences. No commentary.
 - Required shape: {"chunkSummary":"string","facts":[...]}
 - Produce up to ${factsPerChunk} facts when supported by the chunk. Sparse chunks may produce fewer.
-- Every fact must include: category, subject, fact, lorePurpose, priorityHint, relevanceHint, messageRefs.
+- Every fact must include: operation, category, subject, title, fact, injection, lorePurpose, priorityHint, relevanceHint, durabilityReason, messageRefs.
 - messageRefs must be message numbers from the bracketed message labels.
 - Keep facts atomic: one durable claim per fact.
 - Use categories: character, relationship, item, spell, knowledge, place, faction, goal, timeline, event, secret, artifact, skill, rule. Do not emit reference/glossary/general facts.
@@ -881,9 +921,12 @@ Generation mode: ${profile.mode || 'bootstrap'}.
 Target total entries for this scan: ${profile.targetTotal || 40}.`;
 }
 
-function buildBulkCandidateUserMessage({ stateSummary, chunk, plan, profile }) {
+function buildBulkCandidateUserMessage({ stateSummary, loreIndex, chunk, plan, profile }) {
     return `Current Wandlight state summary:
 ${stateSummary}
+
+Accepted/pending lore index for duplicate/update routing:
+${loreIndex || '(No accepted or pending story lore yet.)'}
 
 Bulk scan range: messages ${plan.startIndex}-${plan.endIndex} (${plan.sourceMessageCount} messages).
 Current chunk: messages ${chunk.startIndex}-${chunk.endIndex}.
@@ -892,7 +935,7 @@ Generation mode: ${profile.mode || 'bootstrap'}.
 Message interval:
 ${formatScanMessages(chunk.messages) || '(No message text)'}
 
-Extract compact candidate facts from this interval. Output ONLY the JSON object now.`;
+Extract compact candidate lore operations from this interval. Output ONLY the JSON object now.`;
 }
 
 function normalizeCandidateFact(raw = {}, chunk = {}) {
@@ -902,10 +945,22 @@ function normalizeCandidateFact(raw = {}, chunk = {}) {
     const fact = String(raw.fact || raw.detail || raw.description || raw.text || raw.summary || '').trim();
     if (!fact || fact.length < 8) return null;
     const messageRefs = Array.isArray(raw.messageRefs) ? raw.messageRefs : Array.isArray(raw.messages) ? raw.messages : Array.isArray(raw.evidenceMessageRefs) ? raw.evidenceMessageRefs : [];
+    const operationRaw = String(raw.operation || raw.action || 'create').trim().toLowerCase().replace(/[^a-z_ -]+/g, '').replace(/\s+/g, '_');
+    const operation = ['create', 'update', 'merge', 'supersede', 'conflict', 'none'].includes(operationRaw) ? operationRaw : 'create';
+    const toStrings = (value, limit = 8) => Array.isArray(value)
+        ? value.map(v => String(v || '').trim()).filter(Boolean).slice(0, limit)
+        : [];
     return {
+        operation,
+        targetEntryId: String(raw.targetEntryId || raw.targetId || raw.existingEntryId || '').trim(),
         category,
         subject: subject || fact.split(/[.;]/)[0].slice(0, 80).trim() || 'Story fact',
+        title: String(raw.title || raw.name || '').trim(),
         fact,
+        injection: String(raw.injection || raw.promptText || raw.instruction || '').trim(),
+        constraints: toStrings(raw.constraints),
+        antiLore: toStrings(raw.antiLore || raw.avoid || raw.doNot),
+        durabilityReason: String(raw.durabilityReason || raw.reason || raw.whyLore || '').trim().slice(0, 500),
         priorityHint: String(raw.priorityHint || raw.priority || 'medium').trim().toLowerCase(),
         relevanceHint: String(raw.relevanceHint || raw.relevance || '').trim().toLowerCase(),
         lorePurpose: String(raw.lorePurpose || raw.purpose || '').trim().toLowerCase(),
@@ -913,6 +968,10 @@ function normalizeCandidateFact(raw = {}, chunk = {}) {
         confidence: Number.isFinite(Number(raw.confidence)) ? Number(raw.confidence) : 0.75,
         messageRefs: messageRefs.map(v => Number(v)).filter(n => Number.isFinite(n) && n > 0),
         scope: raw.scope && typeof raw.scope === 'object' ? raw.scope : {},
+        visibility: raw.visibility && typeof raw.visibility === 'object' ? raw.visibility : {},
+        date: raw.date && typeof raw.date === 'object' ? raw.date : {},
+        recommendedPin: raw.recommendedPin === true || raw.pin === true || raw.protected === true,
+        recommendedMute: raw.recommendedMute === true || raw.mute === true,
         evidence: String(raw.evidence || raw.quote || '').trim().slice(0, 500),
         chunkId: chunk.chunkId || '',
         startIndex: chunk.startIndex || 0,
@@ -1027,6 +1086,48 @@ function candidateCanonToLoreCanon(candidate = {}) {
     return raw === 'canon' ? 'canon' : 'au';
 }
 
+function conciseGeneratedTitle(candidate = {}, category = 'knowledge', lorePurpose = '') {
+    const explicit = String(candidate.title || '').replace(/\s+/g, ' ').trim();
+    if (explicit) return explicit.replace(/[.!?]+$/g, '').slice(0, 80);
+    const subject = String(candidate.subject || '').replace(/\s+/g, ' ').trim();
+    const fact = String(candidate.fact || '').replace(/\s+/g, ' ').trim();
+    const purposeLabels = {
+        knowledge_gate: 'knowledge gate',
+        ability_gate: 'ability gate',
+        status_change: 'state change',
+        event_anchor: 'event anchor',
+        branch_fact: 'story branch',
+        relationship_state: 'relationship state',
+        secret: 'secret',
+        objective: 'objective',
+        item_state: 'item state',
+        location_state: 'location state',
+        rule_constraint: 'rule',
+        behavior_constraint: 'behavior constraint',
+        temporal_gate: 'timeline gate',
+        age_gate: 'age gate',
+    };
+    const suffix = purposeLabels[lorePurpose] || (category ? `${category} lore` : 'story lore');
+    if (subject) return `${subject} ${suffix}`.slice(0, 80);
+    return fact.split(/[.;:]/)[0].replace(/\b(found|discovered|noticed|saw|talked|went)\b/ig, '').trim().slice(0, 80) || 'Story lore';
+}
+
+function generatedKindFor(category = '', lorePurpose = '') {
+    if (lorePurpose === 'knowledge_gate' || lorePurpose === 'secret') return 'knowledge_gate';
+    if (lorePurpose === 'ability_gate') return category === 'spell' ? 'spell_gate' : 'skill_band';
+    if (lorePurpose === 'relationship_state') return 'relationship_state';
+    if (lorePurpose === 'item_state') return 'object_state';
+    if (lorePurpose === 'event_anchor' || lorePurpose === 'temporal_gate') return 'event_anchor';
+    if (lorePurpose === 'behavior_constraint') return 'behavior_gate';
+    if (lorePurpose === 'location_state') return 'place_fact';
+    if (lorePurpose === 'rule_constraint') return 'continuity_rule';
+    if (lorePurpose === 'status_change') return 'character_state';
+    return category === 'spell' ? 'spell_use'
+        : category === 'relationship' ? 'relationship_state'
+            : category === 'item' ? 'object_state'
+                : 'fact';
+}
+
 function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, profile = {} } = {}) {
     const generationMode = profile.mode === 'incremental' ? 'bulk-incremental' : 'bulk-bootstrap';
     const category = categoryToLoreCategory(candidate.category);
@@ -1034,16 +1135,21 @@ function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, pr
     const fact = String(candidate.fact || '').trim();
     const rangeLabel = chunk?.startIndex && chunk?.endIndex ? `Messages ${chunk.startIndex}-${chunk.endIndex}` : '';
     const hash = stableStringHash(`${batchId}|${chunk?.chunkId || ''}|${subject}|${fact}`);
-    const titleFact = fact.replace(/\s+/g, ' ').replace(/[\r\n]+/g, ' ').slice(0, 96);
-    const title = `${subject}: ${titleFact}`.slice(0, 140);
     const messageRefs = Array.isArray(candidate.messageRefs) ? candidate.messageRefs : [];
     const lorePurpose = normalizeLorePurpose(candidate.lorePurpose || candidate.purpose, { kind: category === 'spell' ? 'spell_gate' : category === 'relationship' ? 'relationship_gate' : category === 'item' || category === 'artifact' ? 'artifact_state' : category === 'event' ? 'event_anchor' : category === 'timeline' ? 'event_anchor' : category === 'secret' ? 'knowledge_gate' : 'fact', category });
-    const specificityScore = computeSpecificityScore({ category, kind: category, lorePurpose, content: { fact }, scope: inferScopeFromCandidate(candidate), date: {} });
+    const title = conciseGeneratedTitle(candidate, category, lorePurpose);
+    const scope = inferScopeFromCandidate(candidate);
+    const kind = generatedKindFor(category, lorePurpose);
+    const injection = String(candidate.injection || '').trim() || fact;
+    const constraints = Array.isArray(candidate.constraints) ? candidate.constraints : [];
+    const antiLore = Array.isArray(candidate.antiLore) ? candidate.antiLore : [];
+    const date = candidate.date && typeof candidate.date === 'object' ? candidate.date : {};
+    const specificityScore = computeSpecificityScore({ category, kind, lorePurpose, content: { fact, injection, constraints, antiLore }, scope, date });
     return {
         id: `story_bulk_${cleanIdPart(subject)}_${hash}`,
         title,
-        kind: category === 'spell' ? 'spell_use' : category === 'relationship' ? 'relationship_state' : category === 'item' || category === 'artifact' ? 'object_state' : 'fact',
-        gateType: category === 'spell' ? 'spell_use' : category === 'relationship' ? 'relationship_state' : category === 'item' || category === 'artifact' ? 'object_state' : 'fact',
+        kind,
+        gateType: kind,
         category,
         canon: candidateCanonToLoreCanon(candidate),
         canonStatus: candidateCanonToLoreCanon(candidate),
@@ -1051,15 +1157,24 @@ function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, pr
         lorePurpose,
         specificityScore,
         injectableByDefault: true,
-        truthStatus: category === 'secret' ? 'hidden' : 'true',
-        revealPolicy: category === 'secret' ? 'private' : 'public',
+        truthStatus: category === 'secret' || lorePurpose === 'secret' || lorePurpose === 'knowledge_gate' ? 'hidden' : 'true',
+        revealPolicy: category === 'secret' || lorePurpose === 'secret' || lorePurpose === 'knowledge_gate' ? 'private' : 'public',
         priority: priorityFromHint(candidate.priorityHint, category),
         tags: [subject, category, 'bulk scan', rangeLabel].filter(Boolean),
-        scope: inferScopeFromCandidate(candidate),
+        protected: !!candidate.recommendedPin,
+        date,
+        visibility: candidate.visibility && typeof candidate.visibility === 'object' ? candidate.visibility : {},
+        scope,
         content: {
             fact,
-            injection: fact,
-            notes: candidate.evidence ? `Evidence: ${candidate.evidence}` : '',
+            injection,
+            constraints,
+            antiLore,
+            notes: [candidate.durabilityReason ? `Why lore: ${candidate.durabilityReason}` : '', candidate.evidence ? `Evidence: ${candidate.evidence}` : ''].filter(Boolean).join(' '),
+        },
+        effects: {
+            addsTags: [subject, category, lorePurpose].filter(Boolean),
+            injectionRules: constraints.length || antiLore.length ? { preferAsConstraint: true } : {},
         },
         source: `model-generated:bulk:${batchId}:${chunk?.chunkId || ''}`,
         sourceInfo: {
@@ -1078,15 +1193,86 @@ function candidateFactToLoreEntry(candidate = {}, { batchId = '', chunk = {}, pr
                 endIndex: chunk?.endIndex || 0,
                 messageHash: chunk?.messageHash || '',
                 evidenceMessageRefs: messageRefs,
+                operation: candidate.operation || 'create',
+                targetEntryId: candidate.targetEntryId || '',
                 candidateCategory: candidate.category || category,
                 relevanceHint: candidate.relevanceHint || '',
                 lorePurpose,
                 canonHint: candidate.canon || '',
+                durabilityReason: candidate.durabilityReason || '',
+                recommendedPin: !!candidate.recommendedPin,
+                recommendedMute: !!candidate.recommendedMute,
                 generatedAt: Date.now(),
                 targetTotal: profile.targetTotal || 0,
             },
         },
     };
+}
+
+function classifyGeneratedLoreValue(entry = {}) {
+    const generation = entry.extensions?.wandlightGeneration || {};
+    const operation = String(generation.operation || 'create').toLowerCase();
+    if (operation === 'none') {
+        return { route: 'discard_none', keep: false, reason: 'Model marked this interval as having no durable lore.' };
+    }
+    if (['update', 'merge', 'supersede', 'conflict'].includes(operation)) {
+        return { route: operation, keep: true, reason: `Candidate proposes a ${operation} operation for review.` };
+    }
+
+    const content = entry.content || {};
+    const fact = String(content.fact || entry.fact || '');
+    const injection = String(content.injection || '');
+    const text = `${entry.title || ''} ${fact} ${injection} ${(content.constraints || []).join(' ')} ${(content.antiLore || []).join(' ')} ${content.notes || ''}`;
+    const hasConstraint = (content.constraints || []).length > 0 || (content.antiLore || []).length > 0;
+    const durablePattern = /\b(each time|whenever|when opened|until|before|after|unless|should not|do not|must not|secret|hidden|knows?|does not know|revealed|vow|curse|injur|wound|dead|alive|owns?|carries|possesses|lost|stolen|cannot|can no longer|learned|able to|unable to|relationship|trust|rival|enemy|ally|goal|objective|mission|plan|branch|au|diverge|changed canon|rule|law|ritual|bound|marked)\b/i;
+    const recapPattern = /\b(found|discovered|noticed|saw|met|visited|went to|talked to|read|looked at|picked up|entered)\b/i;
+    const specificity = Number(entry.specificityScore || 0);
+
+    if (hasConstraint || durablePattern.test(text)) {
+        return { route: 'create', keep: true, reason: 'Candidate includes a durable constraint, state, trigger, secret, rule, or recurring behavior.' };
+    }
+    if (specificity >= 55) {
+        return { route: 'create', keep: true, reason: `Candidate passes specificity threshold (${specificity}).` };
+    }
+    if (recapPattern.test(fact) && !durablePattern.test(text)) {
+        return { route: 'low_value_summary', keep: false, reason: 'Looks like a scene recap without durable consequences.' };
+    }
+    if (specificity < 40) {
+        return { route: 'insufficient_specificity', keep: false, reason: `Specificity score ${specificity} is too low for story lore.` };
+    }
+    return { route: 'needs_review', keep: true, reason: 'Specific enough for user review, but no strong durable marker was detected.' };
+}
+
+function applyGeneratedLoreQualityRouting(entries = [], settings = getSettings()) {
+    const kept = [];
+    const dropped = [];
+    const strict = settings.loreStrictQualityGate !== false;
+    for (const raw of normalizeLoreMatrix(entries)) {
+        const classification = classifyGeneratedLoreValue(raw);
+        const generation = raw.extensions?.wandlightGeneration || {};
+        const routed = normalizeLoreMatrix([{
+            ...raw,
+            extensions: {
+                ...(raw.extensions || {}),
+                wandlightGeneration: {
+                    ...generation,
+                    qualityRoute: classification.route,
+                    qualityReason: classification.reason,
+                },
+                wandlightPendingReview: {
+                    ...(raw.extensions?.wandlightPendingReview || {}),
+                    qualityRoute: classification.route,
+                    qualityReason: classification.reason,
+                },
+            },
+        }])[0];
+        if (!classification.keep && strict) {
+            dropped.push({ entry: routed || raw, reason: classification.reason, route: classification.route });
+        } else if (routed) {
+            kept.push(routed);
+        }
+    }
+    return { entries: kept, dropped };
 }
 
 async function runWithConcurrency(items, concurrency, worker) {
@@ -1110,10 +1296,10 @@ async function runWithConcurrency(items, concurrency, worker) {
     return results;
 }
 
-async function extractBulkChunkCandidates({ chunk, plan, batchId, profile, settings, stateSummary, signal }) {
+async function extractBulkChunkCandidates({ chunk, plan, batchId, profile, settings, stateSummary, loreIndex, signal }) {
     const maxAttempts = Math.max(1, Math.min(5, clampInt(settings.loreBulkRetryAttempts, 0, 4, 2) + 1));
     const systemPrompt = buildBulkCandidateSystemPrompt(settings, profile);
-    const userMessage = buildBulkCandidateUserMessage({ stateSummary, chunk, plan, profile });
+    const userMessage = buildBulkCandidateUserMessage({ stateSummary, loreIndex, chunk, plan, profile });
     let lastError = '';
     let rawResponse = '';
 
@@ -1251,6 +1437,23 @@ export async function runBulkLoreGeneration(options = {}) {
             }
             return { status: 'skipped_same_context_pending', contextKey, pendingContextKey: pendingKey };
         }
+        if (pending.length > 0 && settings.loreReplacementGuard !== false && !automationSafe && !options.allowPendingAppend && !options.replacePending) {
+            const pendingKey = pendingMeta?.contextKey || '';
+            return {
+                status: 'pending_lore_exists',
+                contextKey,
+                pendingContextKey: pendingKey,
+                pendingCount: pending.length,
+                sameContext: !pendingKey || pendingKey === contextKey,
+            };
+        }
+        if (pending.length > 0 && !automationSafe && options.replacePending) {
+            markPendingLoreReplaced(contextKey);
+            state = getState();
+            state.pendingLoreEntries = [];
+            state.pendingLoreMeta = null;
+            saveState(state, { syncPrompt: false });
+        }
 
         const ledger = state.loreGeneration || {};
         const attempt = ledger.attempts?.[contextKey];
@@ -1309,6 +1512,7 @@ export async function runBulkLoreGeneration(options = {}) {
             loreContext: state.loreContext,
             acceptedStoryLoreCount: countAcceptedStoryLore(state.loreMatrix || []),
         }, null, 0);
+        const loreIndex = buildCompactLoreIndexForGeneration(state);
 
         startLoreBulkBatch({
             id: batchId,
@@ -1360,6 +1564,8 @@ export async function runBulkLoreGeneration(options = {}) {
         let candidateCount = 0;
         let pendingEntryCount = (state.pendingLoreEntries || []).length;
         let duplicateDrops = 0;
+        let qualityDrops = 0;
+        let routedSimilarCount = 0;
         let snapshotTaken = false;
         let dirtyChunksSinceFullCheckpoint = 0;
         let lastFullCheckpointAt = Date.now();
@@ -1373,6 +1579,8 @@ export async function runBulkLoreGeneration(options = {}) {
             candidateCount,
             pendingEntryCount,
             droppedDuplicateCount: duplicateDrops,
+            droppedQualityCount: qualityDrops,
+            routedSimilarCount,
             lastProgressAt: Date.now(),
             ...extra,
         });
@@ -1396,17 +1604,26 @@ export async function runBulkLoreGeneration(options = {}) {
                 }
             }
             const entries = normalizeLoreMatrix(rawEntries);
-            let filteredEntries = entries;
+            const qualityFiltered = applyGeneratedLoreQualityRouting(entries, settings);
+            let filteredEntries = qualityFiltered.entries;
             let drops = [];
+            let quality = qualityFiltered.dropped || [];
+            qualityDrops += quality.length;
             if (settings.loreDuplicateGuard !== false && filteredEntries.length) {
                 const current = getState();
                 const guardBase = [ ...(current.loreMatrix || []), ...(current.pendingLoreEntries || []) ];
-                const filtered = filterDuplicateLoreEntries(filteredEntries, guardBase, {
-                    storyGeneration: true,
-                    ignoreCanonicalSourceSimilarity: true,
-                });
+                const filtered = settings.loreSimilarityRouting === false
+                    ? filterDuplicateLoreEntries(filteredEntries, guardBase, {
+                        storyGeneration: true,
+                        ignoreCanonicalSourceSimilarity: true,
+                    })
+                    : routeSimilarLoreEntries(filteredEntries, guardBase, {
+                        storyGeneration: true,
+                        ignoreCanonicalSourceSimilarity: true,
+                    });
                 filteredEntries = filtered.entries;
                 drops = filtered.dropped || [];
+                routedSimilarCount += (filtered.routed || []).length;
             }
             duplicateDrops += drops.length;
 
@@ -1419,6 +1636,8 @@ export async function runBulkLoreGeneration(options = {}) {
                     rawEntryCount: entries.length,
                     normalizedEntryCount: entries.length,
                     droppedDuplicateCount: drops.length,
+                    droppedQualityCount: quality.length,
+                    routedSimilarCount,
                     sourceMessageCount: plan.sourceMessageCount,
                     chunkSize: plan.chunkSize,
                     chunkCount: allChunks.length,
@@ -1471,7 +1690,7 @@ export async function runBulkLoreGeneration(options = {}) {
         const results = await runWithConcurrency(queuedChunks, concurrency, async (chunk) => {
             throwIfAborted(signal);
             progress?.(`Story lore scan running: ${completed + failed}/${queuedChunks.length} chunks complete, ${Math.min(concurrency, queuedChunks.length - completed - failed)} active.`, Math.min(95, 8 + Math.round(((completed + failed) / queuedChunks.length) * 85)));
-            const result = await extractBulkChunkCandidates({ chunk, plan, batchId, profile, settings, stateSummary, signal });
+            const result = await extractBulkChunkCandidates({ chunk, plan, batchId, profile, settings, stateSummary, loreIndex, signal });
 
             if (result.status === 'complete') {
                 candidateCount += result.candidates.length;
@@ -1512,6 +1731,8 @@ export async function runBulkLoreGeneration(options = {}) {
             rawEntryCount: candidateCount,
             normalizedEntryCount: candidateCount,
             droppedDuplicateCount: duplicateDrops,
+            droppedQualityCount: qualityDrops,
+            routedSimilarCount,
             sourceMessageCount: plan.sourceMessageCount,
             chunkSize: plan.chunkSize,
             targetEntryCount: profile.targetTotal,
@@ -1523,6 +1744,9 @@ export async function runBulkLoreGeneration(options = {}) {
             lastSource: source,
             validEntryCount: pendingEntryCount,
             rawEntryCount: candidateCount,
+            droppedDuplicateCount: duplicateDrops,
+            droppedQualityCount: qualityDrops,
+            routedSimilarCount,
             generationMode: profile.mode === 'bootstrap' ? 'bulk-bootstrap' : 'bulk-incremental',
             targetEntryCount: profile.targetTotal,
             lastError: status === 'failed' ? `All queued chunks failed (${totalFailed})` : '',
@@ -1541,6 +1765,8 @@ export async function runBulkLoreGeneration(options = {}) {
             candidateCount,
             pendingEntryCount,
             droppedDuplicateCount: duplicateDrops,
+            droppedQualityCount: qualityDrops,
+            routedSimilarCount,
         };
     } catch (e) {
         const batchId = getState()?.loreBulkGeneration?.activeBatchId || '';
@@ -1588,6 +1814,9 @@ export const __bulkLoreTestHooks = {
     buildLoreBulkScanPlan,
     parseBulkCandidateResponse,
     candidateFactToLoreEntry,
+    classifyGeneratedLoreValue,
+    applyGeneratedLoreQualityRouting,
+    buildCompactLoreIndexForGeneration,
     runWithConcurrency,
 };
 

@@ -933,6 +933,95 @@ export function filterDuplicateLoreEntries(entries = [], existingEntries = [], o
 
 // ── Merging ─────────────────────────────────────────────────────────────────────
 
+// Story-lore generation needs similarity routing rather than destructive
+// duplicate dropping, because similar lore often means "update this entry."
+function findSimilarLoreEntry(candidate, existingEntries = [], options = {}) {
+    const existing = normalizeLoreMatrix(existingEntries);
+    const candidateId = candidate.id.toLowerCase();
+    const candidateTitle = candidate.title.toLowerCase();
+
+    for (const current of existing) {
+        if (current.id.toLowerCase() === candidateId) {
+            return { current, reason: `duplicate id: ${current.id}`, exact: true, kind: 'duplicate' };
+        }
+        if (shouldSkipCanonicalSimilarity(candidate, current, options)) {
+            continue;
+        }
+        if (current.title.toLowerCase() === candidateTitle) {
+            const factScore = jaccardSimilarity(candidate.fact, current.fact);
+            if (factScore >= 0.92) {
+                return { current, reason: `duplicate title: ${current.title}`, exact: true, kind: 'duplicate' };
+            }
+            return { current, reason: `same title, changed fact: ${current.title}`, exact: false, kind: 'possible_update' };
+        }
+        const titleScore = jaccardSimilarity(candidate.title, current.title);
+        const factScore = jaccardSimilarity(candidate.fact, current.fact);
+        if (titleScore >= 0.82 || factScore >= 0.72) {
+            const currentFact = String(current.fact || current.content?.fact || '');
+            const candidateFact = String(candidate.fact || candidate.content?.fact || '');
+            const richerCandidate = candidateFact.length > currentFact.length + 40
+                || (candidate.content?.constraints || []).length
+                || (candidate.content?.antiLore || []).length;
+            return {
+                current,
+                reason: titleScore >= 0.82 ? `similar title: ${current.title}` : `similar fact: ${current.title}`,
+                exact: false,
+                kind: richerCandidate ? 'possible_merge' : 'possible_update',
+            };
+        }
+    }
+
+    return null;
+}
+
+export function routeSimilarLoreEntries(entries = [], existingEntries = [], options = {}) {
+    const accepted = [];
+    const dropped = [];
+    const routed = [];
+    const comparison = normalizeLoreMatrix(existingEntries);
+
+    for (const raw of entries) {
+        const entry = normalizeLoreEntry(raw);
+        const match = findSimilarLoreEntry(entry, comparison.concat(accepted), options);
+        if (match?.exact) {
+            dropped.push({ entry, reason: match.reason, route: 'duplicate' });
+            continue;
+        }
+        if (match?.current) {
+            const generation = entry.extensions?.wandlightGeneration || {};
+            const route = match.kind;
+            const next = normalizeLoreEntry({
+                ...entry,
+                extensions: {
+                    ...(entry.extensions || {}),
+                    wandlightGeneration: {
+                        ...generation,
+                        operation: generation.operation && generation.operation !== 'create' ? generation.operation : route === 'possible_merge' ? 'merge' : 'update',
+                        targetEntryId: generation.targetEntryId || match.current.id,
+                        similarityRoute: route,
+                        similarityReason: match.reason,
+                        routedAt: Date.now(),
+                    },
+                    wandlightPendingReview: {
+                        ...(entry.extensions?.wandlightPendingReview || {}),
+                        reviewRoute: route,
+                        targetEntryId: generation.targetEntryId || match.current.id,
+                        similarityReason: match.reason,
+                    },
+                },
+            });
+            accepted.push(next);
+            routed.push({ entry: next, target: match.current, reason: match.reason, route });
+            continue;
+        }
+        if (entry.id && entry.title && entry.fact) {
+            accepted.push(entry);
+        }
+    }
+
+    return { entries: accepted, dropped, routed };
+}
+
 /**
  * Merges incoming lore entries into the existing matrix.
  * Locked or user-edited entries are never overwritten.

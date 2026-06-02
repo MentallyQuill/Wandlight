@@ -13,8 +13,8 @@
       "protected": false,
       "locked": true,
       "date": {
-        "validFrom": "1993-09-01",
-        "validTo": "1998-08-31",
+        "validFrom": "1991-09-01",
+        "validTo": "1993-10-31",
         "precision": "date",
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
@@ -74,7 +74,15 @@
         "confidence": 0.82,
         "notes": "Expanded curated date constraint entry."
       },
-      "ui": {},
+      "ui": {
+        "preview": {
+          "primaryPack": "spells_skills",
+          "suggestionRole": "ability_gate",
+          "detailLevel": "detailed",
+          "suggestByDefault": true,
+          "activeUse": "blocks_early_spell_knowledge"
+        }
+      },
       "extensions": {},
       "canonTiming": {
         "canonExpectedFrom": "1993-09-01",
@@ -104,8 +112,8 @@
       "protected": false,
       "locked": true,
       "date": {
-        "validFrom": "1994-09-01",
-        "validTo": "1998-08-31",
+        "validFrom": "1991-09-01",
+        "validTo": "1994-09-01",
         "precision": "date",
         "schoolYear": 4,
         "book": "Goblet of Fire"
@@ -162,7 +170,15 @@
         "confidence": 0.82,
         "notes": "Expanded curated date constraint entry."
       },
-      "ui": {},
+      "ui": {
+        "preview": {
+          "primaryPack": "spells_skills",
+          "suggestionRole": "ability_gate",
+          "detailLevel": "detailed",
+          "suggestByDefault": true,
+          "activeUse": "blocks_early_spell_knowledge"
+        }
+      },
       "extensions": {},
       "canonTiming": {
         "canonExpectedFrom": "1994-09-01",
@@ -192,8 +208,8 @@
       "protected": false,
       "locked": true,
       "date": {
-        "validFrom": "1995-09-01",
-        "validTo": "1998-08-31",
+        "validFrom": "1991-09-01",
+        "validTo": "1995-10-31",
         "precision": "date",
         "schoolYear": 5,
         "book": "Order of the Phoenix"
@@ -250,7 +266,15 @@
         "confidence": 0.82,
         "notes": "Expanded curated date constraint entry."
       },
-      "ui": {},
+      "ui": {
+        "preview": {
+          "primaryPack": "spells_skills",
+          "suggestionRole": "ability_gate",
+          "detailLevel": "detailed",
+          "suggestByDefault": true,
+          "activeUse": "blocks_early_spell_knowledge"
+        }
+      },
       "extensions": {},
       "canonTiming": {
         "canonExpectedFrom": "1995-09-01",

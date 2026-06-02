@@ -615,6 +615,8 @@ function compactPendingCanonEntryForStorage(entry) {
             chapter: trim(normalized.sourceInfo.chapter, 80),
             confidence: normalized.sourceInfo.confidence,
         } : {},
+        ui: typeof normalized.ui === 'object' && normalized.ui && !Array.isArray(normalized.ui) ? normalized.ui : {},
+        extensions: typeof normalized.extensions === 'object' && normalized.extensions && !Array.isArray(normalized.extensions) ? normalized.extensions : {},
         tags: sliceStrings(normalized.tags, 10, 40),
     };
 }
@@ -747,6 +749,127 @@ function getCanonPreviewDuplicateMeta(entry = {}, keySets = buildExistingCanonKe
     return { duplicateStatus: 'new', duplicateReason: '' };
 }
 
+function normalizeCanonPreviewPackId(value) {
+    const id = String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    const aliases = {
+        guardrails: 'essential_guardrails',
+        essential: 'essential_guardrails',
+        secrets: 'year_secrets',
+        active_secrets: 'year_secrets',
+        hidden_knowledge: 'year_secrets',
+        year_hidden_knowledge: 'year_secrets',
+        events: 'year_events',
+        characters: 'present_characters',
+        character: 'present_characters',
+        spells: 'spells_skills',
+        skills: 'spells_skills',
+        abilities: 'spells_skills',
+        items: 'items_access',
+        access: 'items_access',
+        all: 'all_active',
+        all_matches: 'all_active',
+    };
+    return aliases[id] || id;
+}
+
+function normalizeCanonPreviewDetailLevel(value) {
+    const level = String(value || '').trim().toLowerCase();
+    if (['core', 'standard', 'detailed'].includes(level)) return level;
+    if (['micro', 'advanced', 'expert', 'all'].includes(level)) return 'detailed';
+    return '';
+}
+
+function getRawCanonPreviewConfig(entry = {}) {
+    return entry?.ui?.preview && typeof entry.ui.preview === 'object' && !Array.isArray(entry.ui.preview)
+        ? entry.ui.preview
+        : {};
+}
+
+function inferCanonSuggestionRole(entry = {}) {
+    const raw = getRawCanonPreviewConfig(entry);
+    if (raw.suggestionRole) return String(raw.suggestionRole);
+    const purpose = String(entry.lorePurpose || '').toLowerCase();
+    const kind = String(entry.kind || entry.gateType || '').toLowerCase();
+    const category = String(entry.category || '').toLowerCase();
+    const text = textFromCanonEntry(entry);
+    if (raw.activeUse === 'reference_only' || raw.referenceOnly === true) return 'reference_only';
+    if (category === 'character' || category === 'relationship' || kind.includes('behavior') || kind.includes('relationship') || purpose.includes('behavior') || purpose.includes('relationship')) {
+        return 'character_state';
+    }
+    if (category.includes('item') || category.includes('artifact') || category.includes('object') || kind.includes('artifact') || kind.includes('object')) {
+        return 'access_gate';
+    }
+    if (category.includes('spell') || category.includes('skill') || kind.includes('spell') || kind.includes('skill')) {
+        return 'ability_gate';
+    }
+    if (category.includes('secret') || category.includes('knowledge') || entry.truthStatus === 'hidden' || purpose.includes('knowledge') || purpose.includes('secret') || text.includes('not know') || text.includes('do not reveal')) {
+        return 'reveal_gate';
+    }
+    if (kind.includes('guard') || category.includes('future_guard') || purpose.includes('temporal') || purpose.includes('constraint') || text.includes('do not') || text.includes('should not') || text.includes('before ')) {
+        return 'active_guardrail';
+    }
+    if (category.includes('event') || category.includes('timeline') || kind.includes('event') || kind.includes('anchor') || purpose.includes('event') || purpose.includes('timeline')) {
+        return 'event_anchor';
+    }
+    return 'reference_only';
+}
+
+function inferCanonPreviewPack(entry = {}, suggestionRole = inferCanonSuggestionRole(entry), currentState = getState()) {
+    const raw = getRawCanonPreviewConfig(entry);
+    if (raw.primaryPack) return normalizeCanonPreviewPackId(raw.primaryPack);
+    if (suggestionRole === 'character_state' && isCanonPresentCharacterEntry(entry, currentState)) return 'present_characters';
+    if (suggestionRole === 'access_gate') return 'items_access';
+    if (suggestionRole === 'ability_gate') return 'spells_skills';
+    if (suggestionRole === 'reveal_gate') return 'year_secrets';
+    if (suggestionRole === 'event_anchor') return 'year_events';
+    if (suggestionRole === 'active_guardrail') return 'essential_guardrails';
+    return 'all_active';
+}
+
+function inferCanonPreviewDetailLevel(entry = {}, suggestionRole = inferCanonSuggestionRole(entry)) {
+    const raw = getRawCanonPreviewConfig(entry);
+    const explicit = normalizeCanonPreviewDetailLevel(raw.detailLevel);
+    if (explicit) return explicit;
+    const priority = Number(entry.priority) || 50;
+    const includeOnlyWhenRelevant = entry.effects?.injectionRules?.includeOnlyWhenRelevant === true;
+    if (priority >= 90 || ['active_guardrail', 'reveal_gate'].includes(suggestionRole)) return 'core';
+    if (suggestionRole === 'character_state' || suggestionRole === 'access_gate') return 'standard';
+    if (suggestionRole === 'event_anchor') return 'detailed';
+    if (suggestionRole === 'ability_gate') return includeOnlyWhenRelevant || priority < 85 ? 'detailed' : 'standard';
+    return 'standard';
+}
+
+function shouldSuggestCanonEntryByDefault(entry = {}, suggestionRole = inferCanonSuggestionRole(entry)) {
+    const raw = getRawCanonPreviewConfig(entry);
+    if (raw.suggestByDefault !== undefined) return raw.suggestByDefault !== false;
+    if (raw.showByDefault !== undefined) return raw.showByDefault !== false;
+    if (suggestionRole === 'reference_only') return false;
+    if (entry.injectableByDefault === false) return false;
+    if (suggestionRole === 'ability_gate' && entry.effects?.injectionRules?.includeOnlyWhenRelevant === true && Number(entry.priority || 50) < 85) {
+        return false;
+    }
+    return true;
+}
+
+function getCanonPreviewConfig(entry = {}, currentState = getState()) {
+    const raw = getRawCanonPreviewConfig(entry);
+    const suggestionRole = inferCanonSuggestionRole(entry);
+    const primaryPack = inferCanonPreviewPack(entry, suggestionRole, currentState);
+    const secondaryPacks = normalizedEntryArray(raw.secondaryPacks)
+        .map(normalizeCanonPreviewPackId)
+        .filter(Boolean);
+    const detailLevel = inferCanonPreviewDetailLevel(entry, suggestionRole);
+    const suggestByDefault = shouldSuggestCanonEntryByDefault(entry, suggestionRole);
+    return {
+        primaryPack,
+        secondaryPacks,
+        suggestionRole,
+        detailLevel,
+        suggestByDefault,
+        activeUse: raw.activeUse || '',
+    };
+}
+
 function isCanonGuardrailEntry(entry = {}) {
     const purpose = String(entry.lorePurpose || '').toLowerCase();
     const kind = String(entry.kind || entry.gateType || '').toLowerCase();
@@ -819,6 +942,17 @@ function getPresentCharacterNames(currentState = getState()) {
 function isCanonPresentCharacterEntry(entry = {}, currentState = getState()) {
     const present = getPresentCharacterNames(currentState);
     if (!present.length) return false;
+    const category = String(entry.category || '').toLowerCase();
+    const kind = String(entry.kind || entry.gateType || '').toLowerCase();
+    const purpose = String(entry.lorePurpose || '').toLowerCase();
+    const characterEntry = category === 'character'
+        || category === 'relationship'
+        || kind.includes('character')
+        || kind.includes('behavior')
+        || kind.includes('relationship')
+        || purpose.includes('behavior')
+        || purpose.includes('relationship');
+    if (!characterEntry) return false;
     const scoped = [
         entry.scope?.characters,
         entry.characters,
@@ -837,44 +971,49 @@ function buildCanonPreviewPacks(entries = [], { schoolYear = null, sceneIso = ''
         {
             id: 'essential_guardrails',
             label: 'Essential Guardrails',
-            description: 'High-value exclusions, knowledge gates, and timing constraints.',
-            match: entry => isCanonGuardrailEntry(entry),
+            description: 'Highest-value active suppressors and future-leak blockers.',
         },
         {
             id: 'year_secrets',
-            label: `${yearLabel} Secrets`,
-            description: 'Hidden knowledge, reveal timing, and facts characters should not casually know.',
-            match: entry => isCanonSecretEntry(entry) && (!schoolYear || entryMatchesSchoolYear(entry, schoolYear) || dateInRange(sceneIso, entry)),
+            label: `${yearLabel} Active Secrets`,
+            description: 'Currently active hidden-knowledge and reveal-state constraints.',
         },
         {
             id: 'year_events',
             label: `${yearLabel} Events`,
-            description: 'Major dated events and timeline anchors for this school year.',
-            match: entry => isCanonEventEntry(entry) && (!schoolYear || entryMatchesSchoolYear(entry, schoolYear) || dateInRange(sceneIso, entry)),
+            description: 'Optional dated anchors for broad timeline orientation.',
         },
         {
             id: 'spells_skills',
             label: 'Spells & Skills',
-            description: 'Spell availability, skill bands, and who can plausibly use what.',
-            match: entry => isCanonSpellOrSkillEntry(entry),
+            description: 'Active ability restrictions, not reminders that spells exist.',
         },
         {
             id: 'items_access',
             label: 'Items & Access',
-            description: 'Artifacts, restricted items, and access constraints.',
-            match: entry => isCanonItemEntry(entry),
+            description: 'Active possession, access, and object-use constraints.',
         },
         {
             id: 'present_characters',
             label: 'Present Characters',
-            description: 'Canon context tied to characters detected in the scene.',
-            match: entry => isCanonPresentCharacterEntry(entry, currentState),
+            description: 'Character-specific behavior, status, or relationship entries for characters detected in the scene.',
         },
     ];
 
     const addable = entry => entry?.extensions?.canonPreview?.duplicateStatus === 'new';
+    const packIdsForEntry = (entry) => {
+        const meta = entry.extensions?.canonPreview || getCanonPreviewConfig(entry, currentState);
+        const ids = new Set();
+        if (meta.suggestByDefault !== false) {
+            if (meta.primaryPack) ids.add(normalizeCanonPreviewPackId(meta.primaryPack));
+            for (const packId of normalizedEntryArray(meta.secondaryPacks).map(normalizeCanonPreviewPackId)) {
+                ids.add(packId);
+            }
+        }
+        return ids;
+    };
     const packs = definitions.map(definition => {
-        const packEntries = entries.filter(definition.match);
+        const packEntries = entries.filter(entry => packIdsForEntry(entry).has(definition.id));
         const ids = dedupeIds(packEntries.map(entry => entry.id));
         return {
             id: definition.id,
@@ -888,14 +1027,15 @@ function buildCanonPreviewPacks(entries = [], { schoolYear = null, sceneIso = ''
     }).filter(pack => pack.totalCount > 0);
 
     if (entries.length) {
+        const activeEntries = entries.filter(entry => (entry.extensions?.canonPreview?.suggestionRole || getCanonPreviewConfig(entry, currentState).suggestionRole) !== 'reference_only');
         packs.push({
-            id: 'all_matches',
-            label: 'All Matching Canon',
-            description: 'Every canon entry matching the current context window.',
-            entryIds: dedupeIds(entries.map(entry => entry.id)),
-            totalCount: entries.length,
-            newCount: entries.filter(addable).length,
-            duplicateCount: entries.filter(entry => !addable(entry)).length,
+            id: 'all_active',
+            label: 'All Active Constraints',
+            description: 'Every active non-reference canon constraint matching the current date window.',
+            entryIds: dedupeIds(activeEntries.map(entry => entry.id)),
+            totalCount: activeEntries.length,
+            newCount: activeEntries.filter(addable).length,
+            duplicateCount: activeEntries.filter(entry => !addable(entry)).length,
         });
     }
 
@@ -924,6 +1064,7 @@ export async function queryCanonLoreDatabase(context = null, options = {}) {
     const candidates = db.entries
         .filter(entry => isSpecificLorePurpose(normalizeLorePurpose(entry.lorePurpose || entry.purpose, entry)))
         .filter(entry => entry.injectableByDefault !== false)
+        .filter(entry => shouldSuggestCanonEntryByDefault(entry))
         .filter(entry => dateInRange(sceneIso, entry))
         .map(entry => ({ entry, score: scoreCanonEntry(entry, state, effectiveContext, sceneIso, db.scoring) }))
         .filter(item => item.score > 0);
@@ -970,6 +1111,7 @@ export async function previewCanonLoreForContext(context = null, options = {}) {
 
     const keySets = buildExistingCanonKeySets(currentState);
     const compactEntries = candidateItems.map(item => {
+        const previewConfig = getCanonPreviewConfig(item.entry, currentState);
         const compact = compactPendingCanonEntryForStorage({
             ...item.entry,
             source: item.entry.source || CANON_DB_SOURCE,
@@ -979,6 +1121,7 @@ export async function previewCanonLoreForContext(context = null, options = {}) {
             ...(compact.extensions || {}),
             canonPreview: {
                 score: item.score,
+                ...previewConfig,
                 duplicateStatus: duplicateMeta.duplicateStatus,
                 duplicateReason: duplicateMeta.duplicateReason,
             },
@@ -994,6 +1137,7 @@ export async function previewCanonLoreForContext(context = null, options = {}) {
             extensions: {
                 ...(entry.extensions || {}),
                 canonPreview: {
+                    ...getCanonPreviewConfig(entry, currentState),
                     ...previewMeta,
                     duplicateStatus: duplicateMeta.duplicateStatus,
                     duplicateReason: duplicateMeta.duplicateReason,

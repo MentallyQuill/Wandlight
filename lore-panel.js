@@ -128,6 +128,7 @@ let canonPreviewUiState = {
     preview: null,
     selectedPackId: '',
     selectedEntryIds: [],
+    detailLevel: 'standard',
 };
 
 function getLoreRegistry(registryName) {
@@ -1051,6 +1052,57 @@ function isCanonPreviewEntryAddable(entry = {}) {
     return (entry.extensions?.canonPreview?.duplicateStatus || 'new') === 'new';
 }
 
+const CANON_PREVIEW_DETAIL_LEVELS = [
+    { id: 'core', label: 'Core', tooltip: 'Only highest-value active guardrails and reveal blockers.' },
+    { id: 'standard', label: 'Standard', tooltip: 'Core plus normal character, access, and constraint entries.' },
+    { id: 'detailed', label: 'Detailed', tooltip: 'Includes low-priority and micro constraints that are still active.' },
+    { id: 'all', label: 'All Active', tooltip: 'Shows every active non-reference entry in each pack.' },
+];
+
+function getCanonPreviewDetailLevel() {
+    return ['core', 'standard', 'detailed', 'all'].includes(canonPreviewUiState.detailLevel)
+        ? canonPreviewUiState.detailLevel
+        : 'standard';
+}
+
+function getCanonPreviewDetailRank(level) {
+    const normalized = String(level || '').toLowerCase();
+    if (normalized === 'core') return 1;
+    if (normalized === 'standard') return 2;
+    if (normalized === 'detailed') return 3;
+    return 4;
+}
+
+function getCanonPreviewEntryDetailLevel(entry = {}) {
+    const level = entry.extensions?.canonPreview?.detailLevel || 'standard';
+    return ['core', 'standard', 'detailed'].includes(level) ? level : 'standard';
+}
+
+function canonPreviewDetailAllows(entry = {}, detailLevel = getCanonPreviewDetailLevel()) {
+    if (detailLevel === 'all') return true;
+    return getCanonPreviewDetailRank(getCanonPreviewEntryDetailLevel(entry)) <= getCanonPreviewDetailRank(detailLevel);
+}
+
+function createCanonPreviewDetailControls() {
+    const active = getCanonPreviewDetailLevel();
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-canon-detail-filter';
+    CANON_PREVIEW_DETAIL_LEVELS.forEach(option => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `wandlight-canon-detail-button ${active === option.id ? 'wandlight-canon-detail-active' : ''}`.trim();
+        btn.textContent = option.label;
+        addTooltip(btn, option.tooltip);
+        btn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            canonPreviewUiState.detailLevel = option.id;
+            refreshPanelBody({ preserveScroll: true });
+        });
+        wrap.appendChild(btn);
+    });
+    return wrap;
+}
+
 function createCanonPreviewSection(state) {
     const section = document.createElement('div');
     section.className = 'wandlight-canon-preview-section';
@@ -1081,6 +1133,7 @@ function createCanonPreviewSection(state) {
     const yearText = preview.schoolYear ? `Year ${preview.schoolYear} | ` : '';
     summary.textContent = `${yearText}${preview.sceneIso || 'unknown date'} | ${preview.matchedCount || preview.entries.length} matches | ${preview.newCount || 0} new | ${preview.duplicateCount || 0} already present`;
     section.appendChild(summary);
+    section.appendChild(createCanonPreviewDetailControls());
 
     if (isStale) {
         const stale = document.createElement('div');
@@ -1090,6 +1143,8 @@ function createCanonPreviewSection(state) {
     }
 
     const packs = Array.isArray(preview.packs) ? preview.packs : [];
+    const detailLevel = getCanonPreviewDetailLevel();
+    const entryMap = getCanonPreviewEntryMap(preview);
     const activePack = packs.find(pack => pack.id === canonPreviewUiState.selectedPackId)
         || packs.find(pack => pack.newCount > 0)
         || packs[0]
@@ -1105,15 +1160,20 @@ function createCanonPreviewSection(state) {
         btn.type = 'button';
         btn.className = `wandlight-canon-pack-button ${pack.id === activePack?.id ? 'wandlight-canon-pack-active' : ''}`.trim();
         addTooltip(btn, pack.description || 'Canon preview pack.');
+        const packEntriesForDetail = (pack.entryIds || [])
+            .map(id => entryMap.get(String(id)))
+            .filter(Boolean)
+            .filter(entry => canonPreviewDetailAllows(entry, detailLevel));
+        const packNewForDetail = packEntriesForDetail.filter(isCanonPreviewEntryAddable).length;
 
         const label = document.createElement('span');
         label.className = 'wandlight-canon-pack-label';
-        label.textContent = `${pack.label} (${pack.totalCount || 0})`;
+        label.textContent = `${pack.label} (${packEntriesForDetail.length})`;
         btn.appendChild(label);
 
         const meta = document.createElement('span');
         meta.className = 'wandlight-canon-pack-meta';
-        meta.textContent = `${pack.newCount || 0} new${pack.duplicateCount ? `, ${pack.duplicateCount} present` : ''}`;
+        meta.textContent = `${packNewForDetail} new${packEntriesForDetail.length !== (pack.totalCount || 0) ? ` of ${pack.totalCount || 0}` : ''}${pack.duplicateCount ? `, ${pack.duplicateCount} present` : ''}`;
         btn.appendChild(meta);
 
         btn.addEventListener('click', (event) => {
@@ -1130,8 +1190,8 @@ function createCanonPreviewSection(state) {
         return section;
     }
 
-    const entryMap = getCanonPreviewEntryMap(preview);
-    const packEntries = (activePack.entryIds || []).map(id => entryMap.get(String(id))).filter(Boolean);
+    const packEntriesAll = (activePack.entryIds || []).map(id => entryMap.get(String(id))).filter(Boolean);
+    const packEntries = packEntriesAll.filter(entry => canonPreviewDetailAllows(entry, detailLevel));
     const addablePackIds = packEntries.filter(isCanonPreviewEntryAddable).map(entry => entry.id);
     const selectedIds = getCanonPreviewSelectedIds();
     const selectedAddableCount = Array.from(selectedIds).filter(id => isCanonPreviewEntryAddable(entryMap.get(String(id)) || {})).length;
@@ -1142,7 +1202,7 @@ function createCanonPreviewSection(state) {
     count.className = 'wandlight-canon-preview-selected-count';
     count.textContent = `${selectedAddableCount} selected`;
     controls.appendChild(count);
-    controls.appendChild(createButton('Select Pack', `Selects all ${activePack.newCount || 0} new entries in ${activePack.label}.`, () => {
+    controls.appendChild(createButton('Select Pack', `Selects all visible new entries in ${activePack.label} at the current detail level.`, () => {
         setCanonPreviewSelectedIds([...selectedIds, ...addablePackIds]);
         refreshPanelBody({ preserveScroll: true });
     }, 'wandlight-small-button'));
@@ -1168,6 +1228,15 @@ function createCanonPreviewSection(state) {
     visibleEntries.forEach(entry => {
         list.appendChild(createCanonPreviewEntryRow(entry, selectedIds, isStale));
     });
+    if (!visibleEntries.length) {
+        list.appendChild(createEmptyMessage(`No ${activePack.label} entries at the ${detailLevel === 'all' ? 'All Active' : detailLevel} detail level.`));
+    }
+    if (packEntriesAll.length > packEntries.length) {
+        const hidden = document.createElement('div');
+        hidden.className = 'wandlight-runtime-help wandlight-compact-help';
+        hidden.textContent = `${packEntriesAll.length - packEntries.length} entries hidden by the current detail level. Switch to Detailed or All Active to inspect them.`;
+        list.appendChild(hidden);
+    }
     if (packEntries.length > visibleEntries.length) {
         const note = document.createElement('div');
         note.className = 'wandlight-runtime-help wandlight-compact-help';
@@ -1214,8 +1283,12 @@ function createCanonPreviewEntryRow(entry, selectedIds, isStale = false) {
 
     const meta = document.createElement('div');
     meta.className = 'wandlight-lore-entry-meta wandlight-canon-preview-row-meta';
+    const previewMeta = entry?.extensions?.canonPreview || {};
     if (entry?.category) meta.appendChild(createBadge(entry.category, 'Canon entry category.'));
     if (entry?.lorePurpose) meta.appendChild(createBadge(LORE_PURPOSE_LABELS[entry.lorePurpose] || entry.lorePurpose, 'Why this canon entry would be useful.'));
+    if (previewMeta.suggestionRole) meta.appendChild(createBadge(previewMeta.suggestionRole.replace(/_/g, ' '), 'Canon preview role used for pack sorting.'));
+    if (previewMeta.detailLevel) meta.appendChild(createBadge(previewMeta.detailLevel, 'Canon preview detail tier.'));
+    if (previewMeta.suggestByDefault === false) meta.appendChild(createBadge('non-default', 'Shown only in All Active or higher-detail review because this is not usually worth suggesting automatically.'));
     if (entry?.relevance) meta.appendChild(createBadge(entry.relevance, 'Recommended relevance tier for Pending Lore Review.'));
     meta.appendChild(createBadge(`P${Number(entry?.priority || 50)}`, 'Canon database priority.'));
     if (duplicateStatus !== 'new') {
@@ -1606,6 +1679,7 @@ async function handlePreviewCanonLorePacks(btn) {
             preview: result,
             selectedPackId: (result?.packs || []).find(pack => pack.newCount > 0)?.id || result?.packs?.[0]?.id || '',
             selectedEntryIds: [],
+            detailLevel: getCanonPreviewDetailLevel(),
         };
 
         refreshPanelBody({ preserveScroll: false });
@@ -1648,6 +1722,7 @@ async function handleAddCanonPreviewEntries(btn, entryIds = []) {
                 preview: null,
                 selectedPackId: '',
                 selectedEntryIds: [],
+                detailLevel: getCanonPreviewDetailLevel(),
             };
             setSectionCollapsed('lore.pendingReview', false);
             setPanelState({ activeTab: 'lore' }, { deferSave: true });

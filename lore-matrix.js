@@ -368,6 +368,7 @@ function normalizeUiBlock(input) {
         textColor: asString(raw.textColor),
         icon: asString(raw.icon),
         defaultCollapsed: asBoolean(raw.defaultCollapsed, false),
+        preview: asPlainObject(raw.preview),
     };
 }
 

@@ -189,8 +189,8 @@
       "schemaVersion": 2,
       "id": "event_sirius_public_fugitive",
       "title": "Sirius Public Fugitive Status",
-      "kind": "event_anchor",
-      "category": "event",
+      "kind": "public_belief",
+      "category": "knowledge",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
@@ -206,8 +206,10 @@
       },
       "scope": {
         "topics": [
-          "timeline",
-          "canon state"
+          "Sirius Black",
+          "public belief",
+          "fugitive",
+          "Prisoner of Azkaban"
         ],
         "schoolYears": [
           3
@@ -221,10 +223,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "The public believes Sirius Black is a dangerous fugitive.",
-        "injection": "The public believes Sirius Black is a dangerous fugitive.",
-        "constraints": [],
-        "antiLore": [],
+        "fact": "During Year 3 before Sirius's innocence becomes known to Harry's circle, the public believes Sirius Black is a dangerous fugitive.",
+        "injection": "During Year 3, most people should treat Sirius Black as a dangerous fugitive; do not make his innocence public knowledge before our story reveals it.",
+        "constraints": [
+          "Keep public belief separate from the private truth about Sirius."
+        ],
+        "antiLore": [
+          "Do not have ordinary students or the wider public speak as if Sirius is exonerated before the relevant reveal."
+        ],
         "notes": ""
       },
       "effects": {
@@ -260,13 +266,13 @@
         "schoolYear": 3,
         "book": "Prisoner of Azkaban"
       },
-      "gateType": "event_anchor",
+      "gateType": "public_belief",
       "userEditable": true,
       "canon": "canon",
       "relevance": "normal",
-      "lorePurpose": "event_anchor",
+      "lorePurpose": "knowledge_gate",
       "injectableByDefault": true,
-      "specificityScore": 35
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -370,7 +376,7 @@
       "schemaVersion": 2,
       "id": "event_triwizard_tournament",
       "title": "Triwizard Tournament year",
-      "kind": "event_anchor",
+      "kind": "future_guard",
       "category": "event",
       "canonStatus": "canon",
       "truthStatus": "true",
@@ -387,8 +393,10 @@
       },
       "scope": {
         "topics": [
-          "timeline",
-          "canon state"
+          "Triwizard Tournament",
+          "champions",
+          "tasks",
+          "Goblet of Fire"
         ],
         "schoolYears": [
           4
@@ -402,10 +410,15 @@
       },
       "visibility": {},
       "content": {
-        "fact": "The Triwizard Tournament shapes Hogwarts life and Harry is an unexpected champion.",
-        "injection": "The Triwizard Tournament shapes Hogwarts life and Harry is an unexpected champion.",
-        "constraints": [],
-        "antiLore": [],
+        "fact": "During Year 4, the Triwizard Tournament affects Hogwarts, but champion selection and task outcomes should stay date-gated.",
+        "injection": "During Year 4, do not treat Harry as a Triwizard champion before the Goblet selects him, and do not leak later task, Portkey, graveyard, or Voldemort-return outcomes before the story reaches them.",
+        "constraints": [
+          "Before champion selection, Harry is not publicly a Triwizard champion.",
+          "After selection, task details and graveyard outcomes still remain future-gated until reached."
+        ],
+        "antiLore": [
+          "Do not make September Year 4 scenes assume Harry is already a champion."
+        ],
         "notes": ""
       },
       "effects": {
@@ -436,13 +449,13 @@
         "schoolYear": 4,
         "book": "Goblet of Fire"
       },
-      "gateType": "event_anchor",
+      "gateType": "future_guard",
       "userEditable": true,
       "canon": "canon",
       "relevance": "normal",
-      "lorePurpose": "event_anchor",
+      "lorePurpose": "temporal_gate",
       "injectableByDefault": true,
-      "specificityScore": 45
+      "specificityScore": 100
     },
     {
       "schemaVersion": 2,

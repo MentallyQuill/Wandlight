@@ -303,5 +303,390 @@
     "lorePurpose": "status_change",
     "injectableByDefault": true,
     "specificityScore": 95
+  },
+  {
+    "schemaVersion": 2,
+    "id": "item_gate_marauders_map_pre_acquisition",
+    "title": "Pre-Marauder's Map Access",
+    "kind": "knowledge_gate",
+    "category": "item",
+    "canonStatus": "canon",
+    "truthStatus": "hidden",
+    "revealPolicy": "private",
+    "priority": 96,
+    "date": {
+      "validFrom": "1991-09-01",
+      "validTo": "1993-12-17",
+      "precision": "date",
+      "schoolYear": 3,
+      "book": "Prisoner of Azkaban"
+    },
+    "scope": {
+      "characters": [
+        "Harry Potter",
+        "Fred Weasley",
+        "George Weasley"
+      ],
+      "locations": [
+        "Hogwarts"
+      ],
+      "topics": [
+        "Marauder's Map",
+        "secret map",
+        "Hogsmeade",
+        "hidden passages"
+      ],
+      "objects": [
+        "Marauder's Map"
+      ],
+      "schoolYears": [
+        1,
+        2,
+        3
+      ],
+      "books": [
+        "Philosopher's Stone",
+        "Chamber of Secrets",
+        "Prisoner of Azkaban"
+      ]
+    },
+    "content": {
+      "fact": "Before Fred and George give Harry the Marauder's Map in Year 3, Harry should not have or use it.",
+      "injection": "Before Fred and George give Harry the Marauder's Map in Year 3, Harry should not have or use the map unless our story has established an early acquisition.",
+      "constraints": [
+        "Do not give Harry map-based Hogwarts tracking or secret passage knowledge before the map reaches him.",
+        "Fred and George may still possess the map before giving it to Harry."
+      ],
+      "antiLore": [
+        "Do not let Year 1 or Year 2 Harry rely on the Marauder's Map unless this chat established a divergence."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "book": "Prisoner of Azkaban",
+      "confidence": 0.9
+    },
+    "canonTiming": {
+      "hardValidFrom": "1991-09-01",
+      "hardValidTo": "1993-12-17",
+      "precision": "date",
+      "schoolYear": 3,
+      "book": "Prisoner of Azkaban"
+    },
+    "gateType": "knowledge_gate",
+    "protected": false,
+    "locked": true,
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "normal",
+    "lorePurpose": "knowledge_gate",
+    "injectableByDefault": true,
+    "specificityScore": 100
+  },
+  {
+    "schemaVersion": 2,
+    "id": "item_gate_invisibility_cloak_pre_christmas",
+    "title": "Pre-Invisibility Cloak Access",
+    "kind": "knowledge_gate",
+    "category": "item",
+    "canonStatus": "canon",
+    "truthStatus": "hidden",
+    "revealPolicy": "private",
+    "priority": 90,
+    "date": {
+      "validFrom": "1991-09-01",
+      "validTo": "1991-12-24",
+      "precision": "date",
+      "schoolYear": 1,
+      "book": "Philosopher's Stone"
+    },
+    "scope": {
+      "characters": [
+        "Harry Potter",
+        "Ron Weasley",
+        "Hermione Granger"
+      ],
+      "locations": [
+        "Hogwarts"
+      ],
+      "topics": [
+        "Invisibility Cloak",
+        "stealth",
+        "hidden movement"
+      ],
+      "objects": [
+        "Invisibility Cloak"
+      ],
+      "schoolYears": [
+        1
+      ],
+      "books": [
+        "Philosopher's Stone"
+      ]
+    },
+    "content": {
+      "fact": "Before Christmas 1991, Harry has not received his Invisibility Cloak.",
+      "injection": "Before Christmas 1991, Harry should not have or use his Invisibility Cloak unless our story has established an early gift.",
+      "constraints": [
+        "Do not solve early Year 1 stealth scenes with Harry's cloak before he receives it."
+      ],
+      "antiLore": [
+        "Do not assume Harry always has cloak access from the start of first year."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "book": "Philosopher's Stone",
+      "confidence": 0.9
+    },
+    "canonTiming": {
+      "hardValidFrom": "1991-09-01",
+      "hardValidTo": "1991-12-24",
+      "precision": "date",
+      "schoolYear": 1,
+      "book": "Philosopher's Stone"
+    },
+    "gateType": "knowledge_gate",
+    "protected": false,
+    "locked": true,
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "normal",
+    "lorePurpose": "knowledge_gate",
+    "injectableByDefault": true,
+    "specificityScore": 100
+  },
+  {
+    "schemaVersion": 2,
+    "id": "item_gate_time_turner_pre_year3",
+    "title": "Pre-Time-Turner Access",
+    "kind": "knowledge_gate",
+    "category": "item",
+    "canonStatus": "canon",
+    "truthStatus": "hidden",
+    "revealPolicy": "private",
+    "priority": 94,
+    "date": {
+      "validFrom": "1991-09-01",
+      "validTo": "1993-08-31",
+      "precision": "date",
+      "schoolYear": 3,
+      "book": "Prisoner of Azkaban"
+    },
+    "scope": {
+      "characters": [
+        "Hermione Granger",
+        "Harry Potter",
+        "Ron Weasley"
+      ],
+      "locations": [
+        "Hogwarts"
+      ],
+      "topics": [
+        "Time-Turner",
+        "time travel",
+        "Hermione schedule"
+      ],
+      "objects": [
+        "Time-Turner"
+      ],
+      "schoolYears": [
+        1,
+        2
+      ],
+      "books": [
+        "Philosopher's Stone",
+        "Chamber of Secrets"
+      ]
+    },
+    "content": {
+      "fact": "Before Hermione's Year 3 schedule, the trio should not have Time-Turner access.",
+      "injection": "Before Hermione's Year 3 schedule is established, Harry, Ron, and Hermione should not use or know about a Time-Turner unless our story has introduced one early.",
+      "constraints": [
+        "Do not use time travel as a casual Year 1 or Year 2 solution."
+      ],
+      "antiLore": [
+        "Do not reveal Hermione's Time-Turner before the story has established her Year 3 arrangement."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "book": "Prisoner of Azkaban",
+      "confidence": 0.88
+    },
+    "canonTiming": {
+      "hardValidFrom": "1991-09-01",
+      "hardValidTo": "1993-08-31",
+      "precision": "date",
+      "schoolYear": 3,
+      "book": "Prisoner of Azkaban"
+    },
+    "gateType": "knowledge_gate",
+    "protected": false,
+    "locked": true,
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "normal",
+    "lorePurpose": "knowledge_gate",
+    "injectableByDefault": true,
+    "specificityScore": 100
+  },
+  {
+    "schemaVersion": 2,
+    "id": "knowledge_gate_pre_dumbledores_army",
+    "title": "Pre-Dumbledore's Army",
+    "kind": "knowledge_gate",
+    "category": "faction",
+    "canonStatus": "canon",
+    "truthStatus": "hidden",
+    "revealPolicy": "private",
+    "priority": 92,
+    "date": {
+      "validFrom": "1991-09-01",
+      "validTo": "1995-10-15",
+      "precision": "date",
+      "schoolYear": 5,
+      "book": "Order of the Phoenix"
+    },
+    "scope": {
+      "characters": [
+        "Harry Potter",
+        "Hermione Granger",
+        "Ron Weasley",
+        "Neville Longbottom",
+        "Ginny Weasley",
+        "Luna Lovegood"
+      ],
+      "locations": [
+        "Hogwarts",
+        "Room of Requirement"
+      ],
+      "factions": [
+        "Dumbledore's Army"
+      ],
+      "topics": [
+        "Dumbledore's Army",
+        "DA",
+        "defense training",
+        "secret meetings"
+      ],
+      "schoolYears": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "books": [
+        "Order of the Phoenix"
+      ]
+    },
+    "content": {
+      "fact": "Before the Year 5 DA formation, Dumbledore's Army does not exist as a student defense group.",
+      "injection": "Before the Year 5 DA formation, do not treat Dumbledore's Army, DA meetings, DA coins, or DA-trained student combat skills as established unless our story created the group early.",
+      "constraints": [
+        "Students can still practice defense, but not as members of canon Dumbledore's Army before it forms."
+      ],
+      "antiLore": [
+        "Do not give younger students DA membership or DA training by default."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "book": "Order of the Phoenix",
+      "confidence": 0.9
+    },
+    "canonTiming": {
+      "hardValidFrom": "1991-09-01",
+      "hardValidTo": "1995-10-15",
+      "precision": "date",
+      "schoolYear": 5,
+      "book": "Order of the Phoenix"
+    },
+    "gateType": "knowledge_gate",
+    "protected": false,
+    "locked": true,
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "normal",
+    "lorePurpose": "knowledge_gate",
+    "injectableByDefault": true,
+    "specificityScore": 100
+  },
+  {
+    "schemaVersion": 2,
+    "id": "location_gate_room_of_requirement_pre_da",
+    "title": "Pre-DA Room of Requirement Knowledge",
+    "kind": "knowledge_gate",
+    "category": "location",
+    "canonStatus": "canon",
+    "truthStatus": "hidden",
+    "revealPolicy": "private",
+    "priority": 88,
+    "date": {
+      "validFrom": "1991-09-01",
+      "validTo": "1995-10-15",
+      "precision": "date",
+      "schoolYear": 5,
+      "book": "Order of the Phoenix"
+    },
+    "scope": {
+      "characters": [
+        "Harry Potter",
+        "Hermione Granger",
+        "Ron Weasley"
+      ],
+      "locations": [
+        "Hogwarts",
+        "Room of Requirement"
+      ],
+      "topics": [
+        "Room of Requirement",
+        "secret room",
+        "hidden training room",
+        "DA"
+      ],
+      "schoolYears": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "books": [
+        "Order of the Phoenix"
+      ]
+    },
+    "content": {
+      "fact": "Before the DA context, Harry's circle should not treat the Room of Requirement as an ordinary known resource.",
+      "injection": "Before the Room of Requirement is discovered or introduced in our story, Harry's circle should not casually know how to access it or use it as a default solution.",
+      "constraints": [
+        "Do not turn the Room of Requirement into a general-purpose early-year safe room unless the chat established that discovery."
+      ],
+      "antiLore": [
+        "Do not assume Harry, Ron, and Hermione know the room in Years 1-4 by default."
+      ]
+    },
+    "source": {
+      "work": "Harry Potter",
+      "book": "Order of the Phoenix",
+      "confidence": 0.86
+    },
+    "canonTiming": {
+      "hardValidFrom": "1991-09-01",
+      "hardValidTo": "1995-10-15",
+      "precision": "date",
+      "schoolYear": 5,
+      "book": "Order of the Phoenix"
+    },
+    "gateType": "knowledge_gate",
+    "protected": false,
+    "locked": true,
+    "userEditable": true,
+    "canon": "canon",
+    "relevance": "normal",
+    "lorePurpose": "knowledge_gate",
+    "injectableByDefault": true,
+    "specificityScore": 100
   }
 ]

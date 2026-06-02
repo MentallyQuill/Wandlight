@@ -97,7 +97,7 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "item_state",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 60
     },
     {
@@ -192,7 +192,7 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "item_state",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 60
     },
     {
@@ -239,7 +239,17 @@
       "source": "canon-lore-db:items/artifacts_and_objects.json",
       "locked": true,
       "activation": {},
-      "content": {},
+      "content": {
+        "fact": "Horcrux knowledge is obscure, dangerous, and highly restricted; most characters should not name or explain Horcruxes without an established discovery path.",
+        "injection": "Do not let characters casually name or explain Horcruxes unless our story has established how they learned that restricted knowledge.",
+        "constraints": [
+          "Harry's Year 6 access to Horcrux knowledge should come through Dumbledore's lessons and the Slughorn memory path.",
+          "Hermione and Ron should not discuss Horcruxes before the story establishes how Harry shared or they discovered that knowledge."
+        ],
+        "antiLore": [
+          "Do not treat Horcruxes as common wizarding vocabulary."
+        ]
+      },
       "scope": {
         "characters": [
           "Lord Voldemort",
@@ -287,7 +297,7 @@
       },
       "lorePurpose": "knowledge_gate",
       "injectableByDefault": true,
-      "specificityScore": 60
+      "specificityScore": 100
     }
   ]
 }

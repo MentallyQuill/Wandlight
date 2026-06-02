@@ -44,12 +44,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Riddikulus is taught during Lupin’s Year 3 Defense class.",
-        "injection": "Riddikulus is plausible for third-years after Lupin’s Boggart lesson, but not as routine first-/second-year knowledge.",
+        "fact": "Before Lupin's Year 3 Boggart lesson or a story-established equivalent, Riddikulus should not be routine student knowledge.",
+        "injection": "Do not let first- or second-year students casually know or use Riddikulus unless our story has established early Boggart instruction.",
         "constraints": [
           "Date-gate Boggart handling to Year 3 instruction unless our story establishes otherwise."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not spotlight Riddikulus in later years unless Boggarts or DADA lessons are actually relevant."
+        ],
         "notes": ""
       },
       "effects": {
@@ -87,7 +89,7 @@
       "relevance": "low",
       "lorePurpose": "ability_gate",
       "injectableByDefault": true,
-      "specificityScore": 65
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -130,12 +132,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Stupefy is common in later defensive/combat contexts but should not be casual early-year magic.",
-        "injection": "Stupefy is plausible for trained older students and adults; avoid making it routine for younger students without training.",
+        "fact": "Before practical defensive training, Stupefy should not be casual early-year magic.",
+        "injection": "Do not make Stupefy routine for younger students without practical defensive training or a story-established reason.",
         "constraints": [
           "Treat Stunning as practical combat magic, not casual first-year curriculum."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not give ordinary first- or second-years reliable Stunning Spell use by default."
+        ],
         "notes": ""
       },
       "effects": {
@@ -216,12 +220,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Protego becomes a practical student defense skill around OWL/DA training.",
-        "injection": "Protego is plausible for DA-trained or older students onward; younger students should not casually master shield magic.",
+        "fact": "Before OWL/DA-level defensive training, students should not casually master Protego.",
+        "injection": "Do not let younger students casually master Protego before OWL/DA-level training unless our story has established early shield practice.",
         "constraints": [
           "Date-gate practical shield use."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not treat shield magic as routine early-year spellwork."
+        ],
         "notes": ""
       },
       "effects": {
@@ -259,7 +265,7 @@
       "relevance": "low",
       "lorePurpose": "ability_gate",
       "injectableByDefault": true,
-      "specificityScore": 75
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,

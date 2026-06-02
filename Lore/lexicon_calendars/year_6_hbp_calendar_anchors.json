@@ -1551,7 +1551,7 @@
         }
       },
       "lorePurpose": "ability_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 60
     },
     {

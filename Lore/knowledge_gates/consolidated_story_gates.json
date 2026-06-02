@@ -133,14 +133,14 @@
       "branchId": "main",
       "date": {
         "validFrom": "1991-09-01",
-        "validTo": "1996-06-30",
+        "validTo": "1997-03-31",
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
       },
       "canonTiming": {
         "hardValidFrom": "1991-09-01",
-        "hardValidTo": "1996-06-30",
+        "hardValidTo": "1997-03-31",
         "precision": "date",
         "schoolYear": 6,
         "book": "Half-Blood Prince"
@@ -161,23 +161,26 @@
           2,
           3,
           4,
-          5
+          5,
+          6
         ],
         "books": [
           "Philosopher's Stone",
           "Chamber of Secrets",
           "Prisoner of Azkaban",
           "Goblet of Fire",
-          "Order of the Phoenix"
+          "Order of the Phoenix",
+          "Half-Blood Prince"
         ]
       },
       "activeWhen": null,
       "visibility": {},
       "content": {
         "fact": "Before our story establishes the Year 6 Horcrux discovery/research path, the trio should not know, name, or explain Horcruxes.",
-        "injection": "Before our story establishes the Year 6 Horcrux discovery/research path, Harry, Ron, and Hermione should not casually know, name, or explain Horcruxes.",
+        "injection": "Before our story establishes the Year 6 Horcrux discovery/research path, including early Year 6 before the relevant memories and research, Harry, Ron, and Hermione should not casually know, name, or explain Horcruxes.",
         "constraints": [
-          "Do not let Horcrux knowledge appear before the story has established how the characters learned it."
+          "Do not let Horcrux knowledge appear before the story has established how the characters learned it.",
+          "In September Year 6, do not assume Hermione or Ron can discuss Horcruxes just because the roleplay is in Half-Blood Prince year."
         ],
         "antiLore": [],
         "notes": "Consolidated from overlapping bundled lore gates."

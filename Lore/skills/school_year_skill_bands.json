@@ -34,12 +34,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "First-years are beginners learning foundational charms, potions, transfiguration, flying, and magical safety.",
-        "injection": "First-years are beginners learning foundational charms, potions, transfiguration, flying, and magical safety.",
+        "fact": "First-years are beginners and should not perform advanced defensive, nonverbal, or adult-level magic without story-established exceptional training.",
+        "injection": "Do not let first-years solve problems with advanced defensive, nonverbal, or adult-level magic unless our story has established exceptional training.",
         "constraints": [
-          "First-years are beginners learning foundational charms, potions, transfiguration, flying, and magical safety."
+          "Keep first-year magic foundational unless a specific character has established special training."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not make first-years broadly competent duelists or advanced spellcasters by default."
+        ],
         "notes": ""
       },
       "effects": {
@@ -76,7 +78,7 @@
       "relevance": "low",
       "lorePurpose": "ability_gate",
       "injectableByDefault": true,
-      "specificityScore": 60
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -112,12 +114,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Second-years have basic spell competence but should not handle advanced defensive or nonverbal magic routinely.",
-        "injection": "Second-years have basic spell competence but should not handle advanced defensive or nonverbal magic routinely.",
+        "fact": "Second-years have basic spell competence but should not handle advanced defensive, nonverbal, or adult-level magic routinely.",
+        "injection": "Do not let second-years handle advanced defensive, nonverbal, or adult-level magic routinely unless our story has established unusual training.",
         "constraints": [
-          "Second-years have basic spell competence but should not handle advanced defensive or nonverbal magic routinely."
+          "Treat second-year competence as basic school magic, not adult combat readiness."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not make advanced defensive magic routine for second-years."
+        ],
         "notes": ""
       },
       "effects": {
@@ -154,7 +158,7 @@
       "relevance": "low",
       "lorePurpose": "ability_gate",
       "injectableByDefault": true,
-      "specificityScore": 80
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -190,12 +194,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Third-years add electives and develop more independent magical competence; Harry learns Patronus work unusually early.",
-        "injection": "Third-years add electives and develop more independent magical competence; Harry learns Patronus work unusually early.",
+        "fact": "Third-years are still early students; advanced defensive magic remains unusual, and Harry's Patronus work should not generalize to ordinary classmates.",
+        "injection": "Do not generalize Harry's unusual Year 3 Patronus training to ordinary third-years; advanced defensive magic still needs specific training.",
         "constraints": [
-          "Third-years add electives and develop more independent magical competence; Harry learns Patronus work unusually early."
+          "Third-year electives add breadth, but not broad advanced combat competence."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not make ordinary third-years casually capable of Patronus-level defensive magic."
+        ],
         "notes": ""
       },
       "effects": {
@@ -232,7 +238,7 @@
       "relevance": "low",
       "lorePurpose": "ability_gate",
       "injectableByDefault": true,
-      "specificityScore": 60
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -268,12 +274,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Fourth-years are intermediate students; they learn about serious curses but should not casually perform adult-level magic.",
-        "injection": "Fourth-years are intermediate students; they learn about serious curses but should not casually perform adult-level magic.",
+        "fact": "Fourth-years are intermediate students; exposure to serious curses should not make them casual users of adult-level magic.",
+        "injection": "Do not let fourth-years casually perform adult-level magic just because they have heard about serious curses.",
         "constraints": [
-          "Fourth-years are intermediate students; they learn about serious curses but should not casually perform adult-level magic."
+          "Treat Year 4 curse knowledge as exposure, not mastery."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not make Unforgivable or advanced combat magic routine student spellwork."
+        ],
         "notes": ""
       },
       "effects": {
@@ -310,7 +318,7 @@
       "relevance": "low",
       "lorePurpose": "ability_gate",
       "injectableByDefault": true,
-      "specificityScore": 80
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -346,12 +354,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Fifth-years prepare for OWLs; Dumbledore’s Army members may have improved defensive skills.",
-        "injection": "Fifth-years prepare for OWLs; Dumbledore’s Army members may have improved defensive skills.",
+        "fact": "Fifth-year defensive improvement should be tied to OWL work, DA participation, or other story-established training, not assumed for every student.",
+        "injection": "Do not give all fifth-years DA-level defensive competence by default; tie improved skills to OWL work, DA participation, or established training.",
         "constraints": [
-          "Fifth-years prepare for OWLs; Dumbledore’s Army members may have improved defensive skills."
+          "DA skill gains apply to participants, not every student automatically."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not treat DA training as universal school-wide competence."
+        ],
         "notes": ""
       },
       "effects": {
@@ -388,7 +398,7 @@
       "relevance": "low",
       "lorePurpose": "ability_gate",
       "injectableByDefault": true,
-      "specificityScore": 60
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -424,12 +434,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Sixth-years enter NEWT-level work, begin nonverbal magic training, and have more advanced subject specialization.",
-        "injection": "Sixth-years enter NEWT-level work, begin nonverbal magic training, and have more advanced subject specialization.",
+        "fact": "Sixth-years may begin NEWT-level and nonverbal magic training, but nonverbal or advanced magic should not be effortless or universal.",
+        "injection": "Do not make sixth-year nonverbal or advanced magic effortless or universal; keep it tied to training, aptitude, and subject specialization.",
         "constraints": [
-          "Sixth-years enter NEWT-level work, begin nonverbal magic training, and have more advanced subject specialization."
+          "Treat nonverbal magic as developing skill, not a default capability."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not make every sixth-year casually competent at nonverbal casting."
+        ],
         "notes": ""
       },
       "effects": {
@@ -466,7 +478,7 @@
       "relevance": "low",
       "lorePurpose": "ability_gate",
       "injectableByDefault": true,
-      "specificityScore": 60
+      "specificityScore": 95
     },
     {
       "schemaVersion": 2,
@@ -502,12 +514,14 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Seventh-year-age students may have advanced skills, but the trio’s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school.",
-        "injection": "Seventh-year-age students may have advanced skills, but the trio’s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school.",
+        "fact": "Seventh-year-age students can have advanced training, but canon Year 7 is not a normal Hogwarts school year for the trio.",
+        "injection": "Do not treat canon Year 7 as ordinary school life for Harry, Ron, and Hermione; do not give students war or Horcrux-context skills unless our story established that path.",
         "constraints": [
-          "Seventh-year-age students may have advanced skills, but the trio’s canon Year 7 context is shaped by war and the Horcrux hunt rather than normal school."
+          "Separate seventh-year-age competence from the trio's specific war/Horcrux context."
         ],
-        "antiLore": [],
+        "antiLore": [
+          "Do not assume normal Hogwarts classes for the trio in canon Year 7."
+        ],
         "notes": ""
       },
       "effects": {
@@ -554,7 +568,7 @@
       "relevance": "low",
       "lorePurpose": "ability_gate",
       "injectableByDefault": true,
-      "specificityScore": 60
+      "specificityScore": 95
     }
   ]
 }

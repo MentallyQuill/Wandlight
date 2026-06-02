@@ -3828,10 +3828,10 @@
 
 
 
-/* Phase 11: logo box geometry + stronger runtime icon treatment -----------------
-   - Compact rail logo box is square so the W mark sits in a true 1:1 container.
-   - Expanded rail subtitle/status is suppressed because Session already reports it.
-   - Runtime icons are brightened and strengthened to match the Wandlight logos. */
+/* Phase 12: compact W logo box geometry only -----------------------------------
+   Rebuilt from phase 10 to restore the original runtime icon treatment.
+   The compact rail's logo/drag box is now square without changing the W image
+   centering rules. The expanded rail status line is suppressed. */
 .wandlight-runtime-rail-subtitle,
 .wandlight-runtime-rail-subtitle:empty,
 .wandlight-runtime-rail-expanded .wandlight-runtime-rail-subtitle {
@@ -3839,73 +3839,33 @@
 }
 
 .wandlight-runtime-rail-compact .wandlight-runtime-rail-drag {
-    min-height: 56px;
-    padding: 6px 6px;
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+    max-height: 48px;
+    padding: 0;
+    align-self: center;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 .wandlight-runtime-rail-compact .wandlight-runtime-rail-mark {
-    width: 44px;
-    height: 44px;
-    min-height: 44px;
-    flex: 0 0 44px;
-    align-self: center;
-    margin: 0 auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    box-sizing: border-box;
 }
 
 .wandlight-runtime-rail-compact .wandlight-runtime-rail-logo-img {
-    width: 44px;
-    height: 44px;
-}
-
-.wandlight-runtime-rail-expanded .wandlight-runtime-rail-drag {
-    padding-top: 8px;
-    padding-bottom: 8px;
-}
-
-.wandlight-runtime-rail-icon {
-    flex: 0 0 40px;
-    width: 40px;
-    height: 40px;
-    padding: 2px;
-    background:
-        radial-gradient(circle at 50% 42%, rgba(255, 230, 162, 0.20), transparent 54%),
-        linear-gradient(180deg, rgba(34, 24, 28, 0.74), rgba(12, 10, 16, 0.82));
-    border: 1px solid rgba(215, 181, 109, 0.24);
-    box-shadow:
-        0 0 0 1px rgba(255, 236, 191, 0.06) inset,
-        0 3px 10px rgba(0, 0, 0, 0.18);
-}
-
-.wandlight-runtime-rail-icon-img {
-    filter:
-        brightness(1.22)
-        saturate(1.08)
-        contrast(1.06)
-        drop-shadow(0 0 4px rgba(255, 224, 148, 0.52))
-        drop-shadow(0 0 8px rgba(92, 23, 36, 0.24));
-}
-
-.wandlight-runtime-rail-tab:hover .wandlight-runtime-rail-icon-img,
-.wandlight-runtime-rail-tab-active .wandlight-runtime-rail-icon-img {
-    filter:
-        brightness(1.30)
-        saturate(1.12)
-        contrast(1.08)
-        drop-shadow(0 0 5px rgba(255, 232, 170, 0.70))
-        drop-shadow(0 0 10px rgba(92, 23, 36, 0.34));
-}
-
-.wandlight-runtime-rail-tab:hover .wandlight-runtime-rail-icon,
-.wandlight-runtime-rail-tab-active .wandlight-runtime-rail-icon {
-    border-color: rgba(230, 198, 125, 0.42);
-    background:
-        radial-gradient(circle at 50% 36%, rgba(255, 229, 158, 0.26), transparent 50%),
-        linear-gradient(180deg, rgba(56, 26, 32, 0.82), rgba(18, 12, 18, 0.88));
-    box-shadow:
-        0 0 0 1px rgba(255, 236, 191, 0.10) inset,
-        0 0 14px rgba(215, 181, 109, 0.08);
-}
-
-.wandlight-runtime-rail-expanded .wandlight-runtime-rail-tab {
-    gap: 10px;
+    width: 42px;
+    height: 42px;
+    max-width: 42px;
+    max-height: 42px;
+    object-fit: contain;
 }

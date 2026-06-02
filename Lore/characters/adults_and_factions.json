@@ -2,7 +2,7 @@
   "entries": [
     {
       "id": "canon_dumbledore_headmaster",
-      "title": "Albus Dumbledore: Headmaster",
+      "title": "Dumbledore Before Tower",
       "tags": [
         "Dumbledore",
         "Hogwarts",
@@ -33,11 +33,17 @@
           "Dumbledore"
         ]
       },
-      "priority": 84,
+      "priority": 93,
       "status": "active",
       "source": "canon-lore-db:characters/adults_and_factions.json",
       "locked": true,
-      "content": {},
+      "content": {
+        "fact": "Before the Astronomy Tower event, Dumbledore is alive and remains Hogwarts Headmaster.",
+        "injection": "Before the Astronomy Tower event, Dumbledore is alive and remains a decisive authority at Hogwarts; do not treat him as dead, memorialized, or absent unless our story has established a different outcome.",
+        "constraints": [
+          "After the Tower event, use Dumbledore death-state lore instead."
+        ]
+      },
       "scope": {
         "characters": [
           "Albus Dumbledore"
@@ -103,6 +109,10 @@
           "method": "living/office state expires at death",
           "notes": "Dumbledore Headmaster state is bounded by his death.",
           "appliedIn": "Wandlight relevance-tier regression repair pass"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Merged Dumbledore alive/headmaster gates."
         }
       },
       "lorePurpose": "status_change",

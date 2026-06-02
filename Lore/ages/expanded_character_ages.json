@@ -3,7 +3,7 @@
     {
       "schemaVersion": 2,
       "id": "age_fred_weasley",
-      "title": "Fred Weasley age constraint",
+      "title": "Fred Weasley Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -66,6 +66,10 @@
           "method": "deceased age gate bounded by death date",
           "notes": "Fred age constraints end at his canon death during the Battle of Hogwarts.",
           "appliedIn": "Wandlight relevance-tier regression repair pass"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
         }
       },
       "canonTiming": {
@@ -91,13 +95,13 @@
         "autoMuteOnExpire": false
       },
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     },
     {
       "schemaVersion": 2,
       "id": "age_george_weasley",
-      "title": "George Weasley age constraint",
+      "title": "George Weasley Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -155,7 +159,12 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1978-04-01",
         "hardValidTo": "1998-08-31",
@@ -168,13 +177,13 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     },
     {
       "schemaVersion": 2,
       "id": "age_cedric_diggory",
-      "title": "Cedric Diggory age constraint",
+      "title": "Cedric Diggory Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -237,6 +246,10 @@
           "method": "deceased age gate bounded by death date",
           "notes": "Cedric age constraints end at his canon death in the graveyard.",
           "appliedIn": "Wandlight relevance-tier regression repair pass"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
         }
       },
       "canonTiming": {
@@ -262,13 +275,13 @@
         "autoMuteOnExpire": false
       },
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     },
     {
       "schemaVersion": 2,
       "id": "age_cho_chang",
-      "title": "Cho Chang age constraint",
+      "title": "Cho Chang Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -326,7 +339,12 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1979-01-01",
         "hardValidTo": "1998-08-31",
@@ -339,7 +357,7 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     }
   ]

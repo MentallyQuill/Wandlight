@@ -108,7 +108,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y4_world_cup_pickup",
-      "title": "Weasleys collect Harry for Quidditch World Cup",
+      "title": "Quidditch World Cup Pickup",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -201,6 +201,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1995-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -210,7 +213,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y4_world_cup_riot",
-      "title": "World Cup riot and Dark Mark aftermath",
+      "title": "World Cup Dark Mark Riot",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -303,6 +306,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1995-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -819,7 +825,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y4_wand_weighing_skeeter",
-      "title": "Weighing of the Wands and Rita interview",
+      "title": "Wand Weighing and Rita",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -911,6 +917,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1995-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -920,7 +929,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y4_hagrid_dragons_sirius_fire",
-      "title": "Dragon task revealed and Sirius fire call",
+      "title": "Dragons Revealed",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1013,6 +1022,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1995-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -1022,7 +1034,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y4_first_task_dragon",
-      "title": "First task completed with dragon and golden egg",
+      "title": "First Task Dragon",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1120,6 +1132,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1995-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -1129,7 +1144,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y4_yule_ball",
-      "title": "Yule Ball social pivot",
+      "title": "Yule Ball Social Fallout",
       "kind": "relationship_gate",
       "gateType": "relationship_gate",
       "category": "relationship",
@@ -1183,9 +1198,11 @@
       },
       "visibility": {},
       "content": {
-        "fact": "The Yule Ball reshapes several social dynamics, including Harry’s interest in Cho, Ron’s jealousy over Hermione and Krum, and Cedric’s relationship with Cho.",
-        "injection": "The Yule Ball reshapes several social dynamics, including Harry’s interest in Cho, Ron’s jealousy over Hermione and Krum, and Cedric’s relationship with Cho.",
-        "constraints": [],
+        "fact": "The Yule Ball creates romantic jealousy, social embarrassment, and tension among Harry’s cohort.",
+        "injection": "The Yule Ball creates romantic jealousy, social embarrassment, and tension among Harry’s cohort.",
+        "constraints": [
+          "Use as social aftermath only when the Yule Ball or its relationships are relevant."
+        ],
         "antiLore": [],
         "publicVersion": "",
         "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
@@ -1223,6 +1240,10 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1995-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; broad duplicate removed."
         }
       },
       "lorePurpose": "relationship_state",
@@ -1438,7 +1459,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y4_sirius_cave_meeting",
-      "title": "Sirius meets trio in cave near Hogsmeade",
+      "title": "Sirius Cave Meeting",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1530,6 +1551,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1995-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",

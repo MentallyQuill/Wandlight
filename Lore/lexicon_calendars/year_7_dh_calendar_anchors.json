@@ -6,7 +6,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y7_malfoy_manor_meeting_burbage",
-      "title": "Malfoy Manor meeting and Charity Burbage death",
+      "title": "Malfoy Manor Burbage Murder",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -98,6 +98,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -211,7 +214,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y7_dumbledore_will_birthday",
-      "title": "Harry turns seventeen and receives Dumbledore bequests",
+      "title": "Dumbledore Will Bequests",
       "kind": "artifact_state",
       "gateType": "artifact_state",
       "category": "item",
@@ -307,6 +310,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "item_state",
@@ -419,7 +425,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y7_rab_kreacher_locket",
-      "title": "RAB identity and Kreacher locket story",
+      "title": "RAB and Kreacher Locket Story",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -515,6 +521,10 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; broad duplicate removed."
         }
       },
       "lorePurpose": "event_anchor",
@@ -524,7 +534,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y7_ministry_locket_retrieval",
-      "title": "Ministry infiltration recovers locket",
+      "title": "Ministry Locket Retrieval",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -617,6 +627,13 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; broad duplicate removed."
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "knowledge_gate",
@@ -827,7 +844,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y7_godrics_hollow",
-      "title": "Godric’s Hollow visit and broken wand",
+      "title": "Godric's Hollow Trap",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -921,6 +938,13 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; broad duplicate removed."
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -930,7 +954,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y7_silver_doe_locket_destroyed",
-      "title": "Silver doe, Ron return, and locket destroyed",
+      "title": "Silver Doe and Locket Destruction",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1025,6 +1049,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "knowledge_gate",
@@ -1136,7 +1163,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y7_malfoy_manor_escape",
-      "title": "Malfoy Manor escape and Dobby death",
+      "title": "Malfoy Manor Escape",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1231,6 +1258,13 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for exact calendar anchor."
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -1240,7 +1274,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y7_shell_cottage_planning",
-      "title": "Shell Cottage recovery and Gringotts planning",
+      "title": "Shell Cottage Planning",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1334,6 +1368,13 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for exact calendar anchor."
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",

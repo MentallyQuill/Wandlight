@@ -2,107 +2,8 @@
   "entries": [
     {
       "schemaVersion": 2,
-      "id": "knowledge_gate_chamber_secret_before_year2",
-      "title": "Chamber of Secrets knowledge before Year 2",
-      "kind": "knowledge_gate",
-      "category": "knowledge",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "private",
-      "priority": 85,
-      "protected": true,
-      "locked": true,
-      "date": {
-        "validFrom": "1991-09-01",
-        "validTo": "1992-08-31",
-        "precision": "date",
-        "schoolYear": 1,
-        "book": "Philosopher's Stone"
-      },
-      "scope": {
-        "characters": [
-          "Harry Potter",
-          "Hermione Granger",
-          "Ron Weasley"
-        ],
-        "topics": [
-          "Chamber of Secrets",
-          "Tom Riddle",
-          "basilisk"
-        ],
-        "spells": [],
-        "schoolYears": [
-          1
-        ],
-        "books": [
-          "Philosopher's Stone"
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "The trio should not know the Chamber of Secrets plot, basilisk truth, or Tom Riddle diary connection.",
-        "injection": "Do not have the trio know about the Chamber, basilisk, or diary unless this story established it.",
-        "constraints": [
-          "Prevent Year 1 leakage of Year 2 mystery knowledge."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "knowledge-gate",
-          "future-guard",
-          "year-2"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Philosopher's Stone",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1991-09-01",
-        "canonExpectedUntil": "1992-08-31",
-        "precision": "date",
-        "schoolYear": 1,
-        "book": "Philosopher's Stone"
-      },
-      "activation": {
-        "requiresMissingEvents": [
-          "chamber_of_secrets_resolved"
-        ]
-      },
-      "expiration": {
-        "expiresWhenEventsHappen": [
-          "chamber_of_secrets_resolved"
-        ],
-        "autoMuteOnExpire": true
-      },
-      "gateType": "knowledge_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "knowledge_gate",
-      "injectableByDefault": true,
-      "specificityScore": 95
-    },
-    {
-      "schemaVersion": 2,
       "id": "knowledge_gate_sirius_truth_before_late_year3",
-      "title": "Sirius Black truth before late Year 3",
+      "title": "Sirius Innocence Hidden",
       "kind": "knowledge_gate",
       "category": "knowledge",
       "canonStatus": "canon",
@@ -139,8 +40,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Harry should not know Sirius was innocent or that Peter betrayed his parents.",
-        "injection": "Characters generally believe Sirius Black betrayed the Potters; Harry does not know Peter Pettigrew is the traitor.",
+        "fact": "Before the Shrieking Shack truth is established, Harry should not know Sirius was innocent or that Peter betrayed his parents.",
+        "injection": "Before the Shrieking Shack truth is established, characters generally believe Sirius Black betrayed the Potters; Harry does not know Peter Pettigrew is the traitor.",
         "constraints": [
           "Block early revelation of Sirius innocence and Peter’s betrayal."
         ],
@@ -168,7 +69,11 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
+        }
+      },
       "canonTiming": {
         "canonExpectedFrom": "1991-09-01",
         "canonExpectedUntil": "1994-06-05",
@@ -296,97 +201,6 @@
     },
     {
       "schemaVersion": 2,
-      "id": "knowledge_gate_voldemort_return_public_before_year5_end",
-      "title": "Public Voldemort return knowledge before Ministry battle",
-      "kind": "knowledge_gate",
-      "category": "knowledge",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "private",
-      "priority": 95,
-      "protected": true,
-      "locked": true,
-      "date": {
-        "validFrom": "1995-06-25",
-        "validTo": "1996-06-30",
-        "precision": "date",
-        "schoolYear": 5,
-        "book": "Order of the Phoenix"
-      },
-      "scope": {
-        "characters": [],
-        "topics": [
-          "Voldemort return",
-          "Ministry denial"
-        ],
-        "spells": [],
-        "schoolYears": [
-          5
-        ],
-        "books": [
-          "Order of the Phoenix"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Voldemort has returned but the Ministry publicly denies it until after the Department of Mysteries.",
-        "injection": "Treat Voldemort’s return as true but publicly denied by the Ministry.",
-        "constraints": [
-          "Do not write public institutions as fully accepting Voldemort’s return too early."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "knowledge-gate",
-          "Ministry",
-          "year-5"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Order of the Phoenix",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1995-06-25",
-        "canonExpectedUntil": "1996-06-30",
-        "precision": "date",
-        "schoolYear": 5,
-        "book": "Order of the Phoenix"
-      },
-      "activation": {
-        "requiresMissingEvents": [
-          "voldemort_return_publicly_acknowledged"
-        ]
-      },
-      "expiration": {
-        "expiresWhenEventsHappen": [
-          "voldemort_return_publicly_acknowledged"
-        ],
-        "autoMuteOnExpire": true
-      },
-      "gateType": "knowledge_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "knowledge_gate",
-      "injectableByDefault": true,
-      "specificityScore": 80
-    },
-    {
-      "schemaVersion": 2,
       "id": "knowledge_gate_draco_mission_before_year6_end",
       "title": "Draco mission secrecy gate",
       "kind": "knowledge_gate",
@@ -428,7 +242,7 @@
       "visibility": {},
       "content": {
         "fact": "Draco’s specific mission and cabinet plan are not public knowledge.",
-        "injection": "Draco’s task and Vanishing Cabinet repair should remain secret unless directly discovered in the AU.",
+        "injection": "Draco’s task and Vanishing Cabinet repair should remain secret unless directly discovered in our story.",
         "constraints": [
           "Harry may suspect Draco, but should not know the full mission without evidence."
         ],

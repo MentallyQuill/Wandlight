@@ -3,7 +3,7 @@
     {
       "schemaVersion": 2,
       "id": "chronology_school_year_1",
-      "title": "Canon school year window: Year 1",
+      "title": "Year 1 Timeline",
       "kind": "event_anchor",
       "category": "timeline",
       "canonStatus": "canon",
@@ -36,8 +36,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 1 aligns with Philosopher's Stone chronology for Harry’s cohort.",
-        "injection": "Year 1 aligns with Philosopher's Stone chronology for Harry’s cohort.",
+        "fact": "Year 1 timeline metadata for Harry’s cohort.",
+        "injection": "Year 1 timeline metadata for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -63,7 +63,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Converted school-year window to concise non-default timeline metadata."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1991-09-01",
         "hardValidTo": "1992-08-31",
@@ -74,15 +79,15 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
+      "relevance": "low",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": false,
       "specificityScore": 45
     },
     {
       "schemaVersion": 2,
       "id": "chronology_school_year_2",
-      "title": "Canon school year window: Year 2",
+      "title": "Year 2 Timeline",
       "kind": "event_anchor",
       "category": "timeline",
       "canonStatus": "canon",
@@ -115,8 +120,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 2 aligns with Chamber of Secrets chronology for Harry’s cohort.",
-        "injection": "Year 2 aligns with Chamber of Secrets chronology for Harry’s cohort.",
+        "fact": "Year 2 timeline metadata for Harry’s cohort.",
+        "injection": "Year 2 timeline metadata for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -150,6 +155,10 @@
           "requiresEventsRemoved": [
             "chamber_of_secrets_resolved"
           ]
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Converted school-year window to concise non-default timeline metadata."
         }
       },
       "canonTiming": {
@@ -163,15 +172,15 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
+      "relevance": "low",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": false,
       "specificityScore": 65
     },
     {
       "schemaVersion": 2,
       "id": "chronology_school_year_3",
-      "title": "Canon school year window: Year 3",
+      "title": "Year 3 Timeline",
       "kind": "event_anchor",
       "category": "timeline",
       "canonStatus": "canon",
@@ -204,8 +213,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 3 aligns with Prisoner of Azkaban chronology for Harry’s cohort.",
-        "injection": "Year 3 aligns with Prisoner of Azkaban chronology for Harry’s cohort.",
+        "fact": "Year 3 timeline metadata for Harry’s cohort.",
+        "injection": "Year 3 timeline metadata for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -231,7 +240,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Converted school-year window to concise non-default timeline metadata."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1993-09-01",
         "hardValidTo": "1994-08-31",
@@ -242,15 +256,15 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
+      "relevance": "low",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": false,
       "specificityScore": 45
     },
     {
       "schemaVersion": 2,
       "id": "chronology_school_year_4",
-      "title": "Canon school year window: Year 4",
+      "title": "Year 4 Timeline",
       "kind": "event_anchor",
       "category": "timeline",
       "canonStatus": "canon",
@@ -283,8 +297,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 4 aligns with Goblet of Fire chronology for Harry’s cohort.",
-        "injection": "Year 4 aligns with Goblet of Fire chronology for Harry’s cohort.",
+        "fact": "Year 4 timeline metadata for Harry’s cohort.",
+        "injection": "Year 4 timeline metadata for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -310,7 +324,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Converted school-year window to concise non-default timeline metadata."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1994-09-01",
         "hardValidTo": "1995-08-31",
@@ -321,15 +340,15 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
+      "relevance": "low",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": false,
       "specificityScore": 45
     },
     {
       "schemaVersion": 2,
       "id": "chronology_school_year_5",
-      "title": "Canon school year window: Year 5",
+      "title": "Year 5 Timeline",
       "kind": "event_anchor",
       "category": "timeline",
       "canonStatus": "canon",
@@ -362,8 +381,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 5 aligns with Order of the Phoenix chronology for Harry’s cohort.",
-        "injection": "Year 5 aligns with Order of the Phoenix chronology for Harry’s cohort.",
+        "fact": "Year 5 timeline metadata for Harry’s cohort.",
+        "injection": "Year 5 timeline metadata for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -389,7 +408,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Converted school-year window to concise non-default timeline metadata."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1995-09-01",
         "hardValidTo": "1996-08-31",
@@ -400,15 +424,15 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
+      "relevance": "low",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": false,
       "specificityScore": 45
     },
     {
       "schemaVersion": 2,
       "id": "chronology_school_year_6",
-      "title": "Canon school year window: Year 6",
+      "title": "Year 6 Timeline",
       "kind": "event_anchor",
       "category": "timeline",
       "canonStatus": "canon",
@@ -441,8 +465,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 6 aligns with Half-Blood Prince chronology for Harry’s cohort.",
-        "injection": "Year 6 aligns with Half-Blood Prince chronology for Harry’s cohort.",
+        "fact": "Year 6 timeline metadata for Harry’s cohort.",
+        "injection": "Year 6 timeline metadata for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -468,7 +492,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Converted school-year window to concise non-default timeline metadata."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1996-09-01",
         "hardValidTo": "1997-08-31",
@@ -479,15 +508,15 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
+      "relevance": "low",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": false,
       "specificityScore": 45
     },
     {
       "schemaVersion": 2,
       "id": "chronology_school_year_7",
-      "title": "Canon school year window: Year 7",
+      "title": "Year 7 Timeline",
       "kind": "event_anchor",
       "category": "timeline",
       "canonStatus": "canon",
@@ -520,8 +549,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Year 7 aligns with Deathly Hallows chronology for Harry’s cohort.",
-        "injection": "Year 7 aligns with Deathly Hallows chronology for Harry’s cohort.",
+        "fact": "Year 7 timeline metadata for Harry’s cohort.",
+        "injection": "Year 7 timeline metadata for Harry’s cohort.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -555,6 +584,10 @@
           "requiresEventsRemoved": [
             "deathly_hallows_revealed_to_trio"
           ]
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Converted school-year window to concise non-default timeline metadata."
         }
       },
       "canonTiming": {
@@ -568,9 +601,9 @@
       "gateType": "event_anchor",
       "userEditable": true,
       "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
+      "relevance": "low",
+      "lorePurpose": "temporal_gate",
+      "injectableByDefault": false,
       "specificityScore": 45
     }
   ]

@@ -207,7 +207,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y1_hut_birthday_revelation",
-      "title": "Hagrid reveals Harry’s identity at the sea hut",
+      "title": "Hagrid Reveals Harry",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -297,6 +297,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -511,7 +514,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y1_platform_weasley_intro",
-      "title": "Molly Weasley helps Harry reach Platform Nine and Three-Quarters",
+      "title": "Platform Nine and Three-Quarters",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -602,6 +605,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -713,7 +719,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y1_snape_first_potions",
-      "title": "Snape antagonizes Harry in first Potions class",
+      "title": "Snape First Potions Class",
       "kind": "behavior_gate",
       "gateType": "behavior_gate",
       "category": "character",
@@ -803,6 +809,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "behavior_constraint",
@@ -1016,7 +1025,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y1_nimbus_first_practice",
-      "title": "Harry receives Nimbus 2000 and begins Quidditch practice",
+      "title": "Nimbus and First Quidditch Practice",
       "kind": "artifact_state",
       "gateType": "artifact_state",
       "category": "item",
@@ -1109,6 +1118,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "item_state",
@@ -1318,7 +1330,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y1_christmas_cloak_mirror",
-      "title": "Christmas cloak and Mirror of Erised sequence",
+      "title": "Cloak and Mirror of Erised",
       "kind": "artifact_state",
       "gateType": "artifact_state",
       "category": "item",
@@ -1412,6 +1424,10 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1992-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; broad duplicate removed."
         }
       },
       "lorePurpose": "item_state",

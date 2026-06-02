@@ -6,7 +6,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y3_marge_knight_bus",
-      "title": "Aunt Marge incident and Knight Bus escape",
+      "title": "Marge and Knight Bus",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -99,6 +99,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1994-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -108,7 +111,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y3_diagon_alley_wait",
-      "title": "Harry spends final summer weeks in Diagon Alley",
+      "title": "Diagon Alley Summer Wait",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -198,6 +201,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1994-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -410,7 +416,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y3_buckbeak_injury",
-      "title": "Buckbeak injures Draco during first Care of Magical Creatures lesson",
+      "title": "Buckbeak Injures Draco",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -501,6 +507,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1994-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -610,7 +619,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y3_fat_lady_attack",
-      "title": "Sirius attacks the Fat Lady after first Hogsmeade visit",
+      "title": "Fat Lady Attack",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -702,6 +711,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1994-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -1320,7 +1332,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y3_shrieking_shack_reveal",
-      "title": "Shrieking Shack reveals Sirius, Lupin, and Pettigrew truth",
+      "title": "Shrieking Shack Truth",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1415,6 +1427,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1994-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -1424,7 +1439,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y3_time_turner_rescue",
-      "title": "Time-Turner rescue saves Sirius and Buckbeak",
+      "title": "Time-Turner Rescue",
       "kind": "artifact_state",
       "gateType": "artifact_state",
       "category": "item",
@@ -1518,6 +1533,10 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1994-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; broad duplicate removed."
         }
       },
       "lorePurpose": "item_state",

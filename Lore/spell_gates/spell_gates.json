@@ -291,7 +291,7 @@
     {
       "schemaVersion": 2,
       "id": "spell_gate_sectumsempra",
-      "title": "Sectumsempra knowledge gate",
+      "title": "Sectumsempra",
       "kind": "spell_gate",
       "category": "spell",
       "canonStatus": "canon",
@@ -375,7 +375,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Automatic concise title cleanup for implementation-language wording."
+        }
+      },
       "canonTiming": {
         "canonExpectedFrom": "1996-09-01",
         "canonExpectedUntil": "1998-08-31",

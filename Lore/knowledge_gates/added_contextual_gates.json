@@ -55,7 +55,7 @@
     },
     "content": {
       "fact": "Polyjuice Potion is a complex potion the trio first uses during second year.",
-      "injection": "Treat Polyjuice Potion as advanced and risky; younger students should not casually brew or understand it unless canon/AU events establish special access.",
+      "injection": "Treat Polyjuice Potion as advanced and risky; younger students should not casually brew or understand it unless our story has established special access.",
       "constraints": [
         "Hermione is unusually capable for attempting it in Year 2.",
         "Most students should not treat Polyjuice as routine."
@@ -89,95 +89,14 @@
   },
   {
     "schemaVersion": 2,
-    "id": "future_guard_deathly_hallows_before_year7",
-    "title": "Future Guard: Deathly Hallows Before Year 7",
-    "kind": "future_guard",
-    "category": "timeline",
-    "canonStatus": "canon",
-    "truthStatus": "hidden",
-    "revealPolicy": "do_not_reveal",
-    "priority": 98,
-    "protected": true,
-    "date": {
-      "validFrom": "1991-09-01",
-      "validTo": "1997-07-30",
-      "precision": "date",
-      "label": "Before the Hallows become plot-relevant.",
-      "schoolYear": null
-    },
-    "scope": {
-      "characters": [
-        "Harry Potter",
-        "Hermione Granger",
-        "Ron Weasley"
-      ],
-      "topics": [
-        "Deathly Hallows",
-        "Elder Wand",
-        "Resurrection Stone",
-        "Invisibility Cloak"
-      ],
-      "schoolYears": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "books": []
-    },
-    "content": {
-      "fact": "The trio should not understand the Deathly Hallows framework.",
-      "injection": "Do not have Harry, Hermione, or Ron discuss the Deathly Hallows as a known framework before the Year 7 arc introduces it.",
-      "constraints": [
-        "The Elder Wand's larger significance should not be casually understood ."
-      ],
-      "antiLore": [
-        "Hermione should not explain the Hallows in Year 6 or earlier."
-      ]
-    },
-    "source": {
-      "work": "Harry Potter",
-      "book": "Deathly Hallows",
-      "confidence": 0.95
-    },
-    "canonTiming": {
-      "canonExpectedUntil": "1997-07-30",
-      "hardValidTo": "",
-      "precision": "date",
-      "label": "Before the Hallows become plot-relevant."
-    },
-    "activation": {
-      "requiresMissingEvents": [
-        "deathly_hallows_revealed_to_trio"
-      ]
-    },
-    "expiration": {
-      "expiresWhenEventsHappen": [
-        "deathly_hallows_revealed_to_trio"
-      ],
-      "autoMuteOnExpire": true
-    },
-    "gateType": "future_guard",
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "normal",
-    "lorePurpose": "temporal_gate",
-    "injectableByDefault": true,
-    "specificityScore": 100
-  },
-  {
-    "schemaVersion": 2,
     "id": "behavior_hermione_year6_research_mode",
-    "title": "Hermione Behavior: Year 6 Research Mode",
+    "title": "Hermione Year 6 Research Boundaries",
     "kind": "behavior_gate",
     "category": "character",
     "canonStatus": "canon",
     "truthStatus": "true",
     "revealPolicy": "public",
-    "priority": 72,
+    "priority": 84,
     "date": {
       "validFrom": "1996-09-01",
       "validTo": "1997-06-30",
@@ -206,10 +125,10 @@
       ]
     },
     "content": {
-      "fact": "Hermione is intellectually aggressive, skeptical of unsupported claims, and prone to intense research when confronted with anomalous magic.",
-      "injection": "Write Year 6 Hermione as precise, skeptical, rule-aware, and intensely research-driven; she should ask for evidence and look for library/professor routes before accepting extraordinary claims.",
+      "fact": "In Year 6, Hermione is precise, skeptical, and research-driven, but her knowledge remains bounded by what the story has established she discovered.",
+      "injection": "Write Year 6 Hermione as precise, skeptical, rule-aware, and intensely research-driven; she should ask for evidence and seek library/professor routes, but she should not know hidden plot truths before our story establishes how she learned them.",
       "constraints": [
-        "She may bend rules for a serious enough problem, but she usually rationalizes why it is necessary."
+        "Do not let Hermione’s intelligence become automatic knowledge of unrevealed secrets."
       ]
     },
     "source": {
@@ -232,7 +151,13 @@
     "relevance": "low",
     "lorePurpose": "behavior_constraint",
     "injectableByDefault": true,
-    "specificityScore": 75
+    "specificityScore": 75,
+    "extensions": {
+      "consolidationPass": {
+        "appliedIn": "Wandlight duplicate/title consolidation pass",
+        "notes": "Merged Hermione Year 6 behavior/research duplicates."
+      }
+    }
   },
   {
     "schemaVersion": 2,
@@ -272,7 +197,7 @@
     },
     "content": {
       "fact": "Memory modification is delicate magic and should not be casual student spellwork.",
-      "injection": "Treat Memory Charms as delicate and ethically serious; ordinary students should not casually use reliable memory modification without special training or an AU justification.",
+      "injection": "Treat Memory Charms as delicate and ethically serious; ordinary students should not casually use reliable memory modification without special training or a story-established reason.",
       "constraints": [
         "Hermione can perform difficult magic, but memory alteration should still be treated as grave and risky."
       ],
@@ -302,13 +227,13 @@
   {
     "schemaVersion": 2,
     "id": "institution_hogwarts_year6_security",
-    "title": "Hogwarts Security State - Year 6",
+    "title": "Year 6 Hogwarts Security",
     "kind": "institution_state",
-    "category": "location",
+    "category": "faction",
     "canonStatus": "canon",
     "truthStatus": "true",
     "revealPolicy": "public",
-    "priority": 76,
+    "priority": 88,
     "date": {
       "validFrom": "1996-09-01",
       "validTo": "1997-06-30",
@@ -336,10 +261,10 @@
       ]
     },
     "content": {
-      "fact": "Hogwarts operates under heightened wartime anxiety and security concerns while Dumbledore remains Headmaster until the Astronomy Tower event.",
-      "injection": "Unusual magical events should raise suspicion; security, secrecy, and Dumbledore's authority matter.",
+      "fact": "During the 1996-1997 school year before the Astronomy Tower crisis, Hogwarts operates under heightened security and Dumbledore remains the decisive authority.",
+      "injection": "During Year 6 before the Astronomy Tower crisis, Hogwarts operates under heightened security and Dumbledore remains the decisive authority; suspicious attacks, secret movement, and unusual magic should draw more scrutiny than in ordinary school years.",
       "constraints": [
-        "Do not treat Hogwarts as carefree peacetime Year 1-3 if the date is Year 6."
+        "Keep Year 6 Hogwarts more security-conscious than ordinary school years."
       ]
     },
     "source": {
@@ -369,6 +294,10 @@
         "requiresEventsRemoved": [
           "dumbledore_death_occurs"
         ]
+      },
+      "consolidationPass": {
+        "appliedIn": "Wandlight duplicate/title consolidation pass",
+        "notes": "Merged Year 6 school-year, staff, and security context."
       }
     },
     "lorePurpose": "status_change",

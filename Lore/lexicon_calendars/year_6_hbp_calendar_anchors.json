@@ -618,7 +618,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y6_quidditch_tryouts_slug_dinner",
-      "title": "Quidditch tryouts and first Slug Club dinner",
+      "title": "Tryouts and Slug Club",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -711,6 +711,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1997-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -720,7 +723,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y6_katie_necklace_attack",
-      "title": "Katie Bell cursed by necklace",
+      "title": "Katie Bell Necklace Attack",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -814,6 +817,10 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1997-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; broad Katie/Ron combined duplicate removed."
         }
       },
       "lorePurpose": "event_anchor",
@@ -823,7 +830,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y6_ron_lavender_party",
-      "title": "Ron and Lavender relationship starts after Quidditch win",
+      "title": "Ron and Lavender Start",
       "kind": "relationship_gate",
       "gateType": "relationship_gate",
       "category": "relationship",
@@ -914,6 +921,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1997-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "relationship_state",
@@ -1125,7 +1135,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y6_ron_poisoned_bezoar",
-      "title": "Ron poisoned on birthday; Harry uses bezoar",
+      "title": "Ron Poisoning",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1221,6 +1231,10 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1997-08-31"
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for exact calendar anchor."
         }
       },
       "lorePurpose": "event_anchor",
@@ -1230,7 +1244,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y6_room_myrtle_clue",
-      "title": "Harry links Draco to Room of Requirement and Myrtle",
+      "title": "Draco Room Clue",
       "kind": "knowledge_guard",
       "gateType": "knowledge_guard",
       "category": "knowledge",
@@ -1324,6 +1338,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1997-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "knowledge_gate",
@@ -1540,7 +1557,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y6_ginny_harry_start",
-      "title": "Harry and Ginny begin dating after Quidditch win",
+      "title": "Harry and Ginny Start",
       "kind": "relationship_gate",
       "gateType": "relationship_gate",
       "category": "relationship",
@@ -1630,6 +1647,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1997-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "relationship_state",
@@ -1639,7 +1659,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y6_horcrux_cave_tower",
-      "title": "Horcrux cave trip leads to Astronomy Tower crisis",
+      "title": "Cave and Tower Crisis",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1736,6 +1756,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1997-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "knowledge_gate",

@@ -1,36 +1,139 @@
 {
   "schemaVersion": 3,
   "categories": {
-    "character": { "label": "Character", "color": "#1e3a8a", "textColor": "#dbeafe", "description": "Character-specific information." },
-    "event": { "label": "Event", "color": "#92400e", "textColor": "#ffedd5", "description": "Dated plot event or major transition." },
-    "location": { "label": "Location", "color": "#0f766e", "textColor": "#ccfbf1", "description": "Place, setting, or institutional location." },
-    "item": { "label": "Item", "color": "#365314", "textColor": "#ecfccb", "description": "Object, artifact, possession, or item state." },
-    "spell": { "label": "Spell", "color": "#312e81", "textColor": "#e0e7ff", "description": "Spell knowledge or magical ability." },
-    "faction": { "label": "Faction", "color": "#4338ca", "textColor": "#e0e7ff", "description": "Group, house, institution, or faction state." },
-    "relationship": { "label": "Relationship", "color": "#9d174d", "textColor": "#fce7f3", "description": "Relationship state or history." },
-    "rule": { "label": "Rule", "color": "#4b5563", "textColor": "#f9fafb", "description": "General roleplay, world, or continuity rule." },
-    "timeline": { "label": "Timeline", "color": "#92400e", "textColor": "#ffedd5", "description": "Timeline window or date anchor." },
-    "knowledge": { "label": "Knowledge", "color": "#065f46", "textColor": "#d1fae5", "description": "Who knows what and when." },
-    "secret": { "label": "Secret", "color": "#581c87", "textColor": "#f5d0fe", "description": "Hidden fact or private knowledge." },
-    "other": { "label": "Other", "color": "#374151", "textColor": "#f3f4f6", "description": "Fallback category." }
+    "character": {
+      "label": "Character",
+      "color": "#1e3a8a",
+      "textColor": "#dbeafe",
+      "description": "Character-specific information."
+    },
+    "event": {
+      "label": "Event",
+      "color": "#92400e",
+      "textColor": "#ffedd5",
+      "description": "Dated plot event or major transition."
+    },
+    "location": {
+      "label": "Location",
+      "color": "#0f766e",
+      "textColor": "#ccfbf1",
+      "description": "Place, setting, or institutional location."
+    },
+    "item": {
+      "label": "Item",
+      "color": "#365314",
+      "textColor": "#ecfccb",
+      "description": "Object, artifact, possession, or item state."
+    },
+    "spell": {
+      "label": "Spell",
+      "color": "#312e81",
+      "textColor": "#e0e7ff",
+      "description": "Spell knowledge or magical ability."
+    },
+    "faction": {
+      "label": "Faction",
+      "color": "#4338ca",
+      "textColor": "#e0e7ff",
+      "description": "Group, house, institution, or faction state."
+    },
+    "relationship": {
+      "label": "Relationship",
+      "color": "#9d174d",
+      "textColor": "#fce7f3",
+      "description": "Relationship state or history."
+    },
+    "rule": {
+      "label": "Rule",
+      "color": "#4b5563",
+      "textColor": "#f9fafb",
+      "description": "General roleplay, world, or continuity rule."
+    },
+    "timeline": {
+      "label": "Timeline",
+      "color": "#92400e",
+      "textColor": "#ffedd5",
+      "description": "Timeline window or date anchor."
+    },
+    "knowledge": {
+      "label": "Knowledge",
+      "color": "#065f46",
+      "textColor": "#d1fae5",
+      "description": "Who knows what and when."
+    },
+    "secret": {
+      "label": "Secret",
+      "color": "#581c87",
+      "textColor": "#f5d0fe",
+      "description": "Hidden fact or private knowledge."
+    },
+    "other": {
+      "label": "Other",
+      "color": "#374151",
+      "textColor": "#f3f4f6",
+      "description": "Fallback category."
+    }
   },
   "canonStatuses": {
-    "canon": { "label": "Canon", "color": "#7f1d1d", "textColor": "#f8e7c9", "description": "Mainline canon or canon reference." },
-    "au": { "label": "AU", "color": "#4c1d95", "textColor": "#f3e8ff", "description": "Alternate-universe, branch-specific, or story-generated lore." }
+    "canon": {
+      "label": "Canon",
+      "color": "#7f1d1d",
+      "textColor": "#f8e7c9",
+      "description": "Mainline canon or canon reference."
+    },
+    "au": {
+      "label": "AU",
+      "color": "#4c1d95",
+      "textColor": "#f3e8ff",
+      "description": "Alternate-universe, branch-specific, or story-generated lore."
+    }
   },
   "truthStatuses": {
-    "true": { "label": "True", "description": "True within its canon/AU branch." },
-    "false": { "label": "False", "description": "Known falsehood." },
-    "public_belief": { "label": "Public Belief", "description": "What characters generally believe." },
-    "rumor": { "label": "Rumor", "description": "Unverified claim." },
-    "contested": { "label": "Contested", "description": "Conflicting evidence or contested truth." },
-    "hidden": { "label": "Hidden", "description": "True but not publicly known." }
+    "true": {
+      "label": "True",
+      "description": "True within its canon/AU branch."
+    },
+    "false": {
+      "label": "False",
+      "description": "Known falsehood."
+    },
+    "public_belief": {
+      "label": "Public Belief",
+      "description": "What characters generally believe."
+    },
+    "rumor": {
+      "label": "Rumor",
+      "description": "Unverified claim."
+    },
+    "contested": {
+      "label": "Contested",
+      "description": "Conflicting evidence or contested truth."
+    },
+    "hidden": {
+      "label": "Hidden",
+      "description": "True but not publicly known."
+    }
   },
   "revealPolicies": {
-    "public": { "label": "Public", "description": "Can be revealed normally." },
-    "private": { "label": "Private", "description": "Use carefully; not automatically public." },
-    "do_not_reveal": { "label": "Do Not Reveal", "description": "Do not reveal directly." },
-    "only_if_knower_present": { "label": "Only If Knower Present", "description": "Reveal only when a knower is present." },
-    "only_if_user_reveals": { "label": "Only If User Reveals", "description": "Reveal only after the user brings it up." }
+    "public": {
+      "label": "Public",
+      "description": "Can be revealed normally."
+    },
+    "private": {
+      "label": "Private",
+      "description": "Use carefully; not automatically public."
+    },
+    "do_not_reveal": {
+      "label": "Do Not Reveal",
+      "description": "Do not reveal directly."
+    },
+    "only_if_knower_present": {
+      "label": "Only If Knower Present",
+      "description": "Reveal only when a knower is present."
+    },
+    "only_if_user_reveals": {
+      "label": "Only If User Reveals",
+      "description": "Reveal only after the user brings it up."
+    }
   }
 }

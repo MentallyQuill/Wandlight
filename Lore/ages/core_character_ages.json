@@ -3,7 +3,7 @@
     {
       "schemaVersion": 2,
       "id": "age_harry_potter",
-      "title": "Harry Potter age constraint",
+      "title": "Harry Potter Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -60,7 +60,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1980-07-31",
         "hardValidTo": "1998-08-31",
@@ -73,13 +78,13 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     },
     {
       "schemaVersion": 2,
       "id": "age_hermione_granger",
-      "title": "Hermione Granger age constraint",
+      "title": "Hermione Granger Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -136,7 +141,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1979-09-19",
         "hardValidTo": "1998-08-31",
@@ -149,13 +159,13 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     },
     {
       "schemaVersion": 2,
       "id": "age_ron_weasley",
-      "title": "Ron Weasley age constraint",
+      "title": "Ron Weasley Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -212,7 +222,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1980-03-01",
         "hardValidTo": "1998-08-31",
@@ -225,13 +240,13 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     },
     {
       "schemaVersion": 2,
       "id": "age_draco_malfoy",
-      "title": "Draco Malfoy age constraint",
+      "title": "Draco Malfoy Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -288,7 +303,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1980-06-05",
         "hardValidTo": "1998-08-31",
@@ -301,13 +321,13 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     },
     {
       "schemaVersion": 2,
       "id": "age_ginny_weasley",
-      "title": "Ginny Weasley age constraint",
+      "title": "Ginny Weasley Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -364,7 +384,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1981-08-11",
         "hardValidTo": "1998-08-31",
@@ -377,13 +402,13 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     },
     {
       "schemaVersion": 2,
       "id": "age_neville_longbottom",
-      "title": "Neville Longbottom age constraint",
+      "title": "Neville Longbottom Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -440,7 +465,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1980-07-30",
         "hardValidTo": "1998-08-31",
@@ -453,13 +483,13 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     },
     {
       "schemaVersion": 2,
       "id": "age_luna_lovegood",
-      "title": "Luna Lovegood age constraint",
+      "title": "Luna Lovegood Age Window",
       "kind": "age_gate",
       "category": "character",
       "canonStatus": "canon",
@@ -516,7 +546,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; age gates are non-default metadata unless directly relevant."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1981-02-13",
         "hardValidTo": "1998-08-31",
@@ -529,7 +564,7 @@
       "canon": "canon",
       "relevance": "low",
       "lorePurpose": "age_gate",
-      "injectableByDefault": true,
+      "injectableByDefault": false,
       "specificityScore": 75
     }
   ]

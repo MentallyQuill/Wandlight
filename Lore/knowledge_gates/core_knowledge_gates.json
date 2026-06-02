@@ -2,208 +2,8 @@
   "entries": [
     {
       "schemaVersion": 2,
-      "id": "knowledge_gate_horcruxes_before_year6",
-      "title": "Horcrux knowledge gate before Year 6",
-      "kind": "knowledge_gate",
-      "category": "knowledge",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "do_not_reveal",
-      "priority": 100,
-      "protected": true,
-      "locked": true,
-      "date": {
-        "validFrom": "1991-09-01",
-        "validTo": "1996-06-30",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "scope": {
-        "characters": [
-          "Harry Potter",
-          "Hermione Granger",
-          "Ron Weasley"
-        ],
-        "topics": [
-          "Horcruxes",
-          "knowledge gate"
-        ],
-        "books": [],
-        "schoolYears": []
-      },
-      "visibility": {
-        "notKnownByBefore": {
-          "Harry Potter": "1996-07-01",
-          "Hermione Granger": "1996-07-01",
-          "Ron Weasley": "1996-07-01"
-        }
-      },
-      "content": {
-        "fact": "The trio should not understand or casually discuss Horcruxes.",
-        "injection": "Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Horcruxes unless this story established it.",
-        "constraints": [
-          "Block premature knowledge of Horcruxes."
-        ],
-        "antiLore": [
-          "Do not have Harry Potter explain Horcruxes .",
-          "Do not have Hermione Granger explain Horcruxes .",
-          "Do not have Ron Weasley explain Horcruxes ."
-        ],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Horcruxes",
-          "knowledge-gate",
-          "future-guard"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1991-09-01",
-        "canonExpectedUntil": "1996-06-30",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "activation": {
-        "requiresMissingEvents": [
-          "horcruxes_revealed_to_trio"
-        ]
-      },
-      "expiration": {
-        "expiresWhenEventsHappen": [
-          "horcruxes_revealed_to_trio"
-        ],
-        "autoMuteOnExpire": true
-      },
-      "gateType": "knowledge_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "knowledge_gate",
-      "injectableByDefault": true,
-      "specificityScore": 100
-    },
-    {
-      "schemaVersion": 2,
-      "id": "knowledge_gate_deathly_hallows_before_year7",
-      "title": "Deathly Hallows knowledge gate before Year 7",
-      "kind": "knowledge_gate",
-      "category": "knowledge",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "do_not_reveal",
-      "priority": 95,
-      "protected": true,
-      "locked": true,
-      "date": {
-        "validFrom": "1991-09-01",
-        "validTo": "1997-07-30",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "scope": {
-        "characters": [
-          "Harry Potter",
-          "Hermione Granger",
-          "Ron Weasley"
-        ],
-        "topics": [
-          "Deathly Hallows",
-          "knowledge gate"
-        ],
-        "books": [],
-        "schoolYears": []
-      },
-      "visibility": {
-        "notKnownByBefore": {
-          "Harry Potter": "1997-07-31",
-          "Hermione Granger": "1997-07-31",
-          "Ron Weasley": "1997-07-31"
-        }
-      },
-      "content": {
-        "fact": "The trio should not frame events around the Deathly Hallows.",
-        "injection": "Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Deathly Hallows unless this story established it.",
-        "constraints": [
-          "Block premature knowledge of Deathly Hallows."
-        ],
-        "antiLore": [
-          "Do not have Harry Potter explain Deathly Hallows .",
-          "Do not have Hermione Granger explain Deathly Hallows .",
-          "Do not have Ron Weasley explain Deathly Hallows ."
-        ],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Deathly Hallows",
-          "knowledge-gate",
-          "future-guard"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1991-09-01",
-        "canonExpectedUntil": "1997-07-30",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "activation": {
-        "requiresMissingEvents": [
-          "deathly_hallows_revealed_to_trio"
-        ]
-      },
-      "expiration": {
-        "expiresWhenEventsHappen": [
-          "deathly_hallows_revealed_to_trio"
-        ],
-        "autoMuteOnExpire": true
-      },
-      "gateType": "knowledge_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "knowledge_gate",
-      "injectableByDefault": true,
-      "specificityScore": 100
-    },
-    {
-      "schemaVersion": 2,
       "id": "knowledge_gate_prophecy_before_department",
-      "title": "Prophecy knowledge gate before Department of Mysteries",
+      "title": "Prophecy before Department of Mysteries",
       "kind": "knowledge_gate",
       "category": "knowledge",
       "canonStatus": "canon",
@@ -267,7 +67,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Automatic concise title cleanup for implementation-language wording."
+        }
+      },
       "canonTiming": {
         "canonExpectedFrom": "1991-09-01",
         "canonExpectedUntil": "1996-06-18",
@@ -385,114 +190,14 @@
     },
     {
       "schemaVersion": 2,
-      "id": "knowledge_gate_sirius_truth_before_poa_end",
-      "title": "Sirius truth gate before Year 3 climax",
-      "kind": "knowledge_gate",
-      "category": "knowledge",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "do_not_reveal",
-      "priority": 85,
-      "protected": true,
-      "locked": true,
-      "date": {
-        "validFrom": "1991-09-01",
-        "validTo": "1994-06-05",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "scope": {
-        "characters": [
-          "Harry Potter",
-          "Hermione Granger",
-          "Ron Weasley"
-        ],
-        "topics": [
-          "Sirius Black innocence",
-          "knowledge gate"
-        ],
-        "books": [],
-        "schoolYears": []
-      },
-      "visibility": {
-        "notKnownByBefore": {
-          "Harry Potter": "1994-06-06",
-          "Hermione Granger": "1994-06-06",
-          "Ron Weasley": "1994-06-06"
-        }
-      },
-      "content": {
-        "fact": "The trio should not know Sirius was not the traitor.",
-        "injection": "Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Sirius Black innocence unless this story established it.",
-        "constraints": [
-          "Block premature knowledge of Sirius Black innocence."
-        ],
-        "antiLore": [
-          "Do not have Harry Potter explain Sirius Black innocence .",
-          "Do not have Hermione Granger explain Sirius Black innocence .",
-          "Do not have Ron Weasley explain Sirius Black innocence ."
-        ],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Sirius Black innocence",
-          "knowledge-gate",
-          "future-guard"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1991-09-01",
-        "canonExpectedUntil": "1994-06-05",
-        "precision": "date",
-        "schoolYear": null,
-        "book": ""
-      },
-      "activation": {
-        "requiresMissingEvents": [
-          "sirius_truth_revealed"
-        ]
-      },
-      "expiration": {
-        "expiresWhenEventsHappen": [
-          "sirius_truth_revealed"
-        ],
-        "autoMuteOnExpire": true
-      },
-      "gateType": "knowledge_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "knowledge_gate",
-      "injectableByDefault": true,
-      "specificityScore": 100
-    },
-    {
-      "schemaVersion": 2,
       "id": "knowledge_gate_voldemort_return_before_graveyard",
-      "title": "Voldemort return gate before graveyard",
+      "title": "Pre-Graveyard Voldemort Return",
       "kind": "knowledge_gate",
       "category": "knowledge",
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
-      "priority": 90,
+      "priority": 96,
       "protected": true,
       "locked": true,
       "date": {
@@ -523,10 +228,10 @@
         }
       },
       "content": {
-        "fact": "The trio should not know Voldemort has regained a body.",
-        "injection": "Harry Potter, Hermione Granger, Ron Weasley should not know or casually discuss Voldemort return unless this story established it.",
+        "fact": "Before the graveyard event, characters should not know or discuss Voldemort as physically returned unless our story has established otherwise.",
+        "injection": "Before the graveyard event, Harry, Ron, Hermione, and ordinary wizarding society should not know or discuss Voldemort as physically returned unless our story has established otherwise.",
         "constraints": [
-          "Block premature knowledge of Voldemort return."
+          "Block premature public or trio knowledge of Voldemort’s physical return."
         ],
         "antiLore": [
           "Do not have Harry Potter explain Voldemort return .",
@@ -556,7 +261,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Title/content cleanup for concise pre-graveyard knowledge boundary."
+        }
+      },
       "canonTiming": {
         "canonExpectedFrom": "1991-09-01",
         "canonExpectedUntil": "1995-06-23",

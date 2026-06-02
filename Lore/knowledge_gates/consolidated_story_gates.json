@@ -1,0 +1,329 @@
+{
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_pre_hallows_questline",
+      "title": "Pre-Hallows Questline",
+      "kind": "knowledge_gate",
+      "gateType": "knowledge_gate",
+      "lorePurpose": "knowledge_gate",
+      "specificityScore": 95,
+      "injectableByDefault": true,
+      "category": "knowledge",
+      "relevance": "normal",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 98,
+      "protected": false,
+      "locked": false,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-07-30",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1997-07-30",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "topics": [
+          "Deathly Hallows",
+          "Elder Wand",
+          "Resurrection Stone",
+          "Invisibility Cloak",
+          "Hallows quest"
+        ],
+        "schoolYears": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince"
+        ]
+      },
+      "activeWhen": null,
+      "visibility": {},
+      "content": {
+        "fact": "Before the Year 7 Hallows arc is introduced, the Deathly Hallows are not an active quest framework for the trio.",
+        "injection": "Before the Year 7 Hallows arc is introduced, Harry, Ron, and Hermione should not reason in terms of the Elder Wand, Resurrection Stone, Cloak trio, Hallows symbol, or Hallows-vs-Horcrux choice unless our story has introduced that knowledge early.",
+        "constraints": [
+          "Do not leak Hallows terminology or quest logic into Years 1-6 unless our story has established it."
+        ],
+        "antiLore": [],
+        "notes": "Consolidated from overlapping bundled lore gates."
+      },
+      "effects": {
+        "addsTags": [
+          "Deathly Hallows",
+          "Elder Wand",
+          "Resurrection Stone",
+          "Invisibility Cloak",
+          "Hallows quest",
+          "knowledge_gate",
+          "consolidated"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.86,
+        "notes": "Created by Wandlight duplicate/title consolidation pass."
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Merged duplicate/overlapping lore gates into one concise entry."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_pre_horcrux_knowledge",
+      "title": "Pre-Horcrux Knowledge",
+      "kind": "knowledge_gate",
+      "gateType": "knowledge_gate",
+      "lorePurpose": "knowledge_gate",
+      "specificityScore": 95,
+      "injectableByDefault": true,
+      "category": "knowledge",
+      "relevance": "normal",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 100,
+      "protected": false,
+      "locked": false,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1996-06-30",
+        "precision": "date",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "topics": [
+          "Horcruxes",
+          "Horcrux knowledge",
+          "Voldemort immortality"
+        ],
+        "schoolYears": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix"
+        ]
+      },
+      "activeWhen": null,
+      "visibility": {},
+      "content": {
+        "fact": "Before our story establishes the Year 6 Horcrux discovery/research path, the trio should not know, name, or explain Horcruxes.",
+        "injection": "Before our story establishes the Year 6 Horcrux discovery/research path, Harry, Ron, and Hermione should not casually know, name, or explain Horcruxes.",
+        "constraints": [
+          "Do not let Horcrux knowledge appear before the story has established how the characters learned it."
+        ],
+        "antiLore": [],
+        "notes": "Consolidated from overlapping bundled lore gates."
+      },
+      "effects": {
+        "addsTags": [
+          "Horcruxes",
+          "Horcrux knowledge",
+          "Voldemort immortality",
+          "knowledge_gate",
+          "consolidated"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "chapter": "",
+        "confidence": 0.86,
+        "notes": "Created by Wandlight duplicate/title consolidation pass."
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Merged duplicate/overlapping lore gates into one concise entry."
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "temporal_pre_horcrux_hunt",
+      "title": "Pre-Horcrux Hunt",
+      "kind": "future_guard",
+      "gateType": "future_guard",
+      "lorePurpose": "temporal_gate",
+      "specificityScore": 95,
+      "injectableByDefault": true,
+      "category": "timeline",
+      "relevance": "normal",
+      "canon": "canon",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "private",
+      "priority": 88,
+      "protected": false,
+      "locked": false,
+      "userEditable": true,
+      "branchId": "main",
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1997-07-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1997-07-31",
+        "precision": "date",
+        "schoolYear": 7,
+        "book": "Deathly Hallows"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "topics": [
+          "Horcrux hunt",
+          "fugitive trio",
+          "camping phase",
+          "schooling"
+        ],
+        "schoolYears": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban",
+          "Goblet of Fire",
+          "Order of the Phoenix",
+          "Half-Blood Prince"
+        ]
+      },
+      "activeWhen": null,
+      "visibility": {},
+      "content": {
+        "fact": "Before our story establishes the Year 7 hunt, the trio are not living as fugitives on a Horcrux mission.",
+        "injection": "Before our story establishes the Year 7 Horcrux hunt, Harry, Ron, and Hermione are not living as fugitives on a mission and should still be treated according to the current school-year context.",
+        "constraints": [
+          "Do not shift the trio into Deathly Hallows fugitive-road-trip mode before the story establishes it."
+        ],
+        "antiLore": [],
+        "notes": "Consolidated from overlapping bundled lore gates."
+      },
+      "effects": {
+        "addsTags": [
+          "Horcrux hunt",
+          "fugitive trio",
+          "camping phase",
+          "schooling",
+          "temporal_gate",
+          "consolidated"
+        ],
+        "blocksTermsBeforeDate": [],
+        "protectsEntries": [],
+        "stateHints": {},
+        "injectionRules": {
+          "includeOnlyWhenRelevant": true
+        }
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Deathly Hallows",
+        "chapter": "",
+        "confidence": 0.86,
+        "notes": "Created by Wandlight duplicate/title consolidation pass."
+      },
+      "expiration": {
+        "expiresWhenEventsHappen": [],
+        "autoMuteOnExpire": false
+      },
+      "ui": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Merged duplicate/overlapping lore gates into one concise entry."
+        }
+      }
+    }
+  ]
+}

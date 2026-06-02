@@ -626,7 +626,7 @@
     {
       "schemaVersion": 2,
       "id": "ootp_st_mungos_neville_arthur_state",
-      "title": "St Mungo visits and Neville family knowledge",
+      "title": "St Mungo’s Visit",
       "kind": "knowledge_gate",
       "gateType": "knowledge_gate",
       "category": "knowledge",
@@ -677,8 +677,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "The St Mungo's visit ties Arthur's attack to war danger and reveals Neville's parents' condition to Harry and close friends.",
-        "injection": "The St Mungo's visit ties Arthur's attack to war danger and reveals Neville's parents' condition to Harry and close friends.",
+        "fact": "At St Mungo’s, Harry’s group sees Arthur recovering and learns more about Neville’s parents, making Neville’s family trauma more visible but still private.",
+        "injection": "At St Mungo’s, Arthur is recovering and Neville’s parents become more visible to Harry’s circle; treat Neville’s family trauma as serious and private.",
         "constraints": [],
         "antiLore": [],
         "publicVersion": "",
@@ -708,7 +708,12 @@
       "relevance": "normal",
       "lorePurpose": "knowledge_gate",
       "injectableByDefault": true,
-      "specificityScore": 60
+      "specificityScore": 60,
+      "extensions": {
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
+        }
+      }
     },
     {
       "schemaVersion": 2,
@@ -1064,7 +1069,7 @@
     {
       "schemaVersion": 2,
       "id": "ootp_neville_luna_ginny_resistance_state",
-      "title": "Neville Luna Ginny Year 5 resistance state",
+      "title": "Neville Luna Ginny Year 5 resistance",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -1146,7 +1151,13 @@
       "relevance": "low",
       "lorePurpose": "status_change",
       "injectableByDefault": true,
-      "specificityScore": 60
+      "specificityScore": 60,
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Automatic concise title cleanup for implementation-language wording."
+        }
+      }
     }
   ]
 }

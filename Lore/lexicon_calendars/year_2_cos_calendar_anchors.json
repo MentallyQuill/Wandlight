@@ -313,7 +313,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y2_barrier_closed_car_crash",
-      "title": "Platform barrier closes and car reaches Hogwarts",
+      "title": "Barrier Closes; Car to Hogwarts",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -406,6 +406,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1993-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -813,7 +816,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y2_chamber_legend_library",
-      "title": "Chamber legend explained and potion research begins",
+      "title": "Chamber Legend Research",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -907,6 +910,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1993-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -1220,108 +1226,6 @@
     },
     {
       "schemaVersion": 2,
-      "id": "lexcal_y2_riddle_diary_valentine",
-      "title": "Harry communicates with Tom Riddle through the diary",
-      "kind": "knowledge_guard",
-      "gateType": "knowledge_guard",
-      "category": "knowledge",
-      "canonStatus": "canon",
-      "truthStatus": "established",
-      "revealPolicy": "public",
-      "priority": 91,
-      "protected": true,
-      "locked": true,
-      "userEditable": true,
-      "date": {
-        "validFrom": "1993-02-14",
-        "validTo": "1993-02-21",
-        "precision": "date",
-        "schoolYear": 2,
-        "book": "Chamber of Secrets"
-      },
-      "scope": {
-        "characters": [
-          "Harry Potter",
-          "Tom Riddle",
-          "Ginny Weasley",
-          "Rubeus Hagrid"
-        ],
-        "locations": [
-          "Hogwarts"
-        ],
-        "factions": [],
-        "topics": [
-          "Tom Riddle diary",
-          "false memory",
-          "Chamber of Secrets",
-          "Year 2",
-          "winter_term",
-          "Lexicon calendar"
-        ],
-        "objects": [
-          "Tom Riddle diary"
-        ],
-        "spells": [],
-        "schoolYears": [
-          2
-        ],
-        "books": [
-          "Chamber of Secrets"
-        ],
-        "phases": [
-          "winter_term"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "On Valentine’s Day, Harry uses the diary to communicate with Tom Riddle and receives a misleading vision about Hagrid and the Chamber.",
-        "injection": "On Valentine’s Day, Harry uses the diary to communicate with Tom Riddle and receives a misleading vision about Hagrid and the Chamber.",
-        "constraints": [],
-        "antiLore": [],
-        "publicVersion": "",
-        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
-      },
-      "effects": {
-        "addsTags": [
-          "Chamber of Secrets",
-          "Year 2",
-          "winter_term",
-          "knowledge_guard",
-          "knowledge"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "injectionRules": {}
-      },
-      "sourceInfo": {
-        "id": "hp-lexicon-day-by-day-calendar",
-        "work": "Harry Potter Lexicon",
-        "book": "Chamber of Secrets",
-        "confidence": 0.86,
-        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
-        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
-        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
-      },
-      "source": "hp-lexicon-day-by-day:cos:1993-02-14:riddle_diary_valentine",
-      "canon": "canon",
-      "relevance": "normal",
-      "canonTiming": {
-        "hardValidTo": "1993-02-21"
-      },
-      "extensions": {
-        "temporalTightening": {
-          "method": "lexicon calendar point anchor: validFrom plus 7 days, capped by nearby next anchor",
-          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
-          "appliedIn": "Wandlight relevance-tier regression repair pass",
-          "previousValidTo": "1993-08-31"
-        }
-      },
-      "lorePurpose": "knowledge_gate",
-      "injectableByDefault": true,
-      "specificityScore": 60
-    },
-    {
-      "schemaVersion": 2,
       "id": "lexcal_y2_hermione_penelope_petrified",
       "title": "Hermione and Penelope petrified; Dumbledore removed",
       "kind": "event_anchor",
@@ -1424,7 +1328,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y2_aragog_clue",
-      "title": "Aragog reveals Hagrid did not open the Chamber",
+      "title": "Aragog Chamber Clue",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1515,114 +1419,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1993-08-31"
-        }
-      },
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
-      "specificityScore": 60
-    },
-    {
-      "schemaVersion": 2,
-      "id": "lexcal_y2_chamber_resolution_feast",
-      "title": "Chamber resolution and Dobby freed",
-      "kind": "event_anchor",
-      "gateType": "event_anchor",
-      "category": "event",
-      "canonStatus": "canon",
-      "truthStatus": "established",
-      "revealPolicy": "public",
-      "priority": 97,
-      "protected": true,
-      "locked": true,
-      "userEditable": true,
-      "date": {
-        "validFrom": "1993-05-29",
-        "validTo": "1993-07-13",
-        "precision": "date",
-        "schoolYear": 2,
-        "book": "Chamber of Secrets"
-      },
-      "scope": {
-        "characters": [
-          "Harry Potter",
-          "Ginny Weasley",
-          "Tom Riddle",
-          "Dobby",
-          "Lucius Malfoy",
-          "Albus Dumbledore",
-          "Rubeus Hagrid"
-        ],
-        "locations": [
-          "Chamber of Secrets",
-          "Hogwarts"
-        ],
-        "factions": [],
-        "topics": [
-          "basilisk",
-          "diary destroyed",
-          "Dobby freed",
-          "Chamber of Secrets",
-          "Year 2",
-          "climax",
-          "Lexicon calendar"
-        ],
-        "objects": [
-          "Tom Riddle diary",
-          "Gryffindor sword"
-        ],
-        "spells": [],
-        "schoolYears": [
-          2
-        ],
-        "books": [
-          "Chamber of Secrets"
-        ],
-        "phases": [
-          "climax"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Ginny is rescued, the basilisk is killed, the diary is destroyed, Dumbledore and Hagrid return, the victims recover, Lucius loses influence, and Dobby is freed.",
-        "injection": "Ginny is rescued, the basilisk is killed, the diary is destroyed, Dumbledore and Hagrid return, the victims recover, Lucius loses influence, and Dobby is freed.",
-        "constraints": [],
-        "antiLore": [],
-        "publicVersion": "",
-        "notes": "Original paraphrased date anchor derived from Harry Potter Lexicon calendar/timeline pages; source wording is not reproduced."
-      },
-      "effects": {
-        "addsTags": [
-          "Chamber of Secrets",
-          "Year 2",
-          "climax",
-          "event_anchor",
-          "event"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "injectionRules": {}
-      },
-      "sourceInfo": {
-        "id": "hp-lexicon-day-by-day-calendar",
-        "work": "Harry Potter Lexicon",
-        "book": "Chamber of Secrets",
-        "confidence": 0.86,
-        "url": "https://www.hp-lexicon.org/calendars-harry-potter-novels/day-day-calendar-chamber-secrets/",
-        "timelineUrl": "https://www.hp-lexicon.org/timeline/master-timeline/the-modern-era/the-second-rise-of-voldemort/harry-potters-second-year/",
-        "notes": "Date/sequence anchor paraphrased for roleplay continuity constraints."
-      },
-      "source": "hp-lexicon-day-by-day:cos:1993-05-29:chamber_resolution_feast",
-      "canon": "canon",
-      "relevance": "normal",
-      "canonTiming": {
-        "hardValidTo": "1993-07-13"
-      },
-      "extensions": {
-        "temporalTightening": {
-          "method": "lexicon calendar phase/window anchor: capped by next calendar anchor or 45 days",
-          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
-          "appliedIn": "Wandlight relevance-tier regression repair pass",
-          "previousValidTo": "1993-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",

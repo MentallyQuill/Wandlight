@@ -87,102 +87,14 @@
     },
     {
       "schemaVersion": 2,
-      "id": "event_chamber_opened",
-      "title": "Chamber of Secrets active period",
-      "kind": "event_anchor",
-      "category": "event",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 80,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1992-10-31",
-        "validTo": "1993-05-29",
-        "precision": "date",
-        "schoolYear": 2,
-        "book": "Chamber of Secrets"
-      },
-      "scope": {
-        "topics": [
-          "timeline",
-          "canon state"
-        ],
-        "schoolYears": [
-          2
-        ],
-        "books": [
-          "Chamber of Secrets"
-        ],
-        "phases": [
-          "autumn"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "The Chamber of Secrets threat affects Hogwarts until it is resolved near the end of the school year.",
-        "injection": "The Chamber of Secrets threat affects Hogwarts until it is resolved near the end of the school year.",
-        "constraints": [],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "timeline",
-          "year-2"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Chamber of Secrets",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {
-        "deathStateGatePass": {
-          "method": "removed positive requiresEvents from canon database entry",
-          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
-          "appliedIn": "Wandlight relevance-tier regression repair pass",
-          "requiresEventsRemoved": [
-            "chamber_of_secrets_resolved"
-          ]
-        }
-      },
-      "canonTiming": {
-        "hardValidFrom": "1992-10-31",
-        "hardValidTo": "1993-05-29",
-        "precision": "date",
-        "schoolYear": 2,
-        "book": "Chamber of Secrets"
-      },
-      "activation": {},
-      "gateType": "event_anchor",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
-      "specificityScore": 65
-    },
-    {
-      "schemaVersion": 2,
       "id": "event_chamber_resolved",
-      "title": "Chamber of Secrets resolved",
+      "title": "Chamber Resolution",
       "kind": "event_anchor",
       "category": "event",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 80,
+      "priority": 92,
       "protected": false,
       "locked": true,
       "date": {
@@ -209,9 +121,11 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Ginny is rescued and the Chamber of Secrets incident is over, though it remains sensitive history.",
-        "injection": "Ginny is rescued and the Chamber of Secrets incident is over, though it remains sensitive history.",
-        "constraints": [],
+        "fact": "After the Chamber resolution, the basilisk is defeated, the diary is destroyed, Ginny is rescued, and Dobby can be freed through Lucius’s mistake.",
+        "injection": "After the Chamber resolution, the basilisk is defeated, the diary is destroyed, Ginny is rescued, and Dobby can be freed through Lucius’s mistake.",
+        "constraints": [
+          "Do not keep the Year 2 Chamber crisis unresolved after this event unless our story has established a different outcome."
+        ],
         "antiLore": [],
         "notes": ""
       },
@@ -249,6 +163,10 @@
           "requiresEventsRemoved": [
             "chamber_of_secrets_resolved"
           ]
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Merged Chamber resolution duplicates."
         }
       },
       "canonTiming": {
@@ -263,14 +181,14 @@
       "userEditable": true,
       "canon": "canon",
       "relevance": "normal",
-      "lorePurpose": "event_anchor",
+      "lorePurpose": "status_change",
       "injectableByDefault": true,
       "specificityScore": 65
     },
     {
       "schemaVersion": 2,
       "id": "event_sirius_public_fugitive",
-      "title": "Sirius Black is publicly treated as fugitive",
+      "title": "Sirius Public Fugitive Status",
       "kind": "event_anchor",
       "category": "event",
       "canonStatus": "canon",
@@ -329,7 +247,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; public status kept distinct from private truth."
+        }
+      },
       "canonTiming": {
         "hardValidFrom": "1993-08-01",
         "hardValidTo": "1994-06-30",
@@ -348,7 +271,7 @@
     {
       "schemaVersion": 2,
       "id": "event_sirius_truth_to_trio",
-      "title": "Trio learns Sirius truth",
+      "title": "Sirius Truth Revealed to Trio",
       "kind": "event_anchor",
       "category": "event",
       "canonStatus": "canon",
@@ -421,6 +344,10 @@
           "requiresEventsRemoved": [
             "sirius_truth_revealed"
           ]
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup; private truth kept distinct from public status."
         }
       },
       "canonTiming": {
@@ -519,259 +446,8 @@
     },
     {
       "schemaVersion": 2,
-      "id": "event_voldemort_returns_private_truth",
-      "title": "Voldemort returns at graveyard",
-      "kind": "event_anchor",
-      "category": "event",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 80,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1995-06-24",
-        "validTo": "1996-06-30",
-        "precision": "date",
-        "schoolYear": 4,
-        "book": "Goblet of Fire"
-      },
-      "scope": {
-        "topics": [
-          "timeline",
-          "canon state"
-        ],
-        "schoolYears": [
-          4
-        ],
-        "books": [
-          "Goblet of Fire"
-        ],
-        "phases": [
-          "climax"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Harry and a small group know Voldemort has returned, while public institutions deny it for much of Year 5.",
-        "injection": "Harry and a small group know Voldemort has returned, while public institutions deny it for much of Year 5.",
-        "constraints": [],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "timeline",
-          "year-4"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Goblet of Fire",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {
-        "deathStateGatePass": {
-          "method": "removed positive requiresEvents from canon database entry",
-          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
-          "appliedIn": "Wandlight relevance-tier regression repair pass",
-          "requiresEventsRemoved": [
-            "voldemort_return_publicly_acknowledged"
-          ]
-        }
-      },
-      "canonTiming": {
-        "hardValidFrom": "1995-06-24",
-        "hardValidTo": "1996-06-30",
-        "precision": "date",
-        "schoolYear": 4,
-        "book": "Goblet of Fire"
-      },
-      "activation": {},
-      "gateType": "event_anchor",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
-      "specificityScore": 45
-    },
-    {
-      "schemaVersion": 2,
-      "id": "event_ministry_denial_ootp",
-      "title": "Ministry denial period",
-      "kind": "event_anchor",
-      "category": "event",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 80,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1995-07-01",
-        "validTo": "1996-06-30",
-        "precision": "date",
-        "schoolYear": 5,
-        "book": "Order of the Phoenix"
-      },
-      "scope": {
-        "topics": [
-          "timeline",
-          "canon state"
-        ],
-        "schoolYears": [
-          5
-        ],
-        "books": [
-          "Order of the Phoenix"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "The Ministry publicly denies Voldemort’s return and discredits Harry and Dumbledore.",
-        "injection": "The Ministry publicly denies Voldemort’s return and discredits Harry and Dumbledore.",
-        "constraints": [],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "timeline",
-          "year-5"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Order of the Phoenix",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {
-        "deathStateGatePass": {
-          "method": "removed positive requiresEvents from canon database entry",
-          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
-          "appliedIn": "Wandlight relevance-tier regression repair pass",
-          "requiresEventsRemoved": [
-            "voldemort_return_publicly_acknowledged"
-          ]
-        }
-      },
-      "canonTiming": {
-        "hardValidFrom": "1995-07-01",
-        "hardValidTo": "1996-06-30",
-        "precision": "date",
-        "schoolYear": 5,
-        "book": "Order of the Phoenix"
-      },
-      "activation": {},
-      "gateType": "event_anchor",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
-      "specificityScore": 65
-    },
-    {
-      "schemaVersion": 2,
-      "id": "event_umbridge_hogwarts",
-      "title": "Umbridge influence at Hogwarts",
-      "kind": "event_anchor",
-      "category": "event",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 80,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1995-09-01",
-        "validTo": "1996-06-30",
-        "precision": "date",
-        "schoolYear": 5,
-        "book": "Order of the Phoenix"
-      },
-      "scope": {
-        "topics": [
-          "timeline",
-          "canon state"
-        ],
-        "schoolYears": [
-          5
-        ],
-        "books": [
-          "Order of the Phoenix"
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Dolores Umbridge and Ministry oversight restrict Hogwarts and defensive education.",
-        "injection": "Dolores Umbridge and Ministry oversight restrict Hogwarts and defensive education.",
-        "constraints": [],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "timeline",
-          "year-5"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Order of the Phoenix",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "hardValidFrom": "1995-09-01",
-        "hardValidTo": "1996-06-30",
-        "precision": "date",
-        "schoolYear": 5,
-        "book": "Order of the Phoenix"
-      },
-      "gateType": "event_anchor",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
-      "specificityScore": 45
-    },
-    {
-      "schemaVersion": 2,
       "id": "event_sirius_death_after",
-      "title": "Sirius is dead after Department of Mysteries",
+      "title": "Sirius Death Aftermath",
       "kind": "event_anchor",
       "category": "event",
       "canonStatus": "canon",
@@ -804,8 +480,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Sirius Black is dead and Harry is grieving.",
-        "injection": "Sirius Black is dead and Harry is grieving.",
+        "fact": "Sirius Black is dead after the Department of Mysteries battle, and Harry is grieving.",
+        "injection": "After the Department of Mysteries battle, Sirius Black is dead and Harry is grieving unless our story has established a different outcome.",
         "constraints": [],
         "antiLore": [],
         "notes": ""
@@ -836,6 +512,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1998-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "canonTiming": {
@@ -949,84 +628,6 @@
     },
     {
       "schemaVersion": 2,
-      "id": "event_hbp_school_year",
-      "title": "Half-Blood Prince school year",
-      "kind": "event_anchor",
-      "category": "event",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 80,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1996-09-01",
-        "validTo": "1997-06-30",
-        "precision": "date",
-        "schoolYear": 6,
-        "book": "Half-Blood Prince"
-      },
-      "scope": {
-        "topics": [
-          "timeline",
-          "canon state"
-        ],
-        "schoolYears": [
-          6
-        ],
-        "books": [
-          "Half-Blood Prince"
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Snape teaches Defense Against the Dark Arts, Slughorn teaches Potions, and the war climate is public.",
-        "injection": "Snape teaches Defense Against the Dark Arts, Slughorn teaches Potions, and the war climate is public.",
-        "constraints": [],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "timeline",
-          "year-6"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Half-Blood Prince",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "hardValidFrom": "1996-09-01",
-        "hardValidTo": "1997-06-30",
-        "precision": "date",
-        "schoolYear": 6,
-        "book": "Half-Blood Prince"
-      },
-      "gateType": "event_anchor",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
-      "specificityScore": 45
-    },
-    {
-      "schemaVersion": 2,
       "id": "event_dumbledore_private_lessons",
       "title": "Dumbledore teaches Harry about Voldemort past",
       "kind": "event_anchor",
@@ -1118,95 +719,6 @@
       "lorePurpose": "knowledge_gate",
       "injectableByDefault": true,
       "specificityScore": 45
-    },
-    {
-      "schemaVersion": 2,
-      "id": "event_dumbledore_alive_pre_tower",
-      "title": "Dumbledore alive before Astronomy Tower",
-      "kind": "event_anchor",
-      "category": "event",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 80,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1996-09-01",
-        "validTo": "1997-06-29",
-        "precision": "date",
-        "schoolYear": 6,
-        "book": "Half-Blood Prince"
-      },
-      "scope": {
-        "topics": [
-          "timeline",
-          "canon state"
-        ],
-        "schoolYears": [
-          6
-        ],
-        "books": [
-          "Half-Blood Prince"
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Dumbledore is alive and still Headmaster.",
-        "injection": "Dumbledore is alive and still Headmaster.",
-        "constraints": [],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "timeline",
-          "year-6"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Half-Blood Prince",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "hardValidFrom": "1996-09-01",
-        "hardValidTo": "1997-06-29",
-        "precision": "date",
-        "schoolYear": 6,
-        "book": "Half-Blood Prince"
-      },
-      "activation": {
-        "requiresMissingEvents": [
-          "dumbledore_death_occurs"
-        ]
-      },
-      "expiration": {
-        "expiresWhenEventsHappen": [
-          "dumbledore_death_occurs"
-        ],
-        "autoMuteOnExpire": true
-      },
-      "gateType": "event_anchor",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "event_anchor",
-      "injectableByDefault": true,
-      "specificityScore": 35
     },
     {
       "schemaVersion": 2,
@@ -1395,100 +907,6 @@
       "lorePurpose": "event_anchor",
       "injectableByDefault": true,
       "specificityScore": 35
-    },
-    {
-      "schemaVersion": 2,
-      "id": "event_horcrux_hunt",
-      "title": "Horcrux hunt period",
-      "kind": "event_anchor",
-      "category": "event",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 80,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1997-08-01",
-        "validTo": "1997-08-11",
-        "precision": "date",
-        "schoolYear": 7,
-        "book": "Deathly Hallows"
-      },
-      "scope": {
-        "topics": [
-          "timeline",
-          "canon state"
-        ],
-        "schoolYears": [
-          7
-        ],
-        "books": [
-          "Deathly Hallows"
-        ],
-        "phases": [
-          "summer"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Harry, Ron, and Hermione are not attending normal Hogwarts classes and are hunting Horcruxes.",
-        "injection": "Harry, Ron, and Hermione are not attending normal Hogwarts classes and are hunting Horcruxes.",
-        "constraints": [],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "timeline",
-          "year-7"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Deathly Hallows",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {
-        "temporalTightening": {
-          "method": "curated chronology point event: validFrom plus 10 days",
-          "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
-          "appliedIn": "Wandlight relevance-tier regression repair pass",
-          "previousValidTo": "1998-05-02"
-        },
-        "deathStateGatePass": {
-          "method": "removed positive requiresEvents from canon database entry",
-          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
-          "appliedIn": "Wandlight relevance-tier regression repair pass",
-          "requiresEventsRemoved": [
-            "horcruxes_revealed_to_trio"
-          ]
-        }
-      },
-      "canonTiming": {
-        "hardValidFrom": "1997-08-01",
-        "hardValidTo": "1997-08-11",
-        "precision": "date",
-        "schoolYear": 7,
-        "book": "Deathly Hallows"
-      },
-      "activation": {},
-      "gateType": "event_anchor",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "knowledge_gate",
-      "injectableByDefault": true,
-      "specificityScore": 45
     },
     {
       "schemaVersion": 2,

@@ -268,91 +268,6 @@
     },
     {
       "schemaVersion": 2,
-      "id": "behavior_hermione_granger_year_6",
-      "title": "Hermione Granger behavior - Year 6",
-      "kind": "behavior_gate",
-      "category": "character",
-      "canonStatus": "canon",
-      "truthStatus": "true",
-      "revealPolicy": "public",
-      "priority": 78,
-      "protected": false,
-      "locked": true,
-      "date": {
-        "validFrom": "1996-09-01",
-        "validTo": "1997-06-30",
-        "precision": "date",
-        "schoolYear": 6,
-        "book": "Half-Blood Prince"
-      },
-      "scope": {
-        "characters": [
-          "Hermione Granger"
-        ],
-        "topics": [
-          "behavior",
-          "personality",
-          "year 6"
-        ],
-        "books": [
-          "Half-Blood Prince"
-        ],
-        "schoolYears": [
-          6
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Hermione is academically advanced and skeptical of suspicious shortcuts. She can reason well about danger but does not know every hidden truth automatically.",
-        "injection": "Hermione is academically advanced and skeptical of suspicious shortcuts; She can reason well about danger but does not know every hidden truth automatically; Keep her knowledge bounded by what she has actually learned by the date.",
-        "constraints": [
-          "Keep her knowledge bounded by what she has actually learned by the date."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "Hermione",
-          "year-6",
-          "behavior"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Half-Blood Prince",
-        "chapter": "",
-        "confidence": 0.85,
-        "notes": "Curated date constraint seed entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedFrom": "1996-09-01",
-        "canonExpectedUntil": "1997-06-30",
-        "precision": "date",
-        "schoolYear": 6,
-        "book": "Half-Blood Prince"
-      },
-      "gateType": "behavior_gate",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "low",
-      "lorePurpose": "behavior_constraint",
-      "injectableByDefault": true,
-      "specificityScore": 95
-    },
-    {
-      "schemaVersion": 2,
       "id": "behavior_ron_weasley_year_4",
       "title": "Ron Weasley behavior - Year 4",
       "kind": "behavior_gate",
@@ -439,13 +354,13 @@
     {
       "schemaVersion": 2,
       "id": "behavior_draco_malfoy_year_6",
-      "title": "Draco Malfoy behavior - Year 6",
+      "title": "Draco Year 6 Mission Pressure",
       "kind": "behavior_gate",
       "category": "character",
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 85,
+      "priority": 90,
       "protected": false,
       "locked": true,
       "date": {
@@ -476,10 +391,10 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Draco is under severe pressure during Year 6 and behaves more secretively. His hostility is mixed with fear and obligation.",
-        "injection": "Draco is under severe pressure during Year 6 and behaves more secretively; His hostility is mixed with fear and obligation; Most characters should not know the full reason for his stress before the climax.",
+        "fact": "In Year 6, Draco is under severe pressure from his secret mission, making him secretive, isolated, frightened, and prone to masking fear with arrogance.",
+        "injection": "In Year 6, Draco should be secretive, isolated, and strained under pressure from his hidden mission; arrogance may mask fear rather than simple school rivalry.",
         "constraints": [
-          "Most characters should not know the full reason for his stress before the climax."
+          "Do not make Draco’s mission public unless discovered by the story."
         ],
         "antiLore": [],
         "notes": ""
@@ -505,7 +420,12 @@
         "notes": "Curated date constraint seed entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Merged Draco Year 6 behavior duplicates."
+        }
+      },
       "canonTiming": {
         "canonExpectedFrom": "1996-09-01",
         "canonExpectedUntil": "1997-06-30",

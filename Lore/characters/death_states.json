@@ -3,7 +3,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_quirinus_quirrell",
-      "title": "Quirinus Quirrell death state",
+      "title": "Quirrell Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -102,6 +102,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -111,7 +115,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_barty_crouch_sr",
-      "title": "Barty Crouch Sr. death state",
+      "title": "Barty Crouch Sr. Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -207,6 +211,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -216,7 +224,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_cedric_diggory",
-      "title": "Cedric Diggory death state",
+      "title": "Cedric Diggory Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -272,8 +280,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Cedric Diggory is dead after the Third Task graveyard event unless the current branch explicitly changes that outcome.",
-        "injection": "Cedric Diggory is dead after the Third Task graveyard event unless the current branch explicitly changes that outcome.",
+        "fact": "Cedric Diggory is dead after the Third Task graveyard event unless our story has established a different outcome.",
+        "injection": "Cedric Diggory is dead after the Third Task graveyard event unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Cedric Diggory as alive after 1995-06-24 unless accepted story lore has established a different outcome."
         ],
@@ -312,6 +320,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -321,7 +333,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_sirius_black",
-      "title": "Sirius Black death state",
+      "title": "Sirius Black Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -376,8 +388,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Sirius Black is dead after the Department of Mysteries battle unless the current branch explicitly changes that outcome.",
-        "injection": "Sirius Black is dead after the Department of Mysteries battle unless the current branch explicitly changes that outcome.",
+        "fact": "Sirius Black is dead after the Department of Mysteries battle unless our story has established a different outcome.",
+        "injection": "Sirius Black is dead after the Department of Mysteries battle unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Sirius Black as alive after 1996-06-18 unless accepted story lore has established a different outcome."
         ],
@@ -416,6 +428,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -425,7 +441,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_albus_dumbledore",
-      "title": "Albus Dumbledore death state",
+      "title": "Dumbledore Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -479,8 +495,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Albus Dumbledore is dead after the Astronomy Tower event unless the current branch explicitly changes that outcome.",
-        "injection": "Albus Dumbledore is dead after the Astronomy Tower event unless the current branch explicitly changes that outcome.",
+        "fact": "Albus Dumbledore is dead after the Astronomy Tower event unless our story has established a different outcome.",
+        "injection": "Albus Dumbledore is dead after the Astronomy Tower event unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Albus Dumbledore as alive after 1997-06-30 unless accepted story lore has established a different outcome."
         ],
@@ -519,6 +535,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -528,7 +548,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_charity_burbage",
-      "title": "Charity Burbage death state",
+      "title": "Charity Burbage Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -621,6 +641,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -630,7 +654,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_hedwig",
-      "title": "Hedwig death state",
+      "title": "Hedwig Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -683,8 +707,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Hedwig is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
-        "injection": "Hedwig is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
+        "fact": "Hedwig is dead after the Seven Potters flight unless our story has established a different outcome.",
+        "injection": "Hedwig is dead after the Seven Potters flight unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Hedwig as alive after 1997-07-27 unless accepted story lore has established a different outcome."
         ],
@@ -723,6 +747,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -732,7 +760,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_alastor_moody",
-      "title": "Alastor Moody death state",
+      "title": "Mad-Eye Moody Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -785,8 +813,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Alastor “Mad-Eye” Moody is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
-        "injection": "Alastor “Mad-Eye” Moody is dead after the Seven Potters flight unless the current branch explicitly changes that outcome.",
+        "fact": "Alastor “Mad-Eye” Moody is dead after the Seven Potters flight unless our story has established a different outcome.",
+        "injection": "Alastor “Mad-Eye” Moody is dead after the Seven Potters flight unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Alastor Moody as alive after 1997-07-27 unless accepted story lore has established a different outcome."
         ],
@@ -825,6 +853,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -834,7 +866,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_peter_pettigrew",
-      "title": "Peter Pettigrew death state",
+      "title": "Peter Pettigrew Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -887,8 +919,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Peter Pettigrew is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
-        "injection": "Peter Pettigrew is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
+        "fact": "Peter Pettigrew is dead after the Malfoy Manor escape unless our story has established a different outcome.",
+        "injection": "Peter Pettigrew is dead after the Malfoy Manor escape unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Peter Pettigrew as alive after 1998-04-08 unless accepted story lore has established a different outcome."
         ],
@@ -927,6 +959,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -936,7 +972,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_dobby",
-      "title": "Dobby death state",
+      "title": "Dobby Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -989,8 +1025,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Dobby is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
-        "injection": "Dobby is dead after the Malfoy Manor escape unless the current branch explicitly changes that outcome.",
+        "fact": "Dobby is dead after the Malfoy Manor escape unless our story has established a different outcome.",
+        "injection": "Dobby is dead after the Malfoy Manor escape unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Dobby as alive after 1998-04-08 unless accepted story lore has established a different outcome."
         ],
@@ -1029,6 +1065,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -1038,7 +1078,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_fred_weasley",
-      "title": "Fred Weasley death state",
+      "title": "Fred Weasley Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -1091,8 +1131,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Fred Weasley is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
-        "injection": "Fred Weasley is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "fact": "Fred Weasley is dead after the Battle of Hogwarts unless our story has established a different outcome.",
+        "injection": "Fred Weasley is dead after the Battle of Hogwarts unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Fred Weasley as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
@@ -1131,6 +1171,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -1140,7 +1184,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_remus_lupin",
-      "title": "Remus Lupin death state",
+      "title": "Remus Lupin Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -1193,8 +1237,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Remus Lupin is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
-        "injection": "Remus Lupin is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "fact": "Remus Lupin is dead after the Battle of Hogwarts unless our story has established a different outcome.",
+        "injection": "Remus Lupin is dead after the Battle of Hogwarts unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Remus Lupin as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
@@ -1233,6 +1277,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -1242,7 +1290,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_nymphadora_tonks",
-      "title": "Nymphadora Tonks death state",
+      "title": "Tonks Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -1295,8 +1343,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Nymphadora Tonks is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
-        "injection": "Nymphadora Tonks is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "fact": "Nymphadora Tonks is dead after the Battle of Hogwarts unless our story has established a different outcome.",
+        "injection": "Nymphadora Tonks is dead after the Battle of Hogwarts unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Nymphadora Tonks as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
@@ -1335,6 +1383,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -1344,7 +1396,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_severus_snape",
-      "title": "Severus Snape death state",
+      "title": "Snape Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -1397,8 +1449,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Severus Snape is dead after the Battle of Hogwarts and his final memories unless the current branch explicitly changes that outcome.",
-        "injection": "Severus Snape is dead after the Battle of Hogwarts and his final memories unless the current branch explicitly changes that outcome.",
+        "fact": "Severus Snape is dead after the Battle of Hogwarts and his final memories unless our story has established a different outcome.",
+        "injection": "Severus Snape is dead after the Battle of Hogwarts and his final memories unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Severus Snape as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
@@ -1437,6 +1489,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -1446,7 +1502,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_bellatrix_lestrange",
-      "title": "Bellatrix Lestrange death state",
+      "title": "Bellatrix Lestrange Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -1499,8 +1555,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Bellatrix Lestrange is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
-        "injection": "Bellatrix Lestrange is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "fact": "Bellatrix Lestrange is dead after the Battle of Hogwarts unless our story has established a different outcome.",
+        "injection": "Bellatrix Lestrange is dead after the Battle of Hogwarts unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Bellatrix Lestrange as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
@@ -1539,6 +1595,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -1548,7 +1608,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_lord_voldemort",
-      "title": "Lord Voldemort death state",
+      "title": "Voldemort Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -1601,8 +1661,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Lord Voldemort is dead after the final duel at the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
-        "injection": "Lord Voldemort is dead after the final duel at the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "fact": "Lord Voldemort is dead after the final duel at the Battle of Hogwarts unless our story has established a different outcome.",
+        "injection": "Lord Voldemort is dead after the final duel at the Battle of Hogwarts unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Lord Voldemort as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
@@ -1641,6 +1701,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",
@@ -1650,7 +1714,7 @@
     {
       "schemaVersion": 2,
       "id": "death_state_colin_creevey",
-      "title": "Colin Creevey death state",
+      "title": "Colin Creevey Death",
       "kind": "character_state",
       "gateType": "character_state",
       "category": "character",
@@ -1703,8 +1767,8 @@
       },
       "visibility": {},
       "content": {
-        "fact": "Colin Creevey is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
-        "injection": "Colin Creevey is dead after the Battle of Hogwarts unless the current branch explicitly changes that outcome.",
+        "fact": "Colin Creevey is dead after the Battle of Hogwarts unless our story has established a different outcome.",
+        "injection": "Colin Creevey is dead after the Battle of Hogwarts unless our story has established a different outcome.",
         "constraints": [
           "Do not treat Colin Creevey as alive after 1998-05-02 unless accepted story lore has established a different outcome."
         ],
@@ -1743,6 +1807,10 @@
           "method": "added bounded post-death character state",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "notes": "Provides a bounded deceased-state alternative to alive/age gates."
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Concise title cleanup for death-state entry."
         }
       },
       "lorePurpose": "status_change",

@@ -811,7 +811,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y5_arthur_vision_st_mungos",
-      "title": "Arthur attack vision and St Mungo’s Christmas",
+      "title": "Arthur Attack Vision",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -905,6 +905,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1996-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",
@@ -1518,7 +1521,7 @@
     {
       "schemaVersion": 2,
       "id": "lexcal_y5_department_mysteries_public_return",
-      "title": "Department of Mysteries battle and public Voldemort acknowledgment",
+      "title": "Department Battle; Voldemort Public",
       "kind": "event_anchor",
       "gateType": "event_anchor",
       "category": "event",
@@ -1612,6 +1615,9 @@
           "notes": "End date narrowed so event-like lore does not remain active as an open-ended suggestion.",
           "appliedIn": "Wandlight relevance-tier regression repair pass",
           "previousValidTo": "1996-08-31"
+        },
+        "titleConsolidationPass": {
+          "appliedIn": "Wandlight title polish pass"
         }
       },
       "lorePurpose": "event_anchor",

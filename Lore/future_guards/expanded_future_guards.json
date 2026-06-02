@@ -3,7 +3,7 @@
     {
       "schemaVersion": 2,
       "id": "future_guard_cedric_alive_before_third_task",
-      "title": "Future Guard: Cedric alive before Third Task",
+      "title": "Cedric alive before Third Task",
       "kind": "future_guard",
       "category": "timeline",
       "canonStatus": "canon",
@@ -69,7 +69,12 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Automatic concise title cleanup for implementation-language wording."
+        }
+      },
       "canonTiming": {
         "canonExpectedUntil": "1995-06-23",
         "hardValidTo": "",
@@ -98,94 +103,8 @@
     },
     {
       "schemaVersion": 2,
-      "id": "future_guard_sirius_alive_before_department_mysteries",
-      "title": "Future Guard: Sirius alive before Department of Mysteries",
-      "kind": "future_guard",
-      "category": "timeline",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "private",
-      "priority": 100,
-      "protected": true,
-      "locked": true,
-      "date": {
-        "validFrom": "1995-09-01",
-        "validTo": "1996-06-17",
-        "precision": "date",
-        "schoolYear": 5,
-        "book": "Order of the Phoenix"
-      },
-      "scope": {
-        "characters": [
-          "Sirius Black",
-          "Harry Potter"
-        ],
-        "topics": [
-          "Sirius",
-          "Department of Mysteries"
-        ],
-        "spells": [],
-        "schoolYears": [
-          5
-        ],
-        "books": [
-          "Order of the Phoenix"
-        ],
-        "phases": [
-          "term_start"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "Sirius Black is alive before the Department of Mysteries battle.",
-        "injection": "Do not imply Sirius is dead or that Harry has already suffered that loss.",
-        "constraints": [
-          "Protect Sirius’s death as future canon."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "future-guard",
-          "Sirius",
-          "year-5"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Order of the Phoenix",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedUntil": "1996-06-17",
-        "hardValidTo": "",
-        "precision": "date",
-        "schoolYear": 5,
-        "book": "Order of the Phoenix"
-      },
-      "gateType": "future_guard",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "temporal_gate",
-      "injectableByDefault": true,
-      "specificityScore": 95
-    },
-    {
-      "schemaVersion": 2,
       "id": "future_guard_ministry_not_fallen_before_1997_august",
-      "title": "Future Guard: Ministry not fallen before August 1997",
+      "title": "Ministry not fallen before August 1997",
       "kind": "future_guard",
       "category": "timeline",
       "canonStatus": "canon",
@@ -249,7 +168,12 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Automatic concise title cleanup for implementation-language wording."
+        }
+      },
       "canonTiming": {
         "canonExpectedUntil": "1997-07-31",
         "hardValidTo": "",
@@ -278,109 +202,8 @@
     },
     {
       "schemaVersion": 2,
-      "id": "future_guard_deathly_hallows_not_active_before_year7",
-      "title": "Future Guard: Hallows not active trio quest before Year 7",
-      "kind": "future_guard",
-      "category": "timeline",
-      "canonStatus": "canon",
-      "truthStatus": "hidden",
-      "revealPolicy": "private",
-      "priority": 98,
-      "protected": true,
-      "locked": true,
-      "date": {
-        "validFrom": "1991-09-01",
-        "validTo": "1997-07-30",
-        "precision": "date",
-        "schoolYear": 7,
-        "book": "Deathly Hallows"
-      },
-      "scope": {
-        "characters": [
-          "Harry Potter",
-          "Hermione Granger",
-          "Ron Weasley"
-        ],
-        "topics": [
-          "Deathly Hallows",
-          "Elder Wand",
-          "Resurrection Stone"
-        ],
-        "spells": [],
-        "schoolYears": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "books": [
-          "Deathly Hallows"
-        ]
-      },
-      "visibility": {},
-      "content": {
-        "fact": "The Deathly Hallows framework is not an active trio quest .",
-        "injection": "Do not frame the trio’s decisions around the Deathly Hallows unless our story has introduced them early.",
-        "constraints": [
-          "Prevent future Year 7 quest leakage."
-        ],
-        "antiLore": [],
-        "notes": ""
-      },
-      "effects": {
-        "addsTags": [
-          "future-guard",
-          "Hallows"
-        ],
-        "blocksTermsBeforeDate": [],
-        "protectsEntries": [],
-        "stateHints": {},
-        "injectionRules": {
-          "includeOnlyWhenRelevant": true
-        }
-      },
-      "source": {
-        "work": "Harry Potter",
-        "book": "Deathly Hallows",
-        "chapter": "",
-        "confidence": 0.82,
-        "notes": "Expanded curated date constraint entry."
-      },
-      "ui": {},
-      "extensions": {},
-      "canonTiming": {
-        "canonExpectedUntil": "1997-07-30",
-        "hardValidTo": "",
-        "precision": "date",
-        "schoolYear": 1,
-        "book": "Deathly Hallows"
-      },
-      "activation": {
-        "requiresMissingEvents": [
-          "deathly_hallows_revealed_to_trio"
-        ]
-      },
-      "expiration": {
-        "expiresWhenEventsHappen": [
-          "deathly_hallows_revealed_to_trio"
-        ],
-        "autoMuteOnExpire": true
-      },
-      "gateType": "future_guard",
-      "userEditable": true,
-      "canon": "canon",
-      "relevance": "normal",
-      "lorePurpose": "temporal_gate",
-      "injectableByDefault": true,
-      "specificityScore": 65
-    },
-    {
-      "schemaVersion": 2,
       "id": "future_guard_battle_of_hogwarts_future",
-      "title": "Future Guard: Battle of Hogwarts future event",
+      "title": "Battle of Hogwarts future event",
       "kind": "future_guard",
       "category": "timeline",
       "canonStatus": "canon",
@@ -446,7 +269,12 @@
         "notes": "Expanded curated date constraint entry."
       },
       "ui": {},
-      "extensions": {},
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Automatic concise title cleanup for implementation-language wording."
+        }
+      },
       "canonTiming": {
         "canonExpectedUntil": "1998-05-01",
         "hardValidTo": "",

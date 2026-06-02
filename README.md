@@ -1,4 +1,4 @@
-![Wandlight](Images/banner.jpg)
+![Wandlight](Images/documentation/wandlight-banner.png)
 
 # Wandlight
 

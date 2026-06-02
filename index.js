@@ -13,13 +13,7 @@ import {
     getSettings,
     saveSettings,
     getState,
-    saveState,
-    pushStateSnapshot,
-    undoLastChange,
     exportState,
-    importState,
-    validateDelta,
-    getDefaultState,
     acceptPendingLoreEntries,
     rejectPendingLoreEntries,
 } from './state-manager.js';
@@ -28,10 +22,8 @@ import { installInterceptor, syncPromptInjection, clearExtensionPrompts } from '
 import { onExtractionTriggered, onGenerationEndedAutomation, resetExtractionCounter } from './extractor.js';
 import {
     renderSettingsPanel,
-    renderStatePanel,
     renderLoreContextPreview,
     renderLoreMatrixPreview,
-    refreshMemoPreview,
 } from './ui.js';
 import {
     runLoreContextDetection,
@@ -347,7 +339,7 @@ async function mountSettingsPanel(ctx) {
         if (container) {
             renderSettingsPanel(container);
             wireSettingsPanel(container);
-            // Refresh the state/memo/delta displays after wiring
+            // Refresh runtime/settings preview surfaces after wiring
             // Use the local refreshStatePanel() directly since _wandlightRefreshUI
             // is not yet exposed by exposeGlobalBridge() at this point.
             try {
@@ -394,7 +386,7 @@ function installExtensionsMenuButton() {
     const btn = document.createElement('div');
     btn.id = 'wandlight-extensions-menu-button';
     btn.className = 'list-group-item flex-container flexGap5 interactable';
-    btn.title = 'Open Wandlight runtime window. API and debug settings remain in the extensions panel.';
+    btn.title = 'Open Wandlight runtime window and extension settings.';
 
     btn.innerHTML = `\uD83E\uDE84 <span>Wandlight</span>`;
 
@@ -480,97 +472,6 @@ function wireSettingsPanel(container) {
         });
     });
 
-    // ── "Undo Last Change" button ─────────────────────────────────────────
-    const undoBtn = container.querySelector('#wandlight_undo_change');
-    if (undoBtn) {
-        undoBtn.addEventListener('click', () => {
-            const state = getState();
-            const { state: restoredState, undone } = undoLastChange(state);
-            if (undone) {
-                saveState(restoredState);
-                if (typeof toastr !== 'undefined') toastr.success('Last change undone');
-                if (typeof globalThis._wandlightRefreshUI === 'function') {
-                    globalThis._wandlightRefreshUI();
-                }
-            } else {
-                if (typeof toastr !== 'undefined') toastr.info('No changes to undo');
-            }
-        });
-    }
-
-    // ── "Export State" button ─────────────────────────────────────────────
-    const exportBtn = container.querySelector('#wandlight_export_state');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', () => {
-            const state = getState();
-            const json = exportState(state);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `wandlight_state_${Date.now()}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            if (typeof toastr !== 'undefined') toastr.success('State exported');
-        });
-    }
-
-    // ── "Import State" button ─────────────────────────────────────────────
-    const importBtn = container.querySelector('#wandlight_import_state');
-    if (importBtn) {
-        importBtn.addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (re) => {
-                    const previous = getState();
-                    const { state, error } = importState(re.target.result);
-                    if (error) {
-                        if (typeof toastr !== 'undefined') toastr.error('Import failed: ' + error);
-                        return;
-                    }
-                    // Snapshot the existing state before importing over it
-                    pushStateSnapshot(previous, 'Import state snapshot', settings.maxSnapshots);
-                    // Carry forward stateHistory so the snapshot isn't orphaned
-                    state.stateHistory = previous.stateHistory;
-                    state.memoHistory = previous.memoHistory || [];
-                    saveState(state);
-                    if (typeof toastr !== 'undefined') toastr.success('State imported successfully');
-                    if (typeof globalThis._wandlightRefreshUI === 'function') {
-                        globalThis._wandlightRefreshUI();
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        });
-    }
-
-    // ── "Reset State" button ─────────────────────────────────────────────
-    const resetBtn = container.querySelector('#wandlight_reset_state');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            if (!confirm('Reset all continuity state to defaults? You can undo this via Undo Last Change.')) {
-                return;
-            }
-            // Snapshot before resetting so it can be undone
-            const previous = getState();
-            pushStateSnapshot(previous, 'Pre-reset snapshot', settings.maxSnapshots);
-            const fresh = getDefaultState();
-            fresh.stateHistory = previous.stateHistory;
-            fresh.memoHistory = previous.memoHistory || [];
-            saveState(fresh);
-            if (typeof toastr !== 'undefined') toastr.success('State reset to defaults (undo available)');
-            if (typeof globalThis._wandlightRefreshUI === 'function') {
-                globalThis._wandlightRefreshUI();
-            }
-        });
-    }
-
     console.log(`${LOG_PREFIX} Settings panel wired`);
 }
 
@@ -582,7 +483,6 @@ function exposeGlobalBridge() {
     globalThis._wandlightBuildMemo = buildMemo;
     globalThis._wandlightRefreshUI = refreshStatePanel;
     globalThis._wandlightGetState = getState;
-    globalThis._wandlightValidateDelta = validateDelta;
     globalThis._wandlightShowLorePanel = showLorePanel;
     globalThis._wandlightHideLorePanel = hideLorePanel;
     globalThis._wandlightRefreshLorePanel = refreshLorePanel;
@@ -590,83 +490,27 @@ function exposeGlobalBridge() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// State panel rendering
+// Shared UI refresh bridge
 // ════════════════════════════════════════════════════════════════════════════════
 
 /**
- * Refreshes the state display panel. Called from buttons, events, and
- * via globalThis._wandlightRefreshUI().
+ * Refreshes runtime and lightweight settings preview surfaces. Called from
+ * buttons, events, and via globalThis._wandlightRefreshUI().
  */
 function refreshStatePanel() {
-    const container = document.getElementById('wandlight_state_display');
-    if (!container) return;
-
-    const state = getState();
-    if (!state) {
-        container.textContent = '';
-        const em = document.createElement('em');
-        em.textContent = 'No continuity state loaded';
-        container.appendChild(em);
-        return;
-    }
-
-    renderStatePanel(container, state);
-
-    // Also update the Last Delta preview area
-    const deltaContainer = document.getElementById('wandlight_delta_preview');
-    if (deltaContainer) {
-        if (state.lastDelta) {
-            const summary = state.lastDelta.summary || '(no summary)';
-            const changeKeys = Object.keys(state.lastDelta.changes || {});
-            const deltaJson = JSON.stringify(state.lastDelta, null, 2);
-
-            // Build preview using safe DOM construction to avoid HTML injection
-            deltaContainer.textContent = ''; // clear
-            const wrapper = document.createElement('div');
-
-            const strong = document.createElement('strong');
-            strong.textContent = 'Pending Delta: ';
-            wrapper.appendChild(strong);
-            wrapper.appendChild(document.createTextNode(summary));
-
-            const keyDiv = document.createElement('div');
-            keyDiv.className = 'wandlight-delta-changes';
-            keyDiv.textContent = 'Keys: ' + (changeKeys.length ? changeKeys.join(', ') : '(none)');
-            wrapper.appendChild(keyDiv);
-
-            const pre = document.createElement('pre');
-            pre.className = 'wandlight-delta-json';
-            pre.textContent = deltaJson;
-            wrapper.appendChild(pre);
-
-            deltaContainer.appendChild(wrapper);
-        } else {
-            deltaContainer.textContent = '';
-            const em = document.createElement('em');
-            em.textContent = 'No pending delta';
-            deltaContainer.appendChild(em);
-        }
-    }
-
-    // ── Refresh lore previews ──────────────────────────────────────────────
+    // The former settings-panel state/debug viewer has been removed. Keep this
+    // bridge as the shared UI refresh hook for runtime drawers and lightweight
+    // settings previews that may be present in future templates.
     try {
         renderLoreContextPreview();
         renderLoreMatrixPreview();
-    } catch (e2) {
-        // Silently ignore — lore panels might not be in DOM
+    } catch (_) {
+        // Preview panels may not exist in the settings DOM.
     }
 
-    // ── Refresh memo preview ───────────────────────────────────────────────
-    try {
-        refreshMemoPreview();
-    } catch (e2) {
-        // Silently ignore — memo preview might not be in DOM
-    }
-
-    // ── Refresh lore panel if open ─────────────────────────────────────────
     try {
         refreshLorePanel();
     } catch (_) {
-        // Panel may not be open
+        // Runtime panel may be closed.
     }
 }

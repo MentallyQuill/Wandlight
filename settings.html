@@ -16,7 +16,7 @@
                 <div class="inline-drawer-content">
                     <div class="flex-container flexFlowColumn gap-1">
                         <p style="font-size: 0.85em; opacity: 0.72; margin-bottom: 4px;">
-                            During roleplay, use the Wandlight window for mode, injection toggles, scanning, generation, review, and lore editing. This settings panel is reserved for API setup, developer diagnostics, and data tools.
+                            During roleplay, use the Wandlight window for mode, injection toggles, scanning, generation, review, and lore editing. This settings panel is reserved for opening the runtime window and configuring model/API access.
                         </p>
                         <button id="wandlight_open_window" class="menu_button interactable"
                             title="Open the Wandlight runtime window.">
@@ -155,68 +155,6 @@
                             </div>
                         </div>
 
-                    </div>
-                </div>
-            </div>
-
-            <!-- Data and Developer Debug -->
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <i class="fa-solid fa-database" style="margin-right: 8px; opacity: 0.7;"></i>
-                    <b>Data and Developer Debug</b>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <div class="flex-container flexFlowColumn gap-1">
-                        <label class="checkbox_label">
-                            <input id="wandlight_debug_mode" type="checkbox" data-setting="debugMode" />
-                            <span>Debug Mode</span>
-                            <i class="fa-solid fa-circle-question interactable"
-                                title="Enables verbose console logging for Wandlight troubleshooting."></i>
-                        </label>
-
-                        <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 4px;">
-                            Current continuity state. Double-click the summary to edit raw JSON.
-                        </p>
-                        <div id="wandlight_state_display" class="wandlight-state-display"
-                            style="font-family: monospace; font-size: 0.78em;
-                            background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px;
-                            max-height: 400px; overflow-y: auto; margin: 0; color: #e0e0e0;">
-                            <em>No continuity state loaded</em>
-                        </div>
-                        <textarea id="wandlight_state_json" class="wandlight-state-editor"
-                            style="min-height: 200px; font-family: monospace; font-size: 0.78em;
-                            background: rgba(0,0,0,0.3); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.15);
-                            border-radius: 4px; padding: 10px; resize: vertical; width: 100%; box-sizing: border-box;
-                            display: none;"></textarea>
-
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            <button id="wandlight_refresh_state" class="menu_button interactable"
-                                title="Reload state from chat metadata.">
-                                <i class="fa-solid fa-rotate"></i> Refresh
-                            </button>
-                            <button id="wandlight_save_state" class="menu_button interactable"
-                                title="Save edited raw state JSON.">
-                                <i class="fa-solid fa-floppy-disk"></i> Save State
-                            </button>
-                            <button id="wandlight_undo_change" class="menu_button interactable"
-                                title="Undo the last saved continuity state change.">
-                                <i class="fa-solid fa-undo"></i> Undo Last Change
-                            </button>
-                            <button id="wandlight_import_state" class="menu_button interactable"
-                                title="Import Wandlight state from a JSON file.">
-                                <i class="fa-solid fa-file-import"></i> Import
-                            </button>
-                            <button id="wandlight_export_state" class="menu_button interactable"
-                                title="Export current Wandlight state to a JSON file.">
-                                <i class="fa-solid fa-file-export"></i> Export
-                            </button>
-                            <button id="wandlight_reset_state" class="menu_button interactable"
-                                style="color: #ff6666;"
-                                title="Reset all continuity state to defaults. A snapshot is taken first so this can be undone.">
-                                <i class="fa-solid fa-trash"></i> Reset State
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>

@@ -1120,6 +1120,12 @@
     padding-top: 5px;
 }
 
+.wandlight-new-lore-field .wandlight-lore-editor-input::placeholder,
+.wandlight-new-lore-field .wandlight-lore-editor-textarea::placeholder {
+    color: rgba(241, 234, 216, 0.38);
+    font-style: italic;
+}
+
 .wandlight-new-lore-meta-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

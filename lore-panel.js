@@ -6272,10 +6272,10 @@ function openNewLoreDialog() {
     form.className = 'wandlight-new-lore-form';
     shell.appendChild(form);
 
-    const titleInput = createNewLoreInput(form, 'Title', 'Short descriptive title', '', false);
-    const factInput = createNewLoreInput(form, 'Lore Text', 'The durable fact, rule, constraint, or state to remember', '', true);
-    const injectionInput = createNewLoreInput(form, 'Injection Override', 'Optional model-facing phrasing; blank uses Lore Text', '', true);
-    const notesInput = createNewLoreInput(form, 'Notes', 'Optional private notes for the user', '', true);
+    const titleInput = createNewLoreInput(form, 'Title', 'Short descriptive title', '', false, 'Conundrum Confidicus opening hazard');
+    const factInput = createNewLoreInput(form, 'Lore Text', 'The durable fact, rule, constraint, or state to remember', '', true, 'The Conundrum Confidicus is an ancient book that whispers whenever it is opened and chills the room around it.');
+    const injectionInput = createNewLoreInput(form, 'Injection Override', 'Optional model-facing phrasing; blank uses Lore Text', '', true, 'When this book opens, describe faint whispers and an unnatural chill before any spell effect is revealed.');
+    const notesInput = createNewLoreInput(form, 'Notes', 'Optional private notes for the user', '', true, 'Introduced during the Restricted Section scene. Keep as AU unless later tied to canon.');
 
     const metaGrid = document.createElement('div');
     metaGrid.className = 'wandlight-new-lore-meta-grid';
@@ -6286,7 +6286,7 @@ function openNewLoreDialog() {
     const prioritySelect = createNewLoreSelect(metaGrid, 'Priority', LORE_PRIORITY_VALUES.map(String), '50');
     const truthSelect = createNewLoreSelect(metaGrid, 'Truth', getLoreRegistryValues('truthStatuses', ['true', 'rumor', 'contested', 'hidden']), 'true');
     const revealSelect = createNewLoreSelect(metaGrid, 'Reveal', getLoreRegistryValues('revealPolicies', ['private', 'public', 'do_not_reveal']), 'private');
-    const tagsInput = createNewLoreInput(form, 'Tags', 'Comma-separated tags', '', false);
+    const tagsInput = createNewLoreInput(form, 'Tags', 'Comma-separated tags', '', false, 'restricted-section, cursed-book, whispers');
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
@@ -6361,7 +6361,7 @@ function openNewLoreDialog() {
     requestAnimationFrame(() => titleInput.focus());
 }
 
-function createNewLoreInput(container, labelText, tooltip, value = '', multiline = false) {
+function createNewLoreInput(container, labelText, tooltip, value = '', multiline = false, placeholder = '') {
     const label = document.createElement('label');
     label.className = 'wandlight-new-lore-field';
     const span = document.createElement('span');
@@ -6372,6 +6372,7 @@ function createNewLoreInput(container, labelText, tooltip, value = '', multiline
     input.className = multiline ? 'wandlight-lore-editor-textarea' : 'wandlight-lore-editor-input';
     if (!multiline) input.type = 'text';
     input.value = value || '';
+    input.placeholder = placeholder || '';
     label.appendChild(input);
     container.appendChild(label);
     return input;

@@ -534,7 +534,7 @@ export function saveStateWithSnapshot(state, maxSnapshots) {
 
 // ── Storage safety / recovery helpers ─────────────────────────────────────────
 
-const MAX_PENDING_LORE_ENTRIES = 300;
+export const MAX_PENDING_LORE_ENTRIES = 300;
 const MAX_ACCEPTED_LORE_ENTRIES_FOR_AUTOSANITIZE = 0; // 0 = uncapped; never drop accepted lore during storage sanitization
 
 
@@ -845,8 +845,32 @@ function compactLoreEntryForStorage(entry) {
     };
 }
 
+function compactCompressionStatusForStorage(status) {
+    if (!status || typeof status !== 'object' || Array.isArray(status)) return status;
+    const out = { ...status };
+    const signature = typeof out.lastSignature === 'string' ? out.lastSignature : '';
+    if (signature.length > 1200 || signature.includes('"directText"')) {
+        out.lastSignature = '';
+    }
+    return out;
+}
+
+function sanitizeCompressionStatusesForStorage(state) {
+    if (!state || typeof state !== 'object') return state;
+    state.continuityCompressionStatus = compactCompressionStatusForStorage(state.continuityCompressionStatus || {});
+    state.loreCompressionStatus = compactCompressionStatusForStorage(state.loreCompressionStatus || {});
+    if (state.loreCompressionStatusByRelevance && typeof state.loreCompressionStatusByRelevance === 'object' && !Array.isArray(state.loreCompressionStatusByRelevance)) {
+        state.loreCompressionStatusByRelevance = Object.fromEntries(
+            Object.entries(state.loreCompressionStatusByRelevance)
+                .map(([tier, status]) => [tier, compactCompressionStatusForStorage(status || {})])
+        );
+    }
+    return state;
+}
+
 function sanitizeLoreArraysForStorage(state) {
     if (!state || typeof state !== 'object') return state;
+    sanitizeCompressionStatusesForStorage(state);
 
     if (Array.isArray(state.pendingLoreEntries)) {
         state.pendingLoreEntries = state.pendingLoreEntries

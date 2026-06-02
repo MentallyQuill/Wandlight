@@ -1,95 +1,38 @@
 /**
- * ui.js — Wandlight
- * Renders the settings panel and lightweight provider/preview UI.
+ * ui.js - Wandlight
+ * Renders the settings panel and model provider UI.
  *
- * Exports: renderSettingsPanel, renderLoreContextPreview, renderLoreMatrixPreview
+ * Exports: renderSettingsPanel
  * Imported by: index.js
  */
 
-import { getState, saveState, pushStateSnapshot, getSettings, saveSettings } from './state-manager.js';
-import {
-    normalizeLoreMatrix,
-    normalizeLoreContext,
-    getActiveLoreEntries,
-} from './lore-matrix.js';
+import { DEFAULT_SETTINGS } from './constants.js';
+import { getSettings, saveSettings } from './state-manager.js';
 import { storeNamedApiKey, deleteNamedApiKey } from './secure-keyring.js';
-import { loadApiKey, fetchLoreModels, testLoreConnection, validateLoreProviderConfiguration, getAvailableConnectionProfiles, getAvailableCompletionPresets } from './lore-llm-client.js';
+import {
+    clearCachedApiKey,
+    loadApiKey,
+    fetchLoreModels,
+    testLoreConnection,
+    validateLoreProviderConfigurationAsync,
+    getAvailableConnectionProfiles,
+    getAvailableCompletionPresets,
+} from './lore-llm-client.js';
 
 /**
  * Renders the settings panel HTML into the container.
- * Since settings.html is loaded via renderExtensionTemplateAsync(),
- * this function populates dynamic values, wires range displays,
- * and initializes the memo preview.
+ * Since settings.html is loaded via renderExtensionTemplateAsync(), this
+ * function populates dynamic provider values and wires API/model controls.
  *
  * @param {HTMLElement} container - The settings panel div
  */
 export function renderSettingsPanel(container) {
     if (!container) return;
-
-    // Wire range-input live value displays
-    wireRangeDisplay('wandlight_extraction_interval', 'wandlight_extraction_interval_value');
-    wireRangeDisplay('wandlight_max_lore_entries_in_memo', 'wandlight_max_lore_entries_in_memo_value');
-    wireRangeDisplay('wandlight_max_lore_entries_in_matrix', 'wandlight_max_lore_entries_in_matrix_value');
-
-    // Wire the lore-matrix JSON editor
-    wireLoreMatrixEditor();
-
-    // Wire the lore model provider panel
     setupLoreProviderPanel(container);
-
-
 }
 
-/**
- * Renders the lore context preview from current state.
- */
-export function renderLoreContextPreview() {
-    const preview = document.getElementById('wandlight_lore_context_preview');
-    if (!preview) return;
-
-    try {
-        const state = getState();
-        if (!state) {
-            preview.textContent = '(No continuity state loaded)';
-            return;
-        }
-        const ctx = normalizeLoreContext(state.loreContext || {});
-        const parts = [];
-        if (ctx.sceneDate) parts.push('Scene Date: ' + ctx.sceneDate);
-        if (ctx.subjectiveDate) parts.push('Subjective Date: ' + ctx.subjectiveDate);
-        if (ctx.canonBoundary) parts.push('Canon Boundary: ' + ctx.canonBoundary);
-        if (ctx.branchId && ctx.branchId !== 'main') parts.push('Branch: ' + ctx.branchId);
-        if (ctx.timeTravelMode && ctx.timeTravelMode !== 'none') parts.push('Time Travel: ' + ctx.timeTravelMode);
-        if (ctx.lastDetectedAt) {
-            const date = new Date(ctx.lastDetectedAt);
-            parts.push('Last Detected: ' + date.toLocaleString());
-        }
-        if (ctx.lastGenerationSummary) parts.push('Last Generation: ' + ctx.lastGenerationSummary);
-
-        if (parts.length > 0) {
-            preview.textContent = parts.join('\n');
-        } else {
-            preview.textContent = 'Context pending detection';
-        }
-    } catch (e) {
-        preview.textContent = '(Error: ' + e.message + ')';
-    }
-}
-
-/**
- * Renders the lore matrix preview from current state.
- */
-// ── Model Provider Role setup ──────────────────────────────────────────────────
-
-/**
- * Wires the model provider role UI controls.
- * Reads/stores API keys via secure-keyring, populates connection profile dropdowns,
- * and saves provider role settings.
- * @param {HTMLElement} container - The settings panel container
- */
 function setupLoreProviderPanel(container) {
     if (!container) return;
-
     setupProviderControls(container, 'continuity', 'Utility');
     setupProviderControls(container, 'lore', 'Reasoning');
 }
@@ -127,6 +70,7 @@ function setupProviderControls(container, kind, label) {
     const openaiKeyStatus = container.querySelector(`#wandlight_${prefix}_openai_key_status`);
     const fetchModelsBtn = container.querySelector(`#wandlight_${prefix}_fetch_models`);
     const testConnectionBtn = container.querySelector(`#wandlight_${prefix}_test_connection`);
+    const resetDefaultsBtn = container.querySelector(`#wandlight_${prefix}_provider_reset_defaults`);
     const connectionStatus = container.querySelector(`#wandlight_${prefix}_connection_status`);
     const temperatureInput = container.querySelector(`#wandlight_${prefix}_temperature`);
     const topPInput = container.querySelector(`#wandlight_${prefix}_top_p`);
@@ -140,6 +84,16 @@ function setupProviderControls(container, kind, label) {
     const temperatureKey = `${prefix}Temperature`;
     const topPKey = `${prefix}TopP`;
     const maxTokensKey = `${prefix}MaxTokens`;
+    const providerSettingKeys = [
+        providerKey,
+        profileKey,
+        presetKey,
+        baseUrlKey,
+        modelKey,
+        temperatureKey,
+        topPKey,
+        maxTokensKey,
+    ];
 
     if (providerSelect) providerSelect.value = settings[providerKey] || 'st';
     if (openaiBaseUrl) openaiBaseUrl.value = settings[baseUrlKey] || '';
@@ -168,7 +122,7 @@ function setupProviderControls(container, kind, label) {
     function populateProfiles() {
         if (profileIdSelect) {
             const current = profileIdSelect.value || getSettings()[profileKey] || '';
-            profileIdSelect.innerHTML = '<option value="">— Select Profile —</option>';
+            profileIdSelect.innerHTML = '<option value="">Select Profile</option>';
             const profiles = getAvailableConnectionProfiles();
             if (!profiles.length) {
                 const opt = document.createElement('option');
@@ -189,7 +143,7 @@ function setupProviderControls(container, kind, label) {
 
         if (completionPresetSelect) {
             const current = completionPresetSelect.value || getSettings()[presetKey] || '';
-            completionPresetSelect.innerHTML = '<option value="">— Default —</option>';
+            completionPresetSelect.innerHTML = '<option value="">Default</option>';
             const presets = getAvailableCompletionPresets();
             if (!presets.length) {
                 const opt = document.createElement('option');
@@ -307,6 +261,33 @@ function setupProviderControls(container, kind, label) {
     wireNumericInput(topPInput, topPKey, 0.98, 0, 1);
     wireNumericInput(maxTokensInput, maxTokensKey, 8192, 64, 16384, true);
 
+    if (resetDefaultsBtn) {
+        resetDefaultsBtn.addEventListener('click', () => {
+            const next = getSettings();
+            for (const key of providerSettingKeys) {
+                if (Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, key)) {
+                    next[key] = DEFAULT_SETTINGS[key];
+                }
+            }
+            saveLoreProviderSettings(next);
+            if (providerSelect) providerSelect.value = next[providerKey] || 'st';
+            if (profileIdSelect) profileIdSelect.value = next[profileKey] || '';
+            if (completionPresetSelect) completionPresetSelect.value = next[presetKey] || '';
+            if (openaiBaseUrl) openaiBaseUrl.value = next[baseUrlKey] || '';
+            if (openaiModelSearch) openaiModelSearch.value = next[modelKey] || '';
+            if (temperatureInput) temperatureInput.value = String(next[temperatureKey] ?? 0.7);
+            if (topPInput) topPInput.value = String(next[topPKey] ?? 0.98);
+            if (maxTokensInput) maxTokensInput.value = String(next[maxTokensKey] ?? 8192);
+            populateProfiles();
+            if (profileIdSelect) profileIdSelect.value = next[profileKey] || '';
+            if (completionPresetSelect) completionPresetSelect.value = next[presetKey] || '';
+            renderModelOptions(next[modelKey] || '');
+            refreshProviderRows();
+            if (connectionStatus) connectionStatus.textContent = '';
+            if (typeof toastr !== 'undefined') toastr.info(`${label} provider settings reset to defaults. Stored API keys were preserved.`);
+        });
+    }
+
     async function refreshKeyStatus() {
         if (!openaiKeyStatus) return;
         try {
@@ -333,6 +314,7 @@ function setupProviderControls(container, kind, label) {
             }
             try {
                 await storeNamedApiKey(secretNameForProvider(kind), raw);
+                clearCachedApiKey(kind);
                 openaiKey.value = '';
                 if (typeof toastr !== 'undefined') toastr.success(`${label} API key encrypted and stored.`);
                 await refreshKeyStatus();
@@ -346,6 +328,7 @@ function setupProviderControls(container, kind, label) {
         openaiKeyClearBtn.addEventListener('click', async () => {
             try {
                 await deleteNamedApiKey(secretNameForProvider(kind));
+                clearCachedApiKey(kind);
                 if (openaiKey) openaiKey.value = '';
                 if (typeof toastr !== 'undefined') toastr.success(`${label} API key removed.`);
                 await refreshKeyStatus();
@@ -383,7 +366,7 @@ function setupProviderControls(container, kind, label) {
                 connectionStatus.style.color = '';
             }
             try {
-                const validation = validateLoreProviderConfiguration(kind);
+                const validation = await validateLoreProviderConfigurationAsync(kind);
                 if (!validation.ok) throw new Error(validation.message);
                 const result = await testLoreConnection(kind);
                 if (connectionStatus) {
@@ -409,229 +392,10 @@ function setupProviderControls(container, kind, label) {
     refreshKeyStatus();
 }
 
-/**
- * Helper: saves model provider role settings via the settings manager.
- * @param {Object} settings - Current settings object
- */
 function saveLoreProviderSettings(settings) {
     try {
         saveSettings(settings);
     } catch (e) {
         console.warn('[Wandlight] Failed to save model provider role settings:', e);
     }
-}
-export function renderLoreMatrixPreview() {
-    const preview = document.getElementById('wandlight_lore_matrix_preview');
-    const pendingPreview = document.getElementById('wandlight_pending_lore_preview');
-    const countEl = document.getElementById('wandlight_lore_count');
-    const staleBadge = document.getElementById('wandlight_lore_stale_badge');
-    const batchStatus = document.getElementById('wandlight_lore_batch_status');
-    const pendingCountEl = document.getElementById('wandlight_pending_lore_count');
-    if (!preview) return;
-
-    try {
-        const state = getState();
-        if (!state) {
-            preview.textContent = '(No continuity state loaded)';
-            if (countEl) countEl.textContent = '0';
-            if (staleBadge) staleBadge.style.display = 'none';
-            if (batchStatus) batchStatus.textContent = '';
-            if (pendingCountEl) pendingCountEl.textContent = '0';
-            return;
-        }
-
-        const entries = normalizeLoreMatrix(state.loreMatrix || []);
-        const pendingEntries = normalizeLoreMatrix(state.pendingLoreEntries || []);
-        if (countEl) countEl.textContent = String(entries.length);
-        if (pendingCountEl) pendingCountEl.textContent = String(pendingEntries.length);
-
-        // ── Stale badge: show when pending lore was generated before a state change ──
-        if (staleBadge) {
-            const meta = state.pendingLoreMeta || {};
-            if (pendingEntries.length > 0 && meta.status === 'stale') {
-                staleBadge.style.display = '';
-                staleBadge.textContent = '\u26A0\uFE0F Stale — state has changed since these were generated';
-            } else {
-                staleBadge.style.display = 'none';
-            }
-        }
-
-        // ── Batch status: show when the pending batch was generated and its size ──
-        if (batchStatus) {
-            const meta = state.pendingLoreMeta || {};
-            if (pendingEntries.length > 0 && meta.createdAt) {
-                const generatedDate = new Date(meta.createdAt);
-                const timeStr = generatedDate.toLocaleString();
-                const parts = [`Generated ${timeStr}`];
-                if (meta.validEntryCount !== undefined) {
-                    parts.push(`${meta.validEntryCount} valid`);
-                }
-                if (meta.rawEntryCount !== undefined) {
-                    parts.push(`${meta.rawEntryCount} raw`);
-                }
-                if (meta.droppedEntryCount > 0) {
-                    parts.push(`${meta.droppedEntryCount} dropped`);
-                }
-                batchStatus.textContent = parts.join(' • ');
-            } else if (pendingEntries.length > 0) {
-                batchStatus.textContent = `${pendingEntries.length} entries pending review`;
-            } else {
-                batchStatus.textContent = '';
-            }
-        }
-
-        if (pendingPreview) {
-            if (pendingEntries.length === 0) {
-                pendingPreview.textContent = '(No pending lore entries)';
-            } else {
-                pendingPreview.textContent = pendingEntries.map((entry, i) => {
-                    const detail = entry.fact ? ` — ${entry.fact}` : '';
-                    return `${i + 1}. <${entry.category}> ${entry.title} [${entry.canonStatus}]${detail}`;
-                }).join('\n');
-            }
-        }
-
-        if (entries.length === 0) {
-            preview.textContent = '(No accepted lore entries — generate and accept entries to get started)';
-            return;
-        }
-
-        const activeEntries = getActiveLoreEntries(state, 999);
-        const activeIds = new Set(activeEntries.map(e => e.id));
-        const lines = [];
-
-        entries.forEach((entry, i) => {
-            const isActive = activeIds.has(entry.id);
-            const prefix = isActive ? '\u25CF' : '\u25CB'; // ● active, ○ inactive
-            const statusIcons = {
-                pinned: '\uD83D\uDCCC',
-                archived: '\uD83D\uDCC1',
-                disabled: '\u2B55',
-            };
-            const statusIcon = statusIcons[entry.status] || '';
-
-            const line = [
-                `${i + 1}. ${prefix} ${statusIcon}`,
-                `<${entry.category}>`,
-                `**${entry.title}**`,
-                `[${entry.canonStatus}]`,
-                entry.truthStatus !== 'true' ? `truth:${entry.truthStatus}` : '',
-                entry.revealPolicy !== 'private' ? `reveal:${entry.revealPolicy}` : '',
-            ].filter(Boolean).join(' ');
-            lines.push(line);
-        });
-
-        preview.textContent = lines.join('\n');
-    } catch (e) {
-        preview.textContent = '(Error: ' + e.message + ')';
-    }
-}
-
-// ── Lore Matrix JSON Editor ────────────────────────────────────────────────────
-
-/**
- * Populates the lore-matrix JSON editor textarea with the accepted matrix.
- * @param {Object} state - WandlightState
- */
-function populateLoreMatrixEditor(state) {
-    const textarea = document.getElementById('wandlight_lore_matrix_json');
-    if (!textarea) return;
-    const entries = (state && state.loreMatrix) ? state.loreMatrix : [];
-    textarea.value = JSON.stringify(entries, null, 2);
-}
-
-/**
- * Hides the lore-matrix JSON editor and the save row.
- */
-function hideLoreMatrixEditor() {
-    const textarea = document.getElementById('wandlight_lore_matrix_json');
-    const saveRow = document.getElementById('wandlight_lore_matrix_save_row');
-    if (textarea) textarea.style.display = 'none';
-    if (saveRow) saveRow.style.display = 'none';
-}
-
-/**
- * Wires the lore-matrix JSON editor toggle and save buttons.
- * Uses the module-level imports getState(), saveState(), getSettings().
- */
-function wireLoreMatrixEditor() {
-    const toggleBtn = document.getElementById('wandlight_lore_matrix_toggle_editor');
-    const textarea = document.getElementById('wandlight_lore_matrix_json');
-    const saveRow = document.getElementById('wandlight_lore_matrix_save_row');
-    const saveBtn = document.getElementById('wandlight_lore_matrix_save');
-
-    if (!toggleBtn || !textarea || !saveRow || !saveBtn) return;
-
-    toggleBtn.addEventListener('click', () => {
-        const isVisible = textarea.style.display !== 'none';
-        if (isVisible) {
-            textarea.style.display = 'none';
-            saveRow.style.display = 'none';
-        } else {
-            populateLoreMatrixEditor(getState());
-            textarea.style.display = '';
-            saveRow.style.display = '';
-        }
-    });
-
-    saveBtn.addEventListener('click', () => {
-        try {
-            const raw = textarea.value.trim();
-            if (!raw) {
-                if (typeof toastr !== 'undefined') toastr.warning('Lore matrix JSON is empty. Nothing saved.');
-                return;
-            }
-            const parsed = JSON.parse(raw);
-            if (!Array.isArray(parsed)) {
-                if (typeof toastr !== 'undefined') toastr.error('Lore matrix must be a JSON array of entries.');
-                return;
-            }
-
-            const state = getState();
-            // Snapshot before modifying so the user can undo
-            pushStateSnapshot(state, 'Edit lore matrix via JSON editor', getSettings().maxSnapshots);
-
-            // Normalize and mark every entry as user-edited + locked so model-generated
-            // entries with the same id cannot overwrite the user's story-specific edits.
-            const normalized = normalizeLoreMatrix(parsed).map(entry => ({
-                ...entry,
-                source: entry.source === 'model-generated' ? 'user' : entry.source,
-                userEdited: true,
-                locked: true,
-            }));
-            // Accepted lore is intentionally uncapped; the runtime Lore tab pages the UI.
-            state.loreMatrix = normalized;
-
-            saveState(state);
-            if (typeof toastr !== 'undefined') toastr.success('Lore matrix saved (' + normalized.length + ' entries).');
-
-            hideLoreMatrixEditor();
-            // Refresh the main state panel and lore previews
-            if (typeof globalThis._wandlightRefreshUI === 'function') {
-                globalThis._wandlightRefreshUI();
-            }
-            renderLoreMatrixPreview();
-        } catch (e) {
-            if (typeof toastr !== 'undefined') toastr.error('Invalid JSON: ' + e.message);
-        }
-    });
-}
-
-// ── Range helper ────────────────────────────────────────────────────────────────
-
-/**
- * Wires a range input to display its live value next to it.
- * @param {string} inputId - ID of the range input
- * @param {string} displayId - ID of the value display span
- */
-function wireRangeDisplay(inputId, displayId) {
-    const input = document.getElementById(inputId);
-    const display = document.getElementById(displayId);
-    if (!input || !display) return;
-
-    const updateDisplay = () => {
-        display.textContent = input.value;
-    };
-    input.addEventListener('input', updateDisplay);
-    updateDisplay();
 }

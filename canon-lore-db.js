@@ -13,7 +13,7 @@
  */
 
 import { LOG_PREFIX } from './constants.js';
-import { getState, getSettings, saveState, pushStateSnapshot } from './state-manager.js';
+import { getState, getSettings, saveState, pushStateSnapshot, MAX_PENDING_LORE_ENTRIES } from './state-manager.js';
 import { normalizeLoreMatrix, buildLoreGenerationKey } from './lore-matrix.js';
 import { preprocessPendingLoreEntries } from './pending-lore-preprocessor.js';
 import { normalizeLorePurpose, computeSpecificityScore, isSpecificLorePurpose } from './lore-relevance.js';
@@ -1214,7 +1214,7 @@ export async function addCanonLorePreviewEntriesToPending(entryIds = [], context
     }
 
     const pending = Array.isArray(currentState.pendingLoreEntries) ? currentState.pendingLoreEntries : [];
-    currentState.pendingLoreEntries = [...pending, ...entries].slice(-250);
+    currentState.pendingLoreEntries = [...pending, ...entries].slice(-MAX_PENDING_LORE_ENTRIES);
     currentState.pendingLoreMeta = {
         id: `canon-preview-${Date.now()}`,
         contextKey: buildLoreGenerationKey(currentState),
@@ -1299,7 +1299,7 @@ export async function proposeCanonLoreForContext(context = null, options = {}) {
 
     const pending = Array.isArray(state.pendingLoreEntries) ? state.pendingLoreEntries : [];
     // Canon DB proposals are preprocessed into relevance tiers before review; saveState() runs final bounded sanitization.
-    state.pendingLoreEntries = [...pending, ...entries].slice(-250);
+    state.pendingLoreEntries = [...pending, ...entries].slice(-MAX_PENDING_LORE_ENTRIES);
     state.pendingLoreMeta = {
         id: `canon-db-${Date.now()}`,
         contextKey: buildLoreGenerationKey(state),

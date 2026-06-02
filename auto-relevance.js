@@ -15,6 +15,7 @@ import { sendLoreRequest, validateLoreProviderConfiguration } from './lore-llm-c
 import { captureLoreTimelineState, recordLoreTimelineEvent } from './lore-timeline.js';
 
 let turnCounter = 0;
+let autoRelevanceRunning = false;
 
 function stripJsonFences(text) {
     const raw = String(text || '').trim();
@@ -293,6 +294,18 @@ export function rejectAutoRelevanceSuggestions(ids = null) {
 }
 
 export async function runAutoRelevance(options = {}) {
+    if (autoRelevanceRunning) {
+        return { status: 'skipped_running' };
+    }
+    autoRelevanceRunning = true;
+    try {
+        return await runAutoRelevanceInternal(options);
+    } finally {
+        autoRelevanceRunning = false;
+    }
+}
+
+async function runAutoRelevanceInternal(options = {}) {
     const settings = getSettings();
     const mode = options.mode || settings.autoRelevanceMode || 'suggest';
     if (!options.force && (settings.autoRelevanceEnabled === false || mode === 'off')) {
@@ -405,6 +418,7 @@ export function onGenerationEndedAutoRelevance() {
     turnCounter += 1;
     const every = Math.max(1, Number(settings.autoRelevanceEveryTurns) || 5);
     if (turnCounter < every) return { status: 'waiting', turnCounter, every };
+    if (autoRelevanceRunning) return { status: 'skipped_running' };
     turnCounter = 0;
     runAutoRelevance().catch(e => console.error('[Wandlight Auto-Relevance] failed:', e));
     return { status: 'scheduled' };

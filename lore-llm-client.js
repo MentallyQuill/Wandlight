@@ -264,9 +264,7 @@ function getCachedApiKey(cfg) {
     return cachedKeys.get(cfg.secretName) || '';
 }
 
-export function validateLoreProviderConfiguration(kind = 'lore') {
-    const cfg = getProviderSettings(kind);
-
+function validateProviderShape(cfg) {
     try {
         if (cfg.provider === 'openai_compatible') {
             if (!String(cfg.openAIBaseUrl || '').trim()) {
@@ -274,9 +272,6 @@ export function validateLoreProviderConfiguration(kind = 'lore') {
             }
             if (!String(cfg.openAIModel || '').trim()) {
                 return { ok: false, provider: cfg.provider, kind: cfg.kind, message: `${cfg.title} OpenAI-compatible model is missing. Type or select a model ID.` };
-            }
-            if (!getCachedApiKey(cfg) && !cfg.openAIKeySet) {
-                return { ok: false, provider: cfg.provider, kind: cfg.kind, message: `${cfg.title} OpenAI-compatible API key is missing. Store an API key first.` };
             }
             return { ok: true, provider: cfg.provider, kind: cfg.kind };
         }
@@ -306,8 +301,36 @@ export function validateLoreProviderConfiguration(kind = 'lore') {
     }
 }
 
-export async function testLoreConnection(kind = 'lore') {
+export function validateLoreProviderConfiguration(kind = 'lore') {
+    const cfg = getProviderSettings(kind);
+    const shape = validateProviderShape(cfg);
+    if (!shape.ok) return shape;
+
+    if (cfg.provider === 'openai_compatible' && !getCachedApiKey(cfg) && !cfg.openAIKeySet) {
+        return { ok: false, provider: cfg.provider, kind: cfg.kind, message: `${cfg.title} OpenAI-compatible API key is missing. Store an API key first.` };
+    }
+    return shape;
+}
+
+export async function validateLoreProviderConfigurationAsync(kind = 'lore') {
+    const cfg = getProviderSettings(kind);
     const validation = validateLoreProviderConfiguration(kind);
+    if (!validation.ok || cfg.provider !== 'openai_compatible') return validation;
+
+    const key = await getApiKey(cfg);
+    if (!key) {
+        return {
+            ok: false,
+            provider: cfg.provider,
+            kind: cfg.kind,
+            message: `${cfg.title} OpenAI-compatible API key is stored but could not be read. Store the key again for this session.`,
+        };
+    }
+    return validation;
+}
+
+export async function testLoreConnection(kind = 'lore') {
+    const validation = await validateLoreProviderConfigurationAsync(kind);
     if (!validation.ok) throw new Error(validation.message);
 
     const response = await sendLoreRequest(
@@ -324,7 +347,8 @@ export async function testLoreConnection(kind = 'lore') {
 async function buildOpenAIHeaders(cfg) {
     const headers = { 'Content-Type': 'application/json' };
     const apiKey = await getApiKey(cfg);
-    if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+    if (!apiKey) throw new Error(`${cfg.title} OpenAI-compatible API key is unavailable. Store the key again for this session.`);
+    headers.Authorization = `Bearer ${apiKey}`;
     return headers;
 }
 
@@ -532,7 +556,11 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
 
 export async function fetchLoreModels(kind = 'lore') {
     const cfg = getProviderSettings(kind);
-    if (cfg.provider === 'openai_compatible') return await fetchOpenAICompatibleModels(cfg);
+    if (cfg.provider === 'openai_compatible') {
+        const validation = await validateLoreProviderConfigurationAsync(cfg.kind);
+        if (!validation.ok) throw new Error(validation.message);
+        return await fetchOpenAICompatibleModels(cfg);
+    }
     if (cfg.provider === 'profile') return fetchProfileModels(cfg);
     return fetchSTModel();
 }
@@ -568,7 +596,7 @@ function fetchSTModel() {
 
 export async function sendLoreRequest(systemPrompt, userPrompt, options = {}) {
     const cfg = getProviderSettings(options.providerKind || 'lore');
-    const validation = validateLoreProviderConfiguration(cfg.kind);
+    const validation = await validateLoreProviderConfigurationAsync(cfg.kind);
     if (!validation.ok) throw new Error(validation.message);
 
     if (cfg.provider === 'openai_compatible') return await sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options);

@@ -982,7 +982,7 @@ ${safeJson(stateProjection)}
 
 Relevant configured section guidance:
 ${enabledSections.map(section => {
-    const text = getSectionPromptText(settings, section);
+    const text = getSectionPromptText(settings, section, stateProjection);
     return text ? `- ${section}: ${text}` : '';
 }).filter(Boolean).join('\n') || '(none)'}`;
 }

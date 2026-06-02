@@ -2618,6 +2618,18 @@
     border-color: rgba(155, 176, 196, 0.72) !important;
 }
 
+.wandlight-settings-reset-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 6px 0;
+}
+
+.wandlight-settings-reset-row .wandlight-small-button {
+    margin: 0;
+    padding: 2px 8px;
+    font-size: 0.76em;
+}
+
 /* Final chip compaction: outer chip is ~20px shorter than the old oversized rows. */
 .wandlight-lore-meta-select-wrap {
     height: 14px !important;

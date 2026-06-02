@@ -1559,6 +1559,12 @@ export async function runBulkLoreGeneration(options = {}) {
 
         const plan = buildLoreBulkScanPlan(settings, state);
         if (!plan.sourceMessageCount || !plan.chunks.length) {
+            recordLoreAttempt(contextKey, {
+                status: 'empty_range',
+                lastSource: source,
+                generationMode: automationSafe ? 'bulk-incremental' : 'bulk-bootstrap',
+                lastError: '',
+            }, { increment: false, syncPrompt: false });
             progress?.('No chat messages found in the configured bulk scan range.', 100);
             return { status: 'empty_range', plan };
         }

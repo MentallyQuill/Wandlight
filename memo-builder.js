@@ -61,6 +61,16 @@ function getCompressionTemplate(settings, kind) {
     return String(settings?.[key] || '');
 }
 
+function stableStringHash(value) {
+    const text = typeof value === 'string' ? value : JSON.stringify(value ?? '');
+    let hash = 2166136261;
+    for (let i = 0; i < text.length; i += 1) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(36);
+}
+
 function buildLoreDirectMemoForTier(state, tier = 'normal', settingsOverride = {}) {
     const normalizedTier = normalizeLoreRelevance(tier);
     return buildLoreDirectMemo(state, {
@@ -82,13 +92,16 @@ export function getCompressionSourceSignature(state, kind = 'lore', directTextOv
             : parsed.tier
                 ? buildLoreDirectMemoForTier(state, parsed.tier, settings)
                 : buildLoreDirectMemo(state, { ...settings, loreInjectionMode: 'direct' }));
+    const compressionTemplate = getCompressionTemplate(settings, kind);
     return JSON.stringify({
-        signatureVersion: 3,
+        signatureVersion: 4,
         kind: normalizedKind,
         compressionLevel: getCompressionLevel(settings, kind),
-        compressionTemplate: getCompressionTemplate(settings, kind),
+        compressionTemplateHash: stableStringHash(compressionTemplate),
+        compressionTemplateCharacters: compressionTemplate.length,
         pinnedLoreIds: parsed.base === 'lore' ? (state?.loreSelection?.pinnedIds || []).join('|') : '',
-        directText,
+        directTextHash: stableStringHash(directText),
+        directTextCharacters: directText.length,
     });
 }
 

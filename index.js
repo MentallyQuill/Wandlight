@@ -20,11 +20,7 @@ import {
 import { buildMemo } from './memo-builder.js';
 import { installInterceptor, syncPromptInjection, clearExtensionPrompts } from './prompt-injector.js';
 import { onExtractionTriggered, onGenerationEndedAutomation, resetExtractionCounter } from './extractor.js';
-import {
-    renderSettingsPanel,
-    renderLoreContextPreview,
-    renderLoreMatrixPreview,
-} from './ui.js';
+import { renderSettingsPanel } from './ui.js';
 import {
     runLoreContextDetection,
     runStoryLoreScan,
@@ -344,8 +340,6 @@ async function mountSettingsPanel(ctx) {
             // is not yet exposed by exposeGlobalBridge() at this point.
             try {
                 refreshStatePanel();
-                renderLoreContextPreview();
-                renderLoreMatrixPreview();
             } catch (e) {
                 // Silently ignore — panels might not exist yet
             }
@@ -495,20 +489,10 @@ function exposeGlobalBridge() {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /**
- * Refreshes runtime and lightweight settings preview surfaces. Called from
+ * Refreshes runtime surfaces. Called from
  * buttons, events, and via globalThis._wandlightRefreshUI().
  */
 function refreshStatePanel() {
-    // The former settings-panel state/debug viewer has been removed. Keep this
-    // bridge as the shared UI refresh hook for runtime drawers and lightweight
-    // settings previews that may be present in future templates.
-    try {
-        renderLoreContextPreview();
-        renderLoreMatrixPreview();
-    } catch (_) {
-        // Preview panels may not exist in the settings DOM.
-    }
-
     try {
         refreshLorePanel();
     } catch (_) {

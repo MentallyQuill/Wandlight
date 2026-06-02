@@ -63,6 +63,106 @@ const DEFAULT_COMPACT_RAIL_HEIGHT_ESTIMATE = 420;
 const DEFAULT_EXPANDED_RAIL_HEIGHT_ESTIMATE = 420;
 const LAYOUT_VERSION = 2;
 const WANDLIGHT_PRESET_API_ID = 'openai';
+const STORED_API_KEY_SETTING_PREFIXES = Object.freeze(['loreOpenAI', 'continuityOpenAI']);
+const STORED_API_KEY_SETTING_SUFFIXES = Object.freeze(['Encrypted', 'Salt', 'Iv', 'KeyEncrypted', 'KeySalt', 'KeyIv', 'KeySet']);
+const CONTEXT_DETECTION_SETTING_KEYS = Object.freeze([
+    'contextDetectionMode',
+    'contextDetectionAutoInterval',
+    'contextHeaderDetectionEnabled',
+    'contextSourceMessageCount',
+]);
+const STORY_LORE_SCAN_SCOPE_SETTING_KEYS = Object.freeze([
+    'loreBulkScanMode',
+    'loreBulkRangeStart',
+    'loreBulkRangeEnd',
+    'loreSourceMessageCount',
+]);
+const STORY_LORE_SCAN_PERFORMANCE_SETTING_KEYS = Object.freeze([
+    'loreBulkChunkSize',
+    'loreBulkOverlap',
+    'loreBulkConcurrency',
+    'loreBulkRetryAttempts',
+    'loreBulkFullCheckpointEveryChunks',
+    'loreBulkConsolidationChunkWindow',
+]);
+const STORY_LORE_SCAN_QUALITY_SETTING_KEYS = Object.freeze([
+    'loreGenerationBreadthMode',
+    'loreBulkFactsPerChunk',
+    'loreBootstrapTargetEntries',
+    'loreIncrementalTargetEntries',
+    'loreTagCount',
+    'loreReplacementGuard',
+    'loreDuplicateGuard',
+    'loreSimilarityRouting',
+    'loreStrictQualityGate',
+    'loreBulkRescanMode',
+]);
+const STORY_LORE_AUTOMATION_SETTING_KEYS = Object.freeze([
+    'loreGenerationMode',
+    'loreGenerationAutoInterval',
+    'loreGenerationAutoMinTurns',
+    'loreGenerationAutoWordThreshold',
+]);
+const CONTINUITY_SCAN_SCOPE_SETTING_KEYS = Object.freeze([
+    'continuityScanMode',
+    'continuityScanRangeStart',
+    'continuityScanRangeEnd',
+    'continuitySourceMessageCount',
+]);
+const CONTINUITY_SCAN_PERFORMANCE_SETTING_KEYS = Object.freeze([
+    'continuityScanStrategy',
+    'continuityScanFastThreshold',
+    'continuityScanHybridThreshold',
+    'continuityFastMaxTokens',
+    'continuityHybridMaxTokens',
+    'continuityScanChunkSize',
+    'continuityScanOverlap',
+    'continuityScanConcurrency',
+    'continuityScanReducerConcurrency',
+    'continuityScanRetryAttempts',
+    'continuityScanObservationsPerChunk',
+    'continuityObservationMaxTokens',
+    'continuityReducerMaxTokens',
+    'continuityScanFullCheckpointEveryChunks',
+    'continuityScanRescanMode',
+]);
+const CONTINUITY_EMOTION_FRESHNESS_SETTING_KEYS = Object.freeze([
+    'continuityEmotionRecencyEnabled',
+    'continuityEmotionCurrentMessageWindow',
+    'continuityEmotionRecentMessageWindow',
+    'continuityEmotionStaleBehavior',
+]);
+const PROMPT_PLACEMENT_SETTING_KEYS = Object.freeze([
+    'injectionTransport',
+    'continuityInjectionPosition',
+    'continuityInjectionDepth',
+    'continuityInjectionRole',
+    'loreHighInjectionPosition',
+    'loreHighInjectionDepth',
+    'loreHighInjectionRole',
+    'loreNormalInjectionPosition',
+    'loreNormalInjectionDepth',
+    'loreNormalInjectionRole',
+    'loreLowInjectionPosition',
+    'loreLowInjectionDepth',
+    'loreLowInjectionRole',
+]);
+const AUTO_RELEVANCE_SETTING_KEYS = Object.freeze([
+    'autoRelevanceEnabled',
+    'autoRelevanceMode',
+    'autoRelevanceEveryTurns',
+    'autoRelevanceRecentMessages',
+    'autoRelevanceCandidateCap',
+    'autoRelevanceMinConfidence',
+    'autoRelevanceNearFutureDays',
+    'autoRelevanceRecentPastDays',
+    'autoRelevanceProtectPinned',
+    'autoRelevanceEvaluateMuted',
+    'autoRelevanceUseModel',
+    'autoRelevanceModelCandidateCap',
+    'autoRelevanceModelMaxTokens',
+    'autoRelevanceModelRecentChars',
+]);
 
 let bundledWandlightPresetCache = null;
 
@@ -1910,7 +2010,63 @@ function downloadJson(data, filename) {
 
 function cloneJson(value) {
     if (typeof structuredClone === 'function') return structuredClone(value);
+    if (value === undefined) return undefined;
     return JSON.parse(JSON.stringify(value));
+}
+
+function cloneDefaultSettings() {
+    return cloneJson(DEFAULT_SETTINGS);
+}
+
+function copyStoredApiKeySettings(source, target) {
+    if (!source || !target) return target;
+    for (const prefix of STORED_API_KEY_SETTING_PREFIXES) {
+        for (const suffix of STORED_API_KEY_SETTING_SUFFIXES) {
+            const key = `${prefix}${suffix}`;
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                target[key] = cloneJson(source[key]);
+            }
+        }
+    }
+    return target;
+}
+
+function resetAllSettingsToDefaults() {
+    const current = getSettings();
+    const defaults = cloneDefaultSettings();
+    copyStoredApiKeySettings(current, defaults);
+    saveSettings(defaults);
+}
+
+function resetSettingKeysToDefaults(settingKeys, label = 'Settings') {
+    const keys = Array.isArray(settingKeys) ? settingKeys : [];
+    if (!keys.length) return;
+
+    const next = getSettings();
+    let changed = 0;
+    for (const key of keys) {
+        if (!Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, key)) continue;
+        next[key] = cloneJson(DEFAULT_SETTINGS[key]);
+        changed += 1;
+    }
+
+    if (!changed) return;
+    saveSettings(next);
+    refreshPanelBody({ preserveScroll: true });
+    toast(`${label} reset to defaults.`, 'info');
+}
+
+function appendSettingsResetButton(container, settingKeys, label = 'Settings') {
+    if (!container || !Array.isArray(settingKeys) || !settingKeys.length) return;
+    const row = document.createElement('div');
+    row.className = 'wandlight-settings-reset-row';
+    row.appendChild(createButton(
+        'Reset Defaults',
+        `Reset only the ${label.toLowerCase()} controls in this section to bundled defaults.`,
+        () => resetSettingKeysToDefaults(settingKeys, label),
+        'wandlight-small-button wandlight-settings-reset-button'
+    ));
+    container.appendChild(row);
 }
 
 function createDangerZoneCard(state) {
@@ -1976,6 +2132,15 @@ function createDangerZoneCard(state) {
         refreshPanelBody({ preserveScroll: false });
         refreshHeader();
         toast('Generation state reset.', 'info');
+    }, 'wandlight-danger-button'));
+
+    actions.appendChild(createButton('Reset All Settings', 'Resets Wandlight preferences and provider settings to bundled defaults. Stored API keys are preserved.', async () => {
+        const proceed = await confirmAction('Are you sure? Reset all Wandlight settings?', 'You are about to reset Wandlight preferences, workflow settings, provider selections, generation settings, injection settings, and UI defaults. Stored API keys are preserved. Chat state, accepted lore, pending lore, and Lore Timeline are not changed. Continue?');
+        if (!proceed) return;
+        resetAllSettingsToDefaults();
+        refreshPanelBody({ preserveScroll: false });
+        refreshHeader();
+        toast('Wandlight settings reset to defaults. Stored API keys were preserved.', 'info');
     }, 'wandlight-danger-button'));
 
     actions.appendChild(createButton('Total Reset', 'Resets Wandlight continuity state for this chat to defaults and clears Lore Timeline. Panel size and position are preserved.', async () => {
@@ -2097,6 +2262,8 @@ function createContextDetectionCard(state) {
         sourceRow.appendChild(sourceText);
         sourceRow.appendChild(sourceInput);
         card.appendChild(sourceRow);
+
+        appendSettingsResetButton(card, CONTEXT_DETECTION_SETTING_KEYS, 'Context detection settings');
     }
 
     const actions = document.createElement('div');
@@ -2705,6 +2872,7 @@ function getStoryLoreAutomationSummary(settings = getSettings()) {
 function createStoryLoreAutomationSettingsContent() {
     const content = document.createElement('div');
     content.className = 'wandlight-story-lore-automation-content';
+    appendSettingsResetButton(content, STORY_LORE_AUTOMATION_SETTING_KEYS, 'Story lore automation settings');
     content.appendChild(createAutomationModeCard(
         'Story Lore Scan',
         'loreGenerationMode',
@@ -2726,6 +2894,7 @@ function createLoreScanScopeSettingsContent() {
     const settings = getSettings();
     const content = document.createElement('div');
     content.className = 'wandlight-lore-scan-settings-block';
+    appendSettingsResetButton(content, STORY_LORE_SCAN_SCOPE_SETTING_KEYS, 'Story lore scan scope settings');
 
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid wandlight-lore-scan-compact-grid';
@@ -2774,6 +2943,7 @@ function createLoreScanScopeSettingsContent() {
 function createLoreScanPerformanceSettingsContent() {
     const content = document.createElement('div');
     content.className = 'wandlight-lore-scan-settings-block';
+    appendSettingsResetButton(content, STORY_LORE_SCAN_PERFORMANCE_SETTING_KEYS, 'Story lore scan performance settings');
     content.appendChild(createRangeSettingRow('Chunk size', 'Messages per scan chunk. Smaller chunks parse more reliably; larger chunks reduce provider calls.', 'loreBulkChunkSize', { min: 3, max: 50, fallback: 10 }));
     content.appendChild(createRangeSettingRow('Overlap', 'Messages repeated at chunk boundaries to preserve facts that span two intervals. Must be lower than chunk size.', 'loreBulkOverlap', { min: 0, max: 10, fallback: 1 }));
     content.appendChild(createRangeSettingRow('Simultaneous chunks', 'Maximum number of story-lore chunks submitted to the Reasoning provider at the same time.', 'loreBulkConcurrency', { min: 1, max: 8, fallback: 3 }));
@@ -2792,6 +2962,7 @@ function createLoreScanQualitySettingsContent() {
     const settings = getSettings();
     const content = document.createElement('div');
     content.className = 'wandlight-lore-scan-settings-block';
+    appendSettingsResetButton(content, STORY_LORE_SCAN_QUALITY_SETTING_KEYS, 'Story lore generation quality settings');
 
     const modeRow = document.createElement('label');
     modeRow.className = 'wandlight-setting-row wandlight-lore-scan-setting-row';
@@ -3662,6 +3833,7 @@ function createContinuityScanScopeSettingsContent() {
     const settings = getSettings();
     const content = document.createElement('div');
     content.className = 'wandlight-lore-scan-settings-block';
+    appendSettingsResetButton(content, CONTINUITY_SCAN_SCOPE_SETTING_KEYS, 'Continuity scan scope settings');
 
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid wandlight-lore-scan-compact-grid';
@@ -3710,6 +3882,7 @@ function createContinuityScanScopeSettingsContent() {
 function createContinuityScanPerformanceSettingsContent() {
     const content = document.createElement('div');
     content.className = 'wandlight-lore-scan-settings-block';
+    appendSettingsResetButton(content, CONTINUITY_SCAN_PERFORMANCE_SETTING_KEYS, 'Continuity performance and recovery settings');
     content.appendChild(createSelectSettingRow(
         'Scan strategy',
         'Adaptive uses one fast delta call for small recent scans, grouped hybrid calls for medium ranges, and the checkpointed bulk pipeline for large backfills.',
@@ -4008,6 +4181,7 @@ function createEmotionFreshnessControls() {
     help.className = 'wandlight-runtime-help';
     help.textContent = 'Emotion decays by chat-message age so an old feeling does not keep steering the character after the scene moves on.';
     wrap.appendChild(help);
+    appendSettingsResetButton(wrap, CONTINUITY_EMOTION_FRESHNESS_SETTING_KEYS, 'Emotional state freshness settings');
 
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid wandlight-continuity-toggle-grid';
@@ -4845,6 +5019,7 @@ function createInjectionPlacementCard(settings) {
     help.className = 'wandlight-runtime-help';
     help.textContent = 'Recommended: Extension Prompt, System role, with Continuity depth 3, High-Relevance Lore depth 2, Normal depth 5, and Low depth 9. Depth 0 is closest to the latest message.';
     card.appendChild(help);
+    appendSettingsResetButton(card, PROMPT_PLACEMENT_SETTING_KEYS, 'Prompt placement settings');
 
     const placement = document.createElement('div');
     placement.className = 'wandlight-prompt-placement-lines';
@@ -8233,6 +8408,7 @@ function createAutoRelevanceCard(state) {
     help.className = 'wandlight-runtime-help';
     help.textContent = 'Auto-Relevance uses local scoring for performance. It can promote or demote High/Normal/Low relevance, but it does not change mute or pin.';
     card.appendChild(help);
+    appendSettingsResetButton(card, AUTO_RELEVANCE_SETTING_KEYS, 'Auto-Relevance settings');
 
     const enabled = document.createElement('label');
     enabled.className = 'wandlight-inline-toggle';

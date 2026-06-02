@@ -91,14 +91,27 @@ const TAB_ICON_PATHS = {
     injection: './Images/runtime-icons/wandlight_tab_injection_256.png',
 };
 
-function getTabIconSrc(tabId) {
-    const iconPath = TAB_ICON_PATHS[tabId];
-    if (!iconPath) return '';
+const BRAND_LOGO_PATHS = {
+    compact: './Images/branding/wandlight-logo-minimized-256.png',
+    expanded: './Images/branding/wandlight-logo-expanded-512.png',
+};
+
+function getLocalAssetSrc(assetPath) {
+    if (!assetPath) return '';
     try {
-        return new URL(iconPath, import.meta.url).href;
+        return new URL(assetPath, import.meta.url).href;
     } catch (error) {
-        return iconPath;
+        return assetPath;
     }
+}
+
+function getTabIconSrc(tabId) {
+    return getLocalAssetSrc(TAB_ICON_PATHS[tabId]);
+}
+
+function getBrandLogoSrc(railMode) {
+    const key = normalizeRailMode(railMode) === 'expanded' ? 'expanded' : 'compact';
+    return getLocalAssetSrc(BRAND_LOGO_PATHS[key]);
 }
 
 const TAB_TOOLTIPS = {
@@ -435,7 +448,18 @@ function renderRail(state) {
 
     const mark = document.createElement('div');
     mark.className = 'wandlight-runtime-rail-mark';
-    mark.textContent = railMode === 'compact' ? 'W' : 'Wandlight';
+
+    const markImg = document.createElement('img');
+    markImg.className = 'wandlight-runtime-rail-logo-img';
+    markImg.src = getBrandLogoSrc(railMode);
+    markImg.alt = railMode === 'compact' ? 'Wandlight' : 'Wandlight logo';
+    markImg.draggable = false;
+    markImg.addEventListener('error', () => {
+        markImg.remove();
+        mark.textContent = railMode === 'compact' ? 'W' : 'Wandlight';
+        mark.classList.add('wandlight-runtime-rail-mark-fallback');
+    }, { once: true });
+    mark.appendChild(markImg);
     drag.appendChild(mark);
 
     const sub = document.createElement('div');
@@ -6023,6 +6047,37 @@ function setDrawerOpen(open) {
     state.lorePanel.collapsed = state.lorePanel.drawerOpen !== true;
     saveState(state);
     showLorePanel();
+}
+
+export function resetLorePanelLayout(options = {}) {
+    const state = getState();
+    if (!state?.lorePanel) return;
+
+    const drawerWidth = Number(DEFAULT_STATE?.lorePanel?.drawerWidth) || 560;
+    const drawerHeight = Number(DEFAULT_STATE?.lorePanel?.drawerHeight) || 640;
+    const railX = 16;
+    const railY = getDefaultRailY();
+
+    Object.assign(state.lorePanel, {
+        railMode: 'compact',
+        railX,
+        railY,
+        drawerOpen: false,
+        activeTab: 'session',
+        drawerWidth,
+        drawerHeight,
+        collapsed: true,
+        x: railX,
+        y: railY,
+        width: drawerWidth,
+        height: drawerHeight,
+    });
+
+    saveState(state);
+    showLorePanel();
+    if (typeof toastr !== 'undefined' && options.silent !== true) {
+        toastr.success('Wandlight window layout reset.');
+    }
 }
 
 function toggleDrawerForTab(tabId) {

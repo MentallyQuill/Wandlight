@@ -3776,3 +3776,53 @@
     overscroll-behavior: contain !important;
     touch-action: pan-y !important;
 }
+
+
+/* Runtime brand logo integration ------------------------------------------------
+   Phase 10: compact rail uses the square W mark; expanded rail uses the horizontal
+   Wandlight wordmark. These rules are intentionally appended late for cascade priority. */
+.wandlight-runtime-rail-drag {
+    align-items: center;
+}
+
+.wandlight-runtime-rail-mark {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: 0;
+    line-height: 1;
+}
+
+.wandlight-runtime-rail-expanded .wandlight-runtime-rail-mark {
+    min-height: 48px;
+}
+
+.wandlight-runtime-rail-logo-img {
+    display: block;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    filter:
+        drop-shadow(0 0 4px rgba(215, 181, 109, 0.34))
+        drop-shadow(0 0 8px rgba(92, 23, 36, 0.18));
+}
+
+.wandlight-runtime-rail-compact .wandlight-runtime-rail-logo-img {
+    width: 44px;
+    height: 44px;
+}
+
+.wandlight-runtime-rail-expanded .wandlight-runtime-rail-logo-img {
+    width: min(176px, 100%);
+    height: 44px;
+}
+
+.wandlight-runtime-rail-mark-fallback {
+    color: var(--wandlight-gold, #d7b56d);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 10px rgba(215, 181, 109, 0.25);
+}
+

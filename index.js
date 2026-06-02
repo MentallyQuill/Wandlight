@@ -37,7 +37,7 @@ import {
     runLoreContextDetection,
     runStoryLoreScan,
 } from './lore-generator.js';
-import { showLorePanel, hideLorePanel, refreshLorePanel } from './lore-panel.js';
+import { showLorePanel, hideLorePanel, refreshLorePanel, resetLorePanelLayout } from './lore-panel.js';
 import { onGenerationEndedAutoRelevance, runAutoRelevance } from './auto-relevance.js';
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -435,6 +435,15 @@ function wireSettingsPanel(container) {
     if (openWindowBtn) {
         openWindowBtn.addEventListener('click', () => {
             showLorePanel();
+            refreshLorePanel();
+        });
+    }
+
+    // Reset runtime window geometry to a safe default if it is off-screen or too small to grab.
+    const resetWindowBtn = container.querySelector('#wandlight_reset_window');
+    if (resetWindowBtn) {
+        resetWindowBtn.addEventListener('click', () => {
+            resetLorePanelLayout();
             refreshLorePanel();
         });
     }

@@ -1,10 +1,6 @@
 {
   "brand": "Wandlight",
   "source": "wandlight_logo_pack_transparent_modified.zip",
-  "selected": {
-    "expanded": "wandlight_logo_expanded.png",
-    "minimized": "wandlight_logo_minimized.png"
-  },
   "assets": [
     "wandlight-logo-expanded-1024.png",
     "wandlight-logo-expanded-256.png",

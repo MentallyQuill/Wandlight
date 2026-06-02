@@ -2,8 +2,8 @@
  * lore-panel.js - Wandlight
  * Floating roleplay control window.
  *
- * The extension-menu settings panel is reserved for API setup, data/debug, and
- * raw previews. This window is the runtime surface used during roleplay.
+ * The extension-menu settings panel is reserved for API setup and
+ * runtime launch controls. This window is the runtime surface used during roleplay.
  */
 
 import { getPanelLoreState, getInjectableLoreEntries, getLoreRelevanceCounts, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag, LORE_LIFECYCLE_STATUSES } from './lore-matrix.js';
@@ -40,8 +40,9 @@ const RAIL_WIDTH_EXPANDED = 206;
 const RAIL_DRAWER_GAP = 8;
 const MAX_PANEL_MARGIN = 16;
 const DEFAULT_RAIL_LEFT = 20;
-const DEFAULT_COMPACT_RAIL_HEIGHT_ESTIMATE = 428;
-const DEFAULT_EXPANDED_RAIL_HEIGHT_ESTIMATE = 520;
+const DEFAULT_COMPACT_RAIL_HEIGHT_ESTIMATE = 420;
+const DEFAULT_EXPANDED_RAIL_HEIGHT_ESTIMATE = 420;
+const LAYOUT_VERSION = 2;
 
 const CATEGORY_LABELS = {
     all: 'All',
@@ -341,7 +342,7 @@ let tooltipAnchor = null;
 
 // Public runtime ------------------------------------------------------------
 
-export function showLorePanel(options = {}) {
+export function showLorePanel() {
     const state = getState();
     if (state?.lorePanel) {
         state.lorePanel.isOpen = true;
@@ -364,9 +365,6 @@ export function showLorePanel(options = {}) {
     document.body.appendChild(panelRoot);
 
     requestAnimationFrame(() => {
-        if (options.centerDefaultLayout === true) {
-            centerRuntimeRailInViewport({ persist: true, forceLeft: true });
-        }
         clampRuntimeShellToViewport();
         updateAcceptedLoreScrollRegionHeight();
     });
@@ -710,7 +708,7 @@ function getRailMetrics(state, settings = getSettings()) {
 
 function normalizePanelLayoutState(state, options = {}) {
     if (!state) return null;
-    if (!state.lorePanel) state.lorePanel = getDefaultState().lorePanel;
+    if (!state.lorePanel || typeof state.lorePanel !== 'object') state.lorePanel = getDefaultState().lorePanel;
     const panelState = state.lorePanel;
 
     const hadRailFields = panelState.railX != null || panelState.railY != null || panelState.drawerOpen != null;
@@ -724,28 +722,35 @@ function normalizePanelLayoutState(state, options = {}) {
 
     const legacyX = Number(panelState.x);
     const legacyY = Number(panelState.y);
+    const rawRailX = Number(panelState.railX);
+    const rawRailY = Number(panelState.railY);
     const defaultY = getDefaultRailY(panelState);
-    const railXValue = Number(panelState.railX);
-    const railYValue = Number(panelState.railY);
-    const shouldUpgradeDefaultPosition = panelState.layoutVersion == null
-        && [16, 20].includes(Number.isFinite(railXValue) ? railXValue : legacyX)
-        && (Number.isFinite(railYValue) ? railYValue : legacyY) === 220
+    const looksLikeOldDefaultPosition = panelState.layoutVersion !== LAYOUT_VERSION
+        && [16, 20].includes(rawRailX)
+        && rawRailY === 220
+        && (!Number.isFinite(legacyX) || [16, 20].includes(legacyX))
         && (!Number.isFinite(legacyY) || legacyY === 220);
 
-    if (shouldUpgradeDefaultPosition) {
-        panelState.railX = DEFAULT_RAIL_LEFT;
-        panelState.railY = defaultY;
-        panelState.x = DEFAULT_RAIL_LEFT;
-        panelState.y = defaultY;
-    }
-    panelState.layoutVersion = Math.max(2, Number(panelState.layoutVersion) || 0);
+    const railXValue = looksLikeOldDefaultPosition ? Number.NaN : rawRailX;
+    const railYValue = looksLikeOldDefaultPosition ? Number.NaN : rawRailY;
 
-    panelState.railX = clampNumber(Number(panelState.railX), 0, Math.max(0, getViewportWidth() - getRailWidth(panelState)), Number.isFinite(legacyX) ? legacyX : DEFAULT_RAIL_LEFT);
-    panelState.railY = clampNumber(Number(panelState.railY), 0, Math.max(0, getViewportHeight() - 80), Number.isFinite(legacyY) ? legacyY : defaultY);
+    panelState.railX = clampNumber(
+        railXValue,
+        0,
+        Math.max(0, getViewportWidth() - getRailWidth(panelState)),
+        looksLikeOldDefaultPosition ? DEFAULT_RAIL_LEFT : (Number.isFinite(legacyX) ? legacyX : DEFAULT_RAIL_LEFT),
+    );
+    panelState.railY = clampNumber(
+        railYValue,
+        0,
+        Math.max(0, getViewportHeight() - 80),
+        looksLikeOldDefaultPosition ? defaultY : (Number.isFinite(legacyY) ? legacyY : defaultY),
+    );
     panelState.drawerWidth = clampNumber(Number(panelState.drawerWidth), MIN_DRAWER_WIDTH, Math.max(MIN_DRAWER_WIDTH, getViewportWidth() - (MAX_PANEL_MARGIN * 2)), Number(panelState.width) || 560);
     panelState.drawerHeight = clampNumber(Number(panelState.drawerHeight), MIN_DRAWER_HEIGHT, Math.max(MIN_DRAWER_HEIGHT, getViewportHeight() - (MAX_PANEL_MARGIN * 2)), Number(panelState.height) || 640);
+    panelState.layoutVersion = LAYOUT_VERSION;
 
-    if (options.persistLegacyOpenState) {
+    if (options.persistLegacyOpenState || looksLikeOldDefaultPosition) {
         panelState.x = panelState.railX;
         panelState.y = panelState.railY;
         panelState.width = panelState.drawerWidth;
@@ -778,7 +783,10 @@ function getEstimatedRailHeight(panelState = null) {
 
 function getDefaultRailY(panelState = null) {
     const viewportHeight = getViewportHeight();
-    const estimatedHeight = Math.min(getEstimatedRailHeight(panelState), Math.max(80, viewportHeight - (MAX_PANEL_MARGIN * 2)));
+    const estimatedHeight = Math.min(
+        getEstimatedRailHeight(panelState),
+        Math.max(80, viewportHeight - (MAX_PANEL_MARGIN * 2)),
+    );
     return Math.max(MAX_PANEL_MARGIN, Math.round((viewportHeight - estimatedHeight) / 2));
 }
 
@@ -848,7 +856,7 @@ function resolveDrawerDirection(panelState) {
 function applyRuntimeShellGeometry(root, panelState) {
     const railWidth = getRailWidth(panelState);
     const x = clampNumber(Number(panelState?.railX), 0, Math.max(0, getViewportWidth() - railWidth), DEFAULT_RAIL_LEFT);
-    const y = clampNumber(Number(panelState?.railY), 0, Math.max(0, getViewportHeight() - 80), getDefaultRailY(panelState));
+    const y = clampNumber(Number(panelState?.railY), 0, Math.max(0, getViewportHeight() - 80), getDefaultRailY());
     root.style.left = `${x}px`;
     root.style.top = `${y}px`;
     root.style.right = '';
@@ -863,7 +871,7 @@ function clampRuntimeShellToViewport() {
     const railWidth = getRailWidth(panelState);
     const railHeight = panelRoot.querySelector('.wandlight-runtime-rail')?.offsetHeight || 80;
     panelState.railX = clampNumber(Number(panelState.railX), 0, Math.max(0, getViewportWidth() - railWidth), DEFAULT_RAIL_LEFT);
-    panelState.railY = clampNumber(Number(panelState.railY), 0, Math.max(0, getViewportHeight() - Math.min(railHeight, getViewportHeight())), getDefaultRailY(panelState));
+    panelState.railY = clampNumber(Number(panelState.railY), 0, Math.max(0, getViewportHeight() - Math.min(railHeight, getViewportHeight())), getDefaultRailY());
     panelState.x = panelState.railX;
     panelState.y = panelState.railY;
     applyRuntimeShellGeometry(panelRoot, panelState);
@@ -6124,8 +6132,8 @@ export function resetLorePanelLayout(options = {}) {
         state.lorePanel = getDefaultState().lorePanel;
     }
 
-    const drawerWidth = Number(DEFAULT_STATE?.lorePanel?.drawerWidth) || 560;
-    const drawerHeight = Number(DEFAULT_STATE?.lorePanel?.drawerHeight) || 640;
+    const drawerWidth = Number(getDefaultState()?.lorePanel?.drawerWidth) || 560;
+    const drawerHeight = Number(getDefaultState()?.lorePanel?.drawerHeight) || 640;
     const railX = DEFAULT_RAIL_LEFT;
     const railY = getDefaultRailY({ railMode: 'compact' });
 
@@ -6138,15 +6146,22 @@ export function resetLorePanelLayout(options = {}) {
         drawerWidth,
         drawerHeight,
         collapsed: true,
+        isOpen: true,
         x: railX,
         y: railY,
         width: drawerWidth,
         height: drawerHeight,
-        layoutVersion: 2,
+        layoutVersion: LAYOUT_VERSION,
     });
 
     saveState(state);
-    showLorePanel({ centerDefaultLayout: true });
+    showLorePanel();
+
+    const schedule = typeof requestAnimationFrame === 'function'
+        ? requestAnimationFrame
+        : (fn) => setTimeout(fn, 0);
+    schedule(() => centerRuntimeRailInViewport({ forceLeft: true, persist: true }));
+
     if (typeof toastr !== 'undefined' && options.silent !== true) {
         toastr.success('Wandlight window layout reset.');
     }
@@ -6265,7 +6280,7 @@ function onDragMove(e) {
     const railHeight = panelRoot.querySelector('.wandlight-runtime-rail')?.offsetHeight || 80;
     const x = e.clientX - dragOffsetX;
     const y = e.clientY - dragOffsetY;
-    const maxX = Math.max(0, window.innerWidth - railWidth);
+    const maxX = Math.max(0, getViewportWidth() - railWidth);
     const maxY = Math.max(0, getViewportHeight() - Math.min(railHeight, getViewportHeight()));
     panelRoot.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
     panelRoot.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
@@ -6315,7 +6330,7 @@ function onResizeMove(e) {
     const maxWidth = resizeStartDirection === 'left'
         ? Math.max(MIN_DRAWER_WIDTH, railX - RAIL_DRAWER_GAP - MAX_PANEL_MARGIN)
         : Math.max(MIN_DRAWER_WIDTH, getViewportWidth() - railX - railWidth - RAIL_DRAWER_GAP - MAX_PANEL_MARGIN);
-    const maxHeight = Math.max(MIN_DRAWER_HEIGHT, getViewportHeight() - (Number(panelState.railY) || 0) - MAX_PANEL_MARGIN);
+    const maxHeight = Math.max(MIN_DRAWER_HEIGHT, window.innerHeight - (Number(panelState.railY) || 0) - MAX_PANEL_MARGIN);
     const deltaX = e.clientX - resizeStartX;
     const requestedWidth = resizeStartDirection === 'left'
         ? resizeStartWidth - deltaX

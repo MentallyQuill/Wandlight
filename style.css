@@ -9,46 +9,7 @@
     color: var(--SmartThemeBodyColor, #e0e0e0);
 }
 
-/* ── Memo preview block ───────────────────────────────────────────────────────── */
-.wandlight-memo-preview {
-    white-space: pre-wrap;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.82em;
-    line-height: 1.45;
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 10px 12px;
-    max-height: 320px;
-    overflow-y: auto;
-    margin: 0;
-    color: #d4a028;
-    word-break: break-word;
-}
 
-/* ── State JSON editor ────────────────────────────────────────────────────────── */
-.wandlight-state-editor {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.78em;
-    line-height: 1.4;
-    background: rgba(0, 0, 0, 0.35);
-    color: #b8c7d6;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-    padding: 10px 12px;
-    resize: vertical;
-    min-height: 280px;
-    max-height: 600px;
-    width: 100%;
-    box-sizing: border-box;
-    tab-size: 2;
-}
-
-.wandlight-state-editor:focus {
-    border-color: rgba(80, 140, 255, 0.5);
-    outline: none;
-    box-shadow: 0 0 4px rgba(80, 140, 255, 0.2);
-}
 
 /* ── Slider spacing ───────────────────────────────────────────────────────────── */
 .wandlight-settings input[type="range"] {
@@ -73,47 +34,8 @@
     margin-left: 6px;
 }
 
-/* ── State display (read-only view) ──────────────────────────────────────────── */
-.wandlight-state-display {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 10px 12px;
-    max-height: 360px;
-    overflow-y: auto;
-    cursor: pointer;
-    transition: border-color 0.2s;
-}
 
-.wandlight-state-display:hover {
-    border-color: rgba(255, 255, 255, 0.25);
-}
 
-/* ── Delta preview block ─────────────────────────────────────────────────────── */
-.wandlight-delta-preview {
-    white-space: pre-wrap;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.78em;
-    line-height: 1.4;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(80, 140, 255, 0.2);
-    border-radius: 4px;
-    padding: 8px 10px;
-    max-height: 200px;
-    overflow-y: auto;
-    color: #a8c8e8;
-    word-break: break-word;
-}
-
-/* ── State section styling (used by renderStatePanel) ─────────────────────────── */
-.wandlight-state-section {
-    border-left: 2px solid rgba(255, 255, 255, 0.08);
-    padding-left: 8px;
-}
-
-.wandlight-state-section:last-child {
-    margin-bottom: 0;
-}
 
 /* ── Toast error/warning compat ───────────────────────────────────────────────── */
 .wandlight-error {
@@ -3894,7 +3816,7 @@
 }
 
 
-/* Phase 15: Runtime Window controls -------------------------------------------
+/* Phase 16: Runtime Window controls -------------------------------------------
    Open and Reset sit side-by-side with equal button widths. */
 .wandlight-runtime-window-actions {
     display: flex;

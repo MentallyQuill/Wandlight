@@ -45,7 +45,7 @@ export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
 export const LOG_PREFIX = '[Wandlight Continuity]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 15;
+export const SCHEMA_VERSION = 16;
 
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -477,10 +477,18 @@ export function getDefaultState() {
             lastError: '',
         },
 
-        // Lore panel UI state (schema v4)
+        // Runtime rail + drawer UI state (schema v16). Legacy x/y/width/height
+        // remain as migration aliases for older saved Wandlight panels.
         lorePanel: {
             isOpen: true,
-            collapsed: false,
+            collapsed: true,
+            railMode: 'compact',
+            railX: 16,
+            railY: 220,
+            drawerOpen: false,
+            drawerWidth: 560,
+            drawerHeight: 640,
+            drawerDirection: 'auto',
             selectedCategory: 'all',
             search: '',
             selectedEntryId: '',
@@ -497,8 +505,10 @@ export function getDefaultState() {
             loreStatus: 'Idle.',
             loreProgress: 0,
             showOnlyActive: false,
-            width: 420,
-            height: 520,
+            x: 16,
+            y: 220,
+            width: 560,
+            height: 640,
         },
 
         // Lore selection (user overrides for active loring)

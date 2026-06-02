@@ -33,6 +33,11 @@ import { runAutoRelevance, applyAutoRelevanceSuggestions, clearAutoRelevanceSugg
 const PANEL_ID = 'wandlight-lore-panel';
 const MIN_PANEL_WIDTH = 420;
 const MIN_PANEL_HEIGHT = 360;
+const MIN_DRAWER_WIDTH = 360;
+const MIN_DRAWER_HEIGHT = 320;
+const RAIL_WIDTH_COMPACT = 52;
+const RAIL_WIDTH_EXPANDED = 188;
+const RAIL_DRAWER_GAP = 8;
 const MAX_PANEL_MARGIN = 16;
 
 const CATEGORY_LABELS = {
@@ -68,6 +73,14 @@ const TAB_LABELS = {
     continuity: 'Continuity',
     lore: 'Lore',
     injection: 'Injection',
+};
+
+const TAB_ICONS = {
+    session: 'S',
+    context: 'C',
+    continuity: 'K',
+    lore: 'L',
+    injection: 'I',
 };
 
 const TAB_TOOLTIPS = {
@@ -287,6 +300,7 @@ let resizeStartX = 0;
 let resizeStartY = 0;
 let resizeStartWidth = 0;
 let resizeStartHeight = 0;
+let resizeStartDirection = 'right';
 
 let floatingTooltip = null;
 let tooltipAnchor = null;
@@ -297,40 +311,28 @@ export function showLorePanel() {
     const state = getState();
     if (state?.lorePanel) {
         state.lorePanel.isOpen = true;
+        normalizePanelLayoutState(state, { persistLegacyOpenState: true });
         saveState(state);
     }
 
     removeLorePanel();
 
     const freshState = getState();
-    const panelState = freshState?.lorePanel || { isOpen: true, collapsed: false };
+    normalizePanelLayoutState(freshState, { persistLegacyOpenState: true });
+    const panelState = freshState?.lorePanel || getDefaultState().lorePanel;
 
     panelRoot = document.createElement('div');
     panelRoot.id = PANEL_ID;
-    panelRoot.className = 'wandlight-lore-panel';
-
-    const savedWidth = Math.max(MIN_PANEL_WIDTH, Number(panelState.width) || 520);
-    const savedHeight = Math.max(MIN_PANEL_HEIGHT, Number(panelState.height) || 640);
-    panelRoot.style.width = `${Math.min(savedWidth, Math.max(MIN_PANEL_WIDTH, window.innerWidth - MAX_PANEL_MARGIN))}px`;
-    panelRoot.style.height = `${Math.min(savedHeight, Math.max(MIN_PANEL_HEIGHT, window.innerHeight - MAX_PANEL_MARGIN))}px`;
-
-    if (panelState.collapsed) {
-        panelRoot.classList.add('wandlight-lore-panel-collapsed');
-    }
+    panelRoot.className = 'wandlight-lore-panel wandlight-runtime-shell';
+    applyRuntimeShellGeometry(panelRoot, panelState);
 
     renderPanelShell(panelRoot, freshState);
     document.body.appendChild(panelRoot);
 
-    if (panelState.x != null && panelState.y != null) {
-        requestAnimationFrame(() => {
-            if (!panelRoot) return;
-            panelRoot.style.left = `${Math.max(0, Math.min(panelState.x, window.innerWidth - panelRoot.offsetWidth))}px`;
-            panelRoot.style.top = `${Math.max(0, Math.min(panelState.y, window.innerHeight - panelRoot.offsetHeight))}px`;
-        });
-    } else {
-        panelRoot.style.right = '16px';
-        panelRoot.style.bottom = '16px';
-    }
+    requestAnimationFrame(() => {
+        clampRuntimeShellToViewport();
+        updateAcceptedLoreScrollRegionHeight();
+    });
 }
 
 export function hideLorePanel() {
@@ -352,6 +354,12 @@ export function refreshLorePanel() {
         return;
     }
 
+    normalizePanelLayoutState(state);
+    const hasDrawer = !!existing.querySelector('.wandlight-runtime-drawer');
+    if ((state.lorePanel.drawerOpen === true) !== hasDrawer) {
+        renderPanelShell(existing, state);
+        return;
+    }
     refreshPanelBody({ preserveScroll: true });
     refreshHeader();
 }
@@ -368,69 +376,186 @@ function removeLorePanel() {
 // Shell -----------------------------------------------------------------------
 
 function renderPanelShell(root, state) {
+    normalizePanelLayoutState(state);
+    const panelState = state?.lorePanel || getDefaultState().lorePanel;
+    const railMode = normalizeRailMode(panelState.railMode);
+    const activeTab = normalizeTab(panelState.activeTab);
+    const drawerOpen = panelState.drawerOpen === true;
+    const drawerDirection = drawerOpen ? resolveDrawerDirection(panelState) : 'right';
+
     root.innerHTML = '';
+    root.className = 'wandlight-lore-panel wandlight-runtime-shell';
+    root.classList.add(`wandlight-runtime-rail-${railMode}`);
+    if (drawerOpen) root.classList.add('wandlight-runtime-drawer-open');
+    root.dataset.railMode = railMode;
+    root.dataset.drawerDirection = drawerDirection;
+    root.style.setProperty('--wandlight-rail-width', `${getRailWidth(panelState)}px`);
+    root.style.setProperty('--wandlight-drawer-width', `${getConstrainedDrawerWidth(panelState, drawerDirection)}px`);
+    root.style.setProperty('--wandlight-drawer-height', `${getConstrainedDrawerHeight(panelState)}px`);
 
-    const header = document.createElement('div');
-    header.className = 'wandlight-lore-panel-header';
-    header.addEventListener('mousedown', onDragStart);
-
-    const collapseBtn = createIconButton(
-        state?.lorePanel?.collapsed ? '>' : 'v',
-        state?.lorePanel?.collapsed ? 'Expand Wandlight Continuity window.' : 'Collapse Wandlight Continuity window.',
-        'wandlight-lore-panel-collapse-btn',
-        (e) => {
-            e.stopPropagation();
-            toggleCollapse();
-        }
-    );
-    header.appendChild(collapseBtn);
-
-    const titleWrap = document.createElement('div');
-    titleWrap.className = 'wandlight-lore-panel-title-wrap';
-
-    const title = document.createElement('div');
-    title.className = 'wandlight-lore-panel-title';
-    title.textContent = 'Wandlight Continuity';
-    addTooltip(title, 'Roleplay control window for continuity scanning, generation, review, and lore management.');
-    titleWrap.appendChild(title);
-
-    const status = document.createElement('div');
-    status.className = 'wandlight-lore-panel-status';
-    titleWrap.appendChild(status);
-    header.appendChild(titleWrap);
-
-    const closeBtn = createIconButton('x', 'Close the Wandlight Continuity window. Use /wandlight-lore-panel or the extensions-menu launcher to reopen it.', 'wandlight-lore-panel-close-btn', (e) => {
-        e.stopPropagation();
-        hideLorePanel();
-    });
-    header.appendChild(closeBtn);
-
-    root.appendChild(header);
-
-    const body = document.createElement('div');
-    body.className = 'wandlight-lore-panel-body';
-    root.appendChild(body);
-
-    if (!state?.lorePanel?.collapsed) {
-        renderPanelBody(body, state);
-    }
-
-    const resizeHandle = document.createElement('div');
-    resizeHandle.className = 'wandlight-lore-panel-resize-handle';
-    resizeHandle.addEventListener('pointerdown', onResizeStart);
-    addTooltip(resizeHandle, 'Drag from this corner to resize the Wandlight Continuity window.');
-    root.appendChild(resizeHandle);
+    root.appendChild(renderRail(state));
+    if (drawerOpen) root.appendChild(renderDrawer(state, drawerDirection));
 
     refreshHeader();
 }
 
+function renderRail(state) {
+    const panelState = state?.lorePanel || getDefaultState().lorePanel;
+    const railMode = normalizeRailMode(panelState.railMode);
+    const activeTab = normalizeTab(panelState.activeTab);
+    const drawerOpen = panelState.drawerOpen === true;
+    const settings = getSettings();
+    const metrics = getRailMetrics(state, settings);
+
+    const rail = document.createElement('div');
+    rail.className = `wandlight-runtime-rail wandlight-runtime-rail-${railMode}`;
+
+    const drag = document.createElement('div');
+    drag.className = 'wandlight-runtime-rail-drag';
+    drag.addEventListener('mousedown', onDragStart);
+    addTooltip(drag, 'Drag to move the Wandlight rail. The drawer stays anchored to this rail.');
+
+    const mark = document.createElement('div');
+    mark.className = 'wandlight-runtime-rail-mark';
+    mark.textContent = railMode === 'compact' ? 'W' : 'Wandlight';
+    drag.appendChild(mark);
+
+    const sub = document.createElement('div');
+    sub.className = 'wandlight-runtime-rail-subtitle';
+    sub.textContent = settings.enabled ? 'Active' : 'Paused';
+    drag.appendChild(sub);
+    rail.appendChild(drag);
+
+    const tabs = document.createElement('div');
+    tabs.className = 'wandlight-runtime-rail-tabs';
+    for (const [tabId, label] of Object.entries(TAB_LABELS)) {
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = 'wandlight-runtime-rail-tab';
+        tab.dataset.tabId = tabId;
+        if (drawerOpen && tabId === activeTab) tab.classList.add('wandlight-runtime-rail-tab-active');
+        addTooltip(tab, TAB_TOOLTIPS[tabId]);
+
+        const icon = document.createElement('span');
+        icon.className = 'wandlight-runtime-rail-icon';
+        icon.textContent = TAB_ICONS[tabId] || label.slice(0, 1);
+        tab.appendChild(icon);
+
+        const labelEl = document.createElement('span');
+        labelEl.className = 'wandlight-runtime-rail-label';
+        labelEl.textContent = label;
+        tab.appendChild(labelEl);
+
+        const metric = document.createElement('span');
+        metric.className = 'wandlight-runtime-rail-metric';
+        metric.dataset.tabId = tabId;
+        metric.textContent = metrics[tabId] || '';
+        tab.appendChild(metric);
+
+        tab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDrawerForTab(tabId);
+        });
+        tabs.appendChild(tab);
+    }
+    rail.appendChild(tabs);
+
+    const controls = document.createElement('div');
+    controls.className = 'wandlight-runtime-rail-controls';
+
+    const density = createIconButton(
+        railMode === 'compact' ? '>' : '<',
+        railMode === 'compact' ? 'Show labels and compact metrics.' : 'Use icons only.',
+        'wandlight-runtime-rail-control wandlight-runtime-rail-density',
+        (e) => {
+            e.stopPropagation();
+            toggleRailMode();
+        }
+    );
+    controls.appendChild(density);
+
+    const close = createIconButton(
+        'x',
+        'Close the Wandlight rail. Use /wandlight-lore-panel or the extension launcher to reopen it.',
+        'wandlight-runtime-rail-control wandlight-runtime-rail-close',
+        (e) => {
+            e.stopPropagation();
+            hideLorePanel();
+        }
+    );
+    controls.appendChild(close);
+    rail.appendChild(controls);
+
+    return rail;
+}
+
+function renderDrawer(state, direction = 'right') {
+    const panelState = state?.lorePanel || getDefaultState().lorePanel;
+    const activeTab = normalizeTab(panelState.activeTab);
+
+    const drawer = document.createElement('div');
+    drawer.className = `wandlight-runtime-drawer wandlight-runtime-drawer-${direction}`;
+    drawer.style.width = `${getConstrainedDrawerWidth(panelState, direction)}px`;
+    drawer.style.height = `${getConstrainedDrawerHeight(panelState)}px`;
+
+    const header = document.createElement('div');
+    header.className = 'wandlight-runtime-drawer-header';
+
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'wandlight-lore-panel-title-wrap';
+    const title = document.createElement('div');
+    title.className = 'wandlight-lore-panel-title wandlight-runtime-drawer-title';
+    title.textContent = TAB_LABELS[activeTab] || 'Wandlight Continuity';
+    addTooltip(title, TAB_TOOLTIPS[activeTab] || 'Wandlight Continuity runtime drawer.');
+    titleWrap.appendChild(title);
+
+    const status = document.createElement('div');
+    status.className = 'wandlight-lore-panel-status wandlight-runtime-drawer-status';
+    titleWrap.appendChild(status);
+    header.appendChild(titleWrap);
+
+    const collapseBtn = createIconButton('>', 'Collapse the active drawer and leave the rail visible.', 'wandlight-lore-panel-collapse-btn wandlight-runtime-drawer-collapse', (e) => {
+        e.stopPropagation();
+        setDrawerOpen(false);
+    });
+    header.appendChild(collapseBtn);
+
+    const closeBtn = createIconButton('x', 'Close the Wandlight rail and drawer.', 'wandlight-lore-panel-close-btn wandlight-runtime-drawer-close', (e) => {
+        e.stopPropagation();
+        hideLorePanel();
+    });
+    header.appendChild(closeBtn);
+    drawer.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'wandlight-lore-panel-body';
+    drawer.appendChild(body);
+    renderPanelBody(body, state);
+
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'wandlight-lore-panel-resize-handle wandlight-runtime-drawer-resize-handle';
+    resizeHandle.addEventListener('pointerdown', onResizeStart);
+    addTooltip(resizeHandle, 'Drag to resize the active drawer. The size is remembered across tabs.');
+    drawer.appendChild(resizeHandle);
+
+    return drawer;
+}
+
 function refreshHeader() {
     if (!panelRoot) return;
-    const status = panelRoot.querySelector('.wandlight-lore-panel-status');
-    if (!status) return;
 
     const state = getState();
+    normalizePanelLayoutState(state);
     const settings = getSettings();
+    const metrics = getRailMetrics(state, settings);
+
+    for (const metric of panelRoot.querySelectorAll('.wandlight-runtime-rail-metric[data-tab-id]')) {
+        metric.textContent = metrics[metric.dataset.tabId] || '';
+    }
+
+    const status = panelRoot.querySelector('.wandlight-runtime-drawer-status');
+    if (!status) return;
+
     const pendingLore = (state?.pendingLoreEntries || []).length;
     const pendingDelta = state?.lastDelta ? 1 : 0;
     const counts = getPanelLoreState(state).counts;
@@ -438,36 +563,19 @@ function refreshHeader() {
 
     status.innerHTML = '';
     status.appendChild(createStatusPill(`Mode: ${getWorkflowLabel(settings)}`, getWorkflowTooltip(settings)));
-    status.appendChild(createStatusPill(settings.enabled ? 'Wandlight Active' : 'Wandlight Paused', 'Master runtime toggle. When paused, Wandlight does not inject, scan, or generate.'));
+    status.appendChild(createStatusPill(settings.enabled ? 'Active' : 'Paused', 'Master runtime toggle. When paused, Wandlight does not inject, scan, or generate.'));
     status.appendChild(createStatusPill((settings.injectContinuity !== false && settings.injectMemo !== false) ? 'Continuity Injected' : 'Continuity Not Injected', 'Whether Wandlight includes structured continuity state in roleplay generation prompts.'));
     if (pendingDelta + pendingLore > 0) {
-        status.appendChild(createStatusPill(`Pending: ${pendingDelta + pendingLore}`, 'Pending items: generated lore entries in the Lore tab, plus any legacy continuity delta shown in the Continuity tab.'));
+        status.appendChild(createStatusPill(`Pending: ${pendingDelta + pendingLore}`, 'Pending generated lore entries plus any legacy continuity delta.'));
     }
-    status.appendChild(createStatusPill(`Lore Selected: ${selectedLore}`, 'Accepted lore entries selected for the next injection after context activation, priority, pinning, and muting. There is no hidden entry cap; mute entries to exclude them.'));
+    status.appendChild(createStatusPill(`Lore Selected: ${selectedLore}`, 'Accepted lore entries selected for the next injection after context activation, priority, pinning, and muting.'));
+    void counts;
 }
 
 function renderPanelBody(container, state) {
     container.innerHTML = '';
 
-    const tabs = document.createElement('div');
-    tabs.className = 'wandlight-runtime-tabs';
-
     const activeTab = normalizeTab(state?.lorePanel?.activeTab);
-    for (const [tabId, label] of Object.entries(TAB_LABELS)) {
-        const tab = document.createElement('button');
-        tab.className = 'wandlight-runtime-tab';
-        if (tabId === activeTab) tab.classList.add('wandlight-runtime-tab-active');
-        tab.type = 'button';
-        tab.textContent = label;
-        addTooltip(tab, TAB_TOOLTIPS[tabId]);
-        tab.addEventListener('click', () => {
-            setPanelState({ activeTab: tabId });
-            refreshPanelBody({ preserveScroll: false });
-        });
-        tabs.appendChild(tab);
-    }
-    container.appendChild(tabs);
-
     const tabBody = document.createElement('div');
     tabBody.className = `wandlight-runtime-tab-body wandlight-runtime-tab-body-${activeTab}`;
     container.appendChild(tabBody);
@@ -485,6 +593,138 @@ function renderPanelBody(container, state) {
     }
 
     if (activeTab === 'lore') scheduleAcceptedLoreLayoutUpdate();
+}
+
+function getRailMetrics(state, settings = getSettings()) {
+    const counts = getPanelLoreState(state).counts;
+    const pendingLore = (state?.pendingLoreEntries || []).length;
+    const selectedLore = getSelectedLoreInjectionCount(state, settings);
+    const injectionStats = getInjectionCharacterStats(state, settings);
+    const sceneDate = String(state?.loreContext?.sceneDate || '').trim();
+    const canonBoundary = String(state?.loreContext?.canonBoundary || '').trim();
+    const activeCharacters = Array.isArray(state?.scene?.presentCharacters)
+        ? state.scene.presentCharacters.length
+        : (Array.isArray(state?.characters) ? state.characters.length : 0);
+    const liveItems = [state?.scene?.location, state?.scene?.currentActivity].filter(Boolean).length;
+
+    return {
+        session: settings.enabled ? getWorkflowLabel(settings) : 'Paused',
+        context: sceneDate || canonBoundary || 'No date',
+        continuity: `${activeCharacters || liveItems || 0} live`,
+        lore: pendingLore ? `${counts.active || 0}+${pendingLore}` : `${counts.active || 0} active`,
+        injection: injectionStats.totalChars ? `${injectionStats.totalTokens} tk` : `${selectedLore} lore`,
+    };
+}
+
+function normalizePanelLayoutState(state, options = {}) {
+    if (!state) return null;
+    if (!state.lorePanel) state.lorePanel = getDefaultState().lorePanel;
+    const panelState = state.lorePanel;
+
+    const hadRailFields = panelState.railX != null || panelState.railY != null || panelState.drawerOpen != null;
+    panelState.railMode = normalizeRailMode(panelState.railMode);
+    if (typeof panelState.drawerOpen !== 'boolean') {
+        panelState.drawerOpen = hadRailFields ? false : panelState.collapsed !== true;
+    }
+    panelState.collapsed = panelState.drawerOpen !== true;
+    panelState.activeTab = normalizeTab(panelState.activeTab);
+    panelState.drawerDirection = ['auto', 'right', 'left'].includes(panelState.drawerDirection) ? panelState.drawerDirection : 'auto';
+
+    const legacyX = Number(panelState.x);
+    const legacyY = Number(panelState.y);
+    const defaultY = getDefaultRailY();
+    panelState.railX = clampNumber(Number(panelState.railX), 0, Math.max(0, window.innerWidth - getRailWidth(panelState)), Number.isFinite(legacyX) ? legacyX : 16);
+    panelState.railY = clampNumber(Number(panelState.railY), 0, Math.max(0, window.innerHeight - 80), Number.isFinite(legacyY) ? legacyY : defaultY);
+    panelState.drawerWidth = clampNumber(Number(panelState.drawerWidth), MIN_DRAWER_WIDTH, Math.max(MIN_DRAWER_WIDTH, window.innerWidth - (MAX_PANEL_MARGIN * 2)), Number(panelState.width) || 560);
+    panelState.drawerHeight = clampNumber(Number(panelState.drawerHeight), MIN_DRAWER_HEIGHT, Math.max(MIN_DRAWER_HEIGHT, window.innerHeight - (MAX_PANEL_MARGIN * 2)), Number(panelState.height) || 640);
+
+    if (options.persistLegacyOpenState) {
+        panelState.x = panelState.railX;
+        panelState.y = panelState.railY;
+        panelState.width = panelState.drawerWidth;
+        panelState.height = panelState.drawerHeight;
+    }
+    return panelState;
+}
+
+function normalizeRailMode(mode) {
+    return mode === 'expanded' ? 'expanded' : 'compact';
+}
+
+function getRailWidth(panelState) {
+    return normalizeRailMode(panelState?.railMode) === 'expanded' ? RAIL_WIDTH_EXPANDED : RAIL_WIDTH_COMPACT;
+}
+
+function getDefaultRailY() {
+    return Math.max(16, Math.round((window.innerHeight || 800) * 0.35));
+}
+
+function getConstrainedDrawerWidth(panelState, direction = 'right') {
+    const railX = Number(panelState?.railX) || 0;
+    const railWidth = getRailWidth(panelState);
+    const requested = Number(panelState?.drawerWidth) || 560;
+    const spaceRight = Math.max(MIN_DRAWER_WIDTH, window.innerWidth - railX - railWidth - RAIL_DRAWER_GAP - MAX_PANEL_MARGIN);
+    const spaceLeft = Math.max(MIN_DRAWER_WIDTH, railX - RAIL_DRAWER_GAP - MAX_PANEL_MARGIN);
+    const maxWidth = direction === 'left' ? spaceLeft : spaceRight;
+    return Math.max(MIN_DRAWER_WIDTH, Math.min(requested, maxWidth));
+}
+
+function getConstrainedDrawerHeight(panelState) {
+    const railY = Number(panelState?.railY) || 0;
+    const requested = Number(panelState?.drawerHeight) || 640;
+    const maxHeight = Math.max(MIN_DRAWER_HEIGHT, window.innerHeight - railY - MAX_PANEL_MARGIN);
+    return Math.max(MIN_DRAWER_HEIGHT, Math.min(requested, maxHeight));
+}
+
+function resolveDrawerDirection(panelState) {
+    if (panelState?.drawerDirection === 'left') return 'left';
+    if (panelState?.drawerDirection === 'right') return 'right';
+
+    const railX = Number(panelState?.railX) || 0;
+    const railWidth = getRailWidth(panelState);
+    const requested = Number(panelState?.drawerWidth) || 560;
+    const spaceRight = window.innerWidth - railX - railWidth - RAIL_DRAWER_GAP - MAX_PANEL_MARGIN;
+    const spaceLeft = railX - RAIL_DRAWER_GAP - MAX_PANEL_MARGIN;
+
+    if (spaceRight >= requested) return 'right';
+    if (spaceLeft >= requested) return 'left';
+    return spaceRight >= spaceLeft ? 'right' : 'left';
+}
+
+function applyRuntimeShellGeometry(root, panelState) {
+    const railWidth = getRailWidth(panelState);
+    const x = clampNumber(Number(panelState?.railX), 0, Math.max(0, window.innerWidth - railWidth), 16);
+    const y = clampNumber(Number(panelState?.railY), 0, Math.max(0, window.innerHeight - 80), getDefaultRailY());
+    root.style.left = `${x}px`;
+    root.style.top = `${y}px`;
+    root.style.right = '';
+    root.style.bottom = '';
+}
+
+function clampRuntimeShellToViewport() {
+    if (!panelRoot) return;
+    const state = getState();
+    const panelState = normalizePanelLayoutState(state);
+    if (!panelState) return;
+    const railWidth = getRailWidth(panelState);
+    const railHeight = panelRoot.querySelector('.wandlight-runtime-rail')?.offsetHeight || 80;
+    panelState.railX = clampNumber(Number(panelState.railX), 0, Math.max(0, window.innerWidth - railWidth), 16);
+    panelState.railY = clampNumber(Number(panelState.railY), 0, Math.max(0, window.innerHeight - Math.min(railHeight, window.innerHeight)), getDefaultRailY());
+    panelState.x = panelState.railX;
+    panelState.y = panelState.railY;
+    applyRuntimeShellGeometry(panelRoot, panelState);
+    panelRoot.style.setProperty('--wandlight-rail-width', `${railWidth}px`);
+    panelRoot.style.setProperty('--wandlight-drawer-width', `${getConstrainedDrawerWidth(panelState, resolveDrawerDirection(panelState))}px`);
+    panelRoot.style.setProperty('--wandlight-drawer-height', `${getConstrainedDrawerHeight(panelState)}px`);
+    saveState(state);
+}
+
+function clampNumber(value, min, max, fallback) {
+    const safeMin = Number.isFinite(min) ? min : 0;
+    const safeMax = Number.isFinite(max) ? Math.max(safeMin, max) : safeMin;
+    const safeFallback = Number.isFinite(fallback) ? fallback : safeMin;
+    const n = Number.isFinite(value) ? value : safeFallback;
+    return Math.max(safeMin, Math.min(n, safeMax));
 }
 
 // Session tab -----------------------------------------------------------------
@@ -4917,8 +5157,10 @@ function scheduleAcceptedLoreLayoutUpdate() {
 }
 
 function updateAcceptedLoreScrollRegionHeight() {
-    if (!panelRoot || panelRoot.classList.contains('wandlight-lore-panel-collapsed')) return;
-    const list = panelRoot.querySelector('.wandlight-accepted-lore-scroll-region');
+    if (!panelRoot) return;
+    const drawer = panelRoot.querySelector('.wandlight-runtime-drawer');
+    if (!drawer) return;
+    const list = drawer.querySelector('.wandlight-accepted-lore-scroll-region');
     if (!list) return;
 
     const acceptedSection = list.closest('.wandlight-accepted-lore-section');
@@ -4927,9 +5169,9 @@ function updateAcceptedLoreScrollRegionHeight() {
     const summary = acceptedDetails?.querySelector(':scope > .wandlight-collapsible-summary');
     if (!acceptedSection || !acceptedDetails?.open || !content) return;
 
-    const panelRect = panelRoot.getBoundingClientRect();
-    const bodyRect = panelRoot.querySelector('.wandlight-lore-panel-body')?.getBoundingClientRect?.() || panelRect;
-    const tabRect = panelRoot.querySelector('.wandlight-runtime-tab-body-lore')?.getBoundingClientRect?.() || bodyRect;
+    const panelRect = drawer.getBoundingClientRect();
+    const bodyRect = drawer.querySelector('.wandlight-lore-panel-body')?.getBoundingClientRect?.() || panelRect;
+    const tabRect = drawer.querySelector('.wandlight-runtime-tab-body-lore')?.getBoundingClientRect?.() || bodyRect;
     const detailsRect = acceptedDetails.getBoundingClientRect();
     const bottomBoundary = Math.min(panelRect.bottom, bodyRect.bottom, tabRect.bottom) - 8;
 
@@ -4958,7 +5200,10 @@ function updateAcceptedLoreScrollRegionHeight() {
 }
 
 if (typeof window !== 'undefined') {
-    window.addEventListener('resize', scheduleAcceptedLoreLayoutUpdate);
+    window.addEventListener('resize', () => {
+        clampRuntimeShellToViewport();
+        scheduleAcceptedLoreLayoutUpdate();
+    });
 }
 
 function cssEscape(value) {
@@ -5701,19 +5946,61 @@ function setPanelState(patch, options = {}) {
 function toggleCollapse() {
     const state = getState();
     if (!state?.lorePanel) return;
-    state.lorePanel.collapsed = !state.lorePanel.collapsed;
+    normalizePanelLayoutState(state);
+    state.lorePanel.drawerOpen = state.lorePanel.drawerOpen !== true;
+    state.lorePanel.collapsed = state.lorePanel.drawerOpen !== true;
+    saveState(state);
+    showLorePanel();
+}
+
+function setDrawerOpen(open) {
+    const state = getState();
+    if (!state?.lorePanel) return;
+    normalizePanelLayoutState(state);
+    state.lorePanel.drawerOpen = open === true;
+    state.lorePanel.collapsed = state.lorePanel.drawerOpen !== true;
+    saveState(state);
+    showLorePanel();
+}
+
+function toggleDrawerForTab(tabId) {
+    const state = getState();
+    if (!state?.lorePanel) return;
+    normalizePanelLayoutState(state);
+    const normalizedTab = normalizeTab(tabId);
+    const sameActiveTab = normalizeTab(state.lorePanel.activeTab) === normalizedTab;
+    const shouldClose = sameActiveTab && state.lorePanel.drawerOpen === true;
+    state.lorePanel.activeTab = normalizedTab;
+    state.lorePanel.drawerOpen = !shouldClose;
+    state.lorePanel.collapsed = shouldClose;
+    saveState(state);
+    showLorePanel();
+}
+
+function toggleRailMode() {
+    const state = getState();
+    if (!state?.lorePanel) return;
+    normalizePanelLayoutState(state);
+    state.lorePanel.railMode = normalizeRailMode(state.lorePanel.railMode) === 'compact' ? 'expanded' : 'compact';
     saveState(state);
     showLorePanel();
 }
 
 function refreshPanelBody(options = {}) {
     if (!panelRoot) return;
+    const stateForShell = getState();
+    normalizePanelLayoutState(stateForShell);
     const body = panelRoot.querySelector('.wandlight-lore-panel-body');
-    if (!body) return;
+    if (!body) {
+        if (stateForShell?.lorePanel?.drawerOpen === true) renderPanelShell(panelRoot, stateForShell);
+        else refreshHeader();
+        return;
+    }
 
     const activeScroll = getActiveScrollElement();
     const scrollTop = options.preserveScroll && activeScroll ? activeScroll.scrollTop : 0;
-    const panelScrollTop = options.preserveScroll ? (panelRoot.scrollTop || 0) : 0;
+    const drawer = panelRoot.querySelector('.wandlight-runtime-drawer');
+    const drawerScrollTop = options.preserveScroll && drawer ? (drawer.scrollTop || 0) : 0;
     const pageScrollElement = typeof document !== 'undefined' ? document.scrollingElement || document.documentElement : null;
     const pageScrollTop = (options.preserveScroll || options.preserveWindowScroll) && pageScrollElement
         ? pageScrollElement.scrollTop
@@ -5722,13 +6009,14 @@ function refreshPanelBody(options = {}) {
         ? pageScrollElement.scrollLeft
         : null;
 
-    const state = getState();
+    const state = stateForShell;
     renderPanelBody(body, state);
+    refreshHeader();
 
     if (options.preserveScroll) {
         const newScroll = getActiveScrollElement();
         if (newScroll) newScroll.scrollTop = scrollTop;
-        panelRoot.scrollTop = panelScrollTop;
+        if (drawer) drawer.scrollTop = drawerScrollTop;
     }
 
     if ((options.preserveScroll || options.preserveWindowScroll) && pageScrollElement && pageScrollTop !== null) {
@@ -5758,11 +6046,11 @@ function onDragStart(e) {
     dragOffsetX = e.clientX - rect.left;
     dragOffsetY = e.clientY - rect.top;
 
-    panelRoot.style.right = '';
-    panelRoot.style.bottom = '';
     panelRoot.style.left = `${rect.left}px`;
     panelRoot.style.top = `${rect.top}px`;
-    panelRoot.style.cursor = 'grabbing';
+    panelRoot.style.right = '';
+    panelRoot.style.bottom = '';
+    panelRoot.classList.add('wandlight-runtime-dragging');
 
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
@@ -5770,10 +6058,14 @@ function onDragStart(e) {
 
 function onDragMove(e) {
     if (!isDragging || !panelRoot) return;
+    const state = getState();
+    const panelState = normalizePanelLayoutState(state) || {};
+    const railWidth = getRailWidth(panelState);
+    const railHeight = panelRoot.querySelector('.wandlight-runtime-rail')?.offsetHeight || 80;
     const x = e.clientX - dragOffsetX;
     const y = e.clientY - dragOffsetY;
-    const maxX = window.innerWidth - panelRoot.offsetWidth;
-    const maxY = window.innerHeight - panelRoot.offsetHeight;
+    const maxX = Math.max(0, window.innerWidth - railWidth);
+    const maxY = Math.max(0, window.innerHeight - Math.min(railHeight, window.innerHeight));
     panelRoot.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
     panelRoot.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
 }
@@ -5781,27 +6073,26 @@ function onDragMove(e) {
 function onDragEnd() {
     if (!panelRoot) return;
     isDragging = false;
-    panelRoot.style.cursor = '';
-    savePanelGeometry();
+    panelRoot.classList.remove('wandlight-runtime-dragging');
+    saveRailGeometry();
     document.removeEventListener('mousemove', onDragMove);
     document.removeEventListener('mouseup', onDragEnd);
 }
 
 function onResizeStart(e) {
     if (e.button !== 0 || !panelRoot) return;
+    const drawer = panelRoot.querySelector('.wandlight-runtime-drawer');
+    if (!drawer) return;
 
     isResizing = true;
-    const rect = panelRoot.getBoundingClientRect();
+    const rect = drawer.getBoundingClientRect();
     resizeStartX = e.clientX;
     resizeStartY = e.clientY;
     resizeStartWidth = rect.width;
     resizeStartHeight = rect.height;
+    resizeStartDirection = panelRoot.dataset.drawerDirection === 'left' ? 'left' : 'right';
 
-    panelRoot.style.left = `${rect.left}px`;
-    panelRoot.style.top = `${rect.top}px`;
-    panelRoot.style.right = '';
-    panelRoot.style.bottom = '';
-    panelRoot.classList.add('wandlight-lore-panel-resizing');
+    drawer.classList.add('wandlight-lore-panel-resizing');
 
     e.preventDefault();
     e.stopPropagation();
@@ -5814,38 +6105,74 @@ function onResizeStart(e) {
 
 function onResizeMove(e) {
     if (!isResizing || !panelRoot) return;
-    const rect = panelRoot.getBoundingClientRect();
-    const maxWidth = Math.max(MIN_PANEL_WIDTH, window.innerWidth - rect.left - MAX_PANEL_MARGIN);
-    const maxHeight = Math.max(MIN_PANEL_HEIGHT, window.innerHeight - rect.top - MAX_PANEL_MARGIN);
-    const width = Math.max(MIN_PANEL_WIDTH, Math.min(maxWidth, resizeStartWidth + (e.clientX - resizeStartX)));
-    const height = Math.max(MIN_PANEL_HEIGHT, Math.min(maxHeight, resizeStartHeight + (e.clientY - resizeStartY)));
-    panelRoot.style.width = `${width}px`;
-    panelRoot.style.height = `${height}px`;
+    const drawer = panelRoot.querySelector('.wandlight-runtime-drawer');
+    if (!drawer) return;
+    const state = getState();
+    const panelState = normalizePanelLayoutState(state) || {};
+    const railX = Number(panelState.railX) || 0;
+    const railWidth = getRailWidth(panelState);
+    const maxWidth = resizeStartDirection === 'left'
+        ? Math.max(MIN_DRAWER_WIDTH, railX - RAIL_DRAWER_GAP - MAX_PANEL_MARGIN)
+        : Math.max(MIN_DRAWER_WIDTH, window.innerWidth - railX - railWidth - RAIL_DRAWER_GAP - MAX_PANEL_MARGIN);
+    const maxHeight = Math.max(MIN_DRAWER_HEIGHT, window.innerHeight - (Number(panelState.railY) || 0) - MAX_PANEL_MARGIN);
+    const deltaX = e.clientX - resizeStartX;
+    const requestedWidth = resizeStartDirection === 'left'
+        ? resizeStartWidth - deltaX
+        : resizeStartWidth + deltaX;
+    const width = Math.max(MIN_DRAWER_WIDTH, Math.min(maxWidth, requestedWidth));
+    const height = Math.max(MIN_DRAWER_HEIGHT, Math.min(maxHeight, resizeStartHeight + (e.clientY - resizeStartY)));
+    drawer.style.width = `${width}px`;
+    drawer.style.height = `${height}px`;
+    panelRoot.style.setProperty('--wandlight-drawer-width', `${width}px`);
+    panelRoot.style.setProperty('--wandlight-drawer-height', `${height}px`);
     updateAcceptedLoreScrollRegionHeight();
 }
 
 function onResizeEnd() {
     if (!isResizing || !panelRoot) return;
     isResizing = false;
-    panelRoot.classList.remove('wandlight-lore-panel-resizing');
-    savePanelGeometry();
+    const drawer = panelRoot.querySelector('.wandlight-runtime-drawer');
+    drawer?.classList.remove('wandlight-lore-panel-resizing');
+    saveDrawerGeometry();
     document.removeEventListener('pointermove', onResizeMove);
     document.removeEventListener('pointerup', onResizeEnd);
     document.removeEventListener('pointercancel', onResizeEnd);
 }
 
-function savePanelGeometry() {
+function saveRailGeometry() {
     if (!panelRoot) return;
     const state = getState();
     if (!state?.lorePanel) return;
+    normalizePanelLayoutState(state);
     const rect = panelRoot.getBoundingClientRect();
-    state.lorePanel.x = Math.round(rect.left);
-    state.lorePanel.y = Math.round(rect.top);
-    if (!panelRoot.classList.contains('wandlight-lore-panel-collapsed')) {
-        state.lorePanel.width = Math.round(rect.width);
-        state.lorePanel.height = Math.round(rect.height);
-    }
+    state.lorePanel.railX = Math.round(rect.left);
+    state.lorePanel.railY = Math.round(rect.top);
+    state.lorePanel.x = state.lorePanel.railX;
+    state.lorePanel.y = state.lorePanel.railY;
     saveState(state);
+}
+
+function saveDrawerGeometry() {
+    if (!panelRoot) return;
+    const state = getState();
+    if (!state?.lorePanel) return;
+    normalizePanelLayoutState(state);
+    const drawer = panelRoot.querySelector('.wandlight-runtime-drawer');
+    if (!drawer) {
+        saveState(state);
+        return;
+    }
+    const rect = drawer.getBoundingClientRect();
+    state.lorePanel.drawerWidth = Math.round(rect.width);
+    state.lorePanel.drawerHeight = Math.round(rect.height);
+    state.lorePanel.width = state.lorePanel.drawerWidth;
+    state.lorePanel.height = state.lorePanel.drawerHeight;
+    saveState(state);
+}
+
+function savePanelGeometry() {
+    saveRailGeometry();
+    saveDrawerGeometry();
 }
 
 // UI helpers ------------------------------------------------------------------

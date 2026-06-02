@@ -991,6 +991,27 @@ export function migrateState(state) {
         state._version = 15;
     }
 
+    // ── Schema v16: runtime rail + anchored drawer layout ────────────────
+    if (state._version < 16) {
+        const defaults = getDefaultState();
+        const previousPanel = state.lorePanel && typeof state.lorePanel === 'object' ? { ...state.lorePanel } : {};
+        const hadDrawerOpen = Object.prototype.hasOwnProperty.call(previousPanel, 'drawerOpen');
+        state.lorePanel = mergeDefaults(previousPanel, defaults.lorePanel);
+        state.lorePanel.railMode = previousPanel.railMode === 'expanded' ? 'expanded' : defaults.lorePanel.railMode;
+        state.lorePanel.drawerOpen = hadDrawerOpen ? previousPanel.drawerOpen === true : previousPanel.collapsed !== true;
+        state.lorePanel.collapsed = state.lorePanel.drawerOpen !== true;
+        state.lorePanel.railX = Number.isFinite(Number(previousPanel.railX)) ? Number(previousPanel.railX) : (Number.isFinite(Number(previousPanel.x)) ? Number(previousPanel.x) : defaults.lorePanel.railX);
+        state.lorePanel.railY = Number.isFinite(Number(previousPanel.railY)) ? Number(previousPanel.railY) : (Number.isFinite(Number(previousPanel.y)) ? Number(previousPanel.y) : defaults.lorePanel.railY);
+        state.lorePanel.drawerWidth = Number.isFinite(Number(previousPanel.drawerWidth)) ? Number(previousPanel.drawerWidth) : (Number.isFinite(Number(previousPanel.width)) ? Number(previousPanel.width) : defaults.lorePanel.drawerWidth);
+        state.lorePanel.drawerHeight = Number.isFinite(Number(previousPanel.drawerHeight)) ? Number(previousPanel.drawerHeight) : (Number.isFinite(Number(previousPanel.height)) ? Number(previousPanel.height) : defaults.lorePanel.drawerHeight);
+        state.lorePanel.drawerDirection = ['auto', 'right', 'left'].includes(previousPanel.drawerDirection) ? previousPanel.drawerDirection : defaults.lorePanel.drawerDirection;
+        state.lorePanel.x = state.lorePanel.railX;
+        state.lorePanel.y = state.lorePanel.railY;
+        state.lorePanel.width = state.lorePanel.drawerWidth;
+        state.lorePanel.height = state.lorePanel.drawerHeight;
+        state._version = 16;
+    }
+
     // ── Always normalize lore fields post-migration ────────────────────────
     // First compact known-heavy canon DB payloads and oversized pending batches so
     // a poisoned chat can recover instead of freezing during panel render/save.
@@ -1016,8 +1037,16 @@ export function migrateState(state) {
     if (!state.lorePanel || typeof state.lorePanel !== 'object') {
         state.lorePanel = getDefaultState().lorePanel;
     } else {
+        const defaultsPanel = getDefaultState().lorePanel;
         state.lorePanel.isOpen = state.lorePanel.isOpen !== false;
-        state.lorePanel.collapsed = !!state.lorePanel.collapsed;
+        state.lorePanel.railMode = state.lorePanel.railMode === 'expanded' ? 'expanded' : 'compact';
+        state.lorePanel.drawerOpen = state.lorePanel.drawerOpen === true;
+        state.lorePanel.collapsed = state.lorePanel.drawerOpen !== true;
+        state.lorePanel.drawerDirection = ['auto', 'right', 'left'].includes(state.lorePanel.drawerDirection) ? state.lorePanel.drawerDirection : 'auto';
+        state.lorePanel.railX = Number.isFinite(Number(state.lorePanel.railX)) ? Number(state.lorePanel.railX) : (Number.isFinite(Number(state.lorePanel.x)) ? Number(state.lorePanel.x) : defaultsPanel.railX);
+        state.lorePanel.railY = Number.isFinite(Number(state.lorePanel.railY)) ? Number(state.lorePanel.railY) : (Number.isFinite(Number(state.lorePanel.y)) ? Number(state.lorePanel.y) : defaultsPanel.railY);
+        state.lorePanel.drawerWidth = Number.isFinite(Number(state.lorePanel.drawerWidth)) && Number(state.lorePanel.drawerWidth) >= 320 ? Number(state.lorePanel.drawerWidth) : (Number.isFinite(Number(state.lorePanel.width)) ? Number(state.lorePanel.width) : defaultsPanel.drawerWidth);
+        state.lorePanel.drawerHeight = Number.isFinite(Number(state.lorePanel.drawerHeight)) && Number(state.lorePanel.drawerHeight) >= 260 ? Number(state.lorePanel.drawerHeight) : (Number.isFinite(Number(state.lorePanel.height)) ? Number(state.lorePanel.height) : defaultsPanel.drawerHeight);
         state.lorePanel.selectedCategory = state.lorePanel.selectedCategory || 'all';
         state.lorePanel.search = state.lorePanel.search || '';
         state.lorePanel.selectedEntryId = state.lorePanel.selectedEntryId || '';
@@ -1041,14 +1070,10 @@ export function migrateState(state) {
         state.lorePanel.pendingReviewVisibleLimit = Number.isFinite(Number(state.lorePanel.pendingReviewVisibleLimit))
             ? Math.max(5, Math.min(1000, Number(state.lorePanel.pendingReviewVisibleLimit)))
             : getDefaultState().lorePanel.pendingReviewVisibleLimit;
-        state.lorePanel.width = Number.isFinite(Number(state.lorePanel.width)) && Number(state.lorePanel.width) >= 320 ? Number(state.lorePanel.width) : 420;
-        state.lorePanel.height = Number.isFinite(Number(state.lorePanel.height)) && Number(state.lorePanel.height) >= 260 ? Number(state.lorePanel.height) : 520;
-        if (state.lorePanel.x !== undefined) {
-            state.lorePanel.x = Number.isFinite(Number(state.lorePanel.x)) ? Number(state.lorePanel.x) : undefined;
-        }
-        if (state.lorePanel.y !== undefined) {
-            state.lorePanel.y = Number.isFinite(Number(state.lorePanel.y)) ? Number(state.lorePanel.y) : undefined;
-        }
+        state.lorePanel.width = Number.isFinite(Number(state.lorePanel.width)) && Number(state.lorePanel.width) >= 320 ? Number(state.lorePanel.width) : state.lorePanel.drawerWidth;
+        state.lorePanel.height = Number.isFinite(Number(state.lorePanel.height)) && Number(state.lorePanel.height) >= 260 ? Number(state.lorePanel.height) : state.lorePanel.drawerHeight;
+        state.lorePanel.x = Number.isFinite(Number(state.lorePanel.x)) ? Number(state.lorePanel.x) : state.lorePanel.railX;
+        state.lorePanel.y = Number.isFinite(Number(state.lorePanel.y)) ? Number(state.lorePanel.y) : state.lorePanel.railY;
     }
 
     // Normalize loreSelection

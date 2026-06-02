@@ -1,5 +1,5 @@
 /**
- * secure-keyring.js — Wandlight Continuity
+ * secure-keyring.js — Wandlight
  * Best-effort encrypted-at-rest secret storage using WebCrypto AES-GCM.
  *
  * Security model:

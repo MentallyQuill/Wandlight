@@ -1,5 +1,5 @@
 /**
- * lore-panel.js - Wandlight Continuity
+ * lore-panel.js - Wandlight
  * Floating roleplay control window.
  *
  * The extension-menu settings panel is reserved for API setup, data/debug, and
@@ -435,7 +435,21 @@ function renderRail(state) {
 
     const mark = document.createElement('div');
     mark.className = 'wandlight-runtime-rail-mark';
-    mark.textContent = railMode === 'compact' ? 'W' : 'Wandlight';
+
+    const markImg = document.createElement('img');
+    markImg.className = 'wandlight-runtime-rail-logo-img';
+    markImg.alt = railMode === 'compact' ? 'Wandlight' : 'Wandlight logo';
+    markImg.src = getExtensionAssetPath(
+        railMode === 'compact'
+            ? 'Images/branding/wandlight-logo-minimized-256.png'
+            : 'Images/branding/wandlight-logo-expanded-512.png',
+    );
+    markImg.onerror = () => {
+        markImg.remove();
+        mark.textContent = railMode === 'compact' ? 'W' : 'Wandlight';
+        mark.classList.add('wandlight-runtime-rail-mark-fallback');
+    };
+    mark.appendChild(markImg);
     drag.appendChild(mark);
 
     const sub = document.createElement('div');
@@ -538,8 +552,8 @@ function renderDrawer(state, direction = 'right') {
     titleWrap.className = 'wandlight-lore-panel-title-wrap';
     const title = document.createElement('div');
     title.className = 'wandlight-lore-panel-title wandlight-runtime-drawer-title';
-    title.textContent = TAB_LABELS[activeTab] || 'Wandlight Continuity';
-    addTooltip(title, TAB_TOOLTIPS[activeTab] || 'Wandlight Continuity runtime drawer.');
+    title.textContent = TAB_LABELS[activeTab] || 'Wandlight';
+    addTooltip(title, TAB_TOOLTIPS[activeTab] || 'Wandlight runtime drawer.');
     titleWrap.appendChild(title);
 
     const status = document.createElement('div');
@@ -6529,7 +6543,7 @@ async function runBusyAction(btn, busyText, action) {
     try {
         await action();
     } catch (e) {
-        console.error('[Wandlight Continuity] Runtime action failed:', e);
+        console.error('[Wandlight] Runtime action failed:', e);
         toast(e?.message ? `Action failed: ${e.message}` : 'Action failed.', 'error');
     } finally {
         btn.disabled = false;

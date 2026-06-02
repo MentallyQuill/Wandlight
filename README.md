@@ -1,8 +1,8 @@
-![Wandlight Continuity](Images/banner.jpg)
+![Wandlight](Images/banner.jpg)
 
-# Wandlight Continuity
+# Wandlight
 
-Wandlight Continuity is a SillyTavern extension for long-form Harry Potter roleplay where chronology, canon timing, AU branches, secrets, and durable story memory matter.
+Wandlight is a SillyTavern extension for long-form Harry Potter roleplay where chronology, canon timing, AU branches, secrets, and durable story memory matter.
 
 The current lore system is relevance-tiered. Accepted lore is not treated as simply active or inactive. Instead, each lore entry has a **Relevance** tier that controls where it is injected, how it is sorted, and how aggressively it is compressed.
 
@@ -143,7 +143,7 @@ Changing High-Relevance lore should not invalidate Low-Relevance compression, an
 Place the extension folder here:
 
 ```text
-data/default-user/extensions/third-party/WandlightContinuity
+data/default-user/extensions/third-party/Wandlight
 ```
 
 Restart SillyTavern and open the Wandlight Runtime Window from the Extensions panel.

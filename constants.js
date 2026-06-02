@@ -1,17 +1,19 @@
 /**
- * constants.js — Wandlight Continuity
+ * constants.js — Wandlight
  * Module key, default state object, default settings, extraction prompt template,
  * lore generation prompts, and logging prefix. No other dependencies.
  */
 
 // ── Module key ──────────────────────────────────────────────────────────────────
-export const MODULE_KEY = 'wandlight_continuity';
+export const MODULE_KEY = 'wandlight';
+export const LEGACY_MODULE_KEYS = Object.freeze(['wandlight_continuity']);
 
 /**
  * The extension folder name under data/default-user/extensions/third-party/.
  * Must match the installed folder name exactly for renderExtensionTemplateAsync.
  */
-export const EXTENSION_FOLDER = 'third-party/WandlightContinuity';
+export const EXTENSION_FOLDER = 'third-party/Wandlight';
+export const LEGACY_EXTENSION_FOLDERS = Object.freeze(['third-party/WandlightContinuity']);
 
 /**
  * Dynamically detects the actual installed extension folder from the script src.
@@ -22,27 +24,25 @@ export const EXTENSION_FOLDER = 'third-party/WandlightContinuity';
 export function detectExtensionFolder(fallback = EXTENSION_FOLDER) {
     try {
         const scripts = Array.from(document.querySelectorAll('script[src]'));
-        // Narrow candidates: only match /third-party/.../index.js AND contain "wandlight" (case-insensitive).
-        const candidates = scripts
-            .map(s => s.src)
-            .filter(src =>
-                src.includes('/third-party/') &&
-                src.endsWith('/index.js') &&
-                /wandlight/i.test(src)
-            );
-        const src = candidates[0];
-        const match = src?.match(/third-party\/([^/]+)\/index\.js/);
-        if (match?.[1]) {
-            return `third-party/${decodeURIComponent(match[1])}`;
+        // Match the actual script location instead of assuming a fixed folder name.
+        // This supports both the rebranded /third-party/Wandlight/ folder and legacy installs.
+        for (const script of scripts) {
+            const rawSrc = script?.src || '';
+            if (!/wandlight/i.test(rawSrc) || !rawSrc.includes('/third-party/')) continue;
+            const url = new URL(rawSrc, document.baseURI);
+            const match = url.pathname.match(/third-party\/([^/]+)\/index\.js$/);
+            if (match?.[1]) {
+                return `third-party/${decodeURIComponent(match[1])}`;
+            }
         }
     } catch (_) {
-        // Silently fall through
+        // Silently fall through.
     }
     return fallback;
 }
 
 // ── Logging prefix ──────────────────────────────────────────────────────────────
-export const LOG_PREFIX = '[Wandlight Continuity]';
+export const LOG_PREFIX = '[Wandlight]';
 
 // ── Schema version ──────────────────────────────────────────────────────────────
 export const SCHEMA_VERSION = 16;

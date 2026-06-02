@@ -1,12 +1,12 @@
 {
-    "display_name": "Wandlight Continuity",
+    "display_name": "Wandlight",
     "version": "1.0.0",
     "author": "MentallyQuill",
-    "key": "wandlight_continuity",
+    "key": "wandlight",
     "js": "index.js",
     "css": "style.css",
     "loading_order": 21,
-    "generate_interceptor": "wandlightContinuityInterceptor",
+    "generate_interceptor": "wandlightInterceptor",
     "homePage": "https://github.com/MentallyQuill/ST-Wandlight",
     "auto_update": false
 }

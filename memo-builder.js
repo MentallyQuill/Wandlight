@@ -1,5 +1,5 @@
 /**
- * memo-builder.js — Wandlight Continuity
+ * memo-builder.js — Wandlight
  * Builds split continuity-state and lore-entry injection previews/memos.
  */
 

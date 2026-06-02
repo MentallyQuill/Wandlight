@@ -1,5 +1,5 @@
 /**
- * extractor.js — Wandlight Continuity
+ * extractor.js — Wandlight
  * Event/automation entrypoints for checkpointed continuity scanning, context
  * detection, and story-lore scanning.
  *

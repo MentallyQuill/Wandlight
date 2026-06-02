@@ -1,5 +1,5 @@
 /**
- * state-manager.js — Wandlight Continuity
+ * state-manager.js — Wandlight
  * State CRUD, settings I/O, migration, delta merging, snapshot history, and undo.
  * Reads reacquire from SillyTavern's context, with one-session migration caching so UI clicks do not repeatedly normalize the full lore matrix.
  *
@@ -7,7 +7,7 @@
  * Imported by: index.js, memo-builder.js, extractor.js, ui.js
  */
 
-import { MODULE_KEY, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
+import { MODULE_KEY, LEGACY_MODULE_KEYS, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
 import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey, applyLoreLifecycleEvaluation } from './lore-matrix.js';
 import { normalizeLoreRelevance, normalizeLoreCanon, normalizeLoreCategory, computeLocalLoreRelevance, normalizeLorePurpose, computeSpecificityScore } from './lore-relevance.js';
 import { preprocessPendingLoreEntries } from './pending-lore-preprocessor.js';
@@ -84,10 +84,35 @@ function ensureTierCompressionStatus(state = {}) {
 }
 
 
+
+function migrateBucket(container, bucketName = 'storage') {
+    if (!container || typeof container !== 'object') return null;
+    const current = container[MODULE_KEY];
+    if (current && typeof current === 'object') return current;
+    for (const legacyKey of LEGACY_MODULE_KEYS || []) {
+        const legacy = container[legacyKey];
+        if (legacy && typeof legacy === 'object') {
+            container[MODULE_KEY] = legacy;
+            return legacy;
+        }
+    }
+    container[MODULE_KEY] = {};
+    return container[MODULE_KEY];
+}
+
+function removeLegacyBuckets(container) {
+    if (!container || typeof container !== 'object') return;
+    for (const legacyKey of LEGACY_MODULE_KEYS || []) {
+        if (legacyKey !== MODULE_KEY && Object.prototype.hasOwnProperty.call(container, legacyKey)) {
+            delete container[legacyKey];
+        }
+    }
+}
+
 // ── Settings I/O ────────────────────────────────────────────────────────────────
 
 /**
- * Reads extensionSettings.wandlight_continuity, deep-merges defaults for any
+ * Reads extensionSettings.wandlight, deep-merges defaults for any
  * missing keys, and returns the live settings object. Always reacquires from
  * SillyTavern.getContext().
  * @returns {Object} WandlightSettings
@@ -98,10 +123,7 @@ export function getSettings() {
         return { ...DEFAULT_SETTINGS };
     }
     const { extensionSettings } = ctx;
-    if (!extensionSettings[MODULE_KEY]) {
-        extensionSettings[MODULE_KEY] = {};
-    }
-    const stored = extensionSettings[MODULE_KEY];
+    const stored = migrateBucket(extensionSettings, 'extensionSettings') || {};
     // Merge defaults into stored, preserving existing user values. Nested setting
     // registries currently only need a one-level merge.
     const merged = { ...DEFAULT_SETTINGS, ...stored };
@@ -164,11 +186,12 @@ export function getSettings() {
 
     // Write back merged defaults so the object is complete going forward
     extensionSettings[MODULE_KEY] = merged;
+    removeLegacyBuckets(extensionSettings);
     return merged;
 }
 
 /**
- * Writes settings to extensionSettings.wandlight_continuity and persists
+ * Writes settings to extensionSettings.wandlight and persists
  * via saveSettingsDebounced().
  * @param {Object} settings - WandlightSettings to save
  */
@@ -177,6 +200,7 @@ export function saveSettings(settings) {
     if (!ctx || !ctx.extensionSettings) return;
     const { extensionSettings, saveSettingsDebounced } = ctx;
     extensionSettings[MODULE_KEY] = settings;
+    removeLegacyBuckets(extensionSettings);
     if (typeof saveSettingsDebounced === 'function') {
         saveSettingsDebounced();
     }
@@ -203,7 +227,7 @@ function queuePromptInjectionSync() {
 // ── State I/O ───────────────────────────────────────────────────────────────────
 
 /**
- * Reads chatMetadata.wandlight_continuity, migrates if needed, merges with
+ * Reads chatMetadata.wandlight, migrates if needed, merges with
  * defaults, and returns the live state object. Always reacquires from
  * SillyTavern.getContext().
  * @returns {Object} WandlightState
@@ -215,10 +239,11 @@ export function getState() {
         return getDefaultState();
     }
     const { chatMetadata } = ctx;
-    let state = chatMetadata[MODULE_KEY];
-    if (!state || typeof state !== 'object') {
+    let state = migrateBucket(chatMetadata, 'chatMetadata');
+    if (!state || typeof state !== 'object' || Object.keys(state).length === 0) {
         state = getDefaultState();
         chatMetadata[MODULE_KEY] = state;
+        removeLegacyBuckets(chatMetadata);
         migratedStateRefs.add(state);
         return state;
     }
@@ -242,6 +267,7 @@ export function getState() {
     if (!Array.isArray(state.stateHistory)) state.stateHistory = [];
     if (state.lastDelta === undefined) state.lastDelta = null;
     chatMetadata[MODULE_KEY] = state;
+    removeLegacyBuckets(chatMetadata);
 
     const afterSize = safeJsonSize(state);
     if (typeof ctx.saveMetadata === 'function' && beforeSize > 0 && (afterSize < beforeSize || beforeSize > MAX_CHAT_STATE_BYTES_BEFORE_AUTO_PERSIST)) {
@@ -257,7 +283,7 @@ export function getState() {
 }
 
 /**
- * Writes state to chatMetadata.wandlight_continuity and persists via saveMetadata().
+ * Writes state to chatMetadata.wandlight and persists via saveMetadata().
  * @param {Object} state - WandlightState to save
  */
 export function saveState(state, options = {}) {
@@ -275,6 +301,7 @@ export function saveState(state, options = {}) {
         state = sanitizeLoreArraysForStorage(state);
     }
     chatMetadata[MODULE_KEY] = state;
+    removeLegacyBuckets(chatMetadata);
     migratedStateRefs.add(state);
     if (typeof saveMetadata === 'function') {
         saveMetadata();
@@ -403,6 +430,7 @@ export function saveStateWithSnapshot(state, maxSnapshots) {
     }
 
     chatMetadata[MODULE_KEY] = state;
+    removeLegacyBuckets(chatMetadata);
     if (typeof saveMetadata === 'function') {
         saveMetadata();
     }

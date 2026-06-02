@@ -1,5 +1,5 @@
 /**
- * canon-lore-db.js — Wandlight Continuity
+ * canon-lore-db.js — Wandlight
  * Local date-aware lore database loader for schema-v2 specific canon lore entries.
  *
  * The database is registry-driven:

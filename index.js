@@ -1,5 +1,5 @@
 /**
- * index.js — Wandlight Continuity
+ * index.js — Wandlight
  * Extension entrypoint. Wires events, renders settings panel, registers
  * slash commands, and exposes globalThis bridge functions.
  *
@@ -49,7 +49,7 @@ import { onGenerationEndedAutoRelevance, runAutoRelevance } from './auto-relevan
 $(document).ready(async () => {
     'use strict';
 
-    console.log(`${LOG_PREFIX} Wandlight Continuity extension initializing...`);
+    console.log(`${LOG_PREFIX} Wandlight extension initializing...`);
 
     // ── Defensive API guard ──────────────────────────────────────────────────
     if (typeof SillyTavern === 'undefined' || !SillyTavern.getContext) {
@@ -197,7 +197,7 @@ function registerSlashCommands(ctx) {
             navigator.clipboard.writeText(memo).then(() => {
                 if (typeof toastr !== 'undefined') toastr.success('Continuity memo copied to clipboard');
             }).catch(() => {
-                if (typeof toastr !== 'undefined') toastr.info(`[Wandlight Continuity State]\n${memo}`);
+                if (typeof toastr !== 'undefined') toastr.info(`[Wandlight State]\n${memo}`);
             });
         }
     }, undefined, '\uD83D\uDCCB Copy continuity memo to clipboard', 'Wandlight');
@@ -305,7 +305,7 @@ function registerSlashCommands(ctx) {
  */
 async function mountSettingsPanel(ctx) {
     // ── Duplicate panel guard ────────────────────────────────────────────────
-    if (document.getElementById('wandlight_continuity_settings')) {
+    if (document.getElementById('wandlight_settings')) {
         console.warn(`${LOG_PREFIX} Settings panel already mounted; skipping duplicate mount`);
         return;
     }
@@ -343,7 +343,7 @@ async function mountSettingsPanel(ctx) {
 
     // ── Wire UI after a brief DOM settle ───────────────────────────────────
     setTimeout(() => {
-        const container = document.getElementById('wandlight_continuity_settings');
+        const container = document.getElementById('wandlight_settings');
         if (container) {
             renderSettingsPanel(container);
             wireSettingsPanel(container);
@@ -394,14 +394,14 @@ function installExtensionsMenuButton() {
     const btn = document.createElement('div');
     btn.id = 'wandlight-extensions-menu-button';
     btn.className = 'list-group-item flex-container flexGap5 interactable';
-    btn.title = 'Open Wandlight Continuity runtime window. API and debug settings remain in the extensions panel.';
+    btn.title = 'Open Wandlight runtime window. API and debug settings remain in the extensions panel.';
 
-    btn.innerHTML = `\uD83E\uDE84 <span>Wandlight Continuity</span>`;
+    btn.innerHTML = `\uD83E\uDE84 <span>Wandlight</span>`;
 
     // Click opens settings panel + optionally lore panel
     btn.addEventListener('click', () => {
         // Scroll/focus the settings panel
-        const panel = document.getElementById('wandlight_continuity_settings');
+        const panel = document.getElementById('wandlight_settings');
         if (panel) {
             panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
             // Expand all inline drawers so settings are visible
@@ -412,7 +412,7 @@ function installExtensionsMenuButton() {
                 }
             });
         } else {
-            if (typeof toastr !== 'undefined') toastr.info('Wandlight Continuity settings panel not yet mounted. It will appear shortly.');
+            if (typeof toastr !== 'undefined') toastr.info('Wandlight settings panel not yet mounted. It will appear shortly.');
         }
     });
 

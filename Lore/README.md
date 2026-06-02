@@ -1,6 +1,6 @@
-# Wandlight Continuity Lore Database
+# Wandlight Lore Database
 
-This folder contains the local, date-aware lore database used by Wandlight Continuity.
+This folder contains the local, date-aware lore database used by Wandlight.
 
 The database is not intended to be a full wiki. It is a chronology and constraint layer. Its job is to keep a roleplay aligned to a specific story date, character knowledge state, spell-learning stage, behavior period, and canon/AU branch.
 

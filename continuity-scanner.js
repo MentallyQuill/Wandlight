@@ -1,5 +1,5 @@
 /**
- * continuity-scanner.js — Wandlight Continuity
+ * continuity-scanner.js — Wandlight
  * Checkpointed, chunked continuity scanner.
  *
  * Pipeline:
@@ -678,7 +678,7 @@ function parseDeltaResponse(text) {
 
 function buildObservationSystemPrompt(settings, stateProjection) {
     const maxObs = clampInt(settings.continuityScanObservationsPerChunk, 3, 30, 12);
-    return `You are Wandlight Continuity's continuity observation extractor.\n\nTask:\n- Read one interval of roleplay messages.\n- Extract compact observations that may change the live continuity state.\n- Do not output a final WandlightDelta. Do not modify state directly.\n- Output ONLY valid JSON.\n\nOutput schema:
+    return `You are Wandlight's continuity observation extractor.\n\nTask:\n- Read one interval of roleplay messages.\n- Extract compact observations that may change the live continuity state.\n- Do not output a final WandlightDelta. Do not modify state directly.\n- Output ONLY valid JSON.\n\nOutput schema:
 {
   "chunkSummary": "short summary",
   "sceneSnapshot": {
@@ -724,7 +724,7 @@ function buildReducerSystemPrompt(settings, group, stateProjection) {
         const text = getSectionPromptText(settings, section);
         return text ? `- ${section}: ${text}` : '';
     }).filter(Boolean).join('\n');
-    return `You are Wandlight Continuity's ${group.label} reducer.\n\nTask:\n- Convert compact continuity observations into ONE valid WandlightDelta partial.\n- Only modify these sections: ${group.sections.join(', ')}.\n- Resolve observations in chronological order using messageRefs.\n- Do not invent facts not supported by observations.\n- If nothing should change for these sections, output {"summary":"No ${group.label} changes","changes":{}}.\n\nReturn ONLY visible valid JSON in WandlightDelta shape.\n\nReducer-specific guidance:\n${prompts || '(none)'}\n\nCurrent compact continuity projection:\n${safeJson(stateProjection)}`;
+    return `You are Wandlight's ${group.label} reducer.\n\nTask:\n- Convert compact continuity observations into ONE valid WandlightDelta partial.\n- Only modify these sections: ${group.sections.join(', ')}.\n- Resolve observations in chronological order using messageRefs.\n- Do not invent facts not supported by observations.\n- If nothing should change for these sections, output {"summary":"No ${group.label} changes","changes":{}}.\n\nReturn ONLY visible valid JSON in WandlightDelta shape.\n\nReducer-specific guidance:\n${prompts || '(none)'}\n\nCurrent compact continuity projection:\n${safeJson(stateProjection)}`;
 }
 
 function buildObservationUserPrompt(chunk, plan) {
@@ -922,7 +922,7 @@ function buildContinuityDeltaSystemPrompt({ settings, stateProjection, enabledSe
     const emphasis = mode === 'fast'
         ? 'Use one compact pass. Prioritize Scene and Timeline, Active Characters, Key Items, and Active Goals/Threads, but evaluate every enabled section.'
         : 'This is a grouped continuity reducer pass. Update only the allowed sections and evaluate each allowed section explicitly.';
-    return `You are Wandlight Continuity's ${mode === 'fast' ? 'fast continuity delta scanner' : 'hybrid continuity section scanner'}.
+    return `You are Wandlight's ${mode === 'fast' ? 'fast continuity delta scanner' : 'hybrid continuity section scanner'}.
 
 Task:
 - Read the supplied roleplay messages and current compact state.

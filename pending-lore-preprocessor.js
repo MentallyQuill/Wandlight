@@ -1,5 +1,5 @@
 /**
- * pending-lore-preprocessor.js — Wandlight Continuity
+ * pending-lore-preprocessor.js — Wandlight
  * Assigns user-facing relevance/canon/category defaults before entries enter Pending Lore Review.
  */
 

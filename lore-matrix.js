@@ -1,5 +1,5 @@
 /**
- * lore-matrix.js — Wandlight Continuity
+ * lore-matrix.js — Wandlight
  * Pure helpers for lore normalization, activation, and merging.
  * No SillyTavern calls. All functions are pure or use only their arguments.
  *

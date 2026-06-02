@@ -1,5 +1,5 @@
 /**
- * lore-generator.js — Wandlight Continuity
+ * lore-generator.js — Wandlight
  * LLM-calling logic for lore context detection and lore matrix generation.
  * No direct UI dependencies — all state operations go through state-manager.
  *
@@ -854,7 +854,7 @@ function buildEffectiveBulkSettings(baseSettings = getSettings(), options = {}) 
 
 function buildBulkCandidateSystemPrompt(settings = getSettings(), profile = {}) {
     const factsPerChunk = clampInt(settings.loreBulkFactsPerChunk, 4, 30, 14);
-    return `You are Wandlight Continuity's bulk story-lore extractor.
+    return `You are Wandlight's bulk story-lore extractor.
 
 Task:
 - Extract compact, durable story-specific candidate facts from a message interval.

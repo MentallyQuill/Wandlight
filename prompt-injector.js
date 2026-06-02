@@ -1,5 +1,5 @@
 /**
- * prompt-injector.js — Wandlight Continuity
+ * prompt-injector.js — Wandlight
  * Registers Wandlight prompt injection.
  *
  * Preferred path: SillyTavern setExtensionPrompt(), which supports role/depth.
@@ -74,14 +74,15 @@ let lastSyncInfo = {
  * Called once from index.js on jQuery document ready.
  */
 export function installInterceptor() {
-    globalThis.wandlightContinuityInterceptor = wandlightContinuityInterceptor;
+    globalThis.wandlightInterceptor = wandlightInterceptor;
+    globalThis.wandlightContinuityInterceptor = wandlightInterceptor; // legacy alias
     globalThis.wandlightSyncPromptInjection = syncPromptInjection;
     globalThis.wandlightClearPromptInjection = clearExtensionPrompts;
     globalThis.wandlightGetInjectionStatus = () => ({ ...lastSyncInfo });
 
     syncPromptInjection();
 
-    if (typeof globalThis.wandlightContinuityInterceptor === 'function') {
+    if (typeof globalThis.wandlightInterceptor === 'function') {
         console.log(`${LOG_PREFIX} prompt injection registered`);
     } else {
         console.error(`${LOG_PREFIX} Failed to register generate_interceptor`);
@@ -274,7 +275,7 @@ function wrapLorePrompt(text, label = 'LORE') {
  * to 'interceptor'. It prepends the combined memo to the last user message, so
  * it has no role/depth semantics beyond the last user message's role.
  */
-function wandlightContinuityInterceptor(chat, contextSize, abort, type) {
+function wandlightInterceptor(chat, contextSize, abort, type) {
     if (type === 'quiet') return;
     try {
         const settings = getSettings();

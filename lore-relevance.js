@@ -1,5 +1,5 @@
 /**
- * lore-relevance.js — Wandlight Continuity
+ * lore-relevance.js — Wandlight
  * Pure helpers for simplified lore relevance, Canon/AU metadata, and tiered lore injection.
  */
 

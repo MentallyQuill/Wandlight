@@ -1,5 +1,5 @@
 /**
- * ui.js — Wandlight Continuity
+ * ui.js — Wandlight
  * Renders the settings panel and state viewer UI.
  *
  * Exports: renderSettingsPanel, renderStatePanel, renderLoreContextPreview, renderLoreMatrixPreview

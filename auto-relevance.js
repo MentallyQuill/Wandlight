@@ -1,5 +1,5 @@
 /**
- * auto-relevance.js — Wandlight Continuity
+ * auto-relevance.js — Wandlight
  * Local high-performance Auto-Relevance pass for accepted lore entries.
  *
  * The pass is deliberately local-first: every accepted entry is scored without an
@@ -63,7 +63,7 @@ function summarizeEntryForModel(item) {
 function buildModelAdjudicationPrompts({ state, settings, candidates, recentText }) {
     const scene = state?.scene || {};
     const context = state?.loreContext || {};
-    const system = `You are Wandlight Continuity's Auto-Relevance adjudicator.
+    const system = `You are Wandlight's Auto-Relevance adjudicator.
 
 Task:
 - Review a compact candidate set of accepted lore entries.

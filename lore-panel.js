@@ -338,6 +338,11 @@ function createCollapsibleSection(sectionId, titleText, subtitleText, defaultOpe
     return details;
 }
 
+function openPendingLoreReviewSections() {
+    setSectionCollapsed('lore.pendingReview', false);
+    setSectionCollapsed('lore.basic.pendingReview', false);
+}
+
 function getCountLabel(value, label) {
     const count = Array.isArray(value) ? value.length : (value && typeof value === 'object' ? Object.keys(value).length : 0);
     return `${count} ${label}${count === 1 ? '' : 's'}`;
@@ -399,7 +404,7 @@ const AUTOMATION_MODES = {
     },
 };
 
-const BASIC_EXPERIENCE_TABS = Object.freeze(['session', 'context', 'lore']);
+const BASIC_EXPERIENCE_TABS = Object.freeze(['session', 'context', 'lore', 'injection']);
 const ADVANCED_EXPERIENCE_TABS = Object.freeze(Object.keys(TAB_LABELS));
 
 let panelRoot = null;
@@ -631,37 +636,52 @@ function renderRail(state) {
 
 function createExperienceModeSwitch(settings = getSettings()) {
     const mode = normalizeExperienceMode(settings.experienceMode);
-    const nextMode = mode === 'advanced' ? 'basic' : 'advanced';
-    const control = document.createElement('button');
-    control.type = 'button';
+    const control = document.createElement('div');
     control.className = `wandlight-experience-switch wandlight-experience-switch-${mode}`;
-    control.setAttribute('role', 'switch');
-    control.setAttribute('aria-checked', mode === 'advanced' ? 'true' : 'false');
+    control.setAttribute('role', 'radiogroup');
     control.setAttribute('aria-label', `Experience Mode: ${getExperienceLabel(settings)}`);
-    addTooltip(control, `${getExperienceTooltip(settings)} Click to switch to ${nextMode === 'advanced' ? 'Advanced' : 'Basic'}.`);
+    addTooltip(control, getExperienceTooltip(settings));
 
-    const basic = document.createElement('span');
+    const basic = document.createElement('button');
+    basic.type = 'button';
     basic.className = 'wandlight-experience-switch-label wandlight-experience-switch-label-basic';
     basic.textContent = 'Basic';
+    basic.setAttribute('role', 'radio');
+    basic.setAttribute('aria-checked', mode === 'basic' ? 'true' : 'false');
+    addTooltip(basic, 'Switch to Basic Experience: essential controls with curated defaults.');
+    basic.addEventListener('click', (event) => {
+        event.stopPropagation();
+        selectExperienceMode('basic');
+    });
     control.appendChild(basic);
 
-    const advanced = document.createElement('span');
+    const advanced = document.createElement('button');
+    advanced.type = 'button';
     advanced.className = 'wandlight-experience-switch-label wandlight-experience-switch-label-advanced';
     advanced.textContent = 'Advanced';
+    advanced.setAttribute('role', 'radio');
+    advanced.setAttribute('aria-checked', mode === 'advanced' ? 'true' : 'false');
+    addTooltip(advanced, 'Switch to Advanced Experience: full Wandlight toolset and restored custom settings.');
+    advanced.addEventListener('click', (event) => {
+        event.stopPropagation();
+        selectExperienceMode('advanced');
+    });
     control.appendChild(advanced);
 
     const knob = document.createElement('span');
     knob.className = 'wandlight-experience-switch-knob';
     control.appendChild(knob);
 
-    control.addEventListener('click', (event) => {
-        event.stopPropagation();
-        setExperienceMode(nextMode);
-        showLorePanel();
-        toast(`Experience Mode set to ${nextMode === 'advanced' ? 'Advanced' : 'Basic'}.`, 'info');
-    });
-
     return control;
+}
+
+function selectExperienceMode(mode) {
+    const normalized = normalizeExperienceMode(mode);
+    const current = normalizeExperienceMode(getSettings().experienceMode);
+    if (current === normalized) return;
+    setExperienceMode(normalized);
+    showLorePanel();
+    toast(`Experience Mode set to ${normalized === 'advanced' ? 'Advanced' : 'Basic'}.`, 'info');
 }
 
 function renderDrawer(state, direction = 'right') {
@@ -2552,7 +2572,7 @@ async function handleAddCanonPreviewEntries(btn, entryIds = []) {
                 selectedEntryIds: [],
                 detailLevel: getCanonPreviewDetailLevel(),
             };
-            setSectionCollapsed('lore.pendingReview', false);
+            openPendingLoreReviewSections();
             setPanelState({ activeTab: 'lore' }, { deferSave: true });
             refreshPanelBody({ preserveScroll: false });
             refreshHeader();
@@ -2608,7 +2628,7 @@ async function handleSuggestCanonLore(btn) {
         });
 
         if (result?.status === 'proposed') {
-            setSectionCollapsed('lore.pendingReview', false);
+            openPendingLoreReviewSections();
             setPanelState({ activeTab: 'lore' }, { deferSave: true });
             refreshPanelBody({ preserveScroll: false });
             refreshHeader();
@@ -2723,7 +2743,7 @@ async function handleBulkGeneratePendingLore(btn) {
             setFeatureProgress('lore', 'Story lore scan cancelled.', 0);
             toast('Story lore scan cancelled.', 'warning');
         } else if (['complete', 'partial'].includes(result?.status)) {
-            setSectionCollapsed('lore.pendingReview', false);
+            openPendingLoreReviewSections();
             setPanelState({ activeTab: 'lore' });
             refreshPanelBody({ preserveScroll: false });
             const failedText = result.failedChunkCount ? ` ${result.failedChunkCount} chunk${result.failedChunkCount === 1 ? '' : 's'} failed and can be retried.` : '';
@@ -3669,8 +3689,117 @@ function setStatePath(state, path, value) {
 
 // Injection tab ---------------------------------------------------------------
 
+function renderBasicInjectionTab(container, state, settings = getSettings()) {
+    updateCompressionTurnStatus(state, 'lore-high');
+    updateCompressionTurnStatus(state, 'lore-normal');
+    updateCompressionTurnStatus(state, 'lore-low');
+
+    container.appendChild(createSectionHeader(
+        'Injection',
+        'Basic mode sends accepted Lore by relevance tier. Continuity injection and prompt placement settings stay hidden in Basic Experience.'
+    ));
+
+    const toggles = document.createElement('div');
+    toggles.className = 'wandlight-runtime-grid';
+    toggles.appendChild(createToggleCard(
+        'Inject Lore',
+        settings.injectLore !== false,
+        'Injects accepted, unmuted Lore entries through relevance-tiered prompt groups.',
+        (checked) => {
+            const next = getSettings();
+            next.injectLore = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+        }
+    ));
+    container.appendChild(toggles);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Basic defaults to Lore injection on and Continuity injection off. Use Advanced Experience for prompt placement, continuity injection, and compression prompt templates.';
+    container.appendChild(help);
+
+    for (const tier of ['high', 'normal', 'low']) {
+        container.appendChild(createBasicLoreTierInjectionCard(tier, state, settings));
+    }
+}
+
+function createBasicLoreTierInjectionCard(tier, state, settings) {
+    const label = RELEVANCE_META[tier]?.label || tier;
+    const preview = buildLorePreview(state, getLoreTierMode(settings, tier), tier);
+    const enabled = settings.injectLore !== false && settings[tierSettingKey(tier, 'InjectionEnabled')] !== false;
+    const entryCount = getInjectableLoreEntries(state, 0, tier).length;
+
+    const card = document.createElement('div');
+    card.className = 'wandlight-runtime-card wandlight-injection-preview-card wandlight-basic-injection-tier-card';
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title';
+    title.textContent = `${label}-Relevance Lore`;
+    addTooltip(title, `${label}-Relevance lore injection controls for Basic Experience.`);
+    card.appendChild(title);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = `${entryCount} accepted, unmuted lore entr${entryCount === 1 ? 'y' : 'ies'} available in this tier.`;
+    card.appendChild(help);
+
+    const controls = document.createElement('div');
+    controls.className = 'wandlight-basic-injection-controls';
+
+    const enabledLabel = document.createElement('label');
+    enabledLabel.className = 'wandlight-inline-toggle';
+    const enabledInput = document.createElement('input');
+    enabledInput.type = 'checkbox';
+    enabledInput.checked = settings[tierSettingKey(tier, 'InjectionEnabled')] !== false;
+    enabledInput.addEventListener('change', () => {
+        const next = getSettings();
+        next[tierSettingKey(tier, 'InjectionEnabled')] = enabledInput.checked;
+        saveSettings(next);
+        refreshPanelBody({ preserveScroll: true, preserveWindowScroll: true });
+        refreshHeader();
+    });
+    enabledLabel.appendChild(enabledInput);
+    enabledLabel.appendChild(document.createTextNode(' Use this lore tier'));
+    controls.appendChild(enabledLabel);
+
+    const modes = document.createElement('div');
+    modes.className = 'wandlight-mode-buttons wandlight-basic-injection-mode-buttons';
+    modes.appendChild(createLoreTierModeButton(tier, 'direct', 'Direct', 'Inject this tier as resolved lore text.'));
+    modes.appendChild(createLoreTierModeButton(tier, 'compressed', 'Compressed', 'Inject this tier from a cached balanced compression.'));
+    controls.appendChild(modes);
+
+    controls.appendChild(createButton(`Compress ${label} Now`, `Compresses ${label}-Relevance lore using the balanced Basic default.`, async (btn) => {
+        const next = getSettings();
+        next[tierSettingKey(tier, 'CompressionLevel')] = 3;
+        saveSettings(next);
+        await runModelCompression(`lore-${tier}`, btn);
+    }, tier === 'high' ? 'wandlight-primary-button' : ''));
+
+    card.appendChild(controls);
+
+    const status = document.createElement('div');
+    status.className = 'wandlight-runtime-help wandlight-basic-injection-status';
+    status.textContent = `${getLoreTierMode(settings, tier)} | ${getCompressionStatusTextForSummary(state, `lore-${tier}`)}`;
+    card.appendChild(status);
+
+    const pre = document.createElement('pre');
+    pre.className = `wandlight-injection-preview wandlight-lore-${tier}-injection-preview`;
+    pre.textContent = getInjectionDisplayText(`${label}-Relevance Lore Injection`, preview, enabled);
+    addTooltip(pre, 'Scrollable prompt context block for this relevance tier.');
+    card.appendChild(pre);
+
+    return card;
+}
+
 function renderInjectionTab(container, state) {
     const settings = getSettings();
+    if (isBasicExperience(settings)) {
+        renderBasicInjectionTab(container, state, settings);
+        return;
+    }
+
     const continuityPreview = buildContinuityPreview(state, settings.continuityInjectionMode || 'direct');
     const lorePreview = buildLorePreview(state, settings.loreInjectionMode || 'direct');
     const loreHighPreview = buildLorePreview(state, getLoreTierMode(settings, 'high'), 'high');
@@ -6007,6 +6136,7 @@ function createEditableLoreEntryEditor(entry) {
 // Lore tab --------------------------------------------------------------------
 
 function renderLoreTab(container, state) {
+    const basic = isBasicExperience();
     container.appendChild(createSectionHeader(
         'Lore',
         'Suggest canon lore from the local database, generate story-specific lore with the model, review pending entries, and manage accepted lore.'
@@ -6035,10 +6165,10 @@ function renderLoreTab(container, state) {
 
     const pendingCount = (state?.pendingLoreEntries || []).length;
     container.appendChild(createCollapsibleSection(
-        'lore.pendingReview',
+        basic ? 'lore.basic.pendingReview' : 'lore.pendingReview',
         'Pending Lore Review',
         pendingCount ? `${pendingCount} pending` : 'none',
-        pendingCount > 0,
+        basic ? true : pendingCount > 0,
         createPendingLoreReviewSection(state),
         { tooltip: 'Review suggested/generated lore entries before accepting them.', className: 'wandlight-lore-pending-collapsible' }
     ));
@@ -6047,7 +6177,7 @@ function renderLoreTab(container, state) {
     const acceptedCount = Math.max(0, (loreState.counts?.all || 0) - (loreState.counts?.pending || 0));
     const injectableCount = getSelectedLoreInjectionCount(state, getSettings());
     container.appendChild(createCollapsibleSection(
-        'lore.acceptedEntries',
+        basic ? 'lore.basic.acceptedEntries' : 'lore.acceptedEntries',
         'Accepted Lore Entries',
         `${acceptedCount} accepted · ${injectableCount} injectable`,
         true,

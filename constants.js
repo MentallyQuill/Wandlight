@@ -52,7 +52,7 @@ export const SCHEMA_VERSION = 18;
 
 export const AUTOMATION_MODE_VALUES = Object.freeze(['manual', 'assisted', 'automatic']);
 export const EXPERIENCE_MODE_VALUES = Object.freeze(['basic', 'advanced']);
-export const BASIC_EXPERIENCE_PROFILE_VERSION = 1;
+export const BASIC_EXPERIENCE_PROFILE_VERSION = 2;
 
 export const BASIC_EXPERIENCE_SETTINGS = Object.freeze({
     autoExtract: false,
@@ -86,7 +86,7 @@ export const BASIC_EXPERIENCE_SETTINGS = Object.freeze({
     autoRelevanceUseModel: false,
     injectionTransport: 'extension_prompt',
     injectMemo: true,
-    injectContinuity: true,
+    injectContinuity: false,
     injectLore: true,
     continuityInjectionMode: 'direct',
     loreHighInjectionEnabled: true,
@@ -95,6 +95,9 @@ export const BASIC_EXPERIENCE_SETTINGS = Object.freeze({
     loreHighInjectionMode: 'direct',
     loreNormalInjectionMode: 'direct',
     loreLowInjectionMode: 'direct',
+    loreHighCompressionLevel: 3,
+    loreNormalCompressionLevel: 3,
+    loreLowCompressionLevel: 3,
     continuityInjectionDepth: 3,
     loreHighInjectionDepth: 2,
     loreNormalInjectionDepth: 5,

@@ -4259,12 +4259,11 @@
     gap: 0;
     padding: 3px;
     border: 1px solid rgba(185, 139, 54, 0.36);
-    border-radius: 999px;
+    border-radius: 6px;
     background:
         linear-gradient(180deg, rgba(20, 18, 20, 0.92), rgba(10, 12, 16, 0.92));
     color: rgba(241, 234, 216, 0.72);
     font: inherit;
-    cursor: pointer;
     box-sizing: border-box;
     overflow: hidden;
     box-shadow: 0 0 0 1px rgba(215, 181, 109, 0.05) inset;
@@ -4285,7 +4284,19 @@
     font-weight: 700;
     line-height: 1;
     white-space: nowrap;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 0 5px;
     transition: color 140ms ease;
+}
+
+.wandlight-experience-switch-label:focus-visible {
+    outline: 1px solid rgba(255, 235, 168, 0.9);
+    outline-offset: -2px;
+    border-radius: 4px;
 }
 
 .wandlight-experience-switch-basic .wandlight-experience-switch-label-basic,
@@ -4300,15 +4311,18 @@
     bottom: 3px;
     left: 3px;
     width: calc(50% - 3px);
-    border-radius: 999px;
+    border-radius: 4px;
     background:
         linear-gradient(180deg, rgba(244, 211, 130, 0.98), rgba(177, 126, 42, 0.98));
     border: 1px solid rgba(255, 235, 168, 0.46);
     box-shadow:
         0 1px 2px rgba(0, 0, 0, 0.42),
-        0 0 0 1px rgba(255, 244, 198, 0.12) inset;
+        0 0 0 1px rgba(255, 244, 198, 0.12) inset,
+        0 0 12px rgba(215, 181, 109, 0.2);
     transform: translateX(0);
-    transition: transform 160ms ease;
+    transition:
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 220ms ease;
 }
 
 .wandlight-experience-switch-advanced .wandlight-experience-switch-knob {
@@ -4322,6 +4336,7 @@
 
 .wandlight-runtime-rail-compact .wandlight-experience-switch-label {
     font-size: 0;
+    padding: 0;
 }
 
 .wandlight-runtime-rail-compact .wandlight-experience-switch-label-basic::after {
@@ -4350,6 +4365,23 @@
         linear-gradient(180deg, rgba(92, 23, 36, 0.52), rgba(26, 18, 24, 0.82));
     border-color: var(--wandlight-border, rgba(185, 139, 54, 0.38));
     color: var(--wandlight-gold, #d7b56d);
+}
+
+.wandlight-basic-injection-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.wandlight-basic-injection-mode-buttons {
+    flex: 1 1 190px;
+    min-width: 160px;
+}
+
+.wandlight-basic-injection-status {
+    margin-bottom: 6px;
 }
 
 .wandlight-runtime-rail-tab-active {

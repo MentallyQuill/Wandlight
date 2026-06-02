@@ -7,7 +7,18 @@
  * Imported by: index.js, memo-builder.js, extractor.js, ui.js
  */
 
-import { MODULE_KEY, LEGACY_MODULE_KEYS, DEFAULT_SETTINGS, getDefaultState, SCHEMA_VERSION, LOG_PREFIX } from './constants.js';
+import {
+    MODULE_KEY,
+    LEGACY_MODULE_KEYS,
+    DEFAULT_SETTINGS,
+    getDefaultState,
+    SCHEMA_VERSION,
+    LOG_PREFIX,
+    AUTOMATION_MODE_VALUES,
+    EXPERIENCE_MODE_VALUES,
+    BASIC_EXPERIENCE_SETTINGS,
+    BASIC_EXPERIENCE_PROFILE_VERSION,
+} from './constants.js';
 import { normalizeLoreContext, normalizeLoreMatrix, mergeLoreEntries, normalizeLoreEntry, buildLoreGenerationKey, applyLoreLifecycleEvaluation } from './lore-matrix.js';
 import { normalizeLoreRelevance, normalizeLoreCanon, normalizeLoreCategory, computeLocalLoreRelevance, normalizeLorePurpose, computeSpecificityScore } from './lore-relevance.js';
 import { preprocessPendingLoreEntries } from './pending-lore-preprocessor.js';
@@ -112,6 +123,25 @@ function removeLegacyBuckets(container) {
 
 // ── Settings I/O ────────────────────────────────────────────────────────────────
 
+function normalizeAutomationModeValue(value, fallback = 'manual') {
+    return AUTOMATION_MODE_VALUES.includes(value) ? value : fallback;
+}
+
+function normalizeExperienceModeValue(value, fallback = 'basic') {
+    return EXPERIENCE_MODE_VALUES.includes(value) ? value : fallback;
+}
+
+function hasStoredWandlightSettings(stored = {}) {
+    return !!(stored && typeof stored === 'object' && Object.keys(stored).length > 0);
+}
+
+function applyBasicExperienceProfile(settings) {
+    Object.assign(settings, BASIC_EXPERIENCE_SETTINGS);
+    settings.experienceMode = 'basic';
+    settings.basicExperienceProfileVersion = BASIC_EXPERIENCE_PROFILE_VERSION;
+    return settings;
+}
+
 /**
  * Reads extensionSettings.wandlight, deep-merges defaults for any
  * missing keys, and returns the live settings object. Always reacquires from
@@ -136,6 +166,20 @@ export function getSettings() {
         ...(DEFAULT_SETTINGS.continuitySectionPrompts || {}),
         ...(stored.continuitySectionPrompts || {}),
     };
+
+    const hasStoredSettings = hasStoredWandlightSettings(stored);
+    const legacyAutomationMode = normalizeAutomationModeValue(stored.workflowMode, '');
+    merged.automationMode = normalizeAutomationModeValue(stored.automationMode, legacyAutomationMode || DEFAULT_SETTINGS.automationMode || 'manual');
+    merged.workflowMode = merged.automationMode;
+    if (stored.experienceMode === undefined && hasStoredSettings) {
+        merged.experienceMode = 'advanced';
+    } else {
+        merged.experienceMode = normalizeExperienceModeValue(merged.experienceMode, DEFAULT_SETTINGS.experienceMode || 'basic');
+    }
+    if (merged.experienceMode === 'basic'
+        && Number(stored.basicExperienceProfileVersion || 0) < BASIC_EXPERIENCE_PROFILE_VERSION) {
+        applyBasicExperienceProfile(merged);
+    }
 
     // One-time upgrade from the old conservative story-lore generation defaults.
     // Previous builds wrote defaults into user settings, so simply changing

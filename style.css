@@ -4249,6 +4249,91 @@
     color: var(--wandlight-muted, rgba(241, 234, 216, 0.68));
 }
 
+.wandlight-experience-switch {
+    position: relative;
+    width: 100%;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    padding: 3px;
+    border: 1px solid rgba(185, 139, 54, 0.36);
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, rgba(20, 18, 20, 0.92), rgba(10, 12, 16, 0.92));
+    color: rgba(241, 234, 216, 0.72);
+    font: inherit;
+    cursor: pointer;
+    box-sizing: border-box;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(215, 181, 109, 0.05) inset;
+}
+
+.wandlight-experience-switch:hover {
+    border-color: rgba(215, 181, 109, 0.58);
+    color: var(--wandlight-text, #f1ead8);
+}
+
+.wandlight-experience-switch-label {
+    position: relative;
+    z-index: 2;
+    flex: 1 1 50%;
+    min-width: 0;
+    text-align: center;
+    font-size: 0.74em;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    transition: color 140ms ease;
+}
+
+.wandlight-experience-switch-basic .wandlight-experience-switch-label-basic,
+.wandlight-experience-switch-advanced .wandlight-experience-switch-label-advanced {
+    color: #161108;
+}
+
+.wandlight-experience-switch-knob {
+    position: absolute;
+    z-index: 1;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, rgba(244, 211, 130, 0.98), rgba(177, 126, 42, 0.98));
+    border: 1px solid rgba(255, 235, 168, 0.46);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.42),
+        0 0 0 1px rgba(255, 244, 198, 0.12) inset;
+    transform: translateX(0);
+    transition: transform 160ms ease;
+}
+
+.wandlight-experience-switch-advanced .wandlight-experience-switch-knob {
+    transform: translateX(calc(100% - 1px));
+}
+
+.wandlight-runtime-rail-compact .wandlight-experience-switch {
+    min-height: 30px;
+    padding: 3px;
+}
+
+.wandlight-runtime-rail-compact .wandlight-experience-switch-label {
+    font-size: 0;
+}
+
+.wandlight-runtime-rail-compact .wandlight-experience-switch-label-basic::after {
+    content: "B";
+    font-size: 10px;
+}
+
+.wandlight-runtime-rail-compact .wandlight-experience-switch-label-advanced::after {
+    content: "A";
+    font-size: 10px;
+}
+
 .wandlight-runtime-rail-tab,
 .wandlight-runtime-rail-control {
     background:

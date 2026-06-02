@@ -8,7 +8,16 @@
 
 import { getPanelLoreState, getInjectableLoreEntries, getLoreRelevanceCounts, normalizeLoreMatrix, normalizeLoreEntry, normalizeLoreTag, LORE_LIFECYCLE_STATUSES } from './lore-matrix.js';
 import { LORE_RELEVANCE_TIERS, LORE_RELEVANCE_LABELS, normalizeLoreRelevance, LORE_CATEGORY_VALUES, LORE_PURPOSE_LABELS, normalizeLorePurpose } from './lore-relevance.js';
-import { getDefaultState, DEFAULT_SETTINGS, WANDLIGHT_PRESET_NAME, WANDLIGHT_PRESET_VERSION, WANDLIGHT_PRESET_ASSET_PATH } from './constants.js';
+import {
+    getDefaultState,
+    DEFAULT_SETTINGS,
+    WANDLIGHT_PRESET_NAME,
+    WANDLIGHT_PRESET_VERSION,
+    WANDLIGHT_PRESET_ASSET_PATH,
+    BASIC_EXPERIENCE_SETTINGS,
+    BASIC_EXPERIENCE_MANAGED_SETTING_KEYS,
+    BASIC_EXPERIENCE_PROFILE_VERSION,
+} from './constants.js';
 import {
     getState,
     getSettings,
@@ -351,7 +360,7 @@ function applyLoreRegistryStyle(el, field, value) {
     return el;
 }
 
-const WORKFLOW_MODES = {
+const AUTOMATION_MODES = {
     manual: {
         label: 'Manual',
         description: 'No automatic extraction or lore generation. Use the buttons in this window when you want Wandlight to scan or generate.',
@@ -389,6 +398,9 @@ const WORKFLOW_MODES = {
         },
     },
 };
+
+const BASIC_EXPERIENCE_TABS = Object.freeze(['session', 'context', 'lore']);
+const ADVANCED_EXPERIENCE_TABS = Object.freeze(Object.keys(TAB_LABELS));
 
 let panelRoot = null;
 let isDragging = false;
@@ -480,7 +492,6 @@ function renderPanelShell(root, state) {
     normalizePanelLayoutState(state);
     const panelState = state?.lorePanel || getDefaultState().lorePanel;
     const railMode = normalizeRailMode(panelState.railMode);
-    const activeTab = normalizeTab(panelState.activeTab);
     const drawerOpen = panelState.drawerOpen === true;
     const drawerDirection = drawerOpen ? resolveDrawerDirection(panelState) : 'right';
 
@@ -503,9 +514,9 @@ function renderPanelShell(root, state) {
 function renderRail(state) {
     const panelState = state?.lorePanel || getDefaultState().lorePanel;
     const railMode = normalizeRailMode(panelState.railMode);
-    const activeTab = normalizeTab(panelState.activeTab);
     const drawerOpen = panelState.drawerOpen === true;
     const settings = getSettings();
+    const activeTab = normalizeTabForExperience(panelState.activeTab, settings);
     const metrics = getRailMetrics(state, settings);
 
     const rail = document.createElement('div');
@@ -537,10 +548,12 @@ function renderRail(state) {
     sub.textContent = '';
     drag.appendChild(sub);
     rail.appendChild(drag);
+    rail.appendChild(createExperienceModeSwitch(settings));
 
     const tabs = document.createElement('div');
     tabs.className = 'wandlight-runtime-rail-tabs';
-    for (const [tabId, label] of Object.entries(TAB_LABELS)) {
+    for (const tabId of getVisibleTabsForExperience(settings)) {
+        const label = TAB_LABELS[tabId];
         const tab = document.createElement('button');
         tab.type = 'button';
         tab.className = 'wandlight-runtime-rail-tab';
@@ -616,9 +629,44 @@ function renderRail(state) {
     return rail;
 }
 
+function createExperienceModeSwitch(settings = getSettings()) {
+    const mode = normalizeExperienceMode(settings.experienceMode);
+    const nextMode = mode === 'advanced' ? 'basic' : 'advanced';
+    const control = document.createElement('button');
+    control.type = 'button';
+    control.className = `wandlight-experience-switch wandlight-experience-switch-${mode}`;
+    control.setAttribute('role', 'switch');
+    control.setAttribute('aria-checked', mode === 'advanced' ? 'true' : 'false');
+    control.setAttribute('aria-label', `Experience Mode: ${getExperienceLabel(settings)}`);
+    addTooltip(control, `${getExperienceTooltip(settings)} Click to switch to ${nextMode === 'advanced' ? 'Advanced' : 'Basic'}.`);
+
+    const basic = document.createElement('span');
+    basic.className = 'wandlight-experience-switch-label wandlight-experience-switch-label-basic';
+    basic.textContent = 'Basic';
+    control.appendChild(basic);
+
+    const advanced = document.createElement('span');
+    advanced.className = 'wandlight-experience-switch-label wandlight-experience-switch-label-advanced';
+    advanced.textContent = 'Advanced';
+    control.appendChild(advanced);
+
+    const knob = document.createElement('span');
+    knob.className = 'wandlight-experience-switch-knob';
+    control.appendChild(knob);
+
+    control.addEventListener('click', (event) => {
+        event.stopPropagation();
+        setExperienceMode(nextMode);
+        showLorePanel();
+        toast(`Experience Mode set to ${nextMode === 'advanced' ? 'Advanced' : 'Basic'}.`, 'info');
+    });
+
+    return control;
+}
+
 function renderDrawer(state, direction = 'right') {
     const panelState = state?.lorePanel || getDefaultState().lorePanel;
-    const activeTab = normalizeTab(panelState.activeTab);
+    const activeTab = normalizeTabForExperience(panelState.activeTab);
 
     const drawer = document.createElement('div');
     drawer.className = `wandlight-runtime-drawer wandlight-runtime-drawer-${direction}`;
@@ -679,7 +727,8 @@ function refreshHeader() {
     const selectedLore = getSelectedLoreInjectionCount(state, settings);
 
     status.innerHTML = '';
-    status.appendChild(createStatusPill(`Mode: ${getWorkflowLabel(settings)}`, getWorkflowTooltip(settings)));
+    status.appendChild(createStatusPill(`Experience: ${getExperienceLabel(settings)}`, getExperienceTooltip(settings)));
+    status.appendChild(createStatusPill(`Automation: ${getAutomationLabel(settings)}`, getAutomationTooltip(settings)));
     status.appendChild(createStatusPill(settings.enabled ? 'Active' : 'Paused', 'Master runtime toggle. When paused, Wandlight does not inject, scan, or generate.'));
     status.appendChild(createStatusPill((settings.injectContinuity !== false && settings.injectMemo !== false) ? 'Continuity Injected' : 'Continuity Not Injected', 'Whether Wandlight includes structured continuity state in roleplay generation prompts.'));
     if (pendingDelta + pendingLore > 0) {
@@ -692,7 +741,7 @@ function refreshHeader() {
 function renderPanelBody(container, state) {
     container.innerHTML = '';
 
-    const activeTab = normalizeTab(state?.lorePanel?.activeTab);
+    const activeTab = normalizeTabForExperience(state?.lorePanel?.activeTab);
     const tabBody = document.createElement('div');
     tabBody.className = `wandlight-runtime-tab-body wandlight-runtime-tab-body-${activeTab}`;
     container.appendChild(tabBody);
@@ -753,7 +802,7 @@ function getRailMetrics(state, settings = getSettings()) {
     const liveItems = [state?.scene?.location, state?.scene?.currentActivity].filter(Boolean).length;
 
     return {
-        session: settings.enabled ? getWorkflowLabel(settings) : 'Paused',
+        session: settings.enabled ? getExperienceLabel(settings) : 'Paused',
         context: sceneDate || canonBoundary || 'No date',
         continuity: `${activeCharacters || liveItems || 0} live`,
         lore: pendingLore ? `${counts.active || 0}+${pendingLore}` : `${counts.active || 0} active`,
@@ -772,7 +821,7 @@ function normalizePanelLayoutState(state, options = {}) {
         panelState.drawerOpen = hadRailFields ? false : panelState.collapsed !== true;
     }
     panelState.collapsed = panelState.drawerOpen !== true;
-    panelState.activeTab = normalizeTab(panelState.activeTab);
+    panelState.activeTab = normalizeTabForExperience(panelState.activeTab);
     panelState.drawerDirection = ['auto', 'right', 'left'].includes(panelState.drawerDirection) ? panelState.drawerDirection : 'auto';
 
     const legacyX = Number(panelState.x);
@@ -955,40 +1004,42 @@ function renderSessionTab(container, state) {
         'Set how Wandlight behaves during roleplay. These controls are intentionally kept out of the extension settings panel.'
     ));
 
-    const modeCard = document.createElement('div');
-    modeCard.className = 'wandlight-runtime-card';
+    if (!isBasicExperience(settings)) {
+        const modeCard = document.createElement('div');
+        modeCard.className = 'wandlight-runtime-card';
 
-    const modeTitle = document.createElement('div');
-    modeTitle.className = 'wandlight-runtime-card-title';
-    modeTitle.textContent = 'Workflow Mode';
-    addTooltip(modeTitle, 'Mode is a real behavior preset. Changing it updates automatic extraction, automatic apply, and automatic lore generation settings.');
-    modeCard.appendChild(modeTitle);
+        const modeTitle = document.createElement('div');
+        modeTitle.className = 'wandlight-runtime-card-title';
+        modeTitle.textContent = 'Automation Mode';
+        addTooltip(modeTitle, 'Automation Mode controls whether Wandlight scans and generates only when clicked, or automatically after roleplay turns. Experience Mode lives on the shelf.');
+        modeCard.appendChild(modeTitle);
 
-    const modeButtons = document.createElement('div');
-    modeButtons.className = 'wandlight-mode-buttons';
-    for (const [mode, cfg] of Object.entries(WORKFLOW_MODES)) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'wandlight-mode-button';
-        if (normalizeWorkflowMode(settings.workflowMode) === mode) btn.classList.add('wandlight-mode-button-active');
-        btn.textContent = cfg.label;
-        addTooltip(btn, cfg.description);
-        btn.addEventListener('click', () => {
-            setWorkflowMode(mode);
-            refreshPanelBody({ preserveScroll: false });
-            refreshHeader();
-            toast(`Workflow mode set to ${cfg.label}`);
-        });
-        modeButtons.appendChild(btn);
+        const modeButtons = document.createElement('div');
+        modeButtons.className = 'wandlight-mode-buttons';
+        for (const [mode, cfg] of Object.entries(AUTOMATION_MODES)) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'wandlight-mode-button';
+            if (normalizeAutomationMode(settings.automationMode || settings.workflowMode) === mode) btn.classList.add('wandlight-mode-button-active');
+            btn.textContent = cfg.label;
+            addTooltip(btn, cfg.description);
+            btn.addEventListener('click', () => {
+                setAutomationMode(mode);
+                refreshPanelBody({ preserveScroll: false });
+                refreshHeader();
+                toast(`Automation mode set to ${cfg.label}`);
+            });
+            modeButtons.appendChild(btn);
+        }
+        modeCard.appendChild(modeButtons);
+
+        const modeDesc = document.createElement('div');
+        modeDesc.className = 'wandlight-runtime-help';
+        modeDesc.textContent = AUTOMATION_MODES[normalizeAutomationMode(settings.automationMode || settings.workflowMode)].description;
+        modeCard.appendChild(modeDesc);
+
+        container.appendChild(modeCard);
     }
-    modeCard.appendChild(modeButtons);
-
-    const modeDesc = document.createElement('div');
-    modeDesc.className = 'wandlight-runtime-help';
-    modeDesc.textContent = WORKFLOW_MODES[normalizeWorkflowMode(settings.workflowMode)].description;
-    modeCard.appendChild(modeDesc);
-
-    container.appendChild(modeCard);
 
     const toggles = document.createElement('div');
     toggles.className = 'wandlight-runtime-grid';
@@ -1534,50 +1585,52 @@ function createContextDetectionCard(state) {
     addTooltip(title, 'Detects story context from recent chat and fills the Story Context fields below. It does not create lore entries.');
     card.appendChild(title);
 
-    card.appendChild(createAutomationModeCard(
-        'Story Context Detection',
-        'contextDetectionMode',
-        'contextDetectionAutoInterval',
-        'Only runs when you click Detect Story Context.',
-        'Runs automatically after roleplay turns on this interval. When fast header detection is enabled, it scans reply headers first and only uses the Reasoning provider if no header is found.',
-        'Automatic story-context detection interval in completed model turns.'
-    ));
-
     const settings = getSettings();
-    const fastGrid = document.createElement('div');
-    fastGrid.className = 'wandlight-runtime-grid';
-    fastGrid.appendChild(createToggleCard(
-        'Fast reply-header detection',
-        settings.contextHeaderDetectionEnabled !== false,
-        'Scans recent model replies for the Wandlight date/time/location/weather header. If a valid header is found, Story Context is set locally and the model call is skipped.',
-        (checked) => {
-            const next = getSettings();
-            next.contextHeaderDetectionEnabled = checked;
-            saveSettings(next);
-        }
-    ));
-    card.appendChild(fastGrid);
+    if (!isBasicExperience(settings)) {
+        card.appendChild(createAutomationModeCard(
+            'Story Context Detection',
+            'contextDetectionMode',
+            'contextDetectionAutoInterval',
+            'Only runs when you click Detect Story Context.',
+            'Runs automatically after roleplay turns on this interval. When fast header detection is enabled, it scans reply headers first and only uses the Reasoning provider if no header is found.',
+            'Automatic story-context detection interval in completed model turns.'
+        ));
 
-    const sourceRow = document.createElement('label');
-    sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
-    const sourceText = document.createElement('span');
-    sourceText.textContent = `Context source messages: ${settings.contextSourceMessageCount || 20}`;
-    addTooltip(sourceText, 'How many recent chat messages are scanned for reply headers or sent to model story-context detection. This is separate from the Lore generation source window.');
-    const sourceInput = document.createElement('input');
-    sourceInput.type = 'range';
-    sourceInput.min = '4';
-    sourceInput.max = '200';
-    sourceInput.step = '1';
-    sourceInput.value = String(settings.contextSourceMessageCount || 20);
-    sourceInput.addEventListener('input', () => {
-        const next = getSettings();
-        next.contextSourceMessageCount = Math.max(4, Math.min(200, parseInt(sourceInput.value, 10) || 20));
-        saveSettings(next);
-        sourceText.textContent = `Context source messages: ${next.contextSourceMessageCount}`;
-    });
-    sourceRow.appendChild(sourceText);
-    sourceRow.appendChild(sourceInput);
-    card.appendChild(sourceRow);
+        const fastGrid = document.createElement('div');
+        fastGrid.className = 'wandlight-runtime-grid';
+        fastGrid.appendChild(createToggleCard(
+            'Fast reply-header detection',
+            settings.contextHeaderDetectionEnabled !== false,
+            'Scans recent model replies for the Wandlight date/time/location/weather header. If a valid header is found, Story Context is set locally and the model call is skipped.',
+            (checked) => {
+                const next = getSettings();
+                next.contextHeaderDetectionEnabled = checked;
+                saveSettings(next);
+            }
+        ));
+        card.appendChild(fastGrid);
+
+        const sourceRow = document.createElement('label');
+        sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+        const sourceText = document.createElement('span');
+        sourceText.textContent = `Context source messages: ${settings.contextSourceMessageCount || 20}`;
+        addTooltip(sourceText, 'How many recent chat messages are scanned for reply headers or sent to model story-context detection. This is separate from the Lore generation source window.');
+        const sourceInput = document.createElement('input');
+        sourceInput.type = 'range';
+        sourceInput.min = '4';
+        sourceInput.max = '200';
+        sourceInput.step = '1';
+        sourceInput.value = String(settings.contextSourceMessageCount || 20);
+        sourceInput.addEventListener('input', () => {
+            const next = getSettings();
+            next.contextSourceMessageCount = Math.max(4, Math.min(200, parseInt(sourceInput.value, 10) || 20));
+            saveSettings(next);
+            sourceText.textContent = `Context source messages: ${next.contextSourceMessageCount}`;
+        });
+        sourceRow.appendChild(sourceText);
+        sourceRow.appendChild(sourceInput);
+        card.appendChild(sourceRow);
+    }
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
@@ -1672,15 +1725,17 @@ function createCanonSuggestionPanel(state) {
 
     panel.appendChild(createCanonPreviewSection(state));
 
-    const advanced = createCollapsibleSection(
-        'lore.canonSuggestionSettings',
-        'Canon Suggestion Settings',
-        settings.canonLoreDatabaseEnabled === false ? 'disabled' : (settings.canonLoreAutoPropose === false ? 'manual' : 'auto after context'),
-        false,
-        createCanonSuggestionSettingsContent(state),
-        { tooltip: 'Low-frequency local canon database settings.' }
-    );
-    panel.appendChild(advanced);
+    if (!isBasicExperience(settings)) {
+        const advanced = createCollapsibleSection(
+            'lore.canonSuggestionSettings',
+            'Canon Suggestion Settings',
+            settings.canonLoreDatabaseEnabled === false ? 'disabled' : (settings.canonLoreAutoPropose === false ? 'manual' : 'auto after context'),
+            false,
+            createCanonSuggestionSettingsContent(state),
+            { tooltip: 'Low-frequency local canon database settings.' }
+        );
+        panel.appendChild(advanced);
+    }
 
     appendGenerationStatus(panel, state, 'canon');
     panel.appendChild(createKeyValue('Last query', db.lastQueriedAt ? new Date(db.lastQueriedAt).toLocaleString() : 'never', 'When the local canon database was last queried.'));
@@ -2072,14 +2127,16 @@ function createStoryLoreGenerationPanel(state) {
     const resultsCard = createBulkLoreLedgerStatusCard(state);
     if (resultsCard) panel.appendChild(resultsCard);
 
-    panel.appendChild(createCollapsibleSection(
-        'lore.storyGenerationSettings',
-        'Story Lore Scan Settings',
-        getLoreScanSettingsSummary(getSettings()),
-        false,
-        createStoryLoreSettingsContent(),
-        { tooltip: 'Advanced model-based story-lore scan controls. Most users can leave these defaults unchanged.', className: 'wandlight-story-lore-settings-collapsible' }
-    ));
+    if (!isBasicExperience()) {
+        panel.appendChild(createCollapsibleSection(
+            'lore.storyGenerationSettings',
+            'Story Lore Scan Settings',
+            getLoreScanSettingsSummary(getSettings()),
+            false,
+            createStoryLoreSettingsContent(),
+            { tooltip: 'Advanced model-based story-lore scan controls. Most users can leave these defaults unchanged.', className: 'wandlight-story-lore-settings-collapsible' }
+        ));
+    }
 
     return panel;
 }
@@ -5965,14 +6022,16 @@ function renderLoreTab(container, state) {
         { tooltip: 'Suggest canon lore from the local database or generate story-specific lore from recent chat messages.', className: 'wandlight-lore-generation-collapsible' }
     ));
 
-    container.appendChild(createCollapsibleSection(
-        'lore.autoRelevance',
-        'Auto-Relevance',
-        getSettings().autoRelevanceEnabled ? `every ${getSettings().autoRelevanceEveryTurns || 5} turns` : 'off',
-        false,
-        createAutoRelevanceCard(state),
-        { tooltip: 'Automatically promotes or demotes accepted lore between High, Normal, and Low relevance tiers.' }
-    ));
+    if (!isBasicExperience()) {
+        container.appendChild(createCollapsibleSection(
+            'lore.autoRelevance',
+            'Auto-Relevance',
+            getSettings().autoRelevanceEnabled ? `every ${getSettings().autoRelevanceEveryTurns || 5} turns` : 'off',
+            false,
+            createAutoRelevanceCard(state),
+            { tooltip: 'Automatically promotes or demotes accepted lore between High, Normal, and Low relevance tiers.' }
+        ));
+    }
 
     const pendingCount = (state?.pendingLoreEntries || []).length;
     container.appendChild(createCollapsibleSection(
@@ -5998,6 +6057,7 @@ function renderLoreTab(container, state) {
 }
 
 function createLoreTimelineCard(state) {
+    const basic = isBasicExperience();
     const summary = getLoreTimelineSummary(state);
     const counts = summary.counts || {};
     const latest = summary.latest;
@@ -6008,52 +6068,60 @@ function createLoreTimelineCard(state) {
     top.className = 'wandlight-lore-timeline-card-top';
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
-    title.textContent = 'Lore Timeline';
-    addTooltip(title, 'Story-aware audit trail for accepted lore changes and recoverable lore versions.');
+    title.textContent = basic ? 'Lore Tools' : 'Lore Timeline';
+    addTooltip(title, basic ? 'Create manual lore and review suggested/generated entries below.' : 'Story-aware audit trail for accepted lore changes and recoverable lore versions.');
     top.appendChild(title);
-    top.appendChild(createStatusPill(summary.eventCount ? `${summary.eventCount} events` : 'No events', 'Lore timeline event count for this chat.'));
+    if (!basic) {
+        top.appendChild(createStatusPill(summary.eventCount ? `${summary.eventCount} events` : 'No events', 'Lore timeline event count for this chat.'));
+    }
     card.appendChild(top);
 
-    const stats = document.createElement('div');
-    stats.className = 'wandlight-lore-timeline-stats';
-    stats.appendChild(createCompactPresetStat('Added', `+${counts.added || 0}`));
-    stats.appendChild(createCompactPresetStat('Deleted', `-${counts.deleted || 0}`));
-    stats.appendChild(createCompactPresetStat('Updated', String(counts.updated || 0)));
-    stats.appendChild(createCompactPresetStat('Restored', String(counts.restored || 0)));
-    card.appendChild(stats);
+    if (!basic) {
+        const stats = document.createElement('div');
+        stats.className = 'wandlight-lore-timeline-stats';
+        stats.appendChild(createCompactPresetStat('Added', `+${counts.added || 0}`));
+        stats.appendChild(createCompactPresetStat('Deleted', `-${counts.deleted || 0}`));
+        stats.appendChild(createCompactPresetStat('Updated', String(counts.updated || 0)));
+        stats.appendChild(createCompactPresetStat('Restored', String(counts.restored || 0)));
+        card.appendChild(stats);
 
-    const rail = document.createElement('div');
-    rail.className = 'wandlight-lore-timeline-mini-rail';
-    const events = getLoreTimelineEvents(state).slice(-18);
-    if (events.length) {
-        for (const event of events) {
-            const tick = document.createElement('span');
-            tick.className = `wandlight-lore-timeline-mini-tick ${getLoreTimelineEventClass(event)}`.trim();
-            addTooltip(tick, event.summary || event.type);
-            rail.appendChild(tick);
+        const rail = document.createElement('div');
+        rail.className = 'wandlight-lore-timeline-mini-rail';
+        const events = getLoreTimelineEvents(state).slice(-18);
+        if (events.length) {
+            for (const event of events) {
+                const tick = document.createElement('span');
+                tick.className = `wandlight-lore-timeline-mini-tick ${getLoreTimelineEventClass(event)}`.trim();
+                addTooltip(tick, event.summary || event.type);
+                rail.appendChild(tick);
+            }
+        } else {
+            const empty = document.createElement('span');
+            empty.className = 'wandlight-lore-timeline-mini-empty';
+            empty.textContent = 'No accepted-lore changes recorded yet.';
+            rail.appendChild(empty);
         }
-    } else {
-        const empty = document.createElement('span');
-        empty.className = 'wandlight-lore-timeline-mini-empty';
-        empty.textContent = 'No accepted-lore changes recorded yet.';
-        rail.appendChild(empty);
+        card.appendChild(rail);
     }
-    card.appendChild(rail);
 
     const foot = document.createElement('div');
     foot.className = 'wandlight-lore-timeline-card-foot';
     const latestText = document.createElement('div');
     latestText.className = 'wandlight-lore-timeline-latest';
-    latestText.textContent = latest ? `Last: ${latest.summary || latest.type}` : 'Manual creations, accepted lore changes, and recoveries will appear here.';
+    latestText.textContent = basic
+        ? 'Create a manual lore draft, or use the generation tools below to add reviewable lore.'
+        : (latest ? `Last: ${latest.summary || latest.type}` : 'Manual creations, accepted lore changes, and recoveries will appear here.');
     foot.appendChild(latestText);
     const actions = document.createElement('div');
     actions.className = 'wandlight-lore-timeline-actions';
     actions.appendChild(createButton('New Lore', 'Create a manual lore draft in Pending Lore Review.', () => {
         openNewLoreDialog();
     }, 'wandlight-primary-button'));
-    actions.appendChild(createButton('Open Timeline', 'Open the full Lore Timeline workbench.', () => {
-        openLoreTimeline();
-    }));
+    if (!basic) {
+        actions.appendChild(createButton('Open Timeline', 'Open the full Lore Timeline workbench.', () => {
+            openLoreTimeline();
+        }));
+    }
     foot.appendChild(actions);
     card.appendChild(foot);
     return card;
@@ -8505,12 +8573,56 @@ function toggleSuppressEntry(entryId, options = {}) {
     else saveState(state);
 }
 
-function setWorkflowMode(mode) {
-    const normalized = normalizeWorkflowMode(mode);
+function setAutomationMode(mode) {
+    const normalized = normalizeAutomationMode(mode);
     const settings = getSettings();
+    settings.automationMode = normalized;
     settings.workflowMode = normalized;
-    Object.assign(settings, WORKFLOW_MODES[normalized].settings);
+    Object.assign(settings, AUTOMATION_MODES[normalized].settings);
     saveSettings(settings);
+}
+
+function setExperienceMode(mode) {
+    const normalized = normalizeExperienceMode(mode);
+    const settings = getSettings();
+    const current = normalizeExperienceMode(settings.experienceMode);
+    if (current === normalized) return;
+
+    if (normalized === 'basic') {
+        settings.advancedExperienceSettingsBackup = pickManagedExperienceSettings(settings);
+        Object.assign(settings, BASIC_EXPERIENCE_SETTINGS);
+        settings.experienceMode = 'basic';
+        settings.basicExperienceProfileVersion = BASIC_EXPERIENCE_PROFILE_VERSION;
+    } else {
+        const backup = isPlainObjectValue(settings.advancedExperienceSettingsBackup)
+            ? settings.advancedExperienceSettingsBackup
+            : {};
+        for (const key of BASIC_EXPERIENCE_MANAGED_SETTING_KEYS) {
+            if (Object.prototype.hasOwnProperty.call(backup, key)) {
+                settings[key] = backup[key];
+            } else if (Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, key)) {
+                settings[key] = DEFAULT_SETTINGS[key];
+            }
+        }
+        settings.experienceMode = 'advanced';
+        settings.workflowMode = settings.automationMode || settings.workflowMode || 'manual';
+    }
+
+    saveSettings(settings);
+    const state = getState();
+    if (state?.lorePanel) {
+        normalizePanelLayoutState(state);
+        state.lorePanel.activeTab = normalizeTabForExperience(state.lorePanel.activeTab, settings);
+        saveState(state);
+    }
+}
+
+function pickManagedExperienceSettings(settings = {}) {
+    const backup = {};
+    for (const key of BASIC_EXPERIENCE_MANAGED_SETTING_KEYS) {
+        if (Object.prototype.hasOwnProperty.call(settings, key)) backup[key] = settings[key];
+    }
+    return backup;
 }
 
 function setPanelState(patch, options = {}) {
@@ -8587,8 +8699,9 @@ function toggleDrawerForTab(tabId) {
     const state = getState();
     if (!state?.lorePanel) return;
     normalizePanelLayoutState(state);
-    const normalizedTab = normalizeTab(tabId);
-    const sameActiveTab = normalizeTab(state.lorePanel.activeTab) === normalizedTab;
+    const settings = getSettings();
+    const normalizedTab = normalizeTabForExperience(tabId, settings);
+    const sameActiveTab = normalizeTabForExperience(state.lorePanel.activeTab, settings) === normalizedTab;
     const shouldClose = sameActiveTab && state.lorePanel.drawerOpen === true;
     state.lorePanel.activeTab = normalizedTab;
     state.lorePanel.drawerOpen = !shouldClose;
@@ -9131,16 +9244,45 @@ function normalizeTab(tab) {
     return Object.prototype.hasOwnProperty.call(TAB_LABELS, tab) ? tab : 'session';
 }
 
-function normalizeWorkflowMode(mode) {
-    return Object.prototype.hasOwnProperty.call(WORKFLOW_MODES, mode) ? mode : 'assisted';
+function getVisibleTabsForExperience(settings = getSettings()) {
+    return normalizeExperienceMode(settings?.experienceMode) === 'basic'
+        ? BASIC_EXPERIENCE_TABS
+        : ADVANCED_EXPERIENCE_TABS;
 }
 
-function getWorkflowLabel(settings) {
-    return WORKFLOW_MODES[normalizeWorkflowMode(settings?.workflowMode)].label;
+function isBasicExperience(settings = getSettings()) {
+    return normalizeExperienceMode(settings?.experienceMode) === 'basic';
 }
 
-function getWorkflowTooltip(settings) {
-    return WORKFLOW_MODES[normalizeWorkflowMode(settings?.workflowMode)].description;
+function normalizeTabForExperience(tab, settings = getSettings()) {
+    const normalized = normalizeTab(tab);
+    return getVisibleTabsForExperience(settings).includes(normalized) ? normalized : 'session';
+}
+
+function normalizeAutomationMode(mode) {
+    return Object.prototype.hasOwnProperty.call(AUTOMATION_MODES, mode) ? mode : 'manual';
+}
+
+function normalizeExperienceMode(mode) {
+    return mode === 'advanced' ? 'advanced' : 'basic';
+}
+
+function getAutomationLabel(settings) {
+    return AUTOMATION_MODES[normalizeAutomationMode(settings?.automationMode || settings?.workflowMode)].label;
+}
+
+function getAutomationTooltip(settings) {
+    return AUTOMATION_MODES[normalizeAutomationMode(settings?.automationMode || settings?.workflowMode)].description;
+}
+
+function getExperienceLabel(settings) {
+    return normalizeExperienceMode(settings?.experienceMode) === 'advanced' ? 'Advanced' : 'Basic';
+}
+
+function getExperienceTooltip(settings) {
+    return normalizeExperienceMode(settings?.experienceMode) === 'advanced'
+        ? 'Advanced Experience shows the full Wandlight toolset and restores your custom advanced settings.'
+        : 'Basic Experience shows the essential Wandlight workflow with curated safe defaults.';
 }
 
 function getCategoryCount(cat, entries, counts) {

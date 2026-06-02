@@ -50,6 +50,59 @@ export const LOG_PREFIX = '[Wandlight]';
 // ── Schema version ──────────────────────────────────────────────────────────────
 export const SCHEMA_VERSION = 18;
 
+export const AUTOMATION_MODE_VALUES = Object.freeze(['manual', 'assisted', 'automatic']);
+export const EXPERIENCE_MODE_VALUES = Object.freeze(['basic', 'advanced']);
+export const BASIC_EXPERIENCE_PROFILE_VERSION = 1;
+
+export const BASIC_EXPERIENCE_SETTINGS = Object.freeze({
+    autoExtract: false,
+    autoApplyDelta: true,
+    autoGenerateLore: false,
+    automationMode: 'manual',
+    workflowMode: 'manual',
+    continuityTrackingMode: 'manual',
+    contextDetectionMode: 'manual',
+    loreGenerationMode: 'manual',
+    contextHeaderDetectionEnabled: true,
+    contextSourceMessageCount: 20,
+    canonLoreDatabaseEnabled: true,
+    canonLoreAutoPropose: true,
+    canonLoreMaxEntries: 10,
+    loreBulkScanMode: 'recent',
+    loreSourceMessageCount: 40,
+    loreBulkChunkSize: 10,
+    loreBulkOverlap: 1,
+    loreBulkConcurrency: 2,
+    loreBulkFactsPerChunk: 8,
+    loreGenerationBreadthMode: 'auto',
+    loreBootstrapTargetEntries: 40,
+    loreIncrementalTargetEntries: 5,
+    loreReplacementGuard: true,
+    loreDuplicateGuard: true,
+    loreSimilarityRouting: true,
+    loreStrictQualityGate: true,
+    loreTagCount: 4,
+    autoRelevanceEnabled: false,
+    autoRelevanceUseModel: false,
+    injectionTransport: 'extension_prompt',
+    injectMemo: true,
+    injectContinuity: true,
+    injectLore: true,
+    continuityInjectionMode: 'direct',
+    loreHighInjectionEnabled: true,
+    loreNormalInjectionEnabled: true,
+    loreLowInjectionEnabled: false,
+    loreHighInjectionMode: 'direct',
+    loreNormalInjectionMode: 'direct',
+    loreLowInjectionMode: 'direct',
+    continuityInjectionDepth: 3,
+    loreHighInjectionDepth: 2,
+    loreNormalInjectionDepth: 5,
+    loreLowInjectionDepth: 9,
+});
+
+export const BASIC_EXPERIENCE_MANAGED_SETTING_KEYS = Object.freeze(Object.keys(BASIC_EXPERIENCE_SETTINGS));
+
 // ── Default extension settings ──────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
     enabled: true,
@@ -60,8 +113,12 @@ export const DEFAULT_SETTINGS = {
     extractionInterval: 1,
     maxSnapshots: 20,
     debugMode: false,
+    experienceMode: 'basic',
+    advancedExperienceSettingsBackup: null,
+    basicExperienceProfileVersion: BASIC_EXPERIENCE_PROFILE_VERSION,
 
     // Runtime automation modes. These replace the old single workflow preset for new behavior.
+    automationMode: 'manual',
     continuityTrackingMode: 'manual', // 'manual' | 'automatic'
     continuityAutoInterval: 5, // turns between automatic continuity scans
     contextDetectionMode: 'manual', // 'manual' | 'automatic'
@@ -103,7 +160,7 @@ export const DEFAULT_SETTINGS = {
     // Accepted Lore Matrix is intentionally uncapped. UI uses paging so hundreds of entries remain usable.
     maxLoreEntriesInMatrix: 0,
     autoGenerateLore: false,
-    workflowMode: 'manual', // legacy UI preset; explicit tab modes are authoritative
+    workflowMode: 'manual', // deprecated legacy alias for automationMode
 
     // Lore generation behavior
     loreSourceMessageCount: 40,

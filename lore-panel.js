@@ -180,6 +180,35 @@ const ACCEPTED_LORE_PAGE_INCREMENT = 40;
 const SEARCH_RENDER_DEBOUNCE_MS = 160;
 const MINOR_STATE_SAVE_DEBOUNCE_MS = 350;
 const LORE_WORKBENCH_ROW_LIMIT = 500;
+const LORE_TIMELINE_MIN_VIEW_MESSAGES = 20;
+const LORE_TIMELINE_DEFAULT_VIEW_MESSAGES = 520;
+const LORE_TIMELINE_MAX_MAIN_TICKS = 900;
+const LORE_TIMELINE_MAX_MINIMAP_TICKS = 1200;
+
+const LORE_TIMELINE_NODE_FILTERS = [
+    { id: 'canon_lore', label: 'Canon', short: 'C', color: '#d8a84f' },
+    { id: 'story_lore', label: 'Story Lore', short: 'S', color: '#b889ff' },
+    { id: 'canon_divergence', label: 'Divergences', short: 'D', color: '#d45a3e' },
+    { id: 'character_knowledge', label: 'Knowledge', short: 'K', color: '#6cc0bf' },
+    { id: 'location_lore', label: 'Locations', short: 'L', color: '#4d92d8' },
+    { id: 'relationship_change', label: 'Relationships', short: 'R', color: '#d18b8b' },
+    { id: 'timeline_event', label: 'Timeline Events', short: 'T', color: '#d49c43' },
+    { id: 'object_lore', label: 'Objects', short: 'O', color: '#bda463' },
+    { id: 'resolved_continuity', label: 'Resolved', short: 'OK', color: '#7ca65a' },
+];
+
+const LORE_TIMELINE_SENDER_PALETTE = [
+    '#f2e2bd',
+    '#3f8bdc',
+    '#b8453d',
+    '#bd7e3b',
+    '#6a8d49',
+    '#5f8680',
+    '#8169d8',
+    '#c98a52',
+    '#9ca6c9',
+    '#d0b05e',
+];
 
 let searchRenderTimer = null;
 let loreWorkbenchSearchTimer = null;
@@ -193,6 +222,8 @@ let loreWorkbenchPendingQuery = '';
 let loreWorkbenchFocusSelector = '';
 let loreTimelineOpen = false;
 let loreTimelineSelectedId = '';
+let loreTimelineViewport = null;
+let loreTimelineActiveFilters = new Set(LORE_TIMELINE_NODE_FILTERS.map(filter => filter.id));
 let canonPreviewUiState = {
     contextKey: '',
     preview: null,
@@ -6058,40 +6089,49 @@ function renderLoreTimeline() {
     const state = getState();
     const events = getLoreTimelineEvents(state);
     const summary = getLoreTimelineSummary(state);
+    const model = buildLoreTimelineVisualizerModel(state, events);
+    ensureLoreTimelineViewport(model.messages.length);
     const selected = events.find(event => event.id === loreTimelineSelectedId) || events[events.length - 1] || null;
     if (selected) loreTimelineSelectedId = selected.id;
+    const selectedNode = model.nodes.find(node => node.event.id === loreTimelineSelectedId) || null;
+    if (selectedNode) keepLoreTimelineIndexVisible(selectedNode.messageIndex, model.messages.length);
+    const visibleNodes = model.nodes.filter(node => isLoreTimelineFilterActive(node.type));
+    const visibleEventIds = new Set(visibleNodes.map(node => node.event.id));
 
     const shell = document.createElement('div');
     shell.className = 'wandlight-lore-timeline-shell';
     overlay.appendChild(shell);
 
-    const header = document.createElement('div');
-    header.className = 'wandlight-lore-workbench-header';
-    const titleWrap = document.createElement('div');
-    titleWrap.className = 'wandlight-lore-workbench-title-wrap';
-    const title = document.createElement('div');
-    title.className = 'wandlight-lore-workbench-title';
-    title.textContent = 'Lore Timeline';
-    titleWrap.appendChild(title);
-    const subtitle = document.createElement('div');
-    subtitle.className = 'wandlight-lore-workbench-subtitle';
-    subtitle.textContent = `${summary.eventCount} events | +${summary.counts.added || 0} added | -${summary.counts.deleted || 0} deleted | ${summary.counts.updated || 0} updated`;
-    titleWrap.appendChild(subtitle);
-    header.appendChild(titleWrap);
-    const close = createButton('Close', 'Close Lore Timeline.', closeLoreTimeline);
-    header.appendChild(close);
-    shell.appendChild(header);
+    shell.appendChild(createContinuityThreadHeader(summary));
+    shell.appendChild(createLoreTimelineFilterBar(model));
+
+    const stage = document.createElement('div');
+    stage.className = 'wandlight-continuity-stage';
+    shell.appendChild(stage);
+
+    const graphWrap = document.createElement('div');
+    graphWrap.className = 'wandlight-continuity-graph-wrap';
+    graphWrap.appendChild(createLoreTimelineGraph(model, visibleNodes, selectedNode));
+    graphWrap.appendChild(createLoreTimelineRuler(model));
+    graphWrap.appendChild(createLoreTimelineMinimap(model, visibleNodes));
+    graphWrap.appendChild(createLoreTimelineGraphControls(model));
+    stage.appendChild(graphWrap);
+
+    stage.appendChild(createLoreTimelineLegend(model, visibleNodes, summary));
 
     const body = document.createElement('div');
-    body.className = 'wandlight-lore-timeline-body';
+    body.className = 'wandlight-lore-timeline-body wandlight-continuity-detail-body';
     shell.appendChild(body);
 
     const list = document.createElement('div');
     list.className = 'wandlight-lore-timeline-event-list';
+    const listedEvents = [...events].reverse().filter(event => !model.nodes.length || visibleEventIds.has(event.id));
     if (!events.length) {
         list.appendChild(createEmptyMessage('No lore timeline events yet. Create, accept, edit, or delete lore to begin the audit trail.'));
+    } else if (!listedEvents.length) {
+        list.appendChild(createEmptyMessage('No lore nodes match the active filters.'));
     } else {
-        for (const event of [...events].reverse()) {
+        for (const event of listedEvents) {
             list.appendChild(createLoreTimelineEventRow(event, event.id === loreTimelineSelectedId));
         }
     }
@@ -6101,6 +6141,614 @@ function renderLoreTimeline() {
     detail.className = 'wandlight-lore-timeline-detail';
     detail.appendChild(createLoreTimelineEventDetail(selected));
     body.appendChild(detail);
+}
+
+function createContinuityThreadHeader(summary) {
+    const header = document.createElement('div');
+    header.className = 'wandlight-continuity-header';
+
+    const brand = document.createElement('div');
+    brand.className = 'wandlight-continuity-brand';
+    brand.textContent = 'Wandlight Continuity';
+    header.appendChild(brand);
+
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'wandlight-continuity-title-wrap';
+    const title = document.createElement('div');
+    title.className = 'wandlight-continuity-title';
+    title.textContent = 'The Continuity Thread';
+    titleWrap.appendChild(title);
+    const subtitle = document.createElement('div');
+    subtitle.className = 'wandlight-continuity-subtitle';
+    subtitle.textContent = `${summary.eventCount || 0} lore nodes | +${summary.counts.added || 0} added | -${summary.counts.deleted || 0} deleted | ${summary.counts.updated || 0} updated`;
+    titleWrap.appendChild(subtitle);
+    header.appendChild(titleWrap);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-continuity-header-actions';
+    actions.appendChild(createButton('New Lore', 'Create a manual lore draft in Pending Lore Review.', () => openNewLoreDialog(), 'wandlight-primary-button'));
+    actions.appendChild(createButton('Close', 'Close Lore Timeline.', closeLoreTimeline));
+    header.appendChild(actions);
+    return header;
+}
+
+function createLoreTimelineFilterBar(model) {
+    const bar = document.createElement('div');
+    bar.className = 'wandlight-continuity-filter-bar';
+    const label = document.createElement('div');
+    label.className = 'wandlight-continuity-filter-label';
+    label.textContent = 'Lore Timeline Visualizer';
+    bar.appendChild(label);
+    const chips = document.createElement('div');
+    chips.className = 'wandlight-continuity-filter-chips';
+    for (const filter of LORE_TIMELINE_NODE_FILTERS) {
+        const count = model.nodes.filter(node => node.type === filter.id).length;
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'wandlight-continuity-filter-chip';
+        if (isLoreTimelineFilterActive(filter.id)) chip.classList.add('wandlight-continuity-filter-chip-active');
+        chip.style.setProperty('--wl-chip-color', filter.color);
+        chip.textContent = `${filter.short} ${filter.label}${count ? ` ${count}` : ''}`;
+        addTooltip(chip, `Toggle ${filter.label} nodes in the timeline graph.`);
+        chip.addEventListener('click', () => {
+            if (isLoreTimelineFilterActive(filter.id)) loreTimelineActiveFilters.delete(filter.id);
+            else loreTimelineActiveFilters.add(filter.id);
+            renderLoreTimeline();
+        });
+        chips.appendChild(chip);
+    }
+    bar.appendChild(chips);
+    return bar;
+}
+
+function isLoreTimelineFilterActive(type) {
+    if (!(loreTimelineActiveFilters instanceof Set)) {
+        loreTimelineActiveFilters = new Set(LORE_TIMELINE_NODE_FILTERS.map(filter => filter.id));
+    }
+    return loreTimelineActiveFilters.has(type);
+}
+
+function buildLoreTimelineVisualizerModel(state, events) {
+    const messages = buildLoreTimelineMessages(events);
+    const senderMap = new Map();
+    for (const message of messages) {
+        if (!senderMap.has(message.senderId)) {
+            senderMap.set(message.senderId, {
+                id: message.senderId,
+                name: message.senderName,
+                type: message.senderType,
+                color: resolveLoreTimelineSenderColor(message.senderId, message.senderType, senderMap.size),
+            });
+        }
+    }
+    for (const message of messages) {
+        message.color = senderMap.get(message.senderId)?.color || '#f2e2bd';
+    }
+    const messageCount = Math.max(1, messages.length);
+    const nodes = events.map((event, index) => createLoreTimelineNode(event, index, messageCount));
+    const connections = buildLoreTimelineConnections(nodes);
+    const milestones = buildLoreTimelineMilestones(state, messageCount);
+    return {
+        messages,
+        senders: Array.from(senderMap.values()),
+        nodes,
+        connections,
+        milestones,
+        maxWordCount: Math.max(1, ...messages.map(message => message.wordCount || 1)),
+    };
+}
+
+function buildLoreTimelineMessages(events = []) {
+    const chat = getSillyTavernChatMessages();
+    if (chat.length) {
+        return chat.map((message, index) => {
+            const text = getTimelineMessageText(message);
+            const sender = getTimelineMessageSender(message, index);
+            return {
+                id: String(message?.id || message?.swipe_id || `message_${index + 1}`),
+                index: index + 1,
+                senderId: sender.id,
+                senderName: sender.name,
+                senderType: sender.type,
+                wordCount: countTimelineWords(text),
+                preview: compactTimelineText(text, 160),
+                timestamp: message?.send_date || message?.extra?.timestamp || '',
+            };
+        });
+    }
+    const maxAnchor = Math.max(1, ...events.map(event => Number(event.messageRange?.latest || event.messageRange?.end || event.messageRange?.start) || 0));
+    return Array.from({ length: maxAnchor }, (_, index) => ({
+        id: `message_${index + 1}`,
+        index: index + 1,
+        senderId: 'unknown',
+        senderName: 'Unknown / Offline',
+        senderType: 'system',
+        wordCount: 1,
+        preview: 'Chat message unavailable in this context.',
+        timestamp: '',
+    }));
+}
+
+function getSillyTavernChatMessages() {
+    try {
+        if (typeof SillyTavern === 'undefined' || typeof SillyTavern.getContext !== 'function') return [];
+        const chat = SillyTavern.getContext()?.chat;
+        return Array.isArray(chat) ? chat : [];
+    } catch (_) {
+        return [];
+    }
+}
+
+function getTimelineMessageText(message) {
+    for (const value of [message?.mes, message?.message, message?.text, message?.content]) {
+        if (typeof value === 'string' && value.trim()) return value;
+    }
+    return '';
+}
+
+function getTimelineMessageSender(message, index) {
+    if (message?.is_user) return { id: 'user', name: 'You', type: 'user' };
+    if (message?.is_system || message?.extra?.type === 'system') return { id: 'system', name: 'System / Lore Engine', type: 'system' };
+    const rawName = String(message?.name || message?.ch_name || '').trim();
+    const name = rawName || (index === 0 ? 'Narrator / Story' : 'Story');
+    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'story';
+    const type = /narrator|story/i.test(name) ? 'narrator' : 'character';
+    return { id: `${type}:${key}`, name, type };
+}
+
+function countTimelineWords(text) {
+    return String(text || '').trim().split(/\s+/).filter(Boolean).length || 1;
+}
+
+function compactTimelineText(text, max = 160) {
+    const clean = String(text || '').replace(/\s+/g, ' ').trim();
+    if (clean.length <= max) return clean;
+    return `${clean.slice(0, Math.max(0, max - 3))}...`;
+}
+
+function resolveLoreTimelineSenderColor(senderId, senderType, ordinal) {
+    if (senderType === 'user') return '#f2e2bd';
+    if (senderType === 'narrator') return '#3f8bdc';
+    if (senderType === 'system') return '#8169d8';
+    const hash = hashTimelineString(senderId);
+    return LORE_TIMELINE_SENDER_PALETTE[(hash + ordinal) % LORE_TIMELINE_SENDER_PALETTE.length] || '#d0b05e';
+}
+
+function hashTimelineString(value) {
+    const text = String(value || '');
+    let hash = 0;
+    for (let i = 0; i < text.length; i += 1) {
+        hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0;
+    }
+    return Math.abs(hash);
+}
+
+function createLoreTimelineNode(event, ordinal, messageCount) {
+    const messageIndex = clampMessageIndex(Number(event.messageRange?.latest || event.messageRange?.end || event.messageRange?.start) || messageCount, messageCount);
+    const type = classifyLoreTimelineNodeType(event);
+    const filter = LORE_TIMELINE_NODE_FILTERS.find(item => item.id === type) || LORE_TIMELINE_NODE_FILTERS[1];
+    const counts = event.counts || {};
+    const weight = Math.max(1, counts.added || 0, counts.deleted || 0, counts.updated || 0, counts.pending || 0, counts.restored || 0);
+    const lane = ordinal % 2 === 0 ? -1 : 1;
+    return {
+        id: event.id,
+        event,
+        type,
+        label: filter.label,
+        short: filter.short,
+        color: filter.color,
+        messageIndex,
+        importance: Math.max(1, Math.min(5, Math.ceil(Math.sqrt(weight)))),
+        lane,
+        refs: Array.isArray(event.refs) ? event.refs : [],
+    };
+}
+
+function classifyLoreTimelineNodeType(event = {}) {
+    const type = String(event.type || '').toLowerCase();
+    const source = String(event.source || '').toLowerCase();
+    const refs = Array.isArray(event.refs) ? event.refs : [];
+    const categories = refs.map(ref => String(ref.category || '').toLowerCase());
+    if (/restore|recover|resolved/.test(type)) return 'resolved_continuity';
+    if (/delete|remove|diverg/.test(type)) return 'canon_divergence';
+    if (/canon/.test(type) || /canon/.test(source) || refs.some(ref => ref.canon === 'canon')) return 'canon_lore';
+    if (categories.some(category => ['relationship', 'faction'].includes(category))) return 'relationship_change';
+    if (categories.some(category => ['location', 'place'].includes(category))) return 'location_lore';
+    if (categories.some(category => ['timeline', 'event'].includes(category))) return 'timeline_event';
+    if (categories.some(category => ['character', 'knowledge', 'secret'].includes(category))) return 'character_knowledge';
+    if (categories.some(category => ['item', 'artifact', 'spell', 'object'].includes(category))) return 'object_lore';
+    if (/relevance|knowledge|pin|mute|edit|metadata/.test(type)) return 'character_knowledge';
+    return 'story_lore';
+}
+
+function buildLoreTimelineConnections(nodes) {
+    const connections = [];
+    const lastByRef = new Map();
+    for (const node of nodes) {
+        const refIds = node.refs.map(ref => ref.id).filter(Boolean);
+        for (const refId of refIds) {
+            const prior = lastByRef.get(refId);
+            if (prior && prior.id !== node.id) {
+                connections.push({
+                    id: `${prior.id}_${node.id}_${refId}`,
+                    sourceId: prior.id,
+                    targetId: node.id,
+                    relation: node.type === 'canon_divergence' ? 'contradicts' : node.type === 'resolved_continuity' ? 'resolves' : 'updates',
+                    strength: 0.72,
+                });
+            }
+            lastByRef.set(refId, node);
+        }
+    }
+    return connections.slice(-80);
+}
+
+function buildLoreTimelineMilestones(state, messageCount) {
+    const context = state?.loreContext || {};
+    const milestones = [
+        { id: 'start', label: 'Start', messageIndex: 1 },
+    ];
+    if (messageCount >= 300) milestones.push({ id: 'act_i', label: 'Act I', messageIndex: Math.max(1, Math.round(messageCount * 0.2)) });
+    if (messageCount >= 900) milestones.push({ id: 'midpoint', label: 'Midpoint', messageIndex: Math.max(1, Math.round(messageCount * 0.5)) });
+    if (context.sceneDate) milestones.push({ id: 'scene_date', label: context.sceneDate, messageIndex: Math.max(1, Math.round(messageCount * 0.75)) });
+    milestones.push({ id: 'current', label: 'Current', messageIndex: messageCount });
+    return milestones;
+}
+
+function ensureLoreTimelineViewport(messageCount) {
+    const total = Math.max(1, messageCount || 1);
+    if (!loreTimelineViewport || !Number.isFinite(loreTimelineViewport.start) || !Number.isFinite(loreTimelineViewport.end)) {
+        const span = Math.min(total, LORE_TIMELINE_DEFAULT_VIEW_MESSAGES);
+        loreTimelineViewport = { start: Math.max(1, total - span + 1), end: total };
+        return;
+    }
+    setLoreTimelineViewport(loreTimelineViewport.start, loreTimelineViewport.end, total);
+}
+
+function setLoreTimelineViewport(start, end, messageCount) {
+    const total = Math.max(1, messageCount || 1);
+    let nextStart = Math.max(1, Math.round(start));
+    let nextEnd = Math.max(nextStart, Math.round(end));
+    let span = Math.max(LORE_TIMELINE_MIN_VIEW_MESSAGES, nextEnd - nextStart + 1);
+    span = Math.min(total, span);
+    if (nextStart + span - 1 > total) nextStart = Math.max(1, total - span + 1);
+    nextEnd = Math.min(total, nextStart + span - 1);
+    loreTimelineViewport = { start: nextStart, end: nextEnd };
+}
+
+function keepLoreTimelineIndexVisible(index, messageCount) {
+    ensureLoreTimelineViewport(messageCount);
+    const current = loreTimelineViewport;
+    if (!current || (index >= current.start && index <= current.end)) return;
+    const span = current.end - current.start + 1;
+    const start = Math.round(index - span / 2);
+    setLoreTimelineViewport(start, start + span - 1, messageCount);
+}
+
+function panLoreTimeline(delta, messageCount) {
+    ensureLoreTimelineViewport(messageCount);
+    const span = loreTimelineViewport.end - loreTimelineViewport.start + 1;
+    setLoreTimelineViewport(loreTimelineViewport.start + delta, loreTimelineViewport.start + delta + span - 1, messageCount);
+}
+
+function zoomLoreTimeline(factor, messageCount, anchorIndex = null) {
+    ensureLoreTimelineViewport(messageCount);
+    const current = loreTimelineViewport;
+    const total = Math.max(1, messageCount || 1);
+    const oldSpan = current.end - current.start + 1;
+    const newSpan = Math.max(LORE_TIMELINE_MIN_VIEW_MESSAGES, Math.min(total, Math.round(oldSpan * factor)));
+    const anchor = anchorIndex || Math.round((current.start + current.end) / 2);
+    const ratio = oldSpan <= 1 ? 0.5 : (anchor - current.start) / oldSpan;
+    const start = Math.round(anchor - newSpan * ratio);
+    setLoreTimelineViewport(start, start + newSpan - 1, total);
+}
+
+function clampMessageIndex(value, messageCount) {
+    const total = Math.max(1, messageCount || 1);
+    return Math.max(1, Math.min(total, Math.round(value) || total));
+}
+
+function createLoreTimelineGraph(model, nodes, selectedNode) {
+    const svg = createTimelineSvg(1180, 340, 'wandlight-continuity-main-svg');
+    svg.setAttribute('aria-label', 'Continuity message timeline graph');
+    const viewport = loreTimelineViewport || { start: 1, end: Math.max(1, model.messages.length) };
+    const width = 1180;
+    const height = 340;
+    const padX = 44;
+    const baselineY = 168;
+    const innerWidth = width - padX * 2;
+    const visibleSpan = Math.max(1, viewport.end - viewport.start);
+    const indexToX = index => padX + ((index - viewport.start) / visibleSpan) * innerWidth;
+
+    svg.appendChild(createTimelineSvgEl('rect', { x: 0, y: 0, width, height, rx: 12, class: 'wandlight-continuity-svg-bg' }));
+    svg.appendChild(createTimelineSvgEl('line', { x1: padX, y1: baselineY, x2: width - padX, y2: baselineY, class: 'wandlight-continuity-baseline' }));
+
+    const visibleMessages = model.messages.filter(message => message.index >= viewport.start && message.index <= viewport.end);
+    const stride = Math.max(1, Math.ceil(visibleMessages.length / LORE_TIMELINE_MAX_MAIN_TICKS));
+    visibleMessages.forEach((message, i) => {
+        if (i % stride !== 0) return;
+        const x = indexToX(message.index);
+        const scaled = Math.sqrt(Math.max(1, message.wordCount) / model.maxWordCount);
+        const tickHeight = 6 + scaled * 104;
+        const line = createTimelineSvgEl('line', {
+            x1: x,
+            y1: baselineY - tickHeight / 2,
+            x2: x,
+            y2: baselineY + tickHeight / 2,
+            class: 'wandlight-continuity-message-tick',
+            style: `--wl-tick-color:${message.color};--wl-tick-width:${Math.min(4, 1 + scaled * 2.4)}px;`,
+        });
+        line.appendChild(createTimelineSvgTitle(`${message.senderName} | message ${message.index} | ${message.wordCount} words | ${message.preview}`));
+        svg.appendChild(line);
+    });
+
+    const visibleNodeMap = new Map(nodes.filter(node => node.messageIndex >= viewport.start && node.messageIndex <= viewport.end).map(node => [node.id, node]));
+    for (const connection of model.connections) {
+        const source = visibleNodeMap.get(connection.sourceId);
+        const target = visibleNodeMap.get(connection.targetId);
+        if (!source || !target) continue;
+        const sx = indexToX(source.messageIndex);
+        const tx = indexToX(target.messageIndex);
+        const sy = getTimelineNodeY(source, baselineY);
+        const ty = getTimelineNodeY(target, baselineY);
+        const cy = Math.min(sy, ty) - 42;
+        svg.appendChild(createTimelineSvgEl('path', {
+            d: `M ${sx} ${sy} Q ${(sx + tx) / 2} ${cy} ${tx} ${ty}`,
+            class: `wandlight-continuity-connection wandlight-continuity-connection-${connection.relation}`,
+        }));
+    }
+
+    for (const node of visibleNodeMap.values()) {
+        const x = indexToX(node.messageIndex);
+        const y = getTimelineNodeY(node, baselineY);
+        const radius = 13 + node.importance * 2;
+        svg.appendChild(createTimelineSvgEl('line', {
+            x1: x,
+            y1: baselineY,
+            x2: x,
+            y2: y,
+            class: 'wandlight-continuity-node-stem',
+            style: `--wl-node-color:${node.color};`,
+        }));
+        const group = createTimelineSvgEl('g', {
+            class: `wandlight-continuity-node ${selectedNode?.id === node.id ? 'wandlight-continuity-node-selected' : ''}`,
+            tabindex: '0',
+            role: 'button',
+            'aria-label': `${node.label}: ${node.event.summary || node.event.type}`,
+            style: `--wl-node-color:${node.color};`,
+        });
+        group.appendChild(createTimelineSvgTitle(`${node.label} | message ${node.messageIndex} | ${node.event.summary || node.event.type}`));
+        group.appendChild(createTimelineSvgEl('circle', { cx: x, cy: y, r: radius, class: 'wandlight-continuity-node-ring' }));
+        const text = createTimelineSvgEl('text', { x, y: y + 4, class: 'wandlight-continuity-node-icon', 'text-anchor': 'middle' });
+        text.textContent = node.short;
+        group.appendChild(text);
+        group.addEventListener('click', () => {
+            loreTimelineSelectedId = node.event.id;
+            renderLoreTimeline();
+        });
+        group.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                loreTimelineSelectedId = node.event.id;
+                renderLoreTimeline();
+            }
+        });
+        svg.appendChild(group);
+    }
+
+    svg.addEventListener('wheel', event => {
+        event.preventDefault();
+        const rect = svg.getBoundingClientRect();
+        const ratio = rect.width ? Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) : 0.5;
+        const anchor = Math.round(viewport.start + ratio * Math.max(1, viewport.end - viewport.start));
+        if (event.ctrlKey || event.metaKey) zoomLoreTimeline(event.deltaY < 0 ? 0.72 : 1.28, model.messages.length, anchor);
+        else panLoreTimeline(Math.round((event.deltaY || event.deltaX || 0) / 30), model.messages.length);
+        renderLoreTimeline();
+    }, { passive: false });
+    return svg;
+}
+
+function getTimelineNodeY(node, baselineY) {
+    const laneGap = 58 + Math.min(34, node.importance * 8);
+    return baselineY + node.lane * laneGap;
+}
+
+function createLoreTimelineRuler(model) {
+    const ruler = document.createElement('div');
+    ruler.className = 'wandlight-continuity-ruler';
+    const viewport = loreTimelineViewport || { start: 1, end: model.messages.length || 1 };
+    const span = Math.max(1, viewport.end - viewport.start);
+    for (const milestone of model.milestones) {
+        if (milestone.messageIndex < viewport.start || milestone.messageIndex > viewport.end) continue;
+        const mark = document.createElement('div');
+        mark.className = 'wandlight-continuity-ruler-mark';
+        mark.style.left = `${((milestone.messageIndex - viewport.start) / span) * 100}%`;
+        mark.textContent = `${milestone.label} ${milestone.messageIndex}`;
+        ruler.appendChild(mark);
+    }
+    return ruler;
+}
+
+function createLoreTimelineMinimap(model, nodes) {
+    const svg = createTimelineSvg(1180, 84, 'wandlight-continuity-minimap-svg');
+    const total = Math.max(1, model.messages.length);
+    const width = 1180;
+    const height = 84;
+    const padX = 28;
+    const baselineY = 42;
+    const innerWidth = width - padX * 2;
+    const indexToX = index => padX + ((index - 1) / Math.max(1, total - 1)) * innerWidth;
+    svg.appendChild(createTimelineSvgEl('rect', { x: 0, y: 0, width, height, rx: 10, class: 'wandlight-continuity-minimap-bg' }));
+    svg.appendChild(createTimelineSvgEl('line', { x1: padX, y1: baselineY, x2: width - padX, y2: baselineY, class: 'wandlight-continuity-minimap-line' }));
+
+    const stride = Math.max(1, Math.ceil(model.messages.length / LORE_TIMELINE_MAX_MINIMAP_TICKS));
+    model.messages.forEach((message, i) => {
+        if (i % stride !== 0) return;
+        const scaled = Math.sqrt(Math.max(1, message.wordCount) / model.maxWordCount);
+        const tickHeight = 3 + scaled * 30;
+        svg.appendChild(createTimelineSvgEl('line', {
+            x1: indexToX(message.index),
+            y1: baselineY - tickHeight / 2,
+            x2: indexToX(message.index),
+            y2: baselineY + tickHeight / 2,
+            class: 'wandlight-continuity-minimap-tick',
+            style: `--wl-tick-color:${message.color};`,
+        }));
+    });
+
+    for (const node of nodes) {
+        svg.appendChild(createTimelineSvgEl('circle', {
+            cx: indexToX(node.messageIndex),
+            cy: baselineY - 28,
+            r: 4,
+            class: 'wandlight-continuity-minimap-node',
+            style: `--wl-node-color:${node.color};`,
+        }));
+    }
+
+    const viewport = loreTimelineViewport || { start: 1, end: total };
+    const vx = indexToX(viewport.start);
+    const vw = Math.max(10, indexToX(viewport.end) - vx);
+    svg.appendChild(createTimelineSvgEl('rect', { x: vx, y: 8, width: vw, height: 68, rx: 6, class: 'wandlight-continuity-minimap-window' }));
+
+    svg.addEventListener('pointerdown', event => {
+        event.preventDefault();
+        const rect = svg.getBoundingClientRect();
+        const span = viewport.end - viewport.start + 1;
+        let lastRender = 0;
+        const updateFromClientX = clientX => {
+            const ratio = rect.width ? Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) : 0.5;
+            const center = Math.round(1 + ratio * (total - 1));
+            setLoreTimelineViewport(center - Math.floor(span / 2), center + Math.ceil(span / 2), total);
+            const now = Date.now();
+            if (now - lastRender > 45) {
+                lastRender = now;
+                renderLoreTimeline();
+            }
+        };
+        const onMove = moveEvent => updateFromClientX(moveEvent.clientX);
+        const onUp = upEvent => {
+            updateFromClientX(upEvent.clientX);
+            document.removeEventListener('pointermove', onMove);
+            document.removeEventListener('pointerup', onUp);
+            renderLoreTimeline();
+        };
+        updateFromClientX(event.clientX);
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp, { once: true });
+    });
+    return svg;
+}
+
+function createLoreTimelineGraphControls(model) {
+    const controls = document.createElement('div');
+    controls.className = 'wandlight-continuity-graph-controls';
+    controls.appendChild(createButton('Fit', 'Show the full message timeline.', () => {
+        setLoreTimelineViewport(1, model.messages.length || 1, model.messages.length || 1);
+        renderLoreTimeline();
+    }));
+    controls.appendChild(createButton('Zoom In', 'Zoom into the current timeline range.', () => {
+        zoomLoreTimeline(0.7, model.messages.length || 1);
+        renderLoreTimeline();
+    }));
+    controls.appendChild(createButton('Zoom Out', 'Zoom out from the current timeline range.', () => {
+        zoomLoreTimeline(1.35, model.messages.length || 1);
+        renderLoreTimeline();
+    }));
+    controls.appendChild(createButton('Current', 'Jump to the latest messages.', () => {
+        const total = model.messages.length || 1;
+        const span = Math.min(total, loreTimelineViewport ? loreTimelineViewport.end - loreTimelineViewport.start + 1 : LORE_TIMELINE_DEFAULT_VIEW_MESSAGES);
+        setLoreTimelineViewport(total - span + 1, total, total);
+        renderLoreTimeline();
+    }, 'wandlight-primary-button'));
+    return controls;
+}
+
+function createLoreTimelineLegend(model, visibleNodes, summary) {
+    const legend = document.createElement('div');
+    legend.className = 'wandlight-continuity-legend';
+    legend.appendChild(createContinuityMetric('Messages', formatInteger(model.messages.length), 'Total'));
+    legend.appendChild(createContinuityMetric('Lore Nodes', formatInteger(visibleNodes.length), `${summary.eventCount || 0} total`));
+
+    const senderBox = document.createElement('div');
+    senderBox.className = 'wandlight-continuity-legend-box';
+    const senderTitle = document.createElement('div');
+    senderTitle.className = 'wandlight-continuity-legend-title';
+    senderTitle.textContent = 'Sender Color';
+    senderBox.appendChild(senderTitle);
+    for (const sender of model.senders.slice(0, 9)) {
+        const row = document.createElement('div');
+        row.className = 'wandlight-continuity-legend-row';
+        row.style.setProperty('--wl-sender-color', sender.color);
+        row.appendChild(document.createElement('span')).className = 'wandlight-continuity-legend-dot';
+        const text = document.createElement('span');
+        text.textContent = sender.name;
+        row.appendChild(text);
+        senderBox.appendChild(row);
+    }
+    legend.appendChild(senderBox);
+
+    const scaleBox = document.createElement('div');
+    scaleBox.className = 'wandlight-continuity-legend-box';
+    const scaleTitle = document.createElement('div');
+    scaleTitle.className = 'wandlight-continuity-legend-title';
+    scaleTitle.textContent = 'Word Count Scale';
+    scaleBox.appendChild(scaleTitle);
+    const scale = document.createElement('div');
+    scale.className = 'wandlight-continuity-word-scale';
+    for (let i = 1; i <= 5; i += 1) {
+        const bar = document.createElement('span');
+        bar.style.height = `${6 + i * 7}px`;
+        scale.appendChild(bar);
+    }
+    scaleBox.appendChild(scale);
+    legend.appendChild(scaleBox);
+    return legend;
+}
+
+function createContinuityMetric(label, value, sublabel) {
+    const metric = document.createElement('div');
+    metric.className = 'wandlight-continuity-metric';
+    const title = document.createElement('div');
+    title.textContent = label;
+    metric.appendChild(title);
+    const count = document.createElement('strong');
+    count.textContent = value;
+    metric.appendChild(count);
+    const sub = document.createElement('span');
+    sub.textContent = sublabel;
+    metric.appendChild(sub);
+    return metric;
+}
+
+function formatInteger(value) {
+    return Number(value || 0).toLocaleString();
+}
+
+function createTimelineSvg(width, height, className) {
+    const svg = createTimelineSvgEl('svg', {
+        viewBox: `0 0 ${width} ${height}`,
+        class: className,
+        preserveAspectRatio: 'none',
+    });
+    return svg;
+}
+
+function createTimelineSvgEl(tag, attrs = {}) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [key, value] of Object.entries(attrs)) {
+        if (value === undefined || value === null) continue;
+        if (key === 'class') el.setAttribute('class', value);
+        else if (key === 'style') el.setAttribute('style', value);
+        else el.setAttribute(key, String(value));
+    }
+    return el;
+}
+
+function createTimelineSvgTitle(text) {
+    const title = createTimelineSvgEl('title');
+    title.textContent = text || '';
+    return title;
 }
 
 function createLoreTimelineEventRow(event, selected = false) {

@@ -35,8 +35,8 @@ const MIN_PANEL_WIDTH = 420;
 const MIN_PANEL_HEIGHT = 360;
 const MIN_DRAWER_WIDTH = 360;
 const MIN_DRAWER_HEIGHT = 320;
-const RAIL_WIDTH_COMPACT = 52;
-const RAIL_WIDTH_EXPANDED = 188;
+const RAIL_WIDTH_COMPACT = 60;
+const RAIL_WIDTH_EXPANDED = 206;
 const RAIL_DRAWER_GAP = 8;
 const MAX_PANEL_MARGIN = 16;
 
@@ -82,6 +82,24 @@ const TAB_ICONS = {
     lore: 'L',
     injection: 'I',
 };
+
+const TAB_ICON_PATHS = {
+    session: './Images/runtime-icons/wandlight_tab_session_256.png',
+    context: './Images/runtime-icons/wandlight_tab_context_256.png',
+    continuity: './Images/runtime-icons/wandlight_tab_continuity_256.png',
+    lore: './Images/runtime-icons/wandlight_tab_lore_256.png',
+    injection: './Images/runtime-icons/wandlight_tab_injection_256.png',
+};
+
+function getTabIconSrc(tabId) {
+    const iconPath = TAB_ICON_PATHS[tabId];
+    if (!iconPath) return '';
+    try {
+        return new URL(iconPath, import.meta.url).href;
+    } catch (error) {
+        return iconPath;
+    }
+}
 
 const TAB_TOOLTIPS = {
     session: 'Runtime overview, instructions, undo history, and destructive cleanup actions.',
@@ -438,7 +456,22 @@ function renderRail(state) {
 
         const icon = document.createElement('span');
         icon.className = 'wandlight-runtime-rail-icon';
-        icon.textContent = TAB_ICONS[tabId] || label.slice(0, 1);
+        icon.dataset.fallbackIcon = TAB_ICONS[tabId] || label.slice(0, 1);
+        const iconSrc = getTabIconSrc(tabId);
+        if (iconSrc) {
+            const iconImg = document.createElement('img');
+            iconImg.className = 'wandlight-runtime-rail-icon-img';
+            iconImg.src = iconSrc;
+            iconImg.alt = '';
+            iconImg.draggable = false;
+            iconImg.addEventListener('error', () => {
+                icon.classList.add('wandlight-runtime-rail-icon-missing');
+                icon.textContent = TAB_ICONS[tabId] || label.slice(0, 1);
+            }, { once: true });
+            icon.appendChild(iconImg);
+        } else {
+            icon.textContent = TAB_ICONS[tabId] || label.slice(0, 1);
+        }
         tab.appendChild(icon);
 
         const labelEl = document.createElement('span');

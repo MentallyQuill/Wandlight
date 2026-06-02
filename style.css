@@ -3511,3 +3511,162 @@
 .wandlight-runtime-drawer .wandlight-runtime-tabs {
     display: none !important;
 }
+
+/* Runtime rail icon integration + restored house-archive gradient palette ---------
+   Phase 4: use transparent tab artwork and bring the rail/drawer back into the
+   original Wandlight dark red, black, and antique-gold color system. */
+.wandlight-lore-panel.wandlight-runtime-shell {
+    color: var(--wandlight-text, #f1ead8);
+}
+
+.wandlight-runtime-rail {
+    gap: 7px;
+    padding: 7px;
+    background:
+        radial-gradient(circle at 18% 8%, rgba(92, 23, 36, 0.56), transparent 34%),
+        radial-gradient(circle at 88% 94%, rgba(185, 139, 54, 0.16), transparent 38%),
+        linear-gradient(145deg, rgba(18, 12, 18, 0.985), rgba(9, 12, 18, 0.975));
+    border: 1px solid var(--wandlight-border, rgba(185, 139, 54, 0.38));
+    box-shadow:
+        0 10px 32px rgba(0, 0, 0, 0.72),
+        0 0 0 1px rgba(215, 181, 109, 0.08) inset,
+        0 0 22px rgba(92, 23, 36, 0.24);
+}
+
+.wandlight-runtime-rail-drag {
+    background:
+        linear-gradient(90deg, rgba(92, 23, 36, 0.72), rgba(20, 24, 32, 0.88));
+    border: 1px solid var(--wandlight-border-soft, rgba(185, 139, 54, 0.18));
+    box-shadow: 0 0 0 1px rgba(215, 181, 109, 0.05) inset;
+}
+
+.wandlight-runtime-rail-mark {
+    color: var(--wandlight-gold, #d7b56d);
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 10px rgba(215, 181, 109, 0.2);
+}
+
+.wandlight-runtime-rail-subtitle {
+    color: var(--wandlight-muted, rgba(241, 234, 216, 0.68));
+}
+
+.wandlight-runtime-rail-tab,
+.wandlight-runtime-rail-control {
+    background:
+        linear-gradient(180deg, rgba(18, 18, 24, 0.78), rgba(18, 12, 18, 0.66));
+    border-color: var(--wandlight-border-soft, rgba(185, 139, 54, 0.18));
+    color: var(--wandlight-text, #f1ead8);
+    box-shadow: 0 0 0 1px rgba(215, 181, 109, 0.035) inset;
+}
+
+.wandlight-runtime-rail-tab:hover,
+.wandlight-runtime-rail-control:hover {
+    background:
+        radial-gradient(circle at 20% 0%, rgba(215, 181, 109, 0.12), transparent 36%),
+        linear-gradient(180deg, rgba(92, 23, 36, 0.52), rgba(26, 18, 24, 0.82));
+    border-color: var(--wandlight-border, rgba(185, 139, 54, 0.38));
+    color: var(--wandlight-gold, #d7b56d);
+}
+
+.wandlight-runtime-rail-tab-active {
+    background:
+        radial-gradient(circle at 28% 12%, rgba(215, 181, 109, 0.2), transparent 34%),
+        linear-gradient(180deg, rgba(92, 23, 36, 0.66), rgba(34, 16, 22, 0.9));
+    border-color: rgba(215, 181, 109, 0.58);
+    color: var(--wandlight-gold, #d7b56d);
+    box-shadow:
+        0 0 0 1px rgba(215, 181, 109, 0.12) inset,
+        0 0 14px rgba(215, 181, 109, 0.08);
+}
+
+.wandlight-runtime-rail-icon {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 36px;
+    padding: 1px;
+    border-radius: 8px;
+    background:
+        radial-gradient(circle at 50% 44%, rgba(215, 181, 109, 0.16), transparent 56%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.22), rgba(18, 12, 18, 0.42));
+    color: var(--wandlight-gold, #d7b56d);
+    border: 1px solid rgba(185, 139, 54, 0.14);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.wandlight-runtime-rail-icon-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    filter: drop-shadow(0 0 3px rgba(215, 181, 109, 0.36));
+}
+
+.wandlight-runtime-rail-tab:hover .wandlight-runtime-rail-icon-img,
+.wandlight-runtime-rail-tab-active .wandlight-runtime-rail-icon-img {
+    filter:
+        drop-shadow(0 0 4px rgba(215, 181, 109, 0.54))
+        drop-shadow(0 0 8px rgba(92, 23, 36, 0.32));
+}
+
+.wandlight-runtime-rail-icon-missing {
+    font-weight: 800;
+    font-size: 0.86em;
+}
+
+.wandlight-runtime-rail-label {
+    color: var(--wandlight-text, #f1ead8);
+}
+
+.wandlight-runtime-rail-metric {
+    color: var(--wandlight-muted, rgba(241, 234, 216, 0.68));
+}
+
+.wandlight-runtime-rail-expanded .wandlight-runtime-rail-tab {
+    min-height: 42px;
+}
+
+.wandlight-runtime-rail-compact .wandlight-runtime-rail-tab,
+.wandlight-runtime-rail-compact .wandlight-runtime-rail-control {
+    min-height: 50px;
+    padding: 4px 4px;
+}
+
+.wandlight-runtime-rail-compact .wandlight-runtime-rail-icon {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+}
+
+.wandlight-runtime-drawer {
+    background:
+        radial-gradient(circle at 8% 0%, rgba(92, 23, 36, 0.42), transparent 36%),
+        radial-gradient(circle at 100% 100%, rgba(185, 139, 54, 0.11), transparent 42%),
+        linear-gradient(145deg, rgba(18, 12, 18, 0.985), rgba(9, 12, 18, 0.98));
+    border: 1px solid var(--wandlight-border, rgba(185, 139, 54, 0.38));
+    box-shadow:
+        0 10px 36px rgba(0, 0, 0, 0.72),
+        0 0 0 1px rgba(215, 181, 109, 0.08) inset,
+        0 0 24px rgba(92, 23, 36, 0.2);
+}
+
+.wandlight-runtime-drawer-header {
+    background: linear-gradient(90deg, rgba(92, 23, 36, 0.72), rgba(20, 24, 32, 0.9));
+    border-bottom: 1px solid var(--wandlight-border-soft, rgba(185, 139, 54, 0.18));
+    box-shadow: 0 -1px 0 rgba(215, 181, 109, 0.07) inset;
+}
+
+.wandlight-runtime-drawer-title {
+    color: var(--wandlight-gold, #d7b56d);
+    text-shadow: 0 0 10px rgba(215, 181, 109, 0.16);
+}
+
+.wandlight-runtime-drawer-status {
+    color: var(--wandlight-muted, rgba(241, 234, 216, 0.68));
+}
+
+.wandlight-runtime-drawer .wandlight-lore-panel-body {
+    background: transparent !important;
+}

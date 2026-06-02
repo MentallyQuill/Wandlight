@@ -1409,10 +1409,45 @@ function applyArrayDelta(target, patch, identityKey, normalizer) {
     }
 }
 
+function sanitizeCharacterPatchForConfig(patch, state) {
+    if (!patch || typeof patch !== 'object' || Array.isArray(patch)) return patch;
+
+    const appearanceEnabled = isSectionEnabled(state, 'appearance');
+    const emotionalStateEnabled = isSectionEnabled(state, 'emotionalState');
+    if (appearanceEnabled && emotionalStateEnabled) return patch;
+
+    const sanitized = { ...patch };
+    const sanitizeCharacter = (raw) => {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
+        const next = { ...raw };
+        if (!appearanceEnabled) delete next.clothing;
+        if (!emotionalStateEnabled) delete next.emotionalState;
+        return next;
+    };
+    const sanitizeUpdate = (raw) => {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
+        const next = { ...raw };
+        if (next.changes && typeof next.changes === 'object' && !Array.isArray(next.changes)) {
+            next.changes = sanitizeCharacter(next.changes);
+        }
+        return next;
+    };
+
+    if (Array.isArray(sanitized.added)) sanitized.added = sanitized.added.map(sanitizeCharacter);
+    if (Array.isArray(sanitized.updated)) sanitized.updated = sanitized.updated.map(sanitizeUpdate);
+    return sanitized;
+}
+
 function clampEmotion(value) {
     const n = Number(value);
     if (!Number.isFinite(n)) return 0;
     return Math.max(-5, Math.min(5, Math.round(n)));
+}
+
+function clampConfidence(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return 1;
+    return Math.max(0, Math.min(1, n));
 }
 
 function normalizeEmotionalState(raw = {}) {
@@ -1427,6 +1462,7 @@ function normalizeEmotionalState(raw = {}) {
         sadness: clampEmotion(src.sadness),
         joy: clampEmotion(src.joy),
         notes: typeof src.notes === 'string' ? src.notes : '',
+        confidence: clampConfidence(src.confidence),
         lastUpdatedAt: Number.isFinite(Number(src.lastUpdatedAt)) ? Number(src.lastUpdatedAt) : Date.now(),
         lastUpdatedChatLength: Number.isFinite(Number(src.lastUpdatedChatLength)) ? Number(src.lastUpdatedChatLength) : getCurrentChatLength(),
     };
@@ -1805,7 +1841,7 @@ export function applyDelta(state, delta) {
 
     // Characters — add/update/remove by name or index
     if (isSectionEnabled(next, 'characters') && changes.characters) {
-        applyArrayDelta(next.characters, changes.characters, 'name', normalizeCharacter);
+        applyArrayDelta(next.characters, sanitizeCharacterPatchForConfig(changes.characters, next), 'name', normalizeCharacter);
     }
 
     // Inventory — add/update/remove by index

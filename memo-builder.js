@@ -254,7 +254,23 @@ function buildLoreDirectMemo(state, settingsOverride = {}) {
 }
 
 
-function formatEmotionalState(raw = {}) {
+function getCurrentChatLength() {
+    try {
+        const ctx = SillyTavern.getContext();
+        return Array.isArray(ctx?.chat) ? ctx.chat.length : 0;
+    } catch (_) {
+        return 0;
+    }
+}
+
+function getEmotionMessageAge(raw = {}) {
+    const updatedAt = Number(raw?.lastUpdatedChatLength);
+    const current = getCurrentChatLength();
+    if (!Number.isFinite(updatedAt) || updatedAt <= 0 || current <= 0 || current < updatedAt) return 0;
+    return Math.max(0, current - updatedAt);
+}
+
+function formatEmotionalState(raw = {}, settings = {}) {
     const keys = ['affection', 'trust', 'desire', 'connection', 'fear', 'anger', 'sadness', 'joy'];
     const labels = [];
     for (const key of keys) {
@@ -262,7 +278,29 @@ function formatEmotionalState(raw = {}) {
         if (Math.abs(val) >= 2) labels.push(`${key} ${val > 0 ? '+' : ''}${val}`);
     }
     if (raw.notes) labels.push(String(raw.notes));
-    return labels.join(', ');
+    const text = labels.join(', ');
+    if (!text) return '';
+    const confidence = Number(raw.confidence);
+    const confidencePrefix = Number.isFinite(confidence) && confidence < 0.65 ? 'uncertain ' : '';
+
+    if (settings.continuityEmotionRecencyEnabled === false) return text;
+
+    const currentWindow = Math.max(0, Number(settings.continuityEmotionCurrentMessageWindow) || 8);
+    const recentWindow = Math.max(currentWindow, Number(settings.continuityEmotionRecentMessageWindow) || 20);
+    const age = getEmotionMessageAge(raw);
+
+    if (age > recentWindow) {
+        const behavior = String(settings.continuityEmotionStaleBehavior || 'omit');
+        if (behavior === 'keep') return `${confidencePrefix}stale (${age} messages ago): ${text}; update naturally if contradicted`;
+        if (behavior === 'keep_as_recent') return `${confidencePrefix}recent (${age} messages ago): ${text}; do not force if the scene has moved on`;
+        return '';
+    }
+
+    if (age > currentWindow) {
+        return `${confidencePrefix}recent (${age} messages ago): ${text}; update naturally if the scene has moved on`;
+    }
+
+    return `${confidencePrefix}current: ${text}`;
 }
 
 function compressLine(text, settings, kind) {

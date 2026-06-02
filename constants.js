@@ -266,6 +266,10 @@ export const DEFAULT_SETTINGS = {
     loreCompressionTurnInterval: 8,
     continuityInjectionMode: 'direct', // 'direct' | 'compressed'
     continuityCompressionLevel: 3,
+    continuityEmotionRecencyEnabled: true,
+    continuityEmotionCurrentMessageWindow: 8,
+    continuityEmotionRecentMessageWindow: 20,
+    continuityEmotionStaleBehavior: 'omit', // 'omit' | 'keep_as_recent' | 'keep'
 
     // Advanced compression prompt templates. Variables: {{kind}}, {{compressionLevel}},
     // {{compressionLabel}}, {{directTokens}}, {{targetTokens}}, {{hardTokenLimit}},
@@ -345,7 +349,7 @@ Direct injection block:
     // when the corresponding section is enabled/tracked for the current chat.
     continuitySectionPrompts: {
         canonScene: 'Extract only explicitly established scene and timeline details: era, in-universe date, canon boundary, location, time of day, weather, ambience, present/nearby characters, and current activity. Do not invent missing fields. Durable story-established canon changes belong in Story Lore, not Continuity.',
-        characters: 'Track active character state when clearly supported: role, current location, clothing, posture, physical condition, current emotional state, carried key items, and immediate goals. Do not summarize relationship history or durable knowledge here; Story Lore owns that memory.',
+        characters: 'Track active character state when clearly supported: role, current location, clothing, posture, physical condition, currently observed emotional state, carried key items, and immediate goals. For emotionalState, include confidence from 0 to 1 when uncertain, and only update it when the latest messages show or explicitly state the emotion. Do not summarize relationship history or durable knowledge here; Story Lore owns that memory.',
         threads: 'Track only active immediate threads that affect the next scene or next few replies. Durable plot history, milestones, secrets, and relationship history belong in Story Lore.',
         inventory: 'Track only consequential currently relevant items: carried key items, ownership, location, and immediate object status. Item history belongs in Story Lore.',
         objectives: 'Track current goals, plans, blockers, stakes, and whether objectives are active, blocked, completed, or abandoned. Long-term plot facts belong in Story Lore.'

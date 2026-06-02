@@ -407,129 +407,408 @@ const AUTOMATION_MODES = {
 const BASIC_EXPERIENCE_TABS = Object.freeze(['session', 'context', 'lore', 'injection']);
 const ADVANCED_EXPERIENCE_TABS = Object.freeze(Object.keys(TAB_LABELS));
 
+function guideStep(id, title, body, tab, target, options = {}) {
+    return Object.freeze({
+        id,
+        title,
+        body,
+        tab,
+        target,
+        actionLabel: 'Show',
+        ...options,
+    });
+}
+
+function freezeGuideSteps(steps) {
+    return Object.freeze(steps.map(step => Object.freeze(step)));
+}
+
 const GUIDE_STEPS = Object.freeze({
-    basic: Object.freeze([
-        {
-            id: 'active',
-            title: 'Turn Wandlight On',
-            body: 'Keep Wandlight active while you roleplay so accepted lore can be selected and injected.',
-            tab: 'session',
-            target: 'session.active',
-            actionLabel: 'Show',
-        },
-        {
-            id: 'context',
-            title: 'Set Story Context',
-            body: 'Detect the scene date and canon reference point before adding canon lore.',
-            tab: 'context',
-            target: 'context.detect',
-            actionLabel: 'Show',
-        },
-        {
-            id: 'lore',
-            title: 'Add Useful Lore',
-            body: 'Preview canon packs, scan story lore, or create a manual lore draft.',
-            tab: 'lore',
-            target: 'lore.generation',
+    basic: freezeGuideSteps([
+        guideStep('active', 'Wandlight Active', 'The master runtime switch. Keep it on when you want Wandlight to select and inject accepted lore.', 'session', 'session.active', {
+            expected: 'When enabled, Wandlight can update prompt injection and run any manual tools you click.',
+            when: 'Turn it off only when you want the chat to ignore Wandlight without changing saved lore.',
+        }),
+        guideStep('preset', 'Wandlight Preset Status', 'Shows whether the bundled Wandlight chat preset is installed and current.', 'session', 'session.preset', {
+            expected: 'A current preset enables reply headers that make Story Context detection faster.',
+            when: 'Check this after installing Wandlight or updating the extension.',
+        }),
+        guideStep('metrics', 'Session Metrics', 'Summarizes pending lore, accepted lore, selected injection entries, and estimated injected tokens.', 'session', 'session.metrics', {
+            expected: 'These numbers tell you whether Wandlight has lore to review and whether lore is being selected for injection.',
+            when: 'Use this as a quick health check when the model seems unaware of stored lore.',
+        }),
+        guideStep('context-detect', 'Detect Story Context', 'Reads recent chat and fills the scene date, canon boundary, and branch fields.', 'context', 'context.detect', {
+            expected: 'The fields below update with the current date/canon point. Canon lore suggestions become date-aware.',
+            when: 'Run this before canon suggestions and whenever the story jumps dates.',
+        }),
+        guideStep('context-fields', 'Story Context Fields', 'Manually correct the Scene date, Canon reference point, and Branch when detection is incomplete.', 'context', 'context.fields', {
+            expected: 'Manual edits immediately affect canon suggestions and story-lore generation.',
+            when: 'Use this for alternate timelines, unclear dates, or scenes where the chat has not stated the date.',
+        }),
+        guideStep('new-lore', 'New Lore', 'Creates a manual pending lore draft from your own judgment.', 'lore', 'lore.new', {
             expandSections: Object.freeze(['lore.generation']),
-            actionLabel: 'Show',
-        },
-        {
-            id: 'review',
-            title: 'Review Pending Lore',
-            body: 'Accept entries worth remembering and dismiss entries that belong only in the chat summary.',
-            tab: 'lore',
-            target: 'lore.pending',
+            expected: 'The draft enters Pending Lore Review so it can be edited before acceptance.',
+            when: 'Use this for important objects, rules, promises, relationships, secrets, or story-specific facts.',
+        }),
+        guideStep('lore-context', 'Lore Context Status', 'Shows the date and canon reference point used by lore tools on this tab.', 'lore', 'lore.contextStatus', {
+            expandSections: Object.freeze(['lore.generation']),
+            expected: 'If the context is missing or stale, refresh it before adding canon lore.',
+            when: 'Check this before Preview Canon Packs or Scan Story Lore.',
+        }),
+        guideStep('canon-preview', 'Preview Canon Packs', 'Queries the local canon database without an API call and groups matching entries into packs.', 'lore', 'lore.canon.preview', {
+            expandSections: Object.freeze(['lore.generation']),
+            expected: 'A preview appears below with selectable date-aware canon constraints.',
+            when: 'Use this to add canon guardrails without paying for model generation.',
+        }),
+        guideStep('canon-results', 'Canon Preview Results', 'Review packs, detail level, selected count, and candidate entries before adding anything.', 'lore', 'lore.canon.previewResults', {
+            fallbackTarget: 'lore.canon.preview',
+            expandSections: Object.freeze(['lore.generation']),
+            expected: 'Selected entries move to Pending Lore Review, not directly into accepted lore.',
+            when: 'Use this to avoid adding too many low-value canon entries.',
+        }),
+        guideStep('story-scan', 'Scan Story Lore', 'Uses the Reasoning provider to extract story-specific lore from recent chat.', 'lore', 'lore.story.scan', {
+            expandSections: Object.freeze(['lore.generation']),
+            expected: 'Generated entries appear in Pending Lore Review after the scan completes.',
+            when: 'Run this after a meaningful amount of new story has happened.',
+        }),
+        guideStep('pending-workbench', 'Pending Workbench', 'Opens a larger review surface for many pending entries.', 'lore', 'lore.pending.workbench', {
+            fallbackTarget: 'lore.pending',
             expandSections: Object.freeze(['lore.basic.pendingReview', 'lore.pendingReview']),
-            actionLabel: 'Show',
-        },
-        {
-            id: 'injection',
-            title: 'Check Injection',
-            body: 'Choose which lore relevance tiers Wandlight sends into the next prompt.',
-            tab: 'injection',
-            target: 'injection.basic',
-            actionLabel: 'Show',
-        },
+            expected: 'You get denser rows and a detail pane for batch review.',
+            when: 'Use this when there are dozens of pending entries.',
+        }),
+        guideStep('pending-entry', 'Pending Entry Anatomy', 'A pending entry shows title, metadata chips, tags, fact text, routing, and review actions.', 'lore', 'lore.pending.entry', {
+            fallbackTarget: 'lore.pending',
+            expandSections: Object.freeze(['lore.basic.pendingReview', 'lore.pendingReview']),
+            expected: 'Accept durable lore. Dismiss recap facts or entries that are not useful for future prompting.',
+            when: 'Use this every time generated or canon lore is proposed.',
+        }),
+        guideStep('pending-bulk', 'Pending Bulk Actions', 'Select, apply, or dismiss groups of pending lore entries.', 'lore', 'lore.pending.bulk', {
+            fallbackTarget: 'lore.pending',
+            expandSections: Object.freeze(['lore.basic.pendingReview', 'lore.pendingReview']),
+            expected: 'Bulk actions process only selected entries unless you choose Apply All or Dismiss All.',
+            when: 'Use this after scanning a large range or adding a whole canon pack.',
+        }),
+        guideStep('accepted-filters', 'Accepted Lore Filters', 'Search and filter accepted entries by category or source.', 'lore', 'lore.accepted.filters', {
+            fallbackTarget: 'lore.accepted',
+            expandSections: Object.freeze(['lore.basic.acceptedEntries', 'lore.acceptedEntries']),
+            expected: 'Only matching accepted entries remain visible.',
+            when: 'Use this once accepted lore grows beyond a small handful of entries.',
+        }),
+        guideStep('accepted-entry', 'Accepted Entry Controls', 'Accepted entries can be expanded, edited, retagged, pinned, muted, and assigned relevance.', 'lore', 'lore.accepted.entry', {
+            fallbackTarget: 'lore.accepted',
+            expandSections: Object.freeze(['lore.basic.acceptedEntries', 'lore.acceptedEntries']),
+            expected: 'Pin prioritizes an entry. Mute stores it but excludes it from injection.',
+            when: 'Use this to keep high-value lore precise and remove noise from prompt injection.',
+        }),
+        guideStep('accepted-workbench', 'Accepted Workbench', 'Opens large-list management for accepted lore.', 'lore', 'lore.accepted.workbench', {
+            fallbackTarget: 'lore.accepted',
+            expandSections: Object.freeze(['lore.basic.acceptedEntries', 'lore.acceptedEntries']),
+            expected: 'You get dense rows, filters, bulk actions, and a detail pane.',
+            when: 'Use this for large accepted-lore sets.',
+        }),
+        guideStep('inject-lore-toggle', 'Inject Lore Toggle', 'Controls whether accepted lore is sent into the next roleplay prompt.', 'injection', 'injection.loreToggle', {
+            expected: 'When on, enabled relevance tiers can contribute prompt text.',
+            when: 'Turn this off if you want to store lore but keep it out of the current prompt.',
+        }),
+        guideStep('high-tier', 'High-Relevance Lore', 'Immediate scene-critical lore. This tier is closest to the latest prompt context.', 'injection', 'injection.tier.high', {
+            expected: 'High lore should usually stay direct unless it becomes very large.',
+            when: 'Use this for current secrets, active objects, live promises, and scene-critical constraints.',
+        }),
+        guideStep('normal-tier', 'Normal-Relevance Lore', 'Useful background lore that may matter soon but is not the current scene focus.', 'injection', 'injection.tier.normal', {
+            expected: 'Normal lore can be direct or compressed depending on token pressure.',
+            when: 'Use this for recent relationship changes, recurring facts, and branch-defining context.',
+        }),
+        guideStep('low-tier', 'Low-Relevance Lore', 'Longer-range background lore. Basic defaults keep this conservative.', 'injection', 'injection.tier.low', {
+            expected: 'Low lore is often disabled or compressed unless the scene needs broad context.',
+            when: 'Use this for distant history or low-priority world state.',
+        }),
     ]),
-    advanced: Object.freeze([
-        {
-            id: 'active',
-            title: 'Session Setup',
-            body: 'Confirm Wandlight is active, then choose how much automation should run during roleplay.',
-            tab: 'session',
-            target: 'session.automation',
-            actionLabel: 'Show',
-        },
-        {
-            id: 'context',
-            title: 'Story Context',
-            body: 'Set the date, canon boundary, and branch that canon suggestions and lore generation use.',
-            tab: 'context',
-            target: 'context.detect',
-            actionLabel: 'Show',
-        },
-        {
-            id: 'continuity',
-            title: 'Continuity State',
-            body: 'Scan lightweight live state such as scene, active cast, key items, and current threads.',
-            tab: 'continuity',
-            target: 'continuity.scan',
-            actionLabel: 'Show',
-        },
-        {
-            id: 'lore-generation',
-            title: 'Lore Generation',
-            body: 'Use local canon suggestions for date-aware constraints and model scans for story-specific lore.',
-            tab: 'lore',
-            target: 'lore.generation',
+    advanced: freezeGuideSteps([
+        guideStep('experience-mode', 'Experience Mode', 'Switches between focused Basic controls and the full Advanced toolset.', 'session', 'session.experienceMode', {
+            expected: 'Basic applies a simpler profile. Advanced restores detailed controls and backed-up settings.',
+            when: 'Use Advanced when you need automation, continuity tuning, workbenches, timeline, or placement control.',
+        }),
+        guideStep('automation-mode', 'Automation Mode', 'Chooses whether Wandlight stays manual, scans continuity automatically, or runs broader automation.', 'session', 'session.automation', {
+            expected: 'Manual only runs when clicked. Assisted tracks continuity. Automatic also runs context/lore automation.',
+            when: 'Use Manual while configuring; use Assisted or Automatic once settings are stable.',
+        }),
+        guideStep('active', 'Wandlight Active', 'The master runtime switch for Wandlight behavior.', 'session', 'session.active', {
+            expected: 'When enabled, prompt injection and configured automation can run.',
+            when: 'Use this to pause Wandlight without deleting state.',
+        }),
+        guideStep('preset', 'Wandlight Preset', 'Detects whether the bundled Wandlight preset is installed and which version is present.', 'session', 'session.preset', {
+            expected: 'Install/update from here, then verify your SillyTavern connection profile if the preset changed it.',
+            when: 'Check this after extension updates or when fast context detection fails.',
+        }),
+        guideStep('metrics', 'Session Metrics', 'Shows pending continuity, pending lore, accepted lore, selected injection count, and injection token estimate.', 'session', 'session.metrics', {
+            expected: 'These values help diagnose whether Wandlight has data and whether it is injecting data.',
+            when: 'Use this as a quick runtime status check.',
+        }),
+        guideStep('context-automation', 'Context Automation', 'Controls whether Story Context detection runs only on click or automatically after turns.', 'context', 'context.automation', {
+            expected: 'Automatic detection can keep dates current, especially with the Wandlight preset header format.',
+            when: 'Use automatic detection if your story frequently moves scenes or dates.',
+        }),
+        guideStep('fast-header', 'Fast Header Detection', 'Scans recent model reply headers for date/time/location/weather before using a model call.', 'context', 'context.fastHeader', {
+            expected: 'If a valid header is found, Wandlight updates Story Context locally and skips provider cost.',
+            when: 'Use this with the Wandlight preset.',
+        }),
+        guideStep('context-window', 'Context Source Messages', 'Controls how many recent chat messages are scanned for headers or sent to model fallback.', 'context', 'context.sourceMessages', {
+            expected: 'Larger windows improve detection but cost more time when model fallback is needed.',
+            when: 'Increase it if context detection misses dates stated earlier in the scene.',
+        }),
+        guideStep('context-detect', 'Detect Story Context', 'Runs context detection immediately.', 'context', 'context.detect', {
+            expected: 'Scene date, canon boundary, branch, and detection timestamp update below.',
+            when: 'Run before canon suggestions or after timeline jumps.',
+        }),
+        guideStep('context-fields', 'Story Context Editor', 'Manually correct context fields when detection is ambiguous or the story is alternate-universe.', 'context', 'context.fields', {
+            expected: 'Manual edits immediately affect generation and canon pack previews.',
+            when: 'Use this for branches, time travel, unclear dates, or custom fanfiction canon points.',
+        }),
+        guideStep('continuity-automation', 'Continuity Automation', 'Controls whether continuity state scanning is manual or turn-interval based.', 'continuity', 'continuity.automation', {
+            expected: 'Automatic scans update lightweight scene state at the configured interval.',
+            when: 'Use this when you want Wandlight to maintain current-scene state in the background.',
+        }),
+        guideStep('continuity-scope', 'Continuity Scan Scope', 'Chooses recent, custom, or entire-chat scanning for continuity state.', 'continuity', 'continuity.scanScope', {
+            expandSections: Object.freeze(['continuity.scanScope']),
+            expected: 'Recent is best for maintenance. Custom or entire chat is for backfill.',
+            when: 'Use custom ranges when a specific section of chat needs recovery.',
+        }),
+        guideStep('continuity-performance', 'Continuity Performance', 'Controls chunking, overlap, parallelism, retry behavior, and checkpoint recovery.', 'continuity', 'continuity.performance', {
+            expandSections: Object.freeze(['continuity.scanPerformance']),
+            expected: 'Smaller chunks are more reliable; higher concurrency is faster but heavier.',
+            when: 'Tune this for large stories or provider instability.',
+        }),
+        guideStep('continuity-run', 'Scan Continuity State', 'Runs the adaptive continuity scanner now.', 'continuity', 'continuity.scan.button', {
+            fallbackTarget: 'continuity.scan',
+            expected: 'Continuity sections update with current scene, cast, items, and active threads.',
+            when: 'Run after a scene changes or after a long section of roleplay.',
+        }),
+        guideStep('tracked-sections', 'Tracked Sections', 'Enables or disables which continuity state sections are updated and injected.', 'continuity', 'continuity.trackedSections', {
+            expandSections: Object.freeze(['continuity.trackedSections']),
+            expected: 'Disabled sections preserve saved data but stop being scanned and injected.',
+            when: 'Use this to reduce noise or keep only the continuity sections you care about.',
+        }),
+        guideStep('character-fields', 'Active Character Fields', 'Appearance Detail and Emotional State are child fields inside Active Characters, not separate top-level continuity sections.', 'continuity', 'continuity.characterFields', {
+            expandSections: Object.freeze(['continuity.trackedSections']),
+            expected: 'Disabling a child field preserves saved values but prevents scans and injection from treating that field as live state.',
+            when: 'Use this when clothing or emotion should stop influencing the next prompt without deleting character state.',
+        }),
+        guideStep('emotional-freshness', 'Emotional State Freshness', 'Controls how long emotional state is injected as current, recent, or omitted as stale.', 'continuity', 'continuity.emotionalState', {
+            expandSections: Object.freeze(['continuity.trackedSections']),
+            expected: 'Old emotions decay by message age so characters can naturally move out of prior moods.',
+            when: 'Tune this if characters seem emotionally stuck or if scans run infrequently.',
+        }),
+        guideStep('scene-editor', 'Scene and Timeline', 'Edits current date, location, activity, and timeline state.', 'continuity', 'continuity.scene', {
+            expandSections: Object.freeze(['continuity.canonScene']),
+            expected: 'This is immediate state, not permanent lore.',
+            when: 'Use this to correct the next-scene anchor.',
+        }),
+        guideStep('character-editor', 'Active Characters', 'Tracks current cast state such as posture, emotions, appearance, and immediate goals.', 'continuity', 'continuity.characters', {
+            expandSections: Object.freeze(['continuity.characters']),
+            expected: 'The model receives current-state cues without needing a full summary.',
+            when: 'Use this for scene-level character state that should not become durable lore.',
+        }),
+        guideStep('character-emotion-summary', 'Emotional State Summary', 'Shows saved emotional state inside Active Characters and labels it as current, recent, stale, or disabled.', 'continuity', 'continuity.emotionalStateSummary', {
+            expandSections: Object.freeze(['continuity.characters']),
+            expected: 'Emotion remains visible for review while stale values stop acting like permanent character mood.',
+            when: 'Use this to verify whether a character emotion is fresh enough to influence injection.',
+        }),
+        guideStep('items-editor', 'Key Items', 'Tracks consequential current items and object status.', 'continuity', 'continuity.items', {
+            expandSections: Object.freeze(['continuity.inventory']),
+            expected: 'Current item state stays available for continuity injection.',
+            when: 'Use this for items currently affecting the scene.',
+        }),
+        guideStep('threads-editor', 'Active Goals and Threads', 'Tracks immediate unresolved goals and active story threads.', 'continuity', 'continuity.threads', {
+            expandSections: Object.freeze(['continuity.activeGoalsThreads']),
+            expected: 'The model gets concise reminders of current objectives.',
+            when: 'Use this for short-term direction rather than permanent lore.',
+        }),
+        guideStep('timeline-summary', 'Lore Timeline Summary', 'Shows accepted-lore change history and opens the full timeline visualizer.', 'lore', 'lore.timeline', {
+            expected: 'Creation, update, deletion, restoration, pin, mute, and metadata events are tracked.',
+            when: 'Use this to audit or recover lore changes.',
+        }),
+        guideStep('timeline-open', 'Open Timeline', 'Opens the full Lore Timeline window.', 'lore', 'lore.timeline.open', {
+            fallbackTarget: 'lore.timeline',
+            expected: 'The visualizer can inspect lore events and restore entries back to pending review.',
+            when: 'Use this for recovery or timeline-aware lore audits.',
+        }),
+        guideStep('new-lore', 'New Lore', 'Creates a manual lore draft with title, text, injection override, notes, tags, and metadata.', 'lore', 'lore.new', {
+            expected: 'The draft goes to Pending Lore Review for editing and acceptance.',
+            when: 'Use this when you know a detail should be remembered without running a model scan.',
+        }),
+        guideStep('lore-context', 'Lore Context Status', 'Shows the Story Context currently driving lore tools.', 'lore', 'lore.contextStatus', {
             expandSections: Object.freeze(['lore.generation']),
-            actionLabel: 'Show',
-        },
-        {
-            id: 'review',
-            title: 'Lore Review',
-            body: 'Use Pending and Accepted Lore to edit, tag, pin, mute, bulk manage, and workbench large batches.',
-            tab: 'lore',
-            target: 'lore.accepted',
-            expandSections: Object.freeze(['lore.pendingReview', 'lore.acceptedEntries']),
-            actionLabel: 'Show',
-        },
-        {
-            id: 'relevance',
-            title: 'Auto-Relevance',
-            body: 'Promote or demote accepted lore tiers with local scoring and optional Utility Provider review.',
-            tab: 'lore',
-            target: 'lore.autoRelevance',
+            expected: 'Context should be current before canon preview or story-lore scan.',
+            when: 'Use this as the Lore tab’s context sanity check.',
+        }),
+        guideStep('canon-preview', 'Preview Canon Packs', 'Runs the local canon database query and builds selectable lore packs.', 'lore', 'lore.canon.preview', {
+            expandSections: Object.freeze(['lore.generation']),
+            expected: 'No provider call is used. Results are grouped by relevance and pack.',
+            when: 'Use this for date-aware canon guardrails.',
+        }),
+        guideStep('canon-detail', 'Canon Detail Level', 'Filters canon preview results from Core to All Active.', 'lore', 'lore.canon.detailFilter', {
+            fallbackTarget: 'lore.canon.preview',
+            expandSections: Object.freeze(['lore.generation']),
+            expected: 'Higher detail shows more low-priority constraints.',
+            when: 'Use Core/Standard for regular play; use Detailed/All when auditing.',
+        }),
+        guideStep('canon-packs', 'Canon Pack Selection', 'Switches between grouped canon packs for the current Story Context.', 'lore', 'lore.canon.packGrid', {
+            fallbackTarget: 'lore.canon.preview',
+            expandSections: Object.freeze(['lore.generation']),
+            expected: 'Only the active pack’s entries are shown below.',
+            when: 'Use packs to add focused canon sets instead of dumping everything.',
+        }),
+        guideStep('canon-add', 'Add Canon to Pending', 'Adds selected or pack-wide canon entries to Pending Lore Review.', 'lore', 'lore.canon.addPending', {
+            fallbackTarget: 'lore.canon.preview',
+            expandSections: Object.freeze(['lore.generation']),
+            expected: 'Added entries remain pending until explicitly accepted.',
+            when: 'Use selected entries for precision; pack add for trusted small packs.',
+        }),
+        guideStep('canon-settings', 'Canon Suggestion Settings', 'Controls local canon database use, auto-suggest behavior, and quick-add cap.', 'lore', 'lore.canon.settings', {
+            expandSections: Object.freeze(['lore.generation', 'lore.canonSuggestionSettings']),
+            expected: 'These settings affect preview/quick-add behavior, not story-lore model scans.',
+            when: 'Use this to tune canon suggestions after context detection.',
+        }),
+        guideStep('story-scan', 'Scan Story Lore', 'Runs model-based extraction for story-specific lore.', 'lore', 'lore.story.scan', {
+            expandSections: Object.freeze(['lore.generation']),
+            expected: 'Results are chunked, checkpointed, and added to Pending Lore Review.',
+            when: 'Use after substantial new story content or for backfilling old chats.',
+        }),
+        guideStep('story-scope', 'Story Lore Scan Scope', 'Chooses recent, custom range, or entire-chat story-lore scanning.', 'lore', 'lore.story.scope', {
+            expandSections: Object.freeze(['lore.generation', 'lore.storyGenerationSettings', 'lore.story.scanScope']),
+            expected: 'Recent is maintenance. Custom and entire chat are backfill tools.',
+            when: 'Use custom ranges for targeted extraction.',
+        }),
+        guideStep('story-performance', 'Story Lore Performance', 'Controls chunk size, overlap, concurrency, retries, checkpoint cadence, and consolidation.', 'lore', 'lore.story.performance', {
+            expandSections: Object.freeze(['lore.generation', 'lore.storyGenerationSettings', 'lore.story.performance']),
+            expected: 'Lower chunk size and concurrency improve reliability; higher values speed up strong providers.',
+            when: 'Tune this for large scans or provider rate limits.',
+        }),
+        guideStep('story-quality', 'Story Lore Quality', 'Controls scan breadth, fact targets, generated tags, duplicate guard, similarity routing, and quality gate.', 'lore', 'lore.story.quality', {
+            expandSections: Object.freeze(['lore.generation', 'lore.storyGenerationSettings', 'lore.story.quality']),
+            expected: 'Quality controls shape what becomes Pending Lore, but users still review entries.',
+            when: 'Use this when scans produce too much recap or miss important story-specific facts.',
+        }),
+        guideStep('story-automation', 'Story Lore Automation', 'Runs story-lore scans after enough words or turns have accumulated.', 'lore', 'lore.story.automation', {
+            expandSections: Object.freeze(['lore.generation', 'lore.storyGenerationSettings', 'lore.story.automation']),
+            expected: 'Automatic scans remain conservative and still route entries to Pending Lore Review.',
+            when: 'Use after the prompt and quality settings are stable.',
+        }),
+        guideStep('pending-entry', 'Pending Entry Anatomy', 'Shows generated operation, quality route, similarity route, relevance, priority, tags, fact, injection text, and review actions.', 'lore', 'lore.pending.entry', {
+            fallbackTarget: 'lore.pending',
+            expandSections: Object.freeze(['lore.pendingReview']),
+            expected: 'Apply good durable lore; dismiss recap or low-value entries.',
+            when: 'Use this for every canon or generated proposal.',
+        }),
+        guideStep('pending-actions', 'Pending Entry Actions', 'Applies, updates, separates, or dismisses a single pending entry.', 'lore', 'lore.pending.actions', {
+            fallbackTarget: 'lore.pending.entry',
+            expandSections: Object.freeze(['lore.pendingReview']),
+            expected: 'Similarity-routed updates can merge into existing lore or be kept as new.',
+            when: 'Use single-entry actions when batch acceptance would be too blunt.',
+        }),
+        guideStep('pending-bulk', 'Pending Bulk Actions', 'Selects and processes many pending entries at once.', 'lore', 'lore.pending.bulk', {
+            fallbackTarget: 'lore.pending',
+            expandSections: Object.freeze(['lore.pendingReview']),
+            expected: 'Bulk actions respect current selection.',
+            when: 'Use after reviewing a batch from canon preview or story scan.',
+        }),
+        guideStep('pending-workbench', 'Pending Workbench', 'Opens a larger pending-lore review workspace.', 'lore', 'lore.pending.workbench', {
+            fallbackTarget: 'lore.pending',
+            expandSections: Object.freeze(['lore.pendingReview']),
+            expected: 'Dense rows and a detail pane make large batches practical.',
+            when: 'Use this when the drawer list is too cramped.',
+        }),
+        guideStep('accepted-tabs', 'Accepted Category Tabs', 'Filters accepted lore by category, relevance, pin/mute state, and generated categories.', 'lore', 'lore.accepted.categoryTabs', {
+            fallbackTarget: 'lore.accepted',
+            expandSections: Object.freeze(['lore.acceptedEntries']),
+            expected: 'The accepted list updates without leaving the Lore tab.',
+            when: 'Use tabs to quickly isolate a type of lore.',
+        }),
+        guideStep('accepted-filters', 'Accepted Search and Source Filter', 'Searches accepted lore and filters by Canon Database, Story Generation, or Manual source.', 'lore', 'lore.accepted.filters', {
+            fallbackTarget: 'lore.accepted',
+            expandSections: Object.freeze(['lore.acceptedEntries']),
+            expected: 'Only matching entries render in the accepted list.',
+            when: 'Use this for cleanup or when finding a specific entry.',
+        }),
+        guideStep('accepted-pin-mute', 'Pin, Mute, and Relevance', 'Pin prioritizes, mute excludes from injection, and relevance assigns prompt tier.', 'lore', 'lore.accepted.pinMuteHelp', {
+            fallbackTarget: 'lore.accepted',
+            expandSections: Object.freeze(['lore.acceptedEntries']),
+            expected: 'These controls determine what lore is stored versus injected.',
+            when: 'Use this to reduce prompt noise without deleting lore.',
+        }),
+        guideStep('accepted-bulk', 'Accepted Bulk Edit', 'Bulk pin, mute, retag, reprioritize, or delete selected accepted entries.', 'lore', 'lore.accepted.bulk', {
+            fallbackTarget: 'lore.accepted',
+            expandSections: Object.freeze(['lore.acceptedEntries']),
+            expected: 'Bulk changes are recorded in Lore Timeline.',
+            when: 'Use this for large cleanup passes.',
+        }),
+        guideStep('accepted-entry', 'Accepted Entry Editor', 'Expand an entry to edit text, injection override, notes, metadata chips, tags, and priority.', 'lore', 'lore.accepted.entry', {
+            fallbackTarget: 'lore.accepted',
+            expandSections: Object.freeze(['lore.acceptedEntries']),
+            expected: 'Saved edits update the accepted lore matrix and timeline.',
+            when: 'Use this to refine generated entries into high-value durable lore.',
+        }),
+        guideStep('accepted-workbench', 'Accepted Workbench', 'Opens a full accepted-lore management window.', 'lore', 'lore.accepted.workbench', {
+            fallbackTarget: 'lore.accepted',
+            expandSections: Object.freeze(['lore.acceptedEntries']),
+            expected: 'Use dense rows, filters, bulk tools, and detail editing in a larger surface.',
+            when: 'Use for large accepted-lore collections.',
+        }),
+        guideStep('auto-toggle', 'Auto-Relevance Toggle', 'Enables periodic local relevance scoring for accepted lore.', 'lore', 'lore.autoRelevance.toggle', {
+            fallbackTarget: 'lore.autoRelevance',
             expandSections: Object.freeze(['lore.autoRelevance']),
-            actionLabel: 'Show',
-        },
-        {
-            id: 'timeline',
-            title: 'Lore Timeline',
-            body: 'Audit created, edited, deleted, and restored lore events across the story timeline.',
-            tab: 'lore',
-            target: 'lore.timeline',
-            actionLabel: 'Show',
-        },
-        {
-            id: 'injection',
-            title: 'Injection Controls',
-            body: 'Place continuity and lore prompt groups separately, then choose direct or compressed handling.',
-            tab: 'injection',
-            target: 'injection.promptPlacement',
+            expected: 'Auto-Relevance can suggest or apply tier changes, but does not pin or mute entries.',
+            when: 'Use when accepted lore grows large enough that manual tiering is tedious.',
+        }),
+        guideStep('auto-mode', 'Auto-Relevance Mode', 'Chooses whether to suggest changes for review or apply high-confidence changes.', 'lore', 'lore.autoRelevance.mode', {
+            fallbackTarget: 'lore.autoRelevance',
+            expandSections: Object.freeze(['lore.autoRelevance']),
+            expected: 'Suggest mode is safer. Apply high-confidence reduces review work.',
+            when: 'Start with Suggest until you trust the tuning.',
+        }),
+        guideStep('auto-tuning', 'Auto-Relevance Tuning', 'Controls scan interval, recent-message window, candidate cap, and confidence threshold.', 'lore', 'lore.autoRelevance.tuning', {
+            fallbackTarget: 'lore.autoRelevance',
+            expandSections: Object.freeze(['lore.autoRelevance']),
+            expected: 'Higher caps are broader but heavier; higher confidence is more conservative.',
+            when: 'Use this to balance responsiveness and noise.',
+        }),
+        guideStep('auto-model', 'Utility Provider Adjudication', 'Optionally asks the Utility provider to review locally scored relevance candidates.', 'lore', 'lore.autoRelevance.model', {
+            fallbackTarget: 'lore.autoRelevance',
+            expandSections: Object.freeze(['lore.autoRelevance']),
+            expected: 'Only the candidate subset is sent to the model.',
+            when: 'Use when local scoring is not nuanced enough.',
+        }),
+        guideStep('injection-toggles', 'Injection Toggles', 'Turns Continuity and Lore injection on or off independently.', 'injection', 'injection.toggles', {
+            expected: 'Disabled blocks remain editable but are not sent.',
+            when: 'Use this to isolate whether continuity or lore is affecting model behavior.',
+        }),
+        guideStep('prompt-placement', 'Prompt Placement', 'Sets injection method, role, position, and depth for each prompt group.', 'injection', 'injection.promptPlacement', {
             expandSections: Object.freeze(['injection.promptPlacement']),
-            actionLabel: 'Show',
-        },
-        {
-            id: 'compression',
-            title: 'Compression',
-            body: 'Tune compression levels and templates for continuity and relevance-tiered lore blocks.',
-            tab: 'injection',
-            target: 'injection.compression',
+            expected: 'Depth 0 is closest to the latest chat message; larger depths place blocks earlier.',
+            when: 'Use this to tune how strongly each prompt block influences the model.',
+        }),
+        guideStep('continuity-injection', 'Continuity Injection Preview', 'Shows the current continuity block and its direct/compressed handling controls.', 'injection', 'injection.preview.continuity', {
+            expected: 'This is the actual continuity text Wandlight plans to send.',
+            when: 'Use this to verify current-scene state before prompting.',
+        }),
+        guideStep('high-injection', 'High-Relevance Lore Injection', 'Shows scene-critical accepted lore and direct/compressed handling.', 'injection', 'injection.preview.high', {
+            expected: 'High lore should stay close and usually direct unless token pressure is high.',
+            when: 'Use this for immediately relevant constraints.',
+        }),
+        guideStep('normal-injection', 'Normal-Relevance Lore Injection', 'Shows useful background lore selected for the Normal tier.', 'injection', 'injection.preview.normal', {
+            expected: 'Normal tier can carry broader context at a deeper prompt position.',
+            when: 'Use this for medium-range context.',
+        }),
+        guideStep('low-injection', 'Low-Relevance Lore Injection', 'Shows distant background lore selected for the Low tier.', 'injection', 'injection.preview.low', {
+            expected: 'Low tier is safest compressed or disabled unless broad context matters.',
+            when: 'Use this when distant context is still useful.',
+        }),
+        guideStep('compression-prompts', 'Compression Prompts', 'Edits prompt templates used to compress continuity and relevance-tiered lore.', 'injection', 'injection.compression', {
             expandSections: Object.freeze(['injection.compressionPrompts']),
-            actionLabel: 'Show',
-        },
+            expected: 'Reset restores defaults; copy helps audit prompts.',
+            when: 'Use this when compression output needs better style or stricter constraints.',
+        }),
     ]),
 });
 
@@ -787,6 +1066,7 @@ function createExperienceModeSwitch(settings = getSettings()) {
     const mode = normalizeExperienceMode(settings.experienceMode);
     const control = document.createElement('div');
     control.className = `wandlight-experience-switch wandlight-experience-switch-${mode}`;
+    markTourTarget(control, 'session.experienceMode');
     control.setAttribute('role', 'radiogroup');
     control.setAttribute('aria-label', `Experience Mode: ${getExperienceLabel(settings)}`);
     addTooltip(control, getExperienceTooltip(settings));
@@ -1175,6 +1455,22 @@ function renderSessionTab(container, state) {
         'Set how Wandlight behaves during roleplay.'
     ));
 
+    const toggles = document.createElement('div');
+    toggles.className = 'wandlight-runtime-grid';
+    toggles.appendChild(markTourTarget(createToggleCard(
+        'Wandlight Active',
+        settings.enabled,
+        'Master switch for Wandlight runtime behavior. Pausing disables prompt injection, automatic extraction, and generation actions.',
+        (checked) => {
+            const next = getSettings();
+            next.enabled = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: false });
+            refreshHeader();
+        }
+    ), 'session.active'));
+    container.appendChild(toggles);
+
     if (!isBasicExperience(settings)) {
         const modeCard = document.createElement('div');
         modeCard.className = 'wandlight-runtime-card';
@@ -1212,22 +1508,6 @@ function renderSessionTab(container, state) {
         container.appendChild(markTourTarget(modeCard, 'session.automation'));
     }
 
-    const toggles = document.createElement('div');
-    toggles.className = 'wandlight-runtime-grid';
-    toggles.appendChild(markTourTarget(createToggleCard(
-        'Wandlight Active',
-        settings.enabled,
-        'Master switch for Wandlight runtime behavior. Pausing disables prompt injection, automatic extraction, and generation actions.',
-        (checked) => {
-            const next = getSettings();
-            next.enabled = checked;
-            saveSettings(next);
-            refreshPanelBody({ preserveScroll: false });
-            refreshHeader();
-        }
-    ), 'session.active'));
-    container.appendChild(toggles);
-
     container.appendChild(createWandlightPresetStatusCard());
 
     container.appendChild(createCollapsibleSection(
@@ -1241,6 +1521,7 @@ function renderSessionTab(container, state) {
 
     const stats = document.createElement('div');
     stats.className = 'wandlight-runtime-card';
+    markTourTarget(stats, 'session.metrics');
     const counts = getPanelLoreState(state).counts;
     const selectedLoreCount = getSelectedLoreInjectionCount(state, settings);
     const injectionStats = getInjectionCharacterStats(state, settings);
@@ -1769,17 +2050,20 @@ function createContextDetectionCard(state) {
 
     const settings = getSettings();
     if (!isBasicExperience(settings)) {
-        card.appendChild(createAutomationModeCard(
+        const automationCard = createAutomationModeCard(
             'Story Context Detection',
             'contextDetectionMode',
             'contextDetectionAutoInterval',
             'Only runs when you click Detect Story Context.',
             'Runs automatically after roleplay turns on this interval. When fast header detection is enabled, it scans reply headers first and only uses the Reasoning provider if no header is found.',
             'Automatic story-context detection interval in completed model turns.'
-        ));
+        );
+        markTourTarget(automationCard, 'context.automation');
+        card.appendChild(automationCard);
 
         const fastGrid = document.createElement('div');
         fastGrid.className = 'wandlight-runtime-grid';
+        markTourTarget(fastGrid, 'context.fastHeader');
         fastGrid.appendChild(createToggleCard(
             'Fast reply-header detection',
             settings.contextHeaderDetectionEnabled !== false,
@@ -1794,6 +2078,7 @@ function createContextDetectionCard(state) {
 
         const sourceRow = document.createElement('label');
         sourceRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+        markTourTarget(sourceRow, 'context.sourceMessages');
         const sourceText = document.createElement('span');
         sourceText.textContent = `Context source messages: ${settings.contextSourceMessageCount || 20}`;
         addTooltip(sourceText, 'How many recent chat messages are scanned for reply headers or sent to model story-context detection. This is separate from the Lore generation source window.');
@@ -1851,6 +2136,7 @@ function createLoreContextStatusCard(state) {
     const context = state?.loreContext || {};
     const card = document.createElement('div');
     card.className = 'wandlight-lore-context-status';
+    markTourTarget(card, 'lore.contextStatus');
 
     const label = document.createElement('div');
     label.className = 'wandlight-lore-context-status-label';
@@ -1874,6 +2160,7 @@ function createLoreContextStatusCard(state) {
     const action = createButton('Refresh Context', 'Runs Detect Story Context, then returns here. Useful before suggesting canon lore.', async (btn) => {
         await handleDetectStoryContext(btn, { stayOnTab: 'lore' });
     }, 'wandlight-secondary-button wandlight-compact-action-button');
+    markTourTarget(action, 'lore.contextRefresh');
     card.appendChild(action);
 
     return card;
@@ -1917,6 +2204,7 @@ function createCanonSuggestionPanel(state) {
             createCanonSuggestionSettingsContent(state),
             { tooltip: 'Low-frequency local canon database settings.' }
         );
+        markTourTarget(advanced, 'lore.canon.settings');
         panel.appendChild(advanced);
     }
 
@@ -1934,6 +2222,7 @@ function createCanonSuggestionSettingsContent(state) {
 
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid';
+    markTourTarget(grid, 'lore.canon.settingsToggles');
     grid.appendChild(createToggleCard(
         'Use Local Canon Database',
         settings.canonLoreDatabaseEnabled !== false,
@@ -1960,6 +2249,7 @@ function createCanonSuggestionSettingsContent(state) {
 
     const capRow = document.createElement('label');
     capRow.className = 'wandlight-slider-row wandlight-compact-slider-row';
+    markTourTarget(capRow, 'lore.canon.cap');
     const capText = document.createElement('span');
     capText.textContent = `Quick/auto add cap: ${settings.canonLoreMaxEntries || 10}`;
     addTooltip(capText, 'Maximum entries used only by Quick Add Top Matches and auto-suggest after Story Context detection. Pack preview counts are not capped by this slider.');
@@ -2076,6 +2366,7 @@ function createCanonPreviewDetailControls() {
 function createCanonPreviewSection(state) {
     const section = document.createElement('div');
     section.className = 'wandlight-canon-preview-section';
+    markTourTarget(section, 'lore.canon.previewResults');
     const preview = canonPreviewUiState.preview;
     const currentContextKey = getCanonPreviewContextKey(state?.loreContext || {});
     const isStale = !!(preview && canonPreviewUiState.contextKey && canonPreviewUiState.contextKey !== currentContextKey);
@@ -2103,7 +2394,7 @@ function createCanonPreviewSection(state) {
     const yearText = preview.schoolYear ? `Year ${preview.schoolYear} | ` : '';
     summary.textContent = `${yearText}${preview.sceneIso || 'unknown date'} | ${preview.matchedCount || preview.entries.length} matches | ${preview.newCount || 0} new | ${preview.duplicateCount || 0} already present`;
     section.appendChild(summary);
-    section.appendChild(createCanonPreviewDetailControls());
+    section.appendChild(markTourTarget(createCanonPreviewDetailControls(), 'lore.canon.detailFilter'));
 
     if (isStale) {
         const stale = document.createElement('div');
@@ -2125,6 +2416,7 @@ function createCanonPreviewSection(state) {
 
     const packGrid = document.createElement('div');
     packGrid.className = 'wandlight-canon-pack-grid';
+    markTourTarget(packGrid, 'lore.canon.packGrid');
     packs.forEach(pack => {
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -2168,6 +2460,7 @@ function createCanonPreviewSection(state) {
 
     const controls = document.createElement('div');
     controls.className = 'wandlight-canon-preview-actions';
+    markTourTarget(controls, 'lore.canon.addPending');
     const count = document.createElement('span');
     count.className = 'wandlight-canon-preview-selected-count';
     count.textContent = `${selectedAddableCount} selected`;
@@ -2194,6 +2487,7 @@ function createCanonPreviewSection(state) {
 
     const list = document.createElement('div');
     list.className = 'wandlight-canon-preview-list';
+    markTourTarget(list, 'lore.canon.entryList');
     const visibleEntries = packEntries.slice(0, 80);
     visibleEntries.forEach(entry => {
         list.appendChild(createCanonPreviewEntryRow(entry, selectedIds, isStale));
@@ -2224,6 +2518,7 @@ function createCanonPreviewEntryRow(entry, selectedIds, isStale = false) {
     const addable = !isStale && duplicateStatus === 'new';
     const row = document.createElement('label');
     row.className = `wandlight-canon-preview-row ${selectedIds.has(id) ? 'wandlight-canon-preview-row-selected' : ''} ${addable ? '' : 'wandlight-canon-preview-row-disabled'}`.trim();
+    markTourTarget(row, 'lore.canon.entry');
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -2312,14 +2607,16 @@ function createStoryLoreGenerationPanel(state) {
     if (resultsCard) panel.appendChild(resultsCard);
 
     if (!isBasicExperience()) {
-        panel.appendChild(createCollapsibleSection(
+        const settingsSection = createCollapsibleSection(
             'lore.storyGenerationSettings',
             'Story Lore Scan Settings',
             getLoreScanSettingsSummary(getSettings()),
             false,
             createStoryLoreSettingsContent(),
             { tooltip: 'Advanced model-based story-lore scan controls. Most users can leave these defaults unchanged.', className: 'wandlight-story-lore-settings-collapsible' }
-        ));
+        );
+        markTourTarget(settingsSection, 'lore.story.settings');
+        panel.appendChild(settingsSection);
     }
 
     return panel;
@@ -2336,41 +2633,49 @@ function createStoryLoreSettingsContent() {
     const wrap = document.createElement('div');
     wrap.className = 'wandlight-story-lore-settings-content';
 
-    wrap.appendChild(createCollapsibleSection(
+    const scopeSection = createCollapsibleSection(
         'lore.story.scanScope',
         'Scan Scope',
         getLoreScanScopeSummary(settings),
         true,
         createLoreScanScopeSettingsContent(),
         { tooltip: 'Choose which chat messages are scanned for story lore.', className: 'wandlight-compact-subsection wandlight-lore-scan-scope-subsection' }
-    ));
+    );
+    markTourTarget(scopeSection, 'lore.story.scope');
+    wrap.appendChild(scopeSection);
 
-    wrap.appendChild(createCollapsibleSection(
+    const performanceSection = createCollapsibleSection(
         'lore.story.performance',
         'Performance',
         getLoreScanPerformanceSummary(settings),
         false,
         createLoreScanPerformanceSettingsContent(),
         { tooltip: 'Controls throughput, chunk size, overlap, and retry behavior for story-lore scanning.', className: 'wandlight-compact-subsection' }
-    ));
+    );
+    markTourTarget(performanceSection, 'lore.story.performance');
+    wrap.appendChild(performanceSection);
 
-    wrap.appendChild(createCollapsibleSection(
+    const qualitySection = createCollapsibleSection(
         'lore.story.quality',
         'Generation Quality',
         getLoreScanQualitySummary(settings),
         false,
         createLoreScanQualitySettingsContent(),
         { tooltip: 'Controls breadth, generated fact count, tags, and duplicate filtering.', className: 'wandlight-compact-subsection' }
-    ));
+    );
+    markTourTarget(qualitySection, 'lore.story.quality');
+    wrap.appendChild(qualitySection);
 
-    wrap.appendChild(createCollapsibleSection(
+    const automationSection = createCollapsibleSection(
         'lore.story.automation',
         'Automation',
         getStoryLoreAutomationSummary(settings),
         false,
         createStoryLoreAutomationSettingsContent(),
         { tooltip: 'Optional automatic story-lore scanning after roleplay turns.', className: 'wandlight-compact-subsection' }
-    ));
+    );
+    markTourTarget(automationSection, 'lore.story.automation');
+    wrap.appendChild(automationSection);
 
     return wrap;
 }
@@ -3038,6 +3343,7 @@ function createCanonLoreDatabaseCard(state) {
 function createContextEditorCard(state) {
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card';
+    markTourTarget(card, 'context.editor');
 
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
@@ -3052,6 +3358,7 @@ function createContextEditorCard(state) {
 
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid wandlight-context-grid';
+    markTourTarget(grid, 'context.fields');
     grid.appendChild(createTextSettingField('Scene date', state?.loreContext?.sceneDate || '', 'Example: September 1, 1996. Used for date-sensitive lore.', (value) => updateLoreContextField('sceneDate', value)));
     grid.appendChild(createTextSettingField('Canon reference point', state?.loreContext?.canonBoundary || '', 'Example: Through Chapter 14 of Half-Blood Prince. Used to avoid using future canon prematurely.', (value) => updateLoreContextField('canonBoundary', value)));
     grid.appendChild(createTextSettingField('Branch', state?.loreContext?.branchId || 'main', 'Use “main” for the primary timeline, or a custom branch name for story/time-travel branches.', (value) => updateLoreContextField('branchId', value || 'main')));
@@ -3315,11 +3622,14 @@ const CONTINUITY_SECTION_LABELS = {
     canon: 'Timeline / Date',
     scene: 'Scene',
     characters: 'Active Characters',
-    appearance: 'Appearance Detail',
-    emotionalState: 'Emotional State',
     inventory: 'Key Items',
     objectives: 'Active Goals',
     threads: 'Active Threads',
+};
+
+const CHARACTER_CONTINUITY_FIELD_LABELS = {
+    appearance: 'Appearance Detail',
+    emotionalState: 'Emotional State',
 };
 
 
@@ -3492,49 +3802,57 @@ function createContinuityScanCard(state) {
     addTooltip(title, 'Adaptive continuity scanning: small scans use one fast delta call, medium scans use grouped section calls, and large scans use the checkpointed bulk pipeline.');
     card.appendChild(title);
 
-    card.appendChild(createAutomationModeCard(
+    const automationCard = createAutomationModeCard(
         'Continuity Tracking',
         'continuityTrackingMode',
         'continuityAutoInterval',
         'Continuity scans only run when you click Scan Continuity State.',
         'Wandlight automatically scans recent continuity state every configured number of turns using the Utility provider.',
         'Automatic continuity scan interval in completed model turns.'
-    ));
+    );
+    markTourTarget(automationCard, 'continuity.automation');
+    card.appendChild(automationCard);
 
     const settingsWrap = document.createElement('div');
     settingsWrap.className = 'wandlight-lore-scan-settings-wrap';
-    settingsWrap.appendChild(createCollapsibleSection(
+    const scopeSection = createCollapsibleSection(
         'continuity.scanScope',
         'Scan Scope',
         getContinuityScanScopeSummary(settings),
         false,
         createContinuityScanScopeSettingsContent,
         { tooltip: 'Choose recent, custom range, or entire-chat scanning for continuity state.' }
-    ));
-    settingsWrap.appendChild(createCollapsibleSection(
+    );
+    markTourTarget(scopeSection, 'continuity.scanScope');
+    settingsWrap.appendChild(scopeSection);
+    const performanceSection = createCollapsibleSection(
         'continuity.scanPerformance',
         'Performance and Recovery',
         getContinuityScanPerformanceSummary(settings),
         false,
         createContinuityScanPerformanceSettingsContent,
         { tooltip: 'Chunk size, overlap, parallelism, retry behavior, and checkpoint settings.' }
-    ));
+    );
+    markTourTarget(performanceSection, 'continuity.performance');
+    settingsWrap.appendChild(performanceSection);
     const hasScanResults = !!state?.continuityScan?.lastBatchId;
     if (hasScanResults) {
-        settingsWrap.appendChild(createCollapsibleSection(
+        const resultsSection = createCollapsibleSection(
             'continuity.scanResults',
             'Scan Results',
             getContinuityScanResultsSummary(state),
             false,
             () => createContinuityScanResultsCard(getState()),
             { tooltip: 'Latest checkpointed continuity scan result and recovery status.' }
-        ));
+        );
+        markTourTarget(resultsSection, 'continuity.results');
+        settingsWrap.appendChild(resultsSection);
     }
     card.appendChild(settingsWrap);
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
-    actions.appendChild(createButton('Scan Continuity State', 'Scans the selected message range with the adaptive continuity scanner, then applies or stores one ordered continuity state update.', async (btn) => {
+    actions.appendChild(markTourTarget(createButton('Scan Continuity State', 'Scans the selected message range with the adaptive continuity scanner, then applies or stores one ordered continuity state update.', async (btn) => {
         if (!ensureContinuityProviderReadyForAction('Scan Continuity State')) return;
         await runBusyAction(btn, 'Scanning...', async () => {
             setFeatureProgress('continuity', 'Scanning continuity state...', 5);
@@ -3567,7 +3885,7 @@ function createContinuityScanCard(state) {
                 toast(`Continuity scan did not update state: ${status}`, 'warning');
             }
         });
-    }, 'wandlight-primary-button'));
+    }, 'wandlight-primary-button'), 'continuity.scan.button'));
     card.appendChild(actions);
 
     appendGenerationStatus(card, state, 'continuity');
@@ -3594,11 +3912,21 @@ function renderContinuityTab(container, state) {
         container.appendChild(pendingDelta);
     }
 
-    container.appendChild(createCollapsibleSection('continuity.trackedSections', 'Tracked Sections', 'Enable/disable live-state scan and injection sections', false, createContinuitySectionToggleCard(state), { tooltip: 'Optional lightweight continuity sections for this chat.' }));
-    container.appendChild(createCollapsibleSection('continuity.canonScene', 'Scene and Timeline', getContinuityCanonSceneSummary(state), false, createCanonSceneEditorCard(state), { tooltip: 'Current date, scene, cast, and activity fields.' }));
-    container.appendChild(createCollapsibleSection('continuity.characters', 'Active Characters', getCountLabel(state.characters || [], 'character'), false, createCharacterStateEditorCard(state), { tooltip: 'Current character-specific state: clothing, posture, emotion, immediate goals, and notes.' }));
-    container.appendChild(createCollapsibleSection('continuity.inventory', 'Key Items', getCountLabel(state.inventory || [], 'item'), false, createJsonEditorCard('Key Items', 'Currently relevant items, owners, locations, and object status. Durable item history belongs in Story Lore.', 'inventory', state.inventory || [], false, 'inventory'), { tooltip: 'Current consequential items only.' }));
-    container.appendChild(createCollapsibleSection('continuity.activeGoalsThreads', 'Active Goals and Threads', getActiveGoalsThreadsSummary(state), false, createActiveGoalsThreadsEditorCard(state), { tooltip: 'Immediate goals and active threads that affect the next scene.' }));
+    const trackedSection = createCollapsibleSection('continuity.trackedSections', 'Tracked Sections', 'Enable/disable live-state scan and injection sections', false, createContinuitySectionToggleCard(state), { tooltip: 'Optional lightweight continuity sections for this chat.' });
+    markTourTarget(trackedSection, 'continuity.trackedSections');
+    container.appendChild(trackedSection);
+    const sceneSection = createCollapsibleSection('continuity.canonScene', 'Scene and Timeline', getContinuityCanonSceneSummary(state), false, createCanonSceneEditorCard(state), { tooltip: 'Current date, scene, cast, and activity fields.' });
+    markTourTarget(sceneSection, 'continuity.scene');
+    container.appendChild(sceneSection);
+    const charactersSection = createCollapsibleSection('continuity.characters', 'Active Characters', getCountLabel(state.characters || [], 'character'), false, createCharacterStateEditorCard(state), { tooltip: 'Current character-specific state: clothing, posture, emotion, immediate goals, and notes.' });
+    markTourTarget(charactersSection, 'continuity.characters');
+    container.appendChild(charactersSection);
+    const inventorySection = createCollapsibleSection('continuity.inventory', 'Key Items', getCountLabel(state.inventory || [], 'item'), false, createJsonEditorCard('Key Items', 'Currently relevant items, owners, locations, and object status. Durable item history belongs in Story Lore.', 'inventory', state.inventory || [], false, 'inventory'), { tooltip: 'Current consequential items only.' });
+    markTourTarget(inventorySection, 'continuity.items');
+    container.appendChild(inventorySection);
+    const threadsSection = createCollapsibleSection('continuity.activeGoalsThreads', 'Active Goals and Threads', getActiveGoalsThreadsSummary(state), false, createActiveGoalsThreadsEditorCard(state), { tooltip: 'Immediate goals and active threads that affect the next scene.' });
+    markTourTarget(threadsSection, 'continuity.threads');
+    container.appendChild(threadsSection);
 }
 
 function createContinuitySectionToggleCard(state) {
@@ -3607,26 +3935,110 @@ function createContinuitySectionToggleCard(state) {
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
     title.textContent = 'Tracked Sections';
-    addTooltip(title, 'Disabled sections are not updated by Scan Continuity State and are omitted from continuity injection. Existing data is preserved unless you delete it.');
+    addTooltip(title, 'Disabled top-level sections are not updated by Scan Continuity State and are omitted from continuity injection. Character child fields control nested character details.');
     card.appendChild(title);
 
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Top-level sections control the live continuity blocks. Appearance Detail and Emotional State are child fields inside Active Characters.';
+    card.appendChild(help);
 
     const grid = document.createElement('div');
     grid.className = 'wandlight-runtime-grid wandlight-continuity-toggle-grid';
     const cfg = state?.continuityConfig || {};
     for (const [key, label] of Object.entries(CONTINUITY_SECTION_LABELS)) {
-        grid.appendChild(createToggleCard(label, cfg[key] !== false, `${label} tracking. Turn off to preserve existing data but omit it from scans and continuity injection.`, (checked) => {
-            const current = getState();
-            pushStateSnapshot(current, `Toggle continuity section: ${label}`, getSettings().maxSnapshots);
-            current.continuityConfig = { ...(current.continuityConfig || {}), [key]: checked };
-            saveState(current);
-            refreshPanelBody({ preserveScroll: true });
-            refreshHeader();
-        }));
+        grid.appendChild(createContinuityConfigToggle(key, label, `${label} tracking. Turn off to preserve existing data but omit it from scans and continuity injection.`, cfg[key] !== false));
     }
     card.appendChild(grid);
 
+    const characterFields = document.createElement('div');
+    characterFields.className = 'wandlight-continuity-child-fields';
+    markTourTarget(characterFields, 'continuity.characterFields');
+    const childTitle = document.createElement('div');
+    childTitle.className = 'wandlight-runtime-card-title wandlight-runtime-card-subtitle';
+    childTitle.textContent = 'Active Character Fields';
+    addTooltip(childTitle, 'Nested fields inside Active Characters. These apply only when Active Characters is enabled.');
+    characterFields.appendChild(childTitle);
+
+    const childHelp = document.createElement('div');
+    childHelp.className = 'wandlight-runtime-help';
+    childHelp.textContent = 'Appearance and emotion are stored inside each active character. Disabling one preserves saved values but keeps scans and injection from treating it as live state.';
+    characterFields.appendChild(childHelp);
+
+    const childGrid = document.createElement('div');
+    childGrid.className = 'wandlight-runtime-grid wandlight-continuity-toggle-grid';
+    for (const [key, label] of Object.entries(CHARACTER_CONTINUITY_FIELD_LABELS)) {
+        const tooltip = key === 'emotionalState'
+            ? 'Emotional State tracking. Turn off to preserve saved emotions but stop scans and continuity injection from treating them as live state.'
+            : 'Appearance Detail tracking. Turn off to preserve saved clothing/appearance details but omit them from scans and continuity injection.';
+        childGrid.appendChild(createContinuityConfigToggle(key, label, tooltip, cfg[key] !== false));
+    }
+    characterFields.appendChild(childGrid);
+    card.appendChild(characterFields);
+
+    card.appendChild(createEmotionFreshnessControls());
+
     return card;
+}
+
+function createContinuityConfigToggle(key, label, tooltip, checked) {
+    return createToggleCard(label, checked, tooltip, (nextChecked) => {
+        const current = getState();
+        pushStateSnapshot(current, `Toggle continuity section: ${label}`, getSettings().maxSnapshots);
+        current.continuityConfig = { ...(current.continuityConfig || {}), [key]: nextChecked };
+        saveState(current);
+        refreshPanelBody({ preserveScroll: true });
+        refreshHeader();
+    });
+}
+
+function createEmotionFreshnessControls() {
+    const settings = getSettings();
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-continuity-emotion-freshness';
+    markTourTarget(wrap, 'continuity.emotionalState');
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-runtime-card-title wandlight-runtime-card-subtitle';
+    title.textContent = 'Emotional State Freshness';
+    addTooltip(title, 'Controls how long emotional state is treated as current in continuity injection.');
+    wrap.appendChild(title);
+
+    const help = document.createElement('div');
+    help.className = 'wandlight-runtime-help';
+    help.textContent = 'Emotion decays by chat-message age so an old feeling does not keep steering the character after the scene moves on.';
+    wrap.appendChild(help);
+
+    const grid = document.createElement('div');
+    grid.className = 'wandlight-runtime-grid wandlight-continuity-toggle-grid';
+    grid.appendChild(createToggleCard(
+        'Use emotion recency labels',
+        settings.continuityEmotionRecencyEnabled !== false,
+        'When enabled, injected emotional state is labeled current or recent, and stale emotions can be omitted.',
+        (checked) => {
+            const next = getSettings();
+            next.continuityEmotionRecencyEnabled = checked;
+            saveSettings(next);
+            refreshPanelBody({ preserveScroll: true });
+            refreshHeader();
+        }
+    ));
+    wrap.appendChild(grid);
+
+    wrap.appendChild(createRangeSettingRow('Current emotion window', 'Messages after an emotional update where emotion is injected as current.', 'continuityEmotionCurrentMessageWindow', { min: 0, max: 50, fallback: 8, suffix: ' messages' }));
+    wrap.appendChild(createRangeSettingRow('Recent emotion window', 'Messages after an emotional update where emotion is injected only as recent context. Older emotions follow stale handling.', 'continuityEmotionRecentMessageWindow', { min: 0, max: 100, fallback: 20, suffix: ' messages' }));
+    wrap.appendChild(createSelectSettingRow(
+        'Stale emotion handling',
+        'Controls what happens after the recent emotion window expires.',
+        'continuityEmotionStaleBehavior',
+        [
+            ['omit', 'Omit stale emotions'],
+            ['keep_as_recent', 'Keep as recent warning'],
+            ['keep', 'Keep with stale label'],
+        ]
+    ));
+
+    return wrap;
 }
 
 function createCanonSceneEditorCard(state) {
@@ -3704,11 +4116,124 @@ function createCharacterStateEditorCard(state) {
         false,
         'characters'
     );
+    card.appendChild(createCharacterAppearanceSummary(state));
+    card.appendChild(createCharacterEmotionSummary(state));
     const schema = document.createElement('div');
     schema.className = 'wandlight-runtime-help';
-    schema.textContent = 'Recommended active character object: { "name": "Harry", "clothing": "school robes", "physicalState": "tired", "emotionalState": { "trust": 2, "fear": 1, "notes": "uneasy but cooperative" }, "goals": ["find the source of the curse"] }';
+    schema.textContent = 'Recommended active character object: { "name": "Harry", "clothing": "school robes", "physicalState": "tired", "emotionalState": { "trust": 2, "fear": 1, "confidence": 0.8, "notes": "uneasy but cooperative" }, "goals": ["find the source of the curse"] }';
     card.appendChild(schema);
     return card;
+}
+
+function createCharacterAppearanceSummary(state) {
+    const cfg = state?.continuityConfig || {};
+    const characters = Array.isArray(state?.characters) ? state.characters : [];
+    return createCharacterFieldSummary(
+        'Appearance Detail',
+        cfg.appearance === false ? 'disabled for scans and injection' : 'active child field',
+        characters
+            .map(c => {
+                return c?.clothing ? `${c.name || 'Unnamed'} - clothing: ${c.clothing}` : '';
+            })
+            .filter(Boolean),
+        'continuity.appearanceDetail',
+        'Appearance Detail is stored inside Active Characters. Disabling it preserves saved values but omits clothing/appearance from scans and injection.'
+    );
+}
+
+function createCharacterEmotionSummary(state) {
+    const cfg = state?.continuityConfig || {};
+    const settings = getSettings();
+    const characters = Array.isArray(state?.characters) ? state.characters : [];
+    return createCharacterFieldSummary(
+        'Emotional State',
+        cfg.emotionalState === false ? 'disabled for scans and injection' : getEmotionFreshnessSummary(settings),
+        characters
+            .map(c => {
+                const emotion = formatEmotionSummaryForPanel(c?.emotionalState || {}, settings);
+                return emotion ? `${c.name || 'Unnamed'} - ${emotion}` : '';
+            })
+            .filter(Boolean),
+        'continuity.emotionalStateSummary',
+        'Emotional State is stored inside Active Characters. Injection uses freshness windows so old emotions do not keep steering the character.'
+    );
+}
+
+function createCharacterFieldSummary(titleText, statusText, lines, tourTarget, tooltip) {
+    const wrap = document.createElement('div');
+    wrap.className = 'wandlight-character-field-summary';
+    markTourTarget(wrap, tourTarget);
+
+    const head = document.createElement('div');
+    head.className = 'wandlight-character-field-summary-head';
+    const title = document.createElement('span');
+    title.textContent = titleText;
+    addTooltip(title, tooltip);
+    head.appendChild(title);
+    const status = document.createElement('span');
+    status.textContent = statusText;
+    head.appendChild(status);
+    wrap.appendChild(head);
+
+    if (lines.length) {
+        for (const line of lines.slice(0, 8)) {
+            const row = document.createElement('div');
+            row.className = 'wandlight-character-field-summary-row';
+            row.textContent = line;
+            wrap.appendChild(row);
+        }
+        if (lines.length > 8) {
+            const more = document.createElement('div');
+            more.className = 'wandlight-character-field-summary-row';
+            more.textContent = `+${lines.length - 8} more`;
+            wrap.appendChild(more);
+        }
+    } else {
+        const empty = document.createElement('div');
+        empty.className = 'wandlight-character-field-summary-row wandlight-character-field-empty';
+        empty.textContent = 'No saved values yet.';
+        wrap.appendChild(empty);
+    }
+
+    return wrap;
+}
+
+function getPanelChatLength() {
+    try {
+        const ctx = SillyTavern.getContext();
+        return Array.isArray(ctx?.chat) ? ctx.chat.length : 0;
+    } catch (_) {
+        return 0;
+    }
+}
+
+function getEmotionFreshnessSummary(settings = getSettings()) {
+    if (settings.continuityEmotionRecencyEnabled === false) return 'recency labels off';
+    return `current ${settings.continuityEmotionCurrentMessageWindow || 8} / recent ${settings.continuityEmotionRecentMessageWindow || 20} messages`;
+}
+
+function formatEmotionSummaryForPanel(raw = {}, settings = getSettings()) {
+    const keys = ['affection', 'trust', 'desire', 'connection', 'fear', 'anger', 'sadness', 'joy'];
+    const parts = [];
+    for (const key of keys) {
+        const value = Number(raw?.[key] || 0);
+        if (Math.abs(value) >= 2) parts.push(`${key} ${value > 0 ? '+' : ''}${value}`);
+    }
+    if (raw?.notes) parts.push(String(raw.notes));
+    if (!parts.length) return '';
+
+    const current = getPanelChatLength();
+    const updatedAt = Number(raw?.lastUpdatedChatLength);
+    const age = Number.isFinite(updatedAt) && updatedAt > 0 && current >= updatedAt ? current - updatedAt : 0;
+    if (settings.continuityEmotionRecencyEnabled === false) return parts.join(', ');
+
+    const currentWindow = Math.max(0, Number(settings.continuityEmotionCurrentMessageWindow) || 8);
+    const recentWindow = Math.max(currentWindow, Number(settings.continuityEmotionRecentMessageWindow) || 20);
+    const confidence = Number(raw?.confidence);
+    const confidenceText = Number.isFinite(confidence) && confidence < 0.65 ? 'uncertain, ' : '';
+    if (age > recentWindow) return `${confidenceText}stale ${age} messages ago; omitted unless stale handling keeps it (${parts.join(', ')})`;
+    if (age > currentWindow) return `${confidenceText}recent ${age} messages ago: ${parts.join(', ')}`;
+    return `${confidenceText}current: ${parts.join(', ')}`;
 }
 
 
@@ -3984,6 +4509,7 @@ function renderInjectionTab(container, state) {
 
     const toggles = document.createElement('div');
     toggles.className = 'wandlight-runtime-grid';
+    markTourTarget(toggles, 'injection.toggles');
     toggles.appendChild(createToggleCard(
         'Inject Continuity',
         settings.injectContinuity !== false && settings.injectMemo !== false,
@@ -4307,6 +4833,7 @@ function getCompressionStatusTextForSummary(state, kind) {
 function createInjectionPlacementCard(settings) {
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-prompt-placement-card';
+    markTourTarget(card, 'injection.placement.card');
 
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
@@ -4324,6 +4851,7 @@ function createInjectionPlacementCard(settings) {
 
     const methodRow = document.createElement('div');
     methodRow.className = 'wandlight-prompt-placement-line wandlight-prompt-placement-method-line';
+    markTourTarget(methodRow, 'injection.placement.method');
     methodRow.appendChild(createPlacementSelect('Injection method', 'injectionTransport', settings.injectionTransport || 'extension_prompt', [
         ['extension_prompt', 'Extension Prompt'],
         ['interceptor', 'Legacy prepend'],
@@ -4460,6 +4988,11 @@ function createPlacementNumber(labelText, settingKey, value, min, max, tooltip, 
 function createInjectionPreviewCard(titleText, className, text, enabled, helpText, extraContent = null) {
     const previewCard = document.createElement('div');
     previewCard.className = 'wandlight-runtime-card wandlight-injection-preview-card';
+    if (String(className || '').includes('continuity')) markTourTarget(previewCard, 'injection.preview.continuity');
+    else if (String(className || '').includes('lore-high')) markTourTarget(previewCard, 'injection.preview.high');
+    else if (String(className || '').includes('lore-normal')) markTourTarget(previewCard, 'injection.preview.normal');
+    else if (String(className || '').includes('lore-low')) markTourTarget(previewCard, 'injection.preview.low');
+    else if (String(className || '').includes('lore-injection-preview')) markTourTarget(previewCard, 'injection.preview.combined');
     const previewTitle = document.createElement('div');
     previewTitle.className = 'wandlight-runtime-card-title';
     previewTitle.textContent = titleText;
@@ -4981,11 +5514,12 @@ function createPendingLoreReviewSection(state) {
         batchInfo.textContent = getPendingLoreBatchLabel(state);
         section.appendChild(batchInfo);
 
-        section.appendChild(createPendingLoreBulkControls(pendingLore, state));
+        section.appendChild(markTourTarget(createPendingLoreBulkControls(pendingLore, state), 'lore.pending.bulk'));
 
         const visibleLimit = Math.max(5, Math.min(1000, Number(state?.lorePanel?.pendingReviewVisibleLimit) || 10));
         const list = document.createElement('div');
         list.className = 'wandlight-review-lore-list wandlight-pending-lore-list';
+        markTourTarget(list, 'lore.pending.list');
         pendingLore.slice(0, visibleLimit).forEach((entry, idx) => list.appendChild(createPendingLoreReviewCard(entry, idx, isPendingLoreSelected(state, entry))));
         section.appendChild(list);
 
@@ -5009,6 +5543,7 @@ function createPendingLoreReviewSection(state) {
 function createLoreWorkbenchLaunchRow(mode, summaryText) {
     const row = document.createElement('div');
     row.className = 'wandlight-lore-workbench-launch-row';
+    markTourTarget(row, mode === 'pending' ? 'lore.pending.workbench' : 'lore.accepted.workbench');
 
     const text = document.createElement('div');
     text.className = 'wandlight-lore-workbench-launch-text';
@@ -5717,6 +6252,7 @@ function dismissSelectedPendingLore() {
 function createPendingLoreReviewCard(entry, index, selected = false) {
     const card = document.createElement('div');
     card.className = 'wandlight-lore-entry-card wandlight-lore-entry-pending wandlight-pending-review-entry-card';
+    markTourTarget(card, 'lore.pending.entry');
     if (selected) card.classList.add('wandlight-review-lore-card-selected');
 
     const headerRow = document.createElement('div');
@@ -5801,6 +6337,7 @@ function createPendingLoreReviewCard(entry, index, selected = false) {
 
     const actionsRow = document.createElement('div');
     actionsRow.className = 'wandlight-primary-actions wandlight-pending-entry-actions';
+    markTourTarget(actionsRow, 'lore.pending.actions');
     const applyLabel = targetId ? 'Apply Update' : 'Apply';
     actionsRow.appendChild(createButton(applyLabel, targetId ? 'Accepts this generated update and merges it into the targeted accepted lore entry.' : 'Accepts this single lore entry and merges it into the accepted lore matrix.', () => {
         acceptPendingLoreEntry(index);
@@ -6424,13 +6961,13 @@ function createLoreTimelineCard(state) {
     foot.appendChild(latestText);
     const actions = document.createElement('div');
     actions.className = 'wandlight-lore-timeline-actions';
-    actions.appendChild(createButton('New Lore', 'Create a manual lore draft in Pending Lore Review.', () => {
+    actions.appendChild(markTourTarget(createButton('New Lore', 'Create a manual lore draft in Pending Lore Review.', () => {
         openNewLoreDialog();
-    }, 'wandlight-primary-button'));
+    }, 'wandlight-primary-button'), 'lore.new'));
     if (!basic) {
-        actions.appendChild(createButton('Open Timeline', 'Open the full Lore Timeline workbench.', () => {
+        actions.appendChild(markTourTarget(createButton('Open Timeline', 'Open the full Lore Timeline workbench.', () => {
             openLoreTimeline();
-        }));
+        }), 'lore.timeline.open'));
     }
     foot.appendChild(actions);
     card.appendChild(foot);
@@ -7699,6 +8236,7 @@ function createAutoRelevanceCard(state) {
 
     const enabled = document.createElement('label');
     enabled.className = 'wandlight-inline-toggle';
+    markTourTarget(enabled, 'lore.autoRelevance.toggle');
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = !!settings.autoRelevanceEnabled;
@@ -7715,6 +8253,7 @@ function createAutoRelevanceCard(state) {
 
     const modeRow = document.createElement('div');
     modeRow.className = 'wandlight-runtime-grid';
+    markTourTarget(modeRow, 'lore.autoRelevance.mode');
     const modeLabel = document.createElement('label');
     modeLabel.className = 'wandlight-inline-field';
     const modeSpan = document.createElement('span');
@@ -7742,6 +8281,7 @@ function createAutoRelevanceCard(state) {
 
     const row = document.createElement('div');
     row.className = 'wandlight-runtime-grid';
+    markTourTarget(row, 'lore.autoRelevance.tuning');
     row.appendChild(createNumberSettingMini('Run every turns', 'autoRelevanceEveryTurns', settings.autoRelevanceEveryTurns || 5, 1, 50));
     row.appendChild(createNumberSettingMini('Recent messages', 'autoRelevanceRecentMessages', settings.autoRelevanceRecentMessages || 20, 1, 200));
     row.appendChild(createNumberSettingMini('Candidate cap', 'autoRelevanceCandidateCap', settings.autoRelevanceCandidateCap || 40, 1, 500));
@@ -7750,6 +8290,7 @@ function createAutoRelevanceCard(state) {
 
     const modelRow = document.createElement('div');
     modelRow.className = 'wandlight-runtime-grid';
+    markTourTarget(modelRow, 'lore.autoRelevance.model');
     const modelToggle = document.createElement('label');
     modelToggle.className = 'wandlight-inline-toggle';
     const modelCb = document.createElement('input');
@@ -7775,6 +8316,7 @@ function createAutoRelevanceCard(state) {
     if (suggestions.length) {
         const box = document.createElement('div');
         box.className = 'wandlight-auto-relevance-suggestions';
+        markTourTarget(box, 'lore.autoRelevance.suggestions');
         const heading = document.createElement('div');
         heading.className = 'wandlight-runtime-help';
         heading.textContent = `Pending relevance suggestions: ${suggestions.length}`;
@@ -7813,6 +8355,7 @@ function createAutoRelevanceCard(state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions';
+    markTourTarget(actions, 'lore.autoRelevance.actions');
     actions.appendChild(createButton('Run Auto-Relevance Now', 'Runs Auto-Relevance immediately. Local scoring always runs first; optional Utility Provider adjudication reviews only the candidate set.', async (btn) => {
         const original = btn.textContent;
         btn.disabled = true;
@@ -7885,6 +8428,7 @@ function createAcceptedLoreEntriesSection(state) {
 
     const tabs = document.createElement('div');
     tabs.className = 'wandlight-lore-tabs';
+    markTourTarget(tabs, 'lore.accepted.categoryTabs');
     for (const cat of categories) {
         const tab = document.createElement('button');
         tab.className = 'wandlight-lore-tab';
@@ -7906,6 +8450,7 @@ function createAcceptedLoreEntriesSection(state) {
 
     const filterRow = document.createElement('div');
     filterRow.className = 'wandlight-lore-filter-row';
+    markTourTarget(filterRow, 'lore.accepted.filters');
 
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
@@ -7944,12 +8489,14 @@ function createAcceptedLoreEntriesSection(state) {
 
     const pinHelp = document.createElement('div');
     pinHelp.className = 'wandlight-runtime-help wandlight-pin-help';
+    markTourTarget(pinHelp, 'lore.accepted.pinMuteHelp');
     pinHelp.textContent = 'Pinned = prioritized/protected. Muted = excluded from injection. Relevance controls tier placement, sorting, and compression budget.';
     addTooltip(pinHelp, 'Pin important facts you always want kept prominent. Mute facts that should stay stored but not be sent to the model.');
     controls.appendChild(pinHelp);
 
     const bulkMount = document.createElement('div');
     bulkMount.className = 'wandlight-lore-bulk-toolbar';
+    markTourTarget(bulkMount, 'lore.accepted.bulk');
     bulkMount.appendChild(createAcceptedLoreBulkControls(state));
     controls.appendChild(bulkMount);
 
@@ -7957,6 +8504,7 @@ function createAcceptedLoreEntriesSection(state) {
 
     const list = document.createElement('div');
     list.className = 'wandlight-lore-entry-list wandlight-accepted-lore-scroll-region';
+    markTourTarget(list, 'lore.accepted.list');
     list.setAttribute('role', 'region');
     list.setAttribute('aria-label', 'Accepted lore entries');
     renderEntryList(list, state);
@@ -8459,6 +9007,7 @@ function scoreSearchEntry(entry, query) {
 function createEntryCard(entry, state) {
     const card = document.createElement('div');
     card.className = 'wandlight-lore-entry-card';
+    markTourTarget(card, entry.isPending ? 'lore.pending.entry' : 'lore.accepted.entry');
     if (entry.id) card.dataset.entryId = entry.id;
 
     if (entry.isPending) card.classList.add('wandlight-lore-entry-pending');
@@ -9342,7 +9891,7 @@ function showGuideStep(step, options = {}) {
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             if (activeWandlightTour && token !== activeWandlightTour.renderToken) return;
-            const target = getTourTargetElement(step.target);
+            const target = getTourTargetElement(step.target) || getTourTargetElement(step.fallbackTarget);
             if (options.highlight) {
                 highlightWandlightTourTarget(target);
                 if (!options.tour) {
@@ -9350,6 +9899,9 @@ function showGuideStep(step, options = {}) {
                         if (!activeWandlightTour) clearWandlightTourHighlight();
                     }, 2200);
                 }
+            }
+            if (!target && !options.tour) {
+                toast(`${step.title || 'Feature'} is not visible in the current state.`, 'info');
             }
             options.onReady?.(target);
         });
@@ -9407,6 +9959,9 @@ function renderWandlightTourPopover(step, target) {
     body.textContent = step.body || '';
     popover.appendChild(body);
 
+    appendWandlightTourDetail(popover, 'When to use', step.when);
+    appendWandlightTourDetail(popover, 'Expected result', step.expected);
+
     const actions = document.createElement('div');
     actions.className = 'wandlight-tour-actions';
     const back = createButton('Back', 'Return to the previous walkthrough step.', () => {
@@ -9435,6 +9990,19 @@ function renderWandlightTourPopover(step, target) {
 
     activeWandlightTour.currentTarget = target || null;
     requestAnimationFrame(repositionWandlightTourPopover);
+}
+
+function appendWandlightTourDetail(popover, labelText, value) {
+    const text = String(value || '').trim();
+    if (!text) return;
+    const row = document.createElement('div');
+    row.className = 'wandlight-tour-detail';
+    const label = document.createElement('span');
+    label.className = 'wandlight-tour-detail-label';
+    label.textContent = `${labelText}:`;
+    row.appendChild(label);
+    row.appendChild(document.createTextNode(` ${text}`));
+    popover.appendChild(row);
 }
 
 function repositionWandlightTourPopover() {

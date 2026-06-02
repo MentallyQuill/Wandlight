@@ -2120,6 +2120,58 @@
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
 
+.wandlight-runtime-card-subtitle {
+    font-size: 0.82em;
+    margin-top: 2px;
+}
+
+.wandlight-continuity-child-fields,
+.wandlight-continuity-emotion-freshness {
+    margin-top: 10px;
+    padding: 9px;
+    border: 1px solid rgba(190, 145, 75, 0.2);
+    border-radius: 6px;
+    background: rgba(20, 18, 20, 0.32);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.wandlight-character-field-summary {
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px solid rgba(190, 145, 75, 0.18);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.14);
+}
+
+.wandlight-character-field-summary-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: #f3d38b;
+    font-size: 0.82em;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.wandlight-character-field-summary-head span:last-child {
+    color: rgba(238, 226, 196, 0.62);
+    font-weight: 500;
+    text-align: right;
+}
+
+.wandlight-character-field-summary-row {
+    color: rgba(238, 226, 196, 0.78);
+    font-size: 0.78em;
+    line-height: 1.35;
+    padding-top: 3px;
+}
+
+.wandlight-character-field-empty {
+    color: rgba(238, 226, 196, 0.52);
+}
+
 .wandlight-json-editor-card,
 .wandlight-json-editor-embedded {
     display: flex;
@@ -3611,7 +3663,7 @@
 .wandlight-tour-popover {
     position: fixed;
     z-index: 2147483647;
-    width: min(300px, calc(100vw - 24px));
+    width: min(340px, calc(100vw - 24px));
     color: #f2dfb2;
     border: 1px solid rgba(194, 150, 78, 0.42);
     border-radius: 6px;
@@ -3620,6 +3672,8 @@
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
     padding: 10px;
     font-size: 12px;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
 }
 
 .wandlight-tour-progress {
@@ -3641,6 +3695,18 @@
     color: rgba(238, 226, 196, 0.82);
     font-size: 0.9em;
     line-height: 1.38;
+}
+
+.wandlight-tour-detail {
+    color: rgba(238, 226, 196, 0.76);
+    font-size: 0.82em;
+    line-height: 1.35;
+    margin-top: 7px;
+}
+
+.wandlight-tour-detail-label {
+    color: rgba(220, 184, 111, 0.9);
+    font-weight: 700;
 }
 
 .wandlight-tour-actions {

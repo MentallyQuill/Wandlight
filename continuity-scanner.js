@@ -161,10 +161,10 @@ export function buildContinuityProjection(state = getState()) {
             role: c?.role || '',
             location: c?.location || '',
             physicalState: c?.physicalState || '',
-            clothing: c?.clothing || '',
+            clothing: cfg.appearance === false ? '' : (c?.clothing || ''),
             posture: c?.posture || '',
             currentGoal: c?.currentGoal || '',
-            emotionalState: c?.emotionalState || undefined,
+            emotionalState: cfg.emotionalState === false ? undefined : (c?.emotionalState || undefined),
             notes: truncateText(c?.notes || '', 300),
         })),
         inventory: cfg.inventory === false ? undefined : compactArray(state?.inventory, 40),
@@ -676,8 +676,29 @@ function parseDeltaResponse(text) {
     return { ...delta, sectionDecisions: delta.sectionDecisions || parsed?.sectionDecisions || null };
 }
 
+function getCharacterContinuityGuidance(stateProjection = {}) {
+    const cfg = stateProjection?.continuityConfig || {};
+    const lines = [];
+    if (cfg.appearance === false) {
+        lines.push('- Appearance Detail is disabled: do not add or update clothing/appearance fields.');
+    } else {
+        lines.push('- Appearance Detail is enabled: update clothing only when currently visible or explicitly changed.');
+    }
+    if (cfg.emotionalState === false) {
+        lines.push('- Emotional State is disabled: do not add or update emotionalState fields.');
+    } else {
+        lines.push('- Emotional State is enabled: update emotionalState only for currently observed behavior or explicit narration. Do not preserve old emotions as current unless the latest messages reinforce them.');
+    }
+    return lines.join('\n');
+}
+
 function buildObservationSystemPrompt(settings, stateProjection) {
     const maxObs = clampInt(settings.continuityScanObservationsPerChunk, 3, 30, 12);
+    const cfg = stateProjection?.continuityConfig || {};
+    const characterBits = ['present active characters', 'physical state', 'carried key items', 'active goals'];
+    if (cfg.appearance !== false) characterBits.push('currently visible appearance/clothing');
+    if (cfg.emotionalState !== false) characterBits.push('currently observed emotional state');
+    const currentContinuityText = ['scene/timeline', ...characterBits, 'immediate unresolved threads'].join(', ');
     return `You are Wandlight's continuity observation extractor.\n\nTask:\n- Read one interval of roleplay messages.\n- Extract compact observations that may change the live continuity state.\n- Do not output a final WandlightDelta. Do not modify state directly.\n- Output ONLY valid JSON.\n\nOutput schema:
 {
   "chunkSummary": "short summary",
@@ -700,10 +721,10 @@ function buildObservationSystemPrompt(settings, stateProjection) {
   ]
 }
 
-Limits:\n- Return up to ${maxObs} observations.\n- Prefer current actionable continuity only: scene/timeline, present active characters, physical/emotional state, carried key items, active goals, and immediate unresolved threads.\n- Do not extract knowledge, secrets, relationship history, story milestones, lore facts, or continuity warnings; Story Lore owns those durable memories.\n- Preserve message indexes in messageRefs.\n- If nothing changed, return {"chunkSummary":"No continuity observations.","observations":[]}.\n\nCurrent compact continuity projection for reference:\n${safeJson(stateProjection)}`;
+Limits:\n- Return up to ${maxObs} observations.\n- Prefer current actionable continuity only: ${currentContinuityText}.\n- Do not extract knowledge, secrets, relationship history, story milestones, lore facts, or continuity warnings; Story Lore owns those durable memories.\n- Preserve message indexes in messageRefs.\n- If nothing changed, return {"chunkSummary":"No continuity observations.","observations":[]}.\n\nCharacter field guidance:\n${getCharacterContinuityGuidance(stateProjection)}\n\nCurrent compact continuity projection for reference:\n${safeJson(stateProjection)}`;
 }
 
-function getSectionPromptText(settings, sectionKey) {
+function getSectionPromptText(settings, sectionKey, stateProjection = {}) {
     const prompts = settings?.continuitySectionPrompts || {};
     const keyMap = {
         canon: ['canonScene'],
@@ -713,15 +734,17 @@ function getSectionPromptText(settings, sectionKey) {
         objectives: ['objectives'],
         threads: ['threads'],
     };
-    return (keyMap[sectionKey] || [])
+    const base = (keyMap[sectionKey] || [])
         .map(k => String(prompts[k] || '').trim())
         .filter(Boolean)
         .join('\n');
+    if (sectionKey !== 'characters') return base;
+    return [base, getCharacterContinuityGuidance(stateProjection)].filter(Boolean).join('\n');
 }
 
 function buildReducerSystemPrompt(settings, group, stateProjection) {
     const prompts = group.sections.map(section => {
-        const text = getSectionPromptText(settings, section);
+        const text = getSectionPromptText(settings, section, stateProjection);
         return text ? `- ${section}: ${text}` : '';
     }).filter(Boolean).join('\n');
     return `You are Wandlight's ${group.label} reducer.\n\nTask:\n- Convert compact continuity observations into ONE valid WandlightDelta partial.\n- Only modify these sections: ${group.sections.join(', ')}.\n- Resolve observations in chronological order using messageRefs.\n- Do not invent facts not supported by observations.\n- If nothing should change for these sections, output {"summary":"No ${group.label} changes","changes":{}}.\n\nReturn ONLY visible valid JSON in WandlightDelta shape.\n\nReducer-specific guidance:\n${prompts || '(none)'}\n\nCurrent compact continuity projection:\n${safeJson(stateProjection)}`;

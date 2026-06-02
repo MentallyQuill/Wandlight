@@ -3869,3 +3869,26 @@
     max-height: 42px;
     object-fit: contain;
 }
+
+
+/* Phase 13: compact rail runtime icon button geometry --------------------------
+   The tab icon itself already sits in a square inner frame. This makes the
+   surrounding compact rail tab/control button square as well, instead of a
+   slightly taller rectangle. Runtime icon artwork and filters are unchanged. */
+.wandlight-runtime-rail-compact .wandlight-runtime-rail-tab,
+.wandlight-runtime-rail-compact .wandlight-runtime-rail-control {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    padding: 2px;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.wandlight-runtime-rail-compact .wandlight-runtime-rail-icon {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+}

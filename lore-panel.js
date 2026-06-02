@@ -464,7 +464,7 @@ function renderRail(state) {
 
     const sub = document.createElement('div');
     sub.className = 'wandlight-runtime-rail-subtitle';
-    sub.textContent = settings.enabled ? 'Active' : 'Paused';
+    sub.textContent = '';
     drag.appendChild(sub);
     rail.appendChild(drag);
 

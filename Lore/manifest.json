@@ -16,6 +16,7 @@
     "characters/adults_and_factions.json",
     "characters/death_states.json",
     "characters/present_character_baselines.json",
+    "characters/adult_character_phase_baselines.json",
     "items/artifacts_and_objects.json",
     "knowledge/secret_knowledge.json",
     "knowledge_gates/core_knowledge_gates.json",

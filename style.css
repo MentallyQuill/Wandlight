@@ -4026,3 +4026,308 @@
     min-height: min(440px, calc(var(--wandlight-drawer-body-available, 620px) - 180px)) !important;
     max-height: min(560px, calc(var(--wandlight-drawer-body-available, 620px) - 60px)) !important;
 }
+
+
+/* Lore Workbench: large in-app review/manage surface for Accepted and Pending lore. */
+.wandlight-lore-workbench-launch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 8px;
+    padding: 7px 8px;
+    border: 1px solid rgba(126, 145, 165, 0.22);
+    border-radius: 7px;
+    background: rgba(10, 12, 16, 0.24);
+}
+
+.wandlight-lore-workbench-launch-text {
+    min-width: 0;
+    color: var(--wandlight-muted, rgba(241, 234, 216, 0.72));
+    font-size: 0.78em;
+    line-height: 1.25;
+}
+
+.wandlight-lore-workbench-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10060;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0, 0, 0, 0.58);
+    box-sizing: border-box;
+}
+
+.wandlight-lore-workbench-shell {
+    width: min(1320px, calc(100vw - 36px));
+    height: min(880px, calc(100vh - 36px));
+    min-width: min(720px, calc(100vw - 36px));
+    min-height: min(520px, calc(100vh - 36px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--wandlight-border, rgba(185, 139, 54, 0.38));
+    border-radius: 10px;
+    background:
+        radial-gradient(circle at 6% 0%, rgba(92, 23, 36, 0.42), transparent 34%),
+        radial-gradient(circle at 100% 100%, rgba(185, 139, 54, 0.12), transparent 40%),
+        linear-gradient(145deg, rgba(18, 12, 18, 0.99), rgba(9, 12, 18, 0.985));
+    color: var(--wandlight-text, #f1ead8);
+    box-shadow:
+        0 18px 54px rgba(0, 0, 0, 0.72),
+        0 0 0 1px rgba(215, 181, 109, 0.08) inset;
+    font-family: var(--SmartThemeFont, 'Segoe UI', sans-serif);
+    box-sizing: border-box;
+}
+
+.wandlight-lore-workbench-header {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--wandlight-border-soft, rgba(185, 139, 54, 0.18));
+    background: linear-gradient(90deg, rgba(92, 23, 36, 0.72), rgba(20, 24, 32, 0.92));
+}
+
+.wandlight-lore-workbench-title {
+    color: var(--wandlight-gold, #d7b56d);
+    font-size: 1.02em;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.wandlight-lore-workbench-subtitle {
+    margin-top: 2px;
+    color: var(--wandlight-muted, rgba(241, 234, 216, 0.68));
+    font-size: 0.76em;
+    line-height: 1.2;
+}
+
+.wandlight-lore-workbench-mode-tabs {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.wandlight-lore-workbench-mode-tab {
+    min-height: 28px;
+    padding: 4px 10px;
+    border: 1px solid rgba(185, 139, 54, 0.24);
+    border-radius: 7px;
+    background: rgba(10, 12, 16, 0.42);
+    color: var(--wandlight-text, #f1ead8);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.82em;
+}
+
+.wandlight-lore-workbench-mode-tab:hover,
+.wandlight-lore-workbench-mode-tab-active {
+    border-color: rgba(215, 181, 109, 0.56);
+    background: rgba(92, 23, 36, 0.56);
+    color: var(--wandlight-gold, #d7b56d);
+}
+
+.wandlight-lore-workbench-body,
+.wandlight-lore-workbench-view {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.wandlight-lore-workbench-body {
+    padding: 10px;
+    gap: 8px;
+}
+
+.wandlight-lore-workbench-controls {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(150px, auto) minmax(150px, auto) auto auto auto;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.wandlight-lore-workbench-view-pending .wandlight-lore-workbench-controls {
+    grid-template-columns: minmax(240px, 1fr) auto auto auto;
+}
+
+.wandlight-lore-workbench-search,
+.wandlight-lore-workbench-select {
+    height: 30px;
+    min-width: 0;
+    border: 1px solid rgba(126, 145, 165, 0.36);
+    border-radius: 7px;
+    background: rgba(10, 12, 16, 0.62);
+    color: var(--wandlight-text, #f1ead8);
+    font: inherit;
+    font-size: 0.82em;
+    padding: 4px 8px;
+    box-sizing: border-box;
+}
+
+.wandlight-lore-workbench-count {
+    color: var(--wandlight-muted, rgba(241, 234, 216, 0.68));
+    font-size: 0.78em;
+    white-space: nowrap;
+}
+
+.wandlight-workbench-bulk-toolbar {
+    flex: 0 0 auto;
+    margin-bottom: 8px;
+}
+
+.wandlight-workbench-bulk-toolbar .wandlight-lore-bulk-controls-card,
+.wandlight-workbench-bulk-toolbar .wandlight-review-bulk-card {
+    margin: 0 !important;
+    max-height: 172px;
+    overflow-y: auto;
+}
+
+.wandlight-lore-workbench-main {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(520px, 1fr) minmax(360px, 440px);
+    gap: 10px;
+}
+
+.wandlight-lore-workbench-table,
+.wandlight-lore-workbench-detail {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid rgba(126, 145, 165, 0.22);
+    border-radius: 8px;
+    background: rgba(10, 12, 16, 0.30);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(215, 181, 109, 0.58) rgba(10, 12, 16, 0.38);
+}
+
+.wandlight-lore-workbench-table {
+    display: flex;
+    flex-direction: column;
+}
+
+.wandlight-lore-workbench-row {
+    display: grid;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 5px 8px;
+    border-bottom: 1px solid rgba(126, 145, 165, 0.14);
+    box-sizing: border-box;
+}
+
+.wandlight-lore-workbench-accepted-table .wandlight-lore-workbench-row {
+    grid-template-columns: 28px minmax(220px, 2fr) minmax(76px, 0.6fr) minmax(76px, 0.6fr) minmax(92px, 0.7fr) minmax(74px, 0.55fr) minmax(58px, 0.45fr) minmax(78px, 0.55fr);
+}
+
+.wandlight-lore-workbench-pending-table .wandlight-lore-workbench-row {
+    grid-template-columns: 28px minmax(260px, 2fr) minmax(84px, 0.7fr) minmax(92px, 0.8fr) minmax(94px, 0.75fr) minmax(74px, 0.55fr) minmax(58px, 0.45fr);
+}
+
+.wandlight-lore-workbench-row-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    min-height: 30px;
+    background: rgba(20, 24, 32, 0.96);
+    color: var(--wandlight-gold, #d7b56d);
+    font-size: 0.72em;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.wandlight-lore-workbench-entry-row {
+    cursor: pointer;
+}
+
+.wandlight-lore-workbench-entry-row:hover {
+    background: rgba(215, 181, 109, 0.07);
+}
+
+.wandlight-lore-workbench-row-active {
+    background: rgba(92, 23, 36, 0.42);
+    box-shadow: 3px 0 0 rgba(215, 181, 109, 0.72) inset;
+}
+
+.wandlight-lore-workbench-cell {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.wandlight-lore-workbench-cell-main,
+.wandlight-lore-workbench-cell-sub {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wandlight-lore-workbench-cell-main {
+    color: var(--wandlight-text, #f1ead8);
+    font-size: 0.78em;
+}
+
+.wandlight-lore-workbench-cell-sub {
+    color: var(--wandlight-muted, rgba(241, 234, 216, 0.58));
+    font-size: 0.68em;
+}
+
+.wandlight-lore-workbench-row-note {
+    padding: 8px;
+    color: var(--wandlight-muted, rgba(241, 234, 216, 0.68));
+    font-size: 0.76em;
+}
+
+.wandlight-lore-workbench-detail {
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.wandlight-lore-workbench-detail-card {
+    margin: 0 !important;
+    cursor: default !important;
+}
+
+.wandlight-lore-workbench-detail .wandlight-lore-entry-fact,
+.wandlight-lore-workbench-detail .wandlight-lore-entry-full-fact,
+.wandlight-lore-workbench-detail .wandlight-lore-editor-textarea {
+    white-space: pre-wrap;
+}
+
+@media (max-width: 980px) {
+    .wandlight-lore-workbench-shell {
+        width: calc(100vw - 20px);
+        height: calc(100vh - 20px);
+        min-width: 0;
+        min-height: 0;
+    }
+
+    .wandlight-lore-workbench-header,
+    .wandlight-lore-workbench-controls,
+    .wandlight-lore-workbench-view-pending .wandlight-lore-workbench-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .wandlight-lore-workbench-mode-tabs {
+        flex-wrap: wrap;
+    }
+
+    .wandlight-lore-workbench-main {
+        grid-template-columns: 1fr;
+    }
+
+    .wandlight-lore-workbench-detail {
+        min-height: 320px;
+    }
+}

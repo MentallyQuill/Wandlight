@@ -91,14 +91,26 @@ const TAB_ICON_PATHS = {
     injection: './Images/runtime-icons/wandlight_tab_injection_256.png',
 };
 
-function getTabIconSrc(tabId) {
-    const iconPath = TAB_ICON_PATHS[tabId];
-    if (!iconPath) return '';
+const BRAND_LOGO_PATHS = {
+    compact: './Images/branding/wandlight-logo-minimized-256.png',
+    expanded: './Images/branding/wandlight-logo-expanded-512.png',
+};
+
+function getRuntimeAssetSrc(assetPath) {
+    if (!assetPath) return '';
     try {
-        return new URL(iconPath, import.meta.url).href;
+        return new URL(assetPath, import.meta.url).href;
     } catch (error) {
-        return iconPath;
+        return assetPath;
     }
+}
+
+function getTabIconSrc(tabId) {
+    return getRuntimeAssetSrc(TAB_ICON_PATHS[tabId]);
+}
+
+function getBrandLogoSrc(railMode) {
+    return getRuntimeAssetSrc(BRAND_LOGO_PATHS[normalizeRailMode(railMode)] || BRAND_LOGO_PATHS.compact);
 }
 
 const TAB_TOOLTIPS = {
@@ -362,6 +374,37 @@ export function hideLorePanel() {
     }
 }
 
+export function resetLorePanelLayout() {
+    const state = getState();
+    if (!state.lorePanel) state.lorePanel = getDefaultState().lorePanel;
+    const panelState = state.lorePanel;
+
+    const defaultDrawerWidth = Math.min(560, Math.max(MIN_DRAWER_WIDTH, (window.innerWidth || 1024) - (MAX_PANEL_MARGIN * 2)));
+    const defaultDrawerHeight = Math.min(640, Math.max(MIN_DRAWER_HEIGHT, (window.innerHeight || 768) - getDefaultRailY() - MAX_PANEL_MARGIN));
+
+    panelState.isOpen = true;
+    panelState.railMode = 'compact';
+    panelState.railX = 16;
+    panelState.railY = getDefaultRailY();
+    panelState.drawerOpen = false;
+    panelState.collapsed = true;
+    panelState.activeTab = 'session';
+    panelState.drawerWidth = defaultDrawerWidth;
+    panelState.drawerHeight = defaultDrawerHeight;
+    panelState.drawerDirection = 'auto';
+
+    // Keep legacy geometry fields in sync for users migrating from the old floating window.
+    panelState.x = panelState.railX;
+    panelState.y = panelState.railY;
+    panelState.width = panelState.drawerWidth;
+    panelState.height = panelState.drawerHeight;
+
+    normalizePanelLayoutState(state, { persistLegacyOpenState: true });
+    saveState(state);
+    showLorePanel();
+    return state.lorePanel;
+}
+
 export function refreshLorePanel() {
     const existing = document.getElementById(PANEL_ID);
     if (!existing) return;
@@ -439,11 +482,7 @@ function renderRail(state) {
     const markImg = document.createElement('img');
     markImg.className = 'wandlight-runtime-rail-logo-img';
     markImg.alt = railMode === 'compact' ? 'Wandlight' : 'Wandlight logo';
-    markImg.src = getExtensionAssetPath(
-        railMode === 'compact'
-            ? 'Images/branding/wandlight-logo-minimized-256.png'
-            : 'Images/branding/wandlight-logo-expanded-512.png',
-    );
+    markImg.src = getBrandLogoSrc(railMode);
     markImg.onerror = () => {
         markImg.remove();
         mark.textContent = railMode === 'compact' ? 'W' : 'Wandlight';

@@ -6274,7 +6274,7 @@ function buildLoreTimelineMessages(events = []) {
                 senderId: sender.id,
                 senderName: sender.name,
                 senderType: sender.type,
-                wordCount: countTimelineWords(text),
+                wordCount: countTimelineWords(sampleText),
                 preview: compactTimelineText(sampleText, 260),
                 detectedDateTime: header?.dateTime || '',
                 timestamp: message?.send_date || message?.extra?.timestamp || '',
@@ -6328,12 +6328,21 @@ function extractTimelineWandlightHeader(text) {
 
 function getTimelineMessageSender(message, index) {
     if (message?.is_user) return { id: 'user', name: 'You', type: 'user' };
-    if (message?.is_system || message?.extra?.type === 'system') return { id: 'system', name: 'System / Lore Engine', type: 'system' };
     const rawName = String(message?.name || message?.ch_name || '').trim();
+    if (rawName && !isTimelineSystemSenderName(rawName)) {
+        const key = rawName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'story';
+        const type = /narrator|story/i.test(rawName) ? 'narrator' : 'character';
+        return { id: `${type}:${key}`, name: rawName, type };
+    }
+    if (message?.is_system || message?.extra?.type === 'system') return { id: 'system', name: rawName || 'System', type: 'system' };
     const name = rawName || (index === 0 ? 'Narrator / Story' : 'Story');
     const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'story';
     const type = /narrator|story/i.test(name) ? 'narrator' : 'character';
     return { id: `${type}:${key}`, name, type };
+}
+
+function isTimelineSystemSenderName(name) {
+    return /^(system|lore engine|wandlight|wandlight continuity)$/i.test(String(name || '').trim());
 }
 
 function countTimelineWords(text) {
@@ -6447,12 +6456,14 @@ function ensureLoreTimelineViewport(messageCount) {
 
 function setLoreTimelineViewport(start, end, messageCount) {
     const total = Math.max(1, messageCount || 1);
-    let nextStart = Math.max(1, Math.round(start));
-    let nextEnd = Math.max(nextStart, Math.round(end));
-    let span = Math.max(LORE_TIMELINE_MIN_VIEW_MESSAGES, nextEnd - nextStart + 1);
+    const requestedStart = Math.round(start);
+    const requestedEnd = Math.round(end);
+    let span = Math.max(LORE_TIMELINE_MIN_VIEW_MESSAGES, requestedEnd - requestedStart + 1);
     span = Math.min(total, span);
+    let nextStart = requestedStart;
+    if (nextStart < 1) nextStart = 1;
     if (nextStart + span - 1 > total) nextStart = Math.max(1, total - span + 1);
-    nextEnd = Math.min(total, nextStart + span - 1);
+    const nextEnd = Math.min(total, nextStart + span - 1);
     loreTimelineViewport = { start: nextStart, end: nextEnd };
 }
 
@@ -6751,21 +6762,21 @@ function createLoreTimelineGraphControls(model) {
     controls.appendChild(createButton('Fit', 'Show the full message timeline.', () => {
         setLoreTimelineViewport(1, model.messages.length || 1, model.messages.length || 1);
         renderLoreTimeline();
-    }));
-    controls.appendChild(createButton('Zoom In', 'Zoom into the current timeline range.', () => {
+    }, 'wandlight-small-button'));
+    controls.appendChild(createButton('+', 'Zoom into the current timeline range.', () => {
         zoomLoreTimeline(0.7, model.messages.length || 1);
         renderLoreTimeline();
-    }));
-    controls.appendChild(createButton('Zoom Out', 'Zoom out from the current timeline range.', () => {
+    }, 'wandlight-small-button wandlight-continuity-zoom-button'));
+    controls.appendChild(createButton('-', 'Zoom out from the current timeline range.', () => {
         zoomLoreTimeline(1.35, model.messages.length || 1);
         renderLoreTimeline();
-    }));
+    }, 'wandlight-small-button wandlight-continuity-zoom-button'));
     controls.appendChild(createButton('Current', 'Jump to the latest messages.', () => {
         const total = model.messages.length || 1;
         const span = Math.min(total, loreTimelineViewport ? loreTimelineViewport.end - loreTimelineViewport.start + 1 : LORE_TIMELINE_DEFAULT_VIEW_MESSAGES);
         setLoreTimelineViewport(total - span + 1, total, total);
         renderLoreTimeline();
-    }, 'wandlight-primary-button'));
+    }, 'wandlight-small-button wandlight-primary-button'));
     return controls;
 }
 
@@ -6797,48 +6808,90 @@ function createLoreTimelineLegend(model, visibleNodes, summary) {
     scaleBox.className = 'wandlight-continuity-legend-box';
     const scaleTitle = document.createElement('div');
     scaleTitle.className = 'wandlight-continuity-legend-title';
-    scaleTitle.textContent = 'Word Count Scale';
+    scaleTitle.textContent = 'Daily Writing Volume';
     scaleBox.appendChild(scaleTitle);
     const scale = document.createElement('div');
-    scale.className = 'wandlight-continuity-word-scale';
-    for (const bin of buildWordScaleBins(model.messages, model.wordScaleMax || model.maxWordCount, model.maxWordCount)) {
+    scale.className = 'wandlight-continuity-day-volume';
+    const bins = buildDailyWritingBins(model.messages);
+    const maxTotal = Math.max(1, ...bins.map(bin => bin.words || 0));
+    const labelStride = Math.max(1, Math.ceil(bins.length / 5));
+    const strip = document.createElement('div');
+    strip.className = 'wandlight-continuity-day-volume-strip';
+    strip.style.minWidth = `${Math.max(100, bins.length * 8)}px`;
+    bins.forEach((bin, idx) => {
         const binEl = document.createElement('div');
-        binEl.className = 'wandlight-continuity-word-scale-bin';
+        binEl.className = 'wandlight-continuity-day-volume-bin';
         const bar = document.createElement('span');
-        bar.style.height = `${6 + bin.index * 6}px`;
+        const scaled = Math.sqrt((bin.words || 0) / maxTotal);
+        bar.style.height = `${Math.max(2, 4 + scaled * 34)}px`;
         binEl.appendChild(bar);
         const label = document.createElement('small');
-        label.textContent = bin.latestLabel;
+        label.textContent = idx === 0 || idx === bins.length - 1 || idx % labelStride === 0 ? bin.shortLabel : '';
         binEl.appendChild(label);
-        addTooltip(binEl, `${bin.label} words | latest realtime date: ${bin.latestLabel}`);
-        scale.appendChild(binEl);
-    }
+        addTooltip(binEl, `${bin.longLabel}: ${formatInteger(bin.words)} words across ${bin.messages} message${bin.messages === 1 ? '' : 's'}.`);
+        strip.appendChild(binEl);
+    });
+    scale.appendChild(strip);
     scaleBox.appendChild(scale);
     legend.appendChild(scaleBox);
     return legend;
 }
 
-function buildWordScaleBins(messages = [], visualMaxWordCount = 1, actualMaxWordCount = visualMaxWordCount) {
-    const max = Math.max(1, Number(visualMaxWordCount) || 1);
-    const actualMax = Math.max(max, Number(actualMaxWordCount) || max);
+function buildDailyWritingBins(messages = []) {
+    const dated = messages
+        .map(message => ({ message, time: parseTimelineRealtime(message.timestamp) }))
+        .filter(item => item.time);
+    if (!dated.length) {
+        return [{
+            key: 'undated',
+            shortLabel: 'No date',
+            longLabel: 'No realtime dates available',
+            words: messages.reduce((sum, message) => sum + (Number(message.wordCount) || 0), 0),
+            messages: messages.length,
+        }];
+    }
+
+    const totals = new Map();
+    for (const item of dated) {
+        const key = getTimelineDayKey(item.time);
+        const existing = totals.get(key) || { key, time: getTimelineDayStart(item.time), words: 0, messages: 0 };
+        existing.words += Number(item.message.wordCount) || 0;
+        existing.messages += 1;
+        totals.set(key, existing);
+    }
+
+    const starts = Array.from(totals.values()).map(item => item.time).sort((a, b) => a - b);
+    const first = starts[0];
+    const last = starts[starts.length - 1];
     const bins = [];
-    for (let index = 1; index <= 5; index += 1) {
-        const min = index === 1 ? 1 : Math.floor(((index - 1) / 5) * max) + 1;
-        const high = index === 5 ? actualMax : Math.max(min, Math.floor((index / 5) * max));
-        const latest = messages
-            .filter(message => (message.wordCount || 0) >= min && (index === 5 || (message.wordCount || 0) <= high))
-            .map(message => parseTimelineRealtime(message.timestamp))
-            .filter(Boolean)
-            .sort((a, b) => b - a)[0] || null;
+    for (let time = first; time <= last; time = addTimelineDays(time, 1)) {
+        const key = getTimelineDayKey(time);
+        const existing = totals.get(key) || { key, time, words: 0, messages: 0 };
         bins.push({
-            index,
-            min,
-            max: high,
-            label: index === 5 && actualMax > max ? `${min}+` : `${min}-${high}`,
-            latestLabel: latest ? formatTimelineRealtimeDate(latest) : 'No date',
+            ...existing,
+            shortLabel: formatTimelineRealtimeDate(time),
+            longLabel: new Date(time).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }),
         });
     }
     return bins;
+}
+
+function getTimelineDayStart(value) {
+    const date = new Date(Number(value));
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function getTimelineDayKey(value) {
+    const date = new Date(Number(value));
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function addTimelineDays(value, days) {
+    const date = new Date(Number(value));
+    date.setDate(date.getDate() + days);
+    return date.getTime();
 }
 
 function parseTimelineRealtime(value) {

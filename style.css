@@ -3554,12 +3554,22 @@
     gap: 6px;
 }
 
+.wandlight-guide-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
 .wandlight-instructions-step-card {
     border: 1px solid rgba(190, 145, 75, 0.24);
-    border-radius: 8px;
+    border-radius: 6px;
     background: rgba(20, 18, 20, 0.45);
     padding: 7px 8px;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .wandlight-instructions-step-title {
@@ -3573,6 +3583,60 @@
     color: rgba(238, 226, 196, 0.78);
     font-size: 0.78em;
     line-height: 1.35;
+}
+
+.wandlight-guide-step-button {
+    align-self: flex-start;
+    margin-top: auto;
+}
+
+.wandlight-tour-highlight {
+    outline: 2px solid rgba(214, 170, 86, 0.95) !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px rgba(214, 170, 86, 0.16) !important;
+    border-radius: 6px;
+}
+
+.wandlight-tour-popover {
+    position: fixed;
+    z-index: 2147483647;
+    width: min(300px, calc(100vw - 24px));
+    color: #f2dfb2;
+    border: 1px solid rgba(194, 150, 78, 0.42);
+    border-radius: 6px;
+    background:
+        linear-gradient(180deg, rgba(42, 32, 24, 0.98), rgba(18, 16, 18, 0.98));
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+    padding: 10px;
+    font-size: 12px;
+}
+
+.wandlight-tour-progress {
+    color: rgba(220, 184, 111, 0.82);
+    font-size: 0.74em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.wandlight-tour-title {
+    color: #f3d38b;
+    font-size: 1em;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.wandlight-tour-body {
+    color: rgba(238, 226, 196, 0.82);
+    font-size: 0.9em;
+    line-height: 1.38;
+}
+
+.wandlight-tour-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 10px;
 }
 
 /* Live feedback fix: accepted lore list owns scrolling; cards do not flex-shrink into a non-scrollable column. */

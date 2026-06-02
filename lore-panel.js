@@ -407,6 +407,153 @@ const AUTOMATION_MODES = {
 const BASIC_EXPERIENCE_TABS = Object.freeze(['session', 'context', 'lore', 'injection']);
 const ADVANCED_EXPERIENCE_TABS = Object.freeze(Object.keys(TAB_LABELS));
 
+const GUIDE_STEPS = Object.freeze({
+    basic: Object.freeze([
+        {
+            id: 'active',
+            title: 'Turn Wandlight On',
+            body: 'Keep Wandlight active while you roleplay so accepted lore can be selected and injected.',
+            tab: 'session',
+            target: 'session.active',
+            actionLabel: 'Show',
+        },
+        {
+            id: 'context',
+            title: 'Set Story Context',
+            body: 'Detect the scene date and canon reference point before adding canon lore.',
+            tab: 'context',
+            target: 'context.detect',
+            actionLabel: 'Show',
+        },
+        {
+            id: 'lore',
+            title: 'Add Useful Lore',
+            body: 'Preview canon packs, scan story lore, or create a manual lore draft.',
+            tab: 'lore',
+            target: 'lore.generation',
+            expandSections: Object.freeze(['lore.generation']),
+            actionLabel: 'Show',
+        },
+        {
+            id: 'review',
+            title: 'Review Pending Lore',
+            body: 'Accept entries worth remembering and dismiss entries that belong only in the chat summary.',
+            tab: 'lore',
+            target: 'lore.pending',
+            expandSections: Object.freeze(['lore.basic.pendingReview', 'lore.pendingReview']),
+            actionLabel: 'Show',
+        },
+        {
+            id: 'injection',
+            title: 'Check Injection',
+            body: 'Choose which lore relevance tiers Wandlight sends into the next prompt.',
+            tab: 'injection',
+            target: 'injection.basic',
+            actionLabel: 'Show',
+        },
+    ]),
+    advanced: Object.freeze([
+        {
+            id: 'active',
+            title: 'Session Setup',
+            body: 'Confirm Wandlight is active, then choose how much automation should run during roleplay.',
+            tab: 'session',
+            target: 'session.automation',
+            actionLabel: 'Show',
+        },
+        {
+            id: 'context',
+            title: 'Story Context',
+            body: 'Set the date, canon boundary, and branch that canon suggestions and lore generation use.',
+            tab: 'context',
+            target: 'context.detect',
+            actionLabel: 'Show',
+        },
+        {
+            id: 'continuity',
+            title: 'Continuity State',
+            body: 'Scan lightweight live state such as scene, active cast, key items, and current threads.',
+            tab: 'continuity',
+            target: 'continuity.scan',
+            actionLabel: 'Show',
+        },
+        {
+            id: 'lore-generation',
+            title: 'Lore Generation',
+            body: 'Use local canon suggestions for date-aware constraints and model scans for story-specific lore.',
+            tab: 'lore',
+            target: 'lore.generation',
+            expandSections: Object.freeze(['lore.generation']),
+            actionLabel: 'Show',
+        },
+        {
+            id: 'review',
+            title: 'Lore Review',
+            body: 'Use Pending and Accepted Lore to edit, tag, pin, mute, bulk manage, and workbench large batches.',
+            tab: 'lore',
+            target: 'lore.accepted',
+            expandSections: Object.freeze(['lore.pendingReview', 'lore.acceptedEntries']),
+            actionLabel: 'Show',
+        },
+        {
+            id: 'relevance',
+            title: 'Auto-Relevance',
+            body: 'Promote or demote accepted lore tiers with local scoring and optional Utility Provider review.',
+            tab: 'lore',
+            target: 'lore.autoRelevance',
+            expandSections: Object.freeze(['lore.autoRelevance']),
+            actionLabel: 'Show',
+        },
+        {
+            id: 'timeline',
+            title: 'Lore Timeline',
+            body: 'Audit created, edited, deleted, and restored lore events across the story timeline.',
+            tab: 'lore',
+            target: 'lore.timeline',
+            actionLabel: 'Show',
+        },
+        {
+            id: 'injection',
+            title: 'Injection Controls',
+            body: 'Place continuity and lore prompt groups separately, then choose direct or compressed handling.',
+            tab: 'injection',
+            target: 'injection.promptPlacement',
+            expandSections: Object.freeze(['injection.promptPlacement']),
+            actionLabel: 'Show',
+        },
+        {
+            id: 'compression',
+            title: 'Compression',
+            body: 'Tune compression levels and templates for continuity and relevance-tiered lore blocks.',
+            tab: 'injection',
+            target: 'injection.compression',
+            expandSections: Object.freeze(['injection.compressionPrompts']),
+            actionLabel: 'Show',
+        },
+    ]),
+});
+
+const GUIDE_CONTENT = Object.freeze({
+    basic: Object.freeze({
+        title: 'Getting Started',
+        subtitle: 'first steps',
+        tooltip: 'A short guided setup for core Wandlight use.',
+        lede: 'Start with story context, add reviewable lore, accept what matters, then check what Wandlight will send into the next prompt.',
+        note: 'The chat remains the source of truth. Wandlight keeps the useful details editable, searchable, and ready for injection.',
+        tourLabel: 'Start Walkthrough',
+    }),
+    advanced: Object.freeze({
+        title: 'Wandlight Guide',
+        subtitle: 'workflow + tools',
+        tooltip: 'A guided map of Wandlight runtime tools and configuration areas.',
+        lede: 'Use this guide to move through automation, context, continuity, lore generation, review, timeline recovery, and injection controls.',
+        note: 'Durable story memory belongs in Lore. Lightweight current-scene state belongs in Continuity. Injection decides what reaches the model.',
+        tourLabel: 'Start Advanced Walkthrough',
+    }),
+});
+
+let activeWandlightTour = null;
+
 let panelRoot = null;
 let isDragging = false;
 let dragOffsetX = 0;
@@ -453,6 +600,7 @@ export function showLorePanel() {
 }
 
 export function hideLorePanel() {
+    closeWandlightTour();
     closeLoreWorkbench();
     removeLorePanel();
     const state = getState();
@@ -468,6 +616,7 @@ export function refreshLorePanel() {
 
     const state = getState();
     if (!state?.lorePanel?.isOpen) {
+        closeWandlightTour();
         removeLorePanel();
         return;
     }
@@ -1018,6 +1167,8 @@ function clampNumber(value, min, max, fallback) {
 
 function renderSessionTab(container, state) {
     const settings = getSettings();
+    const guideMode = isBasicExperience(settings) ? 'basic' : 'advanced';
+    const guide = GUIDE_CONTENT[guideMode] || GUIDE_CONTENT.basic;
 
     container.appendChild(createSectionHeader(
         'Session Controls',
@@ -1058,12 +1209,12 @@ function renderSessionTab(container, state) {
         modeDesc.textContent = AUTOMATION_MODES[normalizeAutomationMode(settings.automationMode || settings.workflowMode)].description;
         modeCard.appendChild(modeDesc);
 
-        container.appendChild(modeCard);
+        container.appendChild(markTourTarget(modeCard, 'session.automation'));
     }
 
     const toggles = document.createElement('div');
     toggles.className = 'wandlight-runtime-grid';
-    toggles.appendChild(createToggleCard(
+    toggles.appendChild(markTourTarget(createToggleCard(
         'Wandlight Active',
         settings.enabled,
         'Master switch for Wandlight runtime behavior. Pausing disables prompt injection, automatic extraction, and generation actions.',
@@ -1074,12 +1225,19 @@ function renderSessionTab(container, state) {
             refreshPanelBody({ preserveScroll: false });
             refreshHeader();
         }
-    ));
+    ), 'session.active'));
     container.appendChild(toggles);
 
     container.appendChild(createWandlightPresetStatusCard());
 
-    container.appendChild(createCollapsibleSection('session.instructions', 'Instructions', 'workflow guide', false, createInstructionsCard(), { tooltip: 'Minimal workflow reference for using Wandlight during roleplay.' }));
+    container.appendChild(createCollapsibleSection(
+        `session.instructions.${guideMode}`,
+        guide.title,
+        guide.subtitle,
+        false,
+        createInstructionsCard(guideMode),
+        { tooltip: guide.tooltip }
+    ));
 
     const stats = document.createElement('div');
     stats.className = 'wandlight-runtime-card';
@@ -1098,38 +1256,29 @@ function renderSessionTab(container, state) {
     container.appendChild(createCollapsibleSection('session.dangerZone', 'Danger Zone', 'Destructive cleanup actions', false, createDangerZoneCard(state), { tooltip: 'Destructive cleanup actions for this chat.', className: 'wandlight-danger-zone-collapsible' }));
 }
 
-function createInstructionsCard() {
+function createInstructionsCard(guideMode = normalizeExperienceMode(getSettings().experienceMode)) {
     const wrap = document.createElement('div');
     wrap.className = 'wandlight-instructions-card';
+    const mode = normalizeExperienceMode(guideMode);
+    const guide = GUIDE_CONTENT[mode] || GUIDE_CONTENT.basic;
+    const steps = GUIDE_STEPS[mode] || GUIDE_STEPS.basic;
 
     const intro = document.createElement('p');
     intro.className = 'wandlight-instructions-lede';
-    intro.textContent = 'Wandlight is a working memory layer for the story. Use it to anchor date, state, lore, and injection without turning the chat itself into a recap.';
+    intro.textContent = guide.lede;
     wrap.appendChild(intro);
 
     const flow = document.createElement('div');
     flow.className = 'wandlight-instructions-flow';
 
-    const cards = [
-        {
-            title: 'Context',
-            body: 'Set the scene date, canon reference point, and branch. Canon suggestions depend on this anchor.',
-        },
-        {
-            title: 'Continuity',
-            body: 'Scan lightweight live state: scene/timeline, active characters, key items, and active goals/threads. Durable memory belongs in Lore.',
-        },
-        {
-            title: 'Lore',
-            body: 'Suggest canon lore from the local database or generate story lore from chat. Review before accepting.',
-        },
-        {
-            title: 'Injection',
-            body: 'Choose what is sent to the model. Inject Continuity, Lore, or both, directly or compressed.',
-        },
-    ];
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-guide-actions';
+    actions.appendChild(createButton(guide.tourLabel || 'Start Walkthrough', 'Open a guided walkthrough that moves through the related Wandlight tabs and controls.', () => {
+        startWandlightTour(mode);
+    }, 'wandlight-primary-button'));
+    wrap.appendChild(actions);
 
-    for (const item of cards) {
+    for (const item of steps) {
         const card = document.createElement('div');
         card.className = 'wandlight-instructions-step-card';
         const title = document.createElement('div');
@@ -1140,6 +1289,12 @@ function createInstructionsCard() {
         body.textContent = item.body;
         card.appendChild(title);
         card.appendChild(body);
+        if (item.actionLabel) {
+            const action = createButton(item.actionLabel, `Open ${item.title}.`, () => {
+                showGuideStep(item, { highlight: true });
+            }, 'wandlight-mini-button wandlight-guide-step-button');
+            card.appendChild(action);
+        }
         flow.appendChild(card);
     }
 
@@ -1147,7 +1302,7 @@ function createInstructionsCard() {
 
     const close = document.createElement('p');
     close.className = 'wandlight-instructions-note';
-    close.textContent = 'The chat remains the source of truth. Wandlight keeps the relevant state visible, editable, and ready for injection.';
+    close.textContent = guide.note;
     wrap.appendChild(close);
 
     return wrap;
@@ -1156,6 +1311,7 @@ function createInstructionsCard() {
 function createWandlightPresetStatusCard() {
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-preset-status-card';
+    markTourTarget(card, 'session.preset');
     card.textContent = 'Checking Wandlight preset...';
     refreshWandlightPresetStatusCard(card);
     return card;
@@ -1598,6 +1754,7 @@ function renderContextTab(container, state) {
 function createContextDetectionCard(state) {
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-generation-progress-card';
+    markTourTarget(card, 'context.detect.card');
 
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
@@ -1654,9 +1811,9 @@ function createContextDetectionCard(state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
-    actions.appendChild(createButton('Detect Story Context', 'Analyzes recent messages and fills the Story Context fields below. It does not create lore entries.', async (btn) => {
+    actions.appendChild(markTourTarget(createButton('Detect Story Context', 'Analyzes recent messages and fills the Story Context fields below. It does not create lore entries.', async (btn) => {
         await handleDetectStoryContext(btn);
-    }, 'wandlight-primary-button'));
+    }, 'wandlight-primary-button'), 'context.detect'));
     card.appendChild(actions);
 
     appendGenerationStatus(card, state, 'context');
@@ -1666,6 +1823,7 @@ function createContextDetectionCard(state) {
 function createLoreGenerationCard(state) {
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-generation-progress-card wandlight-lore-generation-card';
+    markTourTarget(card, 'lore.generation');
 
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
@@ -1735,12 +1893,12 @@ function createCanonSuggestionPanel(state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
-    actions.appendChild(createButton('Preview Canon Packs', 'Queries the local Lore Database and groups matching entries into selectable packs with counts.', async (btn) => {
+    actions.appendChild(markTourTarget(createButton('Preview Canon Packs', 'Queries the local Lore Database and groups matching entries into selectable packs with counts.', async (btn) => {
         await handlePreviewCanonLorePacks(btn);
-    }, 'wandlight-primary-button'));
-    actions.appendChild(createButton('Quick Add Top Matches', `Legacy one-click flow: proposes up to ${settings.canonLoreMaxEntries || 10} top matches into Pending Lore Review.`, async (btn) => {
+    }, 'wandlight-primary-button'), 'lore.canon.preview'));
+    actions.appendChild(markTourTarget(createButton('Quick Add Top Matches', `Legacy one-click flow: proposes up to ${settings.canonLoreMaxEntries || 10} top matches into Pending Lore Review.`, async (btn) => {
         await handleSuggestCanonLore(btn);
-    }, 'wandlight-secondary-button'));
+    }, 'wandlight-secondary-button'), 'lore.canon.quick'));
     panel.appendChild(actions);
 
     panel.appendChild(createCanonPreviewSection(state));
@@ -2110,6 +2268,7 @@ function createCanonPreviewEntryRow(entry, selectedIds, isStale = false) {
 function createStoryLoreGenerationPanel(state) {
     const panel = document.createElement('div');
     panel.className = 'wandlight-lore-generation-panel wandlight-story-lore-generation-panel';
+    markTourTarget(panel, 'lore.story');
 
     const header = document.createElement('div');
     header.className = 'wandlight-lore-generation-panel-title';
@@ -2124,9 +2283,9 @@ function createStoryLoreGenerationPanel(state) {
 
     const actions = document.createElement('div');
     actions.className = 'wandlight-primary-actions wandlight-generation-actions';
-    const scanBtn = createButton('Scan Story Lore', 'Scans the configured message range, processes chunks in parallel, and appends generated story-specific lore into Pending Lore Review as chunks complete.', async (btn) => {
+    const scanBtn = markTourTarget(createButton('Scan Story Lore', 'Scans the configured message range, processes chunks in parallel, and appends generated story-specific lore into Pending Lore Review as chunks complete.', async (btn) => {
         await handleBulkGeneratePendingLore(btn);
-    }, 'wandlight-primary-button');
+    }, 'wandlight-primary-button'), 'lore.story.scan');
     if (loreGenerationUiRunning || activeLoreGenerationController) {
         scanBtn.disabled = true;
         scanBtn.textContent = 'Scan Running...';
@@ -3320,6 +3479,7 @@ function createContinuityScanCard(state) {
     const settings = getSettings();
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-generation-progress-card';
+    markTourTarget(card, 'continuity.scan');
 
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
@@ -3701,7 +3861,8 @@ function renderBasicInjectionTab(container, state, settings = getSettings()) {
 
     const toggles = document.createElement('div');
     toggles.className = 'wandlight-runtime-grid';
-    toggles.appendChild(createToggleCard(
+    markTourTarget(toggles, 'injection.basic');
+    toggles.appendChild(markTourTarget(createToggleCard(
         'Inject Lore',
         settings.injectLore !== false,
         'Injects accepted, unmuted Lore entries through relevance-tiered prompt groups.',
@@ -3712,7 +3873,7 @@ function renderBasicInjectionTab(container, state, settings = getSettings()) {
             refreshPanelBody({ preserveScroll: false });
             refreshHeader();
         }
-    ));
+    ), 'injection.loreToggle'));
     container.appendChild(toggles);
 
     const help = document.createElement('div');
@@ -3733,6 +3894,7 @@ function createBasicLoreTierInjectionCard(tier, state, settings) {
 
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-injection-preview-card wandlight-basic-injection-tier-card';
+    markTourTarget(card, `injection.tier.${tier}`);
 
     const title = document.createElement('div');
     title.className = 'wandlight-runtime-card-title';
@@ -3845,7 +4007,9 @@ function renderInjectionTab(container, state) {
     container.appendChild(toggles);
 
     const placementStatus = `${settings.injectionTransport === 'interceptor' ? 'Legacy prepend' : 'Extension Prompt'} · C ${formatPlacementSummary(settings, 'continuity')} · H ${formatPlacementSummary(settings, 'loreHigh')} · N ${formatPlacementSummary(settings, 'loreNormal')} · L ${formatPlacementSummary(settings, 'loreLow')}`;
-    container.appendChild(createCollapsibleSection('injection.promptPlacement', 'Prompt Placement', placementStatus, false, createInjectionPlacementCard(settings), { tooltip: 'Role, position, and depth used for prompt injection.' }));
+    const placementSection = createCollapsibleSection('injection.promptPlacement', 'Prompt Placement', placementStatus, false, createInjectionPlacementCard(settings), { tooltip: 'Role, position, and depth used for prompt injection.' });
+    markTourTarget(placementSection, 'injection.promptPlacement');
+    container.appendChild(placementSection);
 
     container.appendChild(createInjectionPreviewCard('Continuity Injection', 'wandlight-continuity-injection-preview', continuityPreview, settings.injectContinuity !== false && settings.injectMemo !== false, 'This is the actual Continuity block currently configured for prompt injection. It can be placed at a different depth because it is separated from Lore.', createContinuityHandlingDropdown(state, settings)));
     container.appendChild(createInjectionPreviewCard('High-Relevance Lore Injection', 'wandlight-lore-high-injection-preview', loreHighPreview, settings.injectLore !== false && settings.loreHighInjectionEnabled !== false, 'Lore injected in the high-relevance prompt group.', createLoreTierHandlingDropdown('high', state, settings)));
@@ -3853,14 +4017,16 @@ function renderInjectionTab(container, state) {
     container.appendChild(createInjectionPreviewCard('Low-Relevance Lore Injection', 'wandlight-lore-low-injection-preview', loreLowPreview, settings.injectLore !== false && settings.loreLowInjectionEnabled !== false, 'Lore injected in the low-relevance prompt group.', createLoreTierHandlingDropdown('low', state, settings)));
     container.appendChild(createInjectionPreviewCard('Combined Lore Preview', 'wandlight-lore-injection-preview', lorePreview, settings.injectLore !== false, 'Combined read-only preview of all relevance-tiered lore blocks.'));
 
-    container.appendChild(createCollapsibleSection(
+    const compressionSection = createCollapsibleSection(
         'injection.compressionPrompts',
         'Compression Prompts',
         'Editable templates for model compression',
         false,
         createCompressionPromptEditorCard(),
         { tooltip: 'Editable prompt templates used by Compress Continuity Now and tiered Compress Lore actions.' }
-    ));
+    );
+    markTourTarget(compressionSection, 'injection.compression');
+    container.appendChild(compressionSection);
 }
 
 
@@ -6143,47 +6309,55 @@ function renderLoreTab(container, state) {
     ));
     container.appendChild(createLoreTimelineCard(state));
 
-    container.appendChild(createCollapsibleSection(
+    const generationSection = createCollapsibleSection(
         'lore.generation',
         'Lore Generation',
         'canon suggestions + story generation',
         true,
         createLoreGenerationCard(state),
         { tooltip: 'Suggest canon lore from the local database or generate story-specific lore from recent chat messages.', className: 'wandlight-lore-generation-collapsible' }
-    ));
+    );
+    markTourTarget(generationSection, 'lore.generation.section');
+    container.appendChild(generationSection);
 
     if (!isBasicExperience()) {
-        container.appendChild(createCollapsibleSection(
+        const autoRelevanceSection = createCollapsibleSection(
             'lore.autoRelevance',
             'Auto-Relevance',
             getSettings().autoRelevanceEnabled ? `every ${getSettings().autoRelevanceEveryTurns || 5} turns` : 'off',
             false,
             createAutoRelevanceCard(state),
             { tooltip: 'Automatically promotes or demotes accepted lore between High, Normal, and Low relevance tiers.' }
-        ));
+        );
+        markTourTarget(autoRelevanceSection, 'lore.autoRelevance');
+        container.appendChild(autoRelevanceSection);
     }
 
     const pendingCount = (state?.pendingLoreEntries || []).length;
-    container.appendChild(createCollapsibleSection(
+    const pendingSection = createCollapsibleSection(
         basic ? 'lore.basic.pendingReview' : 'lore.pendingReview',
         'Pending Lore Review',
         pendingCount ? `${pendingCount} pending` : 'none',
         basic ? true : pendingCount > 0,
         createPendingLoreReviewSection(state),
         { tooltip: 'Review suggested/generated lore entries before accepting them.', className: 'wandlight-lore-pending-collapsible' }
-    ));
+    );
+    markTourTarget(pendingSection, 'lore.pending');
+    container.appendChild(pendingSection);
 
     const loreState = getPanelLoreState(state);
     const acceptedCount = Math.max(0, (loreState.counts?.all || 0) - (loreState.counts?.pending || 0));
     const injectableCount = getSelectedLoreInjectionCount(state, getSettings());
-    container.appendChild(createCollapsibleSection(
+    const acceptedSection = createCollapsibleSection(
         basic ? 'lore.basic.acceptedEntries' : 'lore.acceptedEntries',
         'Accepted Lore Entries',
         `${acceptedCount} accepted · ${injectableCount} injectable`,
         true,
         createAcceptedLoreEntriesSection(state),
         { tooltip: 'Search, filter, bulk edit, tag, pin, mute, and edit accepted lore entries.', className: 'wandlight-lore-accepted-collapsible' }
-    ));
+    );
+    markTourTarget(acceptedSection, 'lore.accepted');
+    container.appendChild(acceptedSection);
 }
 
 function createLoreTimelineCard(state) {
@@ -6193,6 +6367,7 @@ function createLoreTimelineCard(state) {
     const latest = summary.latest;
     const card = document.createElement('div');
     card.className = 'wandlight-runtime-card wandlight-lore-timeline-card';
+    markTourTarget(card, 'lore.timeline');
 
     const top = document.createElement('div');
     top.className = 'wandlight-lore-timeline-card-top';
@@ -9091,6 +9266,233 @@ function createToggleCard(label, checked, tooltip, onChange) {
     });
 
     return card;
+}
+
+function markTourTarget(el, target) {
+    if (el && target) el.dataset.wandlightTour = String(target);
+    return el;
+}
+
+function startWandlightTour(mode = normalizeExperienceMode(getSettings().experienceMode)) {
+    const normalized = normalizeExperienceMode(mode);
+    const steps = [...(GUIDE_STEPS[normalized] || GUIDE_STEPS.basic)];
+    if (!steps.length) return;
+
+    closeWandlightTour({ preserveToast: true });
+    activeWandlightTour = {
+        mode: normalized,
+        steps,
+        index: 0,
+        renderToken: 0,
+        currentTarget: null,
+    };
+    document.addEventListener('keydown', onWandlightTourKeydown);
+    window.addEventListener('resize', repositionWandlightTourPopover);
+    renderActiveWandlightTourStep();
+}
+
+function renderActiveWandlightTourStep(skipCount = 0) {
+    const tour = activeWandlightTour;
+    if (!tour) return;
+    if (tour.index < 0) tour.index = 0;
+    if (tour.index >= tour.steps.length) {
+        closeWandlightTour();
+        return;
+    }
+
+    const step = tour.steps[tour.index];
+    showGuideStep(step, {
+        highlight: true,
+        tour: true,
+        onReady: (target) => {
+            if (!activeWandlightTour || activeWandlightTour !== tour) return;
+            if (!target && skipCount < tour.steps.length - 1) {
+                tour.index += 1;
+                renderActiveWandlightTourStep(skipCount + 1);
+                return;
+            }
+            renderWandlightTourPopover(step, target);
+        },
+    });
+}
+
+function showGuideStep(step, options = {}) {
+    if (!step) return;
+
+    for (const sectionId of step.expandSections || []) {
+        setSectionCollapsed(sectionId, false);
+    }
+
+    const state = getState();
+    if (state?.lorePanel) {
+        normalizePanelLayoutState(state);
+        state.lorePanel.drawerOpen = true;
+        state.lorePanel.collapsed = false;
+        state.lorePanel.activeTab = normalizeTabForExperience(step.tab || 'session');
+        saveState(state);
+    }
+    showLorePanel();
+
+    const token = activeWandlightTour ? ++activeWandlightTour.renderToken : 0;
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (activeWandlightTour && token !== activeWandlightTour.renderToken) return;
+            const target = getTourTargetElement(step.target);
+            if (options.highlight) {
+                highlightWandlightTourTarget(target);
+                if (!options.tour) {
+                    window.setTimeout(() => {
+                        if (!activeWandlightTour) clearWandlightTourHighlight();
+                    }, 2200);
+                }
+            }
+            options.onReady?.(target);
+        });
+    });
+}
+
+function getTourTargetElement(targetName) {
+    if (!targetName) return null;
+    const root = panelRoot || document.getElementById(PANEL_ID) || document.body;
+    const candidates = [
+        ...Array.from(root.querySelectorAll('[data-wandlight-tour]')),
+        ...Array.from(document.querySelectorAll('[data-wandlight-tour]')),
+    ];
+    return candidates.find(el => el?.dataset?.wandlightTour === targetName) || null;
+}
+
+function highlightWandlightTourTarget(target) {
+    clearWandlightTourHighlight();
+    if (!target) return;
+    target.classList.add('wandlight-tour-highlight');
+    target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
+}
+
+function clearWandlightTourHighlight() {
+    for (const el of document.querySelectorAll('.wandlight-tour-highlight')) {
+        el.classList.remove('wandlight-tour-highlight');
+    }
+}
+
+function renderWandlightTourPopover(step, target) {
+    const tour = activeWandlightTour;
+    if (!tour) return;
+
+    let popover = document.getElementById('wandlight-tour-popover');
+    if (!popover) {
+        popover = document.createElement('div');
+        popover.id = 'wandlight-tour-popover';
+        popover.className = 'wandlight-tour-popover';
+        document.body.appendChild(popover);
+    }
+
+    popover.innerHTML = '';
+    const progress = document.createElement('div');
+    progress.className = 'wandlight-tour-progress';
+    progress.textContent = `${tour.index + 1} / ${tour.steps.length}`;
+    popover.appendChild(progress);
+
+    const title = document.createElement('div');
+    title.className = 'wandlight-tour-title';
+    title.textContent = step.title || 'Wandlight';
+    popover.appendChild(title);
+
+    const body = document.createElement('div');
+    body.className = 'wandlight-tour-body';
+    body.textContent = step.body || '';
+    popover.appendChild(body);
+
+    const actions = document.createElement('div');
+    actions.className = 'wandlight-tour-actions';
+    const back = createButton('Back', 'Return to the previous walkthrough step.', () => {
+        if (!activeWandlightTour) return;
+        activeWandlightTour.index = Math.max(0, activeWandlightTour.index - 1);
+        renderActiveWandlightTourStep();
+    }, 'wandlight-mini-button');
+    back.disabled = tour.index <= 0;
+    actions.appendChild(back);
+
+    const close = createButton('Close', 'Close the walkthrough.', () => closeWandlightTour(), 'wandlight-mini-button');
+    actions.appendChild(close);
+
+    const nextLabel = tour.index >= tour.steps.length - 1 ? 'Finish' : 'Next';
+    const next = createButton(nextLabel, nextLabel === 'Finish' ? 'Close the walkthrough.' : 'Move to the next walkthrough step.', () => {
+        if (!activeWandlightTour) return;
+        if (activeWandlightTour.index >= activeWandlightTour.steps.length - 1) {
+            closeWandlightTour();
+            return;
+        }
+        activeWandlightTour.index += 1;
+        renderActiveWandlightTourStep();
+    }, 'wandlight-primary-button wandlight-mini-button');
+    actions.appendChild(next);
+    popover.appendChild(actions);
+
+    activeWandlightTour.currentTarget = target || null;
+    requestAnimationFrame(repositionWandlightTourPopover);
+}
+
+function repositionWandlightTourPopover() {
+    const popover = document.getElementById('wandlight-tour-popover');
+    if (!popover) return;
+    const target = activeWandlightTour?.currentTarget;
+    const margin = 12;
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1024;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 768;
+    const popRect = popover.getBoundingClientRect();
+
+    if (!target) {
+        popover.style.left = `${Math.max(margin, (viewportWidth - popRect.width) / 2)}px`;
+        popover.style.top = `${Math.max(margin, (viewportHeight - popRect.height) / 2)}px`;
+        return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    let left = rect.right + margin;
+    if (left + popRect.width > viewportWidth - margin) {
+        left = rect.left - popRect.width - margin;
+    }
+    if (left < margin) {
+        left = rect.left + (rect.width / 2) - (popRect.width / 2);
+    }
+    left = Math.max(margin, Math.min(left, viewportWidth - popRect.width - margin));
+
+    let top = rect.top + (rect.height / 2) - (popRect.height / 2);
+    if (top < margin) top = rect.bottom + margin;
+    if (top + popRect.height > viewportHeight - margin) top = rect.top - popRect.height - margin;
+    top = Math.max(margin, Math.min(top, viewportHeight - popRect.height - margin));
+
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+}
+
+function closeWandlightTour(options = {}) {
+    activeWandlightTour = null;
+    clearWandlightTourHighlight();
+    document.removeEventListener('keydown', onWandlightTourKeydown);
+    window.removeEventListener('resize', repositionWandlightTourPopover);
+    const popover = document.getElementById('wandlight-tour-popover');
+    if (popover) popover.remove();
+    if (!options.preserveToast) hideFloatingTooltip();
+}
+
+function onWandlightTourKeydown(event) {
+    if (!activeWandlightTour) return;
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closeWandlightTour();
+    } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        if (activeWandlightTour.index >= activeWandlightTour.steps.length - 1) closeWandlightTour();
+        else {
+            activeWandlightTour.index += 1;
+            renderActiveWandlightTourStep();
+        }
+    } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        activeWandlightTour.index = Math.max(0, activeWandlightTour.index - 1);
+        renderActiveWandlightTourStep();
+    }
 }
 
 

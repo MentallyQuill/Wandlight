@@ -39,24 +39,24 @@ Example:
 
 ### `taxonomy.json`
 
-This controls UI dropdown options, chip labels, and colors. Users can add new categories or statuses without editing JavaScript.
+This controls chip labels, colors, and display metadata for supported lore registries. Category values are fixed by Wandlight's relevance and injection logic; use the built-in category list unless the JavaScript normalizer is updated too.
 
-Example category:
+Example category metadata override:
 
 ```json
 {
   "categories": {
-    "prophecy": {
-      "label": "Prophecy",
+    "secret": {
+      "label": "Secret",
       "color": "#4c1d95",
       "textColor": "#f3e8ff",
-      "description": "Prophecy-related constraints and knowledge."
+      "description": "Hidden fact or private knowledge."
     }
   }
 }
 ```
 
-After adding this, the Lore UI metadata dropdown can use `prophecy` as a category.
+Supported user-facing categories are `character`, `event`, `location`, `item`, `spell`, `faction`, `relationship`, `rule`, `timeline`, `knowledge`, `secret`, and `other`.
 
 ### `gate-types.json`
 
@@ -81,7 +81,7 @@ Higher weights make a factor more important. For example, increasing `characterM
 
 ## Entry schema v2
 
-A database file should contain an `entries` array:
+A database file should use the standard object wrapper with an `entries` array:
 
 ```json
 {
@@ -323,7 +323,8 @@ Example:
       "id": "my_au_sirius_survives",
       "title": "AU: Sirius Survives",
       "kind": "fact",
-      "category": "au",
+      "category": "character",
+      "canon": "au",
       "canonStatus": "au",
       "truthStatus": "true",
       "revealPolicy": "private",
@@ -358,27 +359,36 @@ Then add the file to `manifest.json`:
 "user/my_custom_entries.json"
 ```
 
-## Adding a new category
+## Category values
 
-Edit `taxonomy.json`:
+Use one of Wandlight's supported user-facing categories:
+
+```json
+[
+  "character",
+  "event",
+  "location",
+  "item",
+  "spell",
+  "faction",
+  "relationship",
+  "rule",
+  "timeline",
+  "knowledge",
+  "secret",
+  "other"
+]
+```
+
+Edit `taxonomy.json` only to change labels, colors, descriptions, or other display metadata for those supported values. New category names require JavaScript normalizer/UI support before they should be used in database entries.
+
+AU is not a category. Use:
 
 ```json
 {
-  "categories": {
-    "prophecy": {
-      "label": "Prophecy",
-      "color": "#4c1d95",
-      "textColor": "#f3e8ff",
-      "description": "Prophecy-related lore, gates, and constraints."
-    }
-  }
+  "category": "character",
+  "canon": "au"
 }
-```
-
-Now entries can use:
-
-```json
-"category": "prophecy"
 ```
 
 ## Adding a new gate type

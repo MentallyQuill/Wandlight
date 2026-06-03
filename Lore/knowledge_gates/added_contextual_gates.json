@@ -1,692 +1,695 @@
-[
-  {
-    "schemaVersion": 2,
-    "id": "gate_polyjuice_potion_early_years",
-    "title": "Polyjuice Potion Knowledge and Difficulty Gate",
-    "kind": "knowledge_gate",
-    "category": "knowledge",
-    "canonStatus": "canon",
-    "truthStatus": "true",
-    "revealPolicy": "public",
-    "priority": 78,
-    "date": {
-      "validFrom": "1992-09-01",
-      "validTo": "1998-05-02",
-      "precision": "school_year",
-      "schoolYear": 2,
-      "book": "Chamber of Secrets",
-      "label": "Polyjuice is advanced and dangerous."
-    },
-    "scope": {
-      "characters": [
-        "Hermione Granger",
-        "Harry Potter",
-        "Ron Weasley"
-      ],
-      "topics": [
-        "polyjuice",
-        "potions",
-        "disguise"
-      ],
-      "objects": [
-        "Polyjuice Potion"
-      ],
-      "schoolYears": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7
-      ],
-      "books": [
-        "Chamber of Secrets"
-      ],
-      "phases": [
-        "term_start"
-      ]
-    },
-    "visibility": {
-      "knownBy": {
-        "Hermione Granger": "1992-12-01",
-        "Harry Potter": "1992-12-01",
-        "Ron Weasley": "1992-12-01"
-      }
-    },
-    "content": {
-      "fact": "Polyjuice Potion is a complex potion the trio first uses during second year.",
-      "injection": "Treat Polyjuice Potion as advanced and risky; younger students should not casually brew or understand it unless our story has established special access.",
-      "constraints": [
-        "Hermione is unusually capable for attempting it in Year 2.",
-        "Most students should not treat Polyjuice as routine."
-      ],
-      "antiLore": [
-        "Do not make Polyjuice a casual first-year trick."
-      ]
-    },
-    "source": {
-      "work": "Harry Potter",
-      "book": "Chamber of Secrets",
-      "confidence": 0.9
-    },
-    "canonTiming": {
-      "canonExpectedFrom": "1992-09-01",
-      "canonExpectedUntil": "1998-05-02",
-      "precision": "school_year",
-      "schoolYear": 2,
-      "book": "Chamber of Secrets",
-      "label": "Polyjuice is advanced and dangerous."
-    },
-    "gateType": "knowledge_gate",
-    "protected": false,
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "normal",
-    "lorePurpose": "knowledge_gate",
-    "injectableByDefault": true,
-    "specificityScore": 95
-  },
-  {
-    "schemaVersion": 2,
-    "id": "behavior_hermione_year6_research_mode",
-    "title": "Hermione Year 6 Research Boundaries",
-    "kind": "behavior_gate",
-    "category": "character",
-    "canonStatus": "canon",
-    "truthStatus": "true",
-    "revealPolicy": "public",
-    "priority": 84,
-    "date": {
-      "validFrom": "1996-09-01",
-      "validTo": "1997-06-30",
-      "precision": "school_year",
-      "schoolYear": 6,
-      "book": "Half-Blood Prince"
-    },
-    "scope": {
-      "characters": [
-        "Hermione Granger"
-      ],
-      "topics": [
-        "research",
-        "suspicion",
-        "library",
-        "rules"
-      ],
-      "schoolYears": [
-        6
-      ],
-      "books": [
-        "Half-Blood Prince"
-      ],
-      "phases": [
-        "term_start"
-      ]
-    },
-    "content": {
-      "fact": "In Year 6, Hermione is precise, skeptical, and research-driven, but her knowledge remains bounded by what the story has established she discovered.",
-      "injection": "Write Year 6 Hermione as precise, skeptical, rule-aware, and intensely research-driven; she should ask for evidence and seek library/professor routes, but she should not know hidden plot truths before our story establishes how she learned them.",
-      "constraints": [
-        "Do not let Hermione’s intelligence become automatic knowledge of unrevealed secrets."
-      ]
-    },
-    "source": {
-      "work": "Harry Potter",
-      "book": "Half-Blood Prince",
-      "confidence": 0.85
-    },
-    "canonTiming": {
-      "canonExpectedFrom": "1996-09-01",
-      "canonExpectedUntil": "1997-06-30",
-      "precision": "school_year",
-      "schoolYear": 6,
-      "book": "Half-Blood Prince"
-    },
-    "gateType": "behavior_gate",
-    "protected": false,
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "low",
-    "lorePurpose": "behavior_constraint",
-    "injectableByDefault": true,
-    "specificityScore": 75,
-    "extensions": {
-      "consolidationPass": {
-        "appliedIn": "Wandlight duplicate/title consolidation pass",
-        "notes": "Merged Hermione Year 6 behavior/research duplicates."
-      }
-    }
-  },
-  {
-    "schemaVersion": 2,
-    "id": "spell_gate_memory_charms_students",
-    "title": "Memory Charm Student Plausibility Gate",
-    "kind": "spell_gate",
-    "category": "spell",
-    "canonStatus": "canon",
-    "truthStatus": "true",
-    "revealPolicy": "public",
-    "priority": 82,
-    "date": {
-      "validFrom": "1991-09-01",
-      "validTo": "1998-05-02",
-      "precision": "era",
-      "schoolYear": null
-    },
-    "scope": {
-      "topics": [
-        "memory charms",
-        "Obliviate",
-        "mind magic"
-      ],
-      "spells": [
-        "Obliviate"
-      ],
-      "schoolYears": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7
-      ],
-      "books": []
-    },
-    "content": {
-      "fact": "Memory modification is delicate magic and should not be casual student spellwork.",
-      "injection": "Treat Memory Charms as delicate and ethically serious; ordinary students should not casually use reliable memory modification without special training or a story-established reason.",
-      "constraints": [
-        "Hermione can perform difficult magic, but memory alteration should still be treated as grave and risky."
-      ],
-      "antiLore": [
-        "Do not have random Hogwarts students casually Obliviate each other."
-      ]
-    },
-    "source": {
-      "work": "Harry Potter",
-      "confidence": 0.82
-    },
-    "canonTiming": {
-      "canonExpectedFrom": "1991-09-01",
-      "canonExpectedUntil": "1998-05-02",
-      "precision": "era"
-    },
-    "gateType": "spell_gate",
-    "protected": false,
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "low",
-    "lorePurpose": "ability_gate",
-    "injectableByDefault": true,
-    "specificityScore": 100
-  },
-  {
-    "schemaVersion": 2,
-    "id": "institution_hogwarts_year6_security",
-    "title": "Year 6 Hogwarts Security",
-    "kind": "institution_state",
-    "category": "faction",
-    "canonStatus": "canon",
-    "truthStatus": "true",
-    "revealPolicy": "public",
-    "priority": 88,
-    "date": {
-      "validFrom": "1996-09-01",
-      "validTo": "1997-06-30",
-      "precision": "school_year",
-      "schoolYear": 6,
-      "book": "Half-Blood Prince"
-    },
-    "scope": {
-      "locations": [
-        "Hogwarts"
-      ],
-      "topics": [
-        "security",
-        "Death Eaters",
-        "Dumbledore"
-      ],
-      "schoolYears": [
-        6
-      ],
-      "books": [
-        "Half-Blood Prince"
-      ],
-      "phases": [
-        "term_start"
-      ]
-    },
-    "content": {
-      "fact": "During the 1996-1997 school year before the Astronomy Tower crisis, Hogwarts operates under heightened security and Dumbledore remains the decisive authority.",
-      "injection": "During Year 6 before the Astronomy Tower crisis, Hogwarts operates under heightened security and Dumbledore remains the decisive authority; suspicious attacks, secret movement, and unusual magic should draw more scrutiny than in ordinary school years.",
-      "constraints": [
-        "Keep Year 6 Hogwarts more security-conscious than ordinary school years."
-      ]
-    },
-    "source": {
-      "work": "Harry Potter",
-      "book": "Half-Blood Prince",
-      "confidence": 0.88
-    },
-    "canonTiming": {
-      "canonExpectedFrom": "1996-09-01",
-      "canonExpectedUntil": "1997-06-30",
-      "precision": "school_year",
-      "schoolYear": 6,
-      "book": "Half-Blood Prince"
-    },
-    "activation": {},
-    "gateType": "institution_state",
-    "protected": false,
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "low",
-    "extensions": {
-      "deathStateGatePass": {
-        "method": "removed positive requiresEvents from canon database entry",
-        "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
-        "appliedIn": "Wandlight relevance-tier regression repair pass",
-        "requiresEventsRemoved": [
-          "dumbledore_death_occurs"
+{
+  "schemaVersion": 2,
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "id": "gate_polyjuice_potion_early_years",
+      "title": "Polyjuice Potion Knowledge and Difficulty Gate",
+      "kind": "knowledge_gate",
+      "category": "knowledge",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 78,
+      "date": {
+        "validFrom": "1992-09-01",
+        "validTo": "1998-05-02",
+        "precision": "school_year",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets",
+        "label": "Polyjuice is advanced and dangerous."
+      },
+      "scope": {
+        "characters": [
+          "Hermione Granger",
+          "Harry Potter",
+          "Ron Weasley"
+        ],
+        "topics": [
+          "polyjuice",
+          "potions",
+          "disguise"
+        ],
+        "objects": [
+          "Polyjuice Potion"
+        ],
+        "schoolYears": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "books": [
+          "Chamber of Secrets"
+        ],
+        "phases": [
+          "term_start"
         ]
       },
-      "consolidationPass": {
-        "appliedIn": "Wandlight duplicate/title consolidation pass",
-        "notes": "Merged Year 6 school-year, staff, and security context."
+      "visibility": {
+        "knownBy": {
+          "Hermione Granger": "1992-12-01",
+          "Harry Potter": "1992-12-01",
+          "Ron Weasley": "1992-12-01"
+        }
+      },
+      "content": {
+        "fact": "Polyjuice Potion is a complex potion the trio first uses during second year.",
+        "injection": "Treat Polyjuice Potion as advanced and risky; younger students should not casually brew or understand it unless our story has established special access.",
+        "constraints": [
+          "Hermione is unusually capable for attempting it in Year 2.",
+          "Most students should not treat Polyjuice as routine."
+        ],
+        "antiLore": [
+          "Do not make Polyjuice a casual first-year trick."
+        ]
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Chamber of Secrets",
+        "confidence": 0.9
+      },
+      "canonTiming": {
+        "canonExpectedFrom": "1992-09-01",
+        "canonExpectedUntil": "1998-05-02",
+        "precision": "school_year",
+        "schoolYear": 2,
+        "book": "Chamber of Secrets",
+        "label": "Polyjuice is advanced and dangerous."
+      },
+      "gateType": "knowledge_gate",
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 95
+    },
+    {
+      "schemaVersion": 2,
+      "id": "behavior_hermione_year6_research_mode",
+      "title": "Hermione Year 6 Research Boundaries",
+      "kind": "behavior_gate",
+      "category": "character",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 84,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "school_year",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "characters": [
+          "Hermione Granger"
+        ],
+        "topics": [
+          "research",
+          "suspicion",
+          "library",
+          "rules"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "content": {
+        "fact": "In Year 6, Hermione is precise, skeptical, and research-driven, but her knowledge remains bounded by what the story has established she discovered.",
+        "injection": "Write Year 6 Hermione as precise, skeptical, rule-aware, and intensely research-driven; she should ask for evidence and seek library/professor routes, but she should not know hidden plot truths before our story establishes how she learned them.",
+        "constraints": [
+          "Do not let Hermione’s intelligence become automatic knowledge of unrevealed secrets."
+        ]
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "confidence": 0.85
+      },
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "school_year",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "gateType": "behavior_gate",
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low",
+      "lorePurpose": "behavior_constraint",
+      "injectableByDefault": true,
+      "specificityScore": 75,
+      "extensions": {
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Merged Hermione Year 6 behavior/research duplicates."
+        }
       }
     },
-    "lorePurpose": "status_change",
-    "injectableByDefault": true,
-    "specificityScore": 95
-  },
-  {
-    "schemaVersion": 2,
-    "id": "item_gate_marauders_map_pre_acquisition",
-    "title": "Pre-Marauder's Map Access",
-    "kind": "knowledge_gate",
-    "category": "item",
-    "canonStatus": "canon",
-    "truthStatus": "hidden",
-    "revealPolicy": "private",
-    "priority": 96,
-    "date": {
-      "validFrom": "1991-09-01",
-      "validTo": "1993-12-17",
-      "precision": "date",
-      "schoolYear": 3,
-      "book": "Prisoner of Azkaban"
+    {
+      "schemaVersion": 2,
+      "id": "spell_gate_memory_charms_students",
+      "title": "Memory Charm Student Plausibility Gate",
+      "kind": "spell_gate",
+      "category": "spell",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 82,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1998-05-02",
+        "precision": "era",
+        "schoolYear": null
+      },
+      "scope": {
+        "topics": [
+          "memory charms",
+          "Obliviate",
+          "mind magic"
+        ],
+        "spells": [
+          "Obliviate"
+        ],
+        "schoolYears": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "books": []
+      },
+      "content": {
+        "fact": "Memory modification is delicate magic and should not be casual student spellwork.",
+        "injection": "Treat Memory Charms as delicate and ethically serious; ordinary students should not casually use reliable memory modification without special training or a story-established reason.",
+        "constraints": [
+          "Hermione can perform difficult magic, but memory alteration should still be treated as grave and risky."
+        ],
+        "antiLore": [
+          "Do not have random Hogwarts students casually Obliviate each other."
+        ]
+      },
+      "source": {
+        "work": "Harry Potter",
+        "confidence": 0.82
+      },
+      "canonTiming": {
+        "canonExpectedFrom": "1991-09-01",
+        "canonExpectedUntil": "1998-05-02",
+        "precision": "era"
+      },
+      "gateType": "spell_gate",
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low",
+      "lorePurpose": "ability_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
-    "scope": {
-      "characters": [
-        "Harry Potter",
-        "Fred Weasley",
-        "George Weasley"
-      ],
-      "locations": [
-        "Hogwarts"
-      ],
-      "topics": [
-        "Marauder's Map",
-        "secret map",
-        "Hogsmeade",
-        "hidden passages"
-      ],
-      "objects": [
-        "Marauder's Map"
-      ],
-      "schoolYears": [
-        1,
-        2,
-        3
-      ],
-      "books": [
-        "Philosopher's Stone",
-        "Chamber of Secrets",
-        "Prisoner of Azkaban"
-      ]
+    {
+      "schemaVersion": 2,
+      "id": "institution_hogwarts_year6_security",
+      "title": "Year 6 Hogwarts Security",
+      "kind": "institution_state",
+      "category": "faction",
+      "canonStatus": "canon",
+      "truthStatus": "true",
+      "revealPolicy": "public",
+      "priority": 88,
+      "date": {
+        "validFrom": "1996-09-01",
+        "validTo": "1997-06-30",
+        "precision": "school_year",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "scope": {
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "security",
+          "Death Eaters",
+          "Dumbledore"
+        ],
+        "schoolYears": [
+          6
+        ],
+        "books": [
+          "Half-Blood Prince"
+        ],
+        "phases": [
+          "term_start"
+        ]
+      },
+      "content": {
+        "fact": "During the 1996-1997 school year before the Astronomy Tower crisis, Hogwarts operates under heightened security and Dumbledore remains the decisive authority.",
+        "injection": "During Year 6 before the Astronomy Tower crisis, Hogwarts operates under heightened security and Dumbledore remains the decisive authority; suspicious attacks, secret movement, and unusual magic should draw more scrutiny than in ordinary school years.",
+        "constraints": [
+          "Keep Year 6 Hogwarts more security-conscious than ordinary school years."
+        ]
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Half-Blood Prince",
+        "confidence": 0.88
+      },
+      "canonTiming": {
+        "canonExpectedFrom": "1996-09-01",
+        "canonExpectedUntil": "1997-06-30",
+        "precision": "school_year",
+        "schoolYear": 6,
+        "book": "Half-Blood Prince"
+      },
+      "activation": {},
+      "gateType": "institution_state",
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "low",
+      "extensions": {
+        "deathStateGatePass": {
+          "method": "removed positive requiresEvents from canon database entry",
+          "notes": "Canon database proposals are date-gated references; they should not become Future solely because a story milestone flag is absent.",
+          "appliedIn": "Wandlight relevance-tier regression repair pass",
+          "requiresEventsRemoved": [
+            "dumbledore_death_occurs"
+          ]
+        },
+        "consolidationPass": {
+          "appliedIn": "Wandlight duplicate/title consolidation pass",
+          "notes": "Merged Year 6 school-year, staff, and security context."
+        }
+      },
+      "lorePurpose": "status_change",
+      "injectableByDefault": true,
+      "specificityScore": 95
     },
-    "content": {
-      "fact": "Before Fred and George give Harry the Marauder's Map in Year 3, Harry should not have or use it.",
-      "injection": "Before Fred and George give Harry the Marauder's Map in Year 3, Harry should not have or use the map unless our story has established an early acquisition.",
-      "constraints": [
-        "Do not give Harry map-based Hogwarts tracking or secret passage knowledge before the map reaches him.",
-        "Fred and George may still possess the map before giving it to Harry."
-      ],
-      "antiLore": [
-        "Do not let Year 1 or Year 2 Harry rely on the Marauder's Map unless this chat established a divergence."
-      ]
+    {
+      "schemaVersion": 2,
+      "id": "item_gate_marauders_map_pre_acquisition",
+      "title": "Pre-Marauder's Map Access",
+      "kind": "knowledge_gate",
+      "category": "item",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 96,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1993-12-17",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Fred Weasley",
+          "George Weasley"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "Marauder's Map",
+          "secret map",
+          "Hogsmeade",
+          "hidden passages"
+        ],
+        "objects": [
+          "Marauder's Map"
+        ],
+        "schoolYears": [
+          1,
+          2,
+          3
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets",
+          "Prisoner of Azkaban"
+        ]
+      },
+      "content": {
+        "fact": "Before Fred and George give Harry the Marauder's Map in Year 3, Harry should not have or use it.",
+        "injection": "Before Fred and George give Harry the Marauder's Map in Year 3, Harry should not have or use the map unless our story has established an early acquisition.",
+        "constraints": [
+          "Do not give Harry map-based Hogwarts tracking or secret passage knowledge before the map reaches him.",
+          "Fred and George may still possess the map before giving it to Harry."
+        ],
+        "antiLore": [
+          "Do not let Year 1 or Year 2 Harry rely on the Marauder's Map unless this chat established a divergence."
+        ]
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.9
+      },
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1993-12-17",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "gateType": "knowledge_gate",
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
-    "source": {
-      "work": "Harry Potter",
-      "book": "Prisoner of Azkaban",
-      "confidence": 0.9
+    {
+      "schemaVersion": 2,
+      "id": "item_gate_invisibility_cloak_pre_christmas",
+      "title": "Pre-Invisibility Cloak Access",
+      "kind": "knowledge_gate",
+      "category": "item",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 90,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1991-12-24",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher's Stone"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Ron Weasley",
+          "Hermione Granger"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "Invisibility Cloak",
+          "stealth",
+          "hidden movement"
+        ],
+        "objects": [
+          "Invisibility Cloak"
+        ],
+        "schoolYears": [
+          1
+        ],
+        "books": [
+          "Philosopher's Stone"
+        ]
+      },
+      "content": {
+        "fact": "Before Christmas 1991, Harry has not received his Invisibility Cloak.",
+        "injection": "Before Christmas 1991, Harry should not have or use his Invisibility Cloak unless our story has established an early gift.",
+        "constraints": [
+          "Do not solve early Year 1 stealth scenes with Harry's cloak before he receives it."
+        ],
+        "antiLore": [
+          "Do not assume Harry always has cloak access from the start of first year."
+        ]
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Philosopher's Stone",
+        "confidence": 0.9
+      },
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1991-12-24",
+        "precision": "date",
+        "schoolYear": 1,
+        "book": "Philosopher's Stone"
+      },
+      "gateType": "knowledge_gate",
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
-    "canonTiming": {
-      "hardValidFrom": "1991-09-01",
-      "hardValidTo": "1993-12-17",
-      "precision": "date",
-      "schoolYear": 3,
-      "book": "Prisoner of Azkaban"
+    {
+      "schemaVersion": 2,
+      "id": "item_gate_time_turner_pre_year3",
+      "title": "Pre-Time-Turner Access",
+      "kind": "knowledge_gate",
+      "category": "item",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 94,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "scope": {
+        "characters": [
+          "Hermione Granger",
+          "Harry Potter",
+          "Ron Weasley"
+        ],
+        "locations": [
+          "Hogwarts"
+        ],
+        "topics": [
+          "Time-Turner",
+          "time travel",
+          "Hermione schedule"
+        ],
+        "objects": [
+          "Time-Turner"
+        ],
+        "schoolYears": [
+          1,
+          2
+        ],
+        "books": [
+          "Philosopher's Stone",
+          "Chamber of Secrets"
+        ]
+      },
+      "content": {
+        "fact": "Before Hermione's Year 3 schedule, the trio should not have Time-Turner access.",
+        "injection": "Before Hermione's Year 3 schedule is established, Harry, Ron, and Hermione should not use or know about a Time-Turner unless our story has introduced one early.",
+        "constraints": [
+          "Do not use time travel as a casual Year 1 or Year 2 solution."
+        ],
+        "antiLore": [
+          "Do not reveal Hermione's Time-Turner before the story has established her Year 3 arrangement."
+        ]
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Prisoner of Azkaban",
+        "confidence": 0.88
+      },
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1993-08-31",
+        "precision": "date",
+        "schoolYear": 3,
+        "book": "Prisoner of Azkaban"
+      },
+      "gateType": "knowledge_gate",
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
-    "gateType": "knowledge_gate",
-    "protected": false,
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "normal",
-    "lorePurpose": "knowledge_gate",
-    "injectableByDefault": true,
-    "specificityScore": 100
-  },
-  {
-    "schemaVersion": 2,
-    "id": "item_gate_invisibility_cloak_pre_christmas",
-    "title": "Pre-Invisibility Cloak Access",
-    "kind": "knowledge_gate",
-    "category": "item",
-    "canonStatus": "canon",
-    "truthStatus": "hidden",
-    "revealPolicy": "private",
-    "priority": 90,
-    "date": {
-      "validFrom": "1991-09-01",
-      "validTo": "1991-12-24",
-      "precision": "date",
-      "schoolYear": 1,
-      "book": "Philosopher's Stone"
+    {
+      "schemaVersion": 2,
+      "id": "knowledge_gate_pre_dumbledores_army",
+      "title": "Pre-Dumbledore's Army",
+      "kind": "knowledge_gate",
+      "category": "faction",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 92,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1995-10-15",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley",
+          "Neville Longbottom",
+          "Ginny Weasley",
+          "Luna Lovegood"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Room of Requirement"
+        ],
+        "factions": [
+          "Dumbledore's Army"
+        ],
+        "topics": [
+          "Dumbledore's Army",
+          "DA",
+          "defense training",
+          "secret meetings"
+        ],
+        "schoolYears": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "content": {
+        "fact": "Before the Year 5 DA formation, Dumbledore's Army does not exist as a student defense group.",
+        "injection": "Before the Year 5 DA formation, do not treat Dumbledore's Army, DA meetings, DA coins, or DA-trained student combat skills as established unless our story created the group early.",
+        "constraints": [
+          "Students can still practice defense, but not as members of canon Dumbledore's Army before it forms."
+        ],
+        "antiLore": [
+          "Do not give younger students DA membership or DA training by default."
+        ]
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "confidence": 0.9
+      },
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1995-10-15",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "gateType": "knowledge_gate",
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
     },
-    "scope": {
-      "characters": [
-        "Harry Potter",
-        "Ron Weasley",
-        "Hermione Granger"
-      ],
-      "locations": [
-        "Hogwarts"
-      ],
-      "topics": [
-        "Invisibility Cloak",
-        "stealth",
-        "hidden movement"
-      ],
-      "objects": [
-        "Invisibility Cloak"
-      ],
-      "schoolYears": [
-        1
-      ],
-      "books": [
-        "Philosopher's Stone"
-      ]
-    },
-    "content": {
-      "fact": "Before Christmas 1991, Harry has not received his Invisibility Cloak.",
-      "injection": "Before Christmas 1991, Harry should not have or use his Invisibility Cloak unless our story has established an early gift.",
-      "constraints": [
-        "Do not solve early Year 1 stealth scenes with Harry's cloak before he receives it."
-      ],
-      "antiLore": [
-        "Do not assume Harry always has cloak access from the start of first year."
-      ]
-    },
-    "source": {
-      "work": "Harry Potter",
-      "book": "Philosopher's Stone",
-      "confidence": 0.9
-    },
-    "canonTiming": {
-      "hardValidFrom": "1991-09-01",
-      "hardValidTo": "1991-12-24",
-      "precision": "date",
-      "schoolYear": 1,
-      "book": "Philosopher's Stone"
-    },
-    "gateType": "knowledge_gate",
-    "protected": false,
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "normal",
-    "lorePurpose": "knowledge_gate",
-    "injectableByDefault": true,
-    "specificityScore": 100
-  },
-  {
-    "schemaVersion": 2,
-    "id": "item_gate_time_turner_pre_year3",
-    "title": "Pre-Time-Turner Access",
-    "kind": "knowledge_gate",
-    "category": "item",
-    "canonStatus": "canon",
-    "truthStatus": "hidden",
-    "revealPolicy": "private",
-    "priority": 94,
-    "date": {
-      "validFrom": "1991-09-01",
-      "validTo": "1993-08-31",
-      "precision": "date",
-      "schoolYear": 3,
-      "book": "Prisoner of Azkaban"
-    },
-    "scope": {
-      "characters": [
-        "Hermione Granger",
-        "Harry Potter",
-        "Ron Weasley"
-      ],
-      "locations": [
-        "Hogwarts"
-      ],
-      "topics": [
-        "Time-Turner",
-        "time travel",
-        "Hermione schedule"
-      ],
-      "objects": [
-        "Time-Turner"
-      ],
-      "schoolYears": [
-        1,
-        2
-      ],
-      "books": [
-        "Philosopher's Stone",
-        "Chamber of Secrets"
-      ]
-    },
-    "content": {
-      "fact": "Before Hermione's Year 3 schedule, the trio should not have Time-Turner access.",
-      "injection": "Before Hermione's Year 3 schedule is established, Harry, Ron, and Hermione should not use or know about a Time-Turner unless our story has introduced one early.",
-      "constraints": [
-        "Do not use time travel as a casual Year 1 or Year 2 solution."
-      ],
-      "antiLore": [
-        "Do not reveal Hermione's Time-Turner before the story has established her Year 3 arrangement."
-      ]
-    },
-    "source": {
-      "work": "Harry Potter",
-      "book": "Prisoner of Azkaban",
-      "confidence": 0.88
-    },
-    "canonTiming": {
-      "hardValidFrom": "1991-09-01",
-      "hardValidTo": "1993-08-31",
-      "precision": "date",
-      "schoolYear": 3,
-      "book": "Prisoner of Azkaban"
-    },
-    "gateType": "knowledge_gate",
-    "protected": false,
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "normal",
-    "lorePurpose": "knowledge_gate",
-    "injectableByDefault": true,
-    "specificityScore": 100
-  },
-  {
-    "schemaVersion": 2,
-    "id": "knowledge_gate_pre_dumbledores_army",
-    "title": "Pre-Dumbledore's Army",
-    "kind": "knowledge_gate",
-    "category": "faction",
-    "canonStatus": "canon",
-    "truthStatus": "hidden",
-    "revealPolicy": "private",
-    "priority": 92,
-    "date": {
-      "validFrom": "1991-09-01",
-      "validTo": "1995-10-15",
-      "precision": "date",
-      "schoolYear": 5,
-      "book": "Order of the Phoenix"
-    },
-    "scope": {
-      "characters": [
-        "Harry Potter",
-        "Hermione Granger",
-        "Ron Weasley",
-        "Neville Longbottom",
-        "Ginny Weasley",
-        "Luna Lovegood"
-      ],
-      "locations": [
-        "Hogwarts",
-        "Room of Requirement"
-      ],
-      "factions": [
-        "Dumbledore's Army"
-      ],
-      "topics": [
-        "Dumbledore's Army",
-        "DA",
-        "defense training",
-        "secret meetings"
-      ],
-      "schoolYears": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "books": [
-        "Order of the Phoenix"
-      ]
-    },
-    "content": {
-      "fact": "Before the Year 5 DA formation, Dumbledore's Army does not exist as a student defense group.",
-      "injection": "Before the Year 5 DA formation, do not treat Dumbledore's Army, DA meetings, DA coins, or DA-trained student combat skills as established unless our story created the group early.",
-      "constraints": [
-        "Students can still practice defense, but not as members of canon Dumbledore's Army before it forms."
-      ],
-      "antiLore": [
-        "Do not give younger students DA membership or DA training by default."
-      ]
-    },
-    "source": {
-      "work": "Harry Potter",
-      "book": "Order of the Phoenix",
-      "confidence": 0.9
-    },
-    "canonTiming": {
-      "hardValidFrom": "1991-09-01",
-      "hardValidTo": "1995-10-15",
-      "precision": "date",
-      "schoolYear": 5,
-      "book": "Order of the Phoenix"
-    },
-    "gateType": "knowledge_gate",
-    "protected": false,
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "normal",
-    "lorePurpose": "knowledge_gate",
-    "injectableByDefault": true,
-    "specificityScore": 100
-  },
-  {
-    "schemaVersion": 2,
-    "id": "location_gate_room_of_requirement_pre_da",
-    "title": "Pre-DA Room of Requirement Knowledge",
-    "kind": "knowledge_gate",
-    "category": "location",
-    "canonStatus": "canon",
-    "truthStatus": "hidden",
-    "revealPolicy": "private",
-    "priority": 88,
-    "date": {
-      "validFrom": "1991-09-01",
-      "validTo": "1995-10-15",
-      "precision": "date",
-      "schoolYear": 5,
-      "book": "Order of the Phoenix"
-    },
-    "scope": {
-      "characters": [
-        "Harry Potter",
-        "Hermione Granger",
-        "Ron Weasley"
-      ],
-      "locations": [
-        "Hogwarts",
-        "Room of Requirement"
-      ],
-      "topics": [
-        "Room of Requirement",
-        "secret room",
-        "hidden training room",
-        "DA"
-      ],
-      "schoolYears": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "books": [
-        "Order of the Phoenix"
-      ]
-    },
-    "content": {
-      "fact": "Before the DA context, Harry's circle should not treat the Room of Requirement as an ordinary known resource.",
-      "injection": "Before the Room of Requirement is discovered or introduced in our story, Harry's circle should not casually know how to access it or use it as a default solution.",
-      "constraints": [
-        "Do not turn the Room of Requirement into a general-purpose early-year safe room unless the chat established that discovery."
-      ],
-      "antiLore": [
-        "Do not assume Harry, Ron, and Hermione know the room in Years 1-4 by default."
-      ]
-    },
-    "source": {
-      "work": "Harry Potter",
-      "book": "Order of the Phoenix",
-      "confidence": 0.86
-    },
-    "canonTiming": {
-      "hardValidFrom": "1991-09-01",
-      "hardValidTo": "1995-10-15",
-      "precision": "date",
-      "schoolYear": 5,
-      "book": "Order of the Phoenix"
-    },
-    "gateType": "knowledge_gate",
-    "protected": false,
-    "locked": true,
-    "userEditable": true,
-    "canon": "canon",
-    "relevance": "normal",
-    "lorePurpose": "knowledge_gate",
-    "injectableByDefault": true,
-    "specificityScore": 100
-  }
-]
+    {
+      "schemaVersion": 2,
+      "id": "location_gate_room_of_requirement_pre_da",
+      "title": "Pre-DA Room of Requirement Knowledge",
+      "kind": "knowledge_gate",
+      "category": "location",
+      "canonStatus": "canon",
+      "truthStatus": "hidden",
+      "revealPolicy": "private",
+      "priority": 88,
+      "date": {
+        "validFrom": "1991-09-01",
+        "validTo": "1995-10-15",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "scope": {
+        "characters": [
+          "Harry Potter",
+          "Hermione Granger",
+          "Ron Weasley"
+        ],
+        "locations": [
+          "Hogwarts",
+          "Room of Requirement"
+        ],
+        "topics": [
+          "Room of Requirement",
+          "secret room",
+          "hidden training room",
+          "DA"
+        ],
+        "schoolYears": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "books": [
+          "Order of the Phoenix"
+        ]
+      },
+      "content": {
+        "fact": "Before the DA context, Harry's circle should not treat the Room of Requirement as an ordinary known resource.",
+        "injection": "Before the Room of Requirement is discovered or introduced in our story, Harry's circle should not casually know how to access it or use it as a default solution.",
+        "constraints": [
+          "Do not turn the Room of Requirement into a general-purpose early-year safe room unless the chat established that discovery."
+        ],
+        "antiLore": [
+          "Do not assume Harry, Ron, and Hermione know the room in Years 1-4 by default."
+        ]
+      },
+      "source": {
+        "work": "Harry Potter",
+        "book": "Order of the Phoenix",
+        "confidence": 0.86
+      },
+      "canonTiming": {
+        "hardValidFrom": "1991-09-01",
+        "hardValidTo": "1995-10-15",
+        "precision": "date",
+        "schoolYear": 5,
+        "book": "Order of the Phoenix"
+      },
+      "gateType": "knowledge_gate",
+      "protected": false,
+      "locked": true,
+      "userEditable": true,
+      "canon": "canon",
+      "relevance": "normal",
+      "lorePurpose": "knowledge_gate",
+      "injectableByDefault": true,
+      "specificityScore": 100
+    }
+  ]
+}

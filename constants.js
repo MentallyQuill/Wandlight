@@ -361,6 +361,7 @@ Direct injection block:
     // Utility provider: used by compression and Scan Continuity State / automatic continuity tracking. Internal key retained for backward compatibility.
     continuityProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
     continuityProfileId: '',
+    // Deprecated: Connection Profiles now own their settings preset.
     continuityCompletionPresetId: '',
     continuityOpenAIBaseUrl: '',
     continuityOpenAIModel: '',
@@ -379,6 +380,7 @@ Direct injection block:
     // Reasoning provider: used by Detect Story Context / Generate Pending Lore. Internal key retained for backward compatibility.
     loreProvider: 'st', // 'st' | 'profile' | 'openai_compatible'
     loreProfileId: '',
+    // Deprecated: Connection Profiles now own their settings preset.
     loreCompletionPresetId: '',
 
     // Lore OpenAI-compatible endpoint

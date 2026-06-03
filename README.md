@@ -103,7 +103,7 @@ After installation, restart or reload SillyTavern. Open Wandlight from the **Run
 ### Recommended First Workflow
 
 1. Open Wandlight from the Extensions menu's **Runtime Window** dropdown and confirm it is active.
-2. Open **API and Model Settings** from the Extensions menu if you want Wandlight to run model-backed tasks. Configure the provider, API, and model settings before using context detection fallback, continuity scans, compression, or story-lore generation. If using a Connection Profile provider, install/use **Provider-1.0** from that provider row.
+2. Open **API and Model Settings** from the Extensions menu if you want Wandlight to run model-backed tasks. Configure the provider, API, and model settings before using context detection fallback, continuity scans, compression, or story-lore generation. If using a Connection Profile provider, install **Provider-1.0** from that provider row, then create or update a SillyTavern Connection Profile that uses it.
 3. Check the Wandlight preset status. Install or update the preset if you want structured scene headers.
 4. Detect Story Context so Wandlight knows the current date, canon boundary, and branch.
 5. Preview Canon Packs or scan Story Lore.
@@ -352,7 +352,7 @@ Each provider can use:
 - a SillyTavern connection profile
 - a direct OpenAI-compatible endpoint with an encrypted local API key
 
-Direct OpenAI-compatible endpoints are the simplest provider path when you are comfortable storing a Wandlight-specific key in the browser session. Connection Profiles are useful when you want SillyTavern to hold the provider key server-side, but they also carry a preset. When using a Connection Profile provider, install **Provider-1.0** from that provider row in **API and Model Settings** and use it as the preset override, or select it as the preset inside the SillyTavern profile itself. **Provider-1.0** is intentionally thin and avoids pulling the full Wandlight roleplay preset into background utility/reasoning calls.
+Direct OpenAI-compatible endpoints are the simplest provider path when you are comfortable storing a Wandlight-specific key in the browser session. Connection Profiles are useful when you want SillyTavern to hold the provider key server-side, but they also carry a settings preset. When using a Connection Profile provider, install **Provider-1.0** from that provider row in **API and Model Settings**, then create or update a SillyTavern Connection Profile that uses **Provider-1.0** with your preferred provider, model, and key. **Provider-1.0** is intentionally thin and avoids pulling the full Wandlight roleplay preset into background utility/reasoning calls.
 
 Both provider roles expose temperature, top-p, max tokens, reset defaults, and connection testing.
 

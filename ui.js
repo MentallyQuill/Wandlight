@@ -21,7 +21,6 @@ import {
     testLoreConnection,
     validateLoreProviderConfigurationAsync,
     getAvailableConnectionProfiles,
-    getAvailableCompletionPresets,
 } from './lore-llm-client.js';
 
 /**
@@ -172,7 +171,9 @@ async function refreshProviderPresetInstallStatus(button, statusEl) {
         button.textContent = installedName ? `Update ${WANDLIGHT_PROVIDER_PRESET_NAME}` : `Install ${WANDLIGHT_PROVIDER_PRESET_NAME}`;
     }
     if (statusEl) {
-        statusEl.textContent = installedName ? `${WANDLIGHT_PROVIDER_PRESET_NAME} installed.` : `${WANDLIGHT_PROVIDER_PRESET_NAME} not installed.`;
+        statusEl.textContent = installedName
+            ? `${WANDLIGHT_PROVIDER_PRESET_NAME} installed. Select it in your SillyTavern profile.`
+            : `${WANDLIGHT_PROVIDER_PRESET_NAME} not installed.`;
         statusEl.style.color = installedName ? '#88cc88' : '#d6b35a';
     }
 }
@@ -184,7 +185,6 @@ function setupProviderControls(container, kind, label) {
     const providerSelect = container.querySelector(`#wandlight_${prefix}_provider`);
     const profileRow = container.querySelector(`#wandlight_${prefix}_profile_row`);
     const profileIdSelect = container.querySelector(`#wandlight_${prefix}_profile_id`);
-    const completionPresetSelect = container.querySelector(`#wandlight_${prefix}_completion_preset_id`);
     const providerPresetInstallBtn = container.querySelector(`#wandlight_${prefix}_provider_preset_install`);
     const providerPresetStatus = container.querySelector(`#wandlight_${prefix}_provider_preset_status`);
     const openaiRow = container.querySelector(`#wandlight_${prefix}_openai_row`);
@@ -238,7 +238,7 @@ function setupProviderControls(container, kind, label) {
     }
 
     function getProfileWarningText() {
-        return `${label} connection profiles include a preset. Use ${WANDLIGHT_PROVIDER_PRESET_NAME} as the profile preset or preset override for Wandlight provider tasks, then test the profile.`;
+        return `${label} connection profiles include a settings preset. For Wandlight provider tasks, use a SillyTavern profile saved with ${WANDLIGHT_PROVIDER_PRESET_NAME}, then test the profile.`;
     }
 
     function showProfileWarning() {
@@ -283,49 +283,6 @@ function setupProviderControls(container, kind, label) {
             profileIdSelect.value = current;
         }
 
-        if (completionPresetSelect) {
-            const current = completionPresetSelect.value || getSettings()[presetKey] || '';
-            completionPresetSelect.innerHTML = '<option value="">Profile preset</option>';
-            const presets = getAvailableCompletionPresets();
-            const providerPresetInstalled = !!getInstalledProviderPreset(getChatCompletionPresetManager());
-            const addedPresetIds = new Set(['']);
-            const appendPresetOption = (id, labelText) => {
-                const normalizedId = String(id || '').trim();
-                if (!normalizedId || addedPresetIds.has(normalizedId)) return;
-                const opt = document.createElement('option');
-                opt.value = normalizedId;
-                opt.textContent = labelText || normalizedId;
-                completionPresetSelect.appendChild(opt);
-                addedPresetIds.add(normalizedId);
-            };
-            if (!presets.length) {
-                const opt = document.createElement('option');
-                opt.value = '';
-                opt.textContent = 'No completion presets found';
-                completionPresetSelect.appendChild(opt);
-            }
-            if (providerPresetInstalled) {
-                appendPresetOption(WANDLIGHT_PROVIDER_PRESET_NAME, `${WANDLIGHT_PROVIDER_PRESET_NAME} (recommended)`);
-            }
-            const recommended = presets.find(pr => {
-                const id = pr.name || pr.id || pr.presetId || pr.preset_id || pr.filename || pr.label || '';
-                return String(id || '').trim().toLowerCase() === WANDLIGHT_PROVIDER_PRESET_NAME.toLowerCase();
-            });
-            if (recommended) {
-                const id = recommended.name || recommended.id || recommended.presetId || recommended.preset_id || recommended.filename || recommended.label || '';
-                const text = recommended.name || recommended.label || recommended.id || recommended.presetId || recommended.preset_id || recommended.filename || id;
-                appendPresetOption(id, `${text} (recommended)`);
-            }
-            for (const pr of presets) {
-                const id = pr.name || pr.id || pr.presetId || pr.preset_id || pr.filename || pr.label || '';
-                if (!id) continue;
-                appendPresetOption(id, pr.name || pr.label || pr.id || pr.presetId || pr.preset_id || pr.filename || id);
-            }
-            if (current && !addedPresetIds.has(current)) {
-                appendPresetOption(current, `${current} (not found)`);
-            }
-            completionPresetSelect.value = current;
-        }
     }
 
     populateProfiles();
@@ -335,15 +292,6 @@ function setupProviderControls(container, kind, label) {
         profileIdSelect.addEventListener('change', () => {
             const next = getSettings();
             next[profileKey] = profileIdSelect.value;
-            saveLoreProviderSettings(next);
-        });
-    }
-    if (completionPresetSelect) {
-        completionPresetSelect.addEventListener('focus', populateProfiles);
-        completionPresetSelect.addEventListener('click', populateProfiles);
-        completionPresetSelect.addEventListener('change', () => {
-            const next = getSettings();
-            next[presetKey] = completionPresetSelect.value;
             saveLoreProviderSettings(next);
         });
     }
@@ -359,12 +307,11 @@ function setupProviderControls(container, kind, label) {
             try {
                 await installBundledProviderPreset();
                 const next = getSettings();
-                next[presetKey] = WANDLIGHT_PROVIDER_PRESET_NAME;
+                next[presetKey] = '';
                 saveLoreProviderSettings(next);
                 populateProfiles();
-                if (completionPresetSelect) completionPresetSelect.value = WANDLIGHT_PROVIDER_PRESET_NAME;
                 await refreshProviderPresetInstallStatus(providerPresetInstallBtn, providerPresetStatus);
-                if (typeof toastr !== 'undefined') toastr.success(`${WANDLIGHT_PROVIDER_PRESET_NAME} installed and selected for ${label.toLowerCase()} provider calls.`);
+                if (typeof toastr !== 'undefined') toastr.success(`${WANDLIGHT_PROVIDER_PRESET_NAME} installed. Select it in your SillyTavern ${label.toLowerCase()} connection profile, then update that profile.`);
             } catch (e) {
                 providerPresetInstallBtn.textContent = original;
                 if (providerPresetStatus) {
@@ -467,7 +414,6 @@ function setupProviderControls(container, kind, label) {
             saveLoreProviderSettings(next);
             if (providerSelect) providerSelect.value = next[providerKey] || 'st';
             if (profileIdSelect) profileIdSelect.value = next[profileKey] || '';
-            if (completionPresetSelect) completionPresetSelect.value = next[presetKey] || '';
             if (openaiBaseUrl) openaiBaseUrl.value = next[baseUrlKey] || '';
             if (openaiModelSearch) openaiModelSearch.value = next[modelKey] || '';
             if (temperatureInput) temperatureInput.value = String(next[temperatureKey] ?? 0.7);
@@ -475,7 +421,6 @@ function setupProviderControls(container, kind, label) {
             if (maxTokensInput) maxTokensInput.value = String(next[maxTokensKey] ?? 8192);
             populateProfiles();
             if (profileIdSelect) profileIdSelect.value = next[profileKey] || '';
-            if (completionPresetSelect) completionPresetSelect.value = next[presetKey] || '';
             renderModelOptions(next[modelKey] || '');
             refreshProviderRows();
             if (connectionStatus) connectionStatus.textContent = '';

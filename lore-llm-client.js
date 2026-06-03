@@ -35,7 +35,6 @@ function getProviderSettings(kind = 'lore') {
         title,
         provider: settings[`${prefix}Provider`] || 'st',
         profileId: settings[`${prefix}ProfileId`] || '',
-        completionPresetId: settings[`${prefix}CompletionPresetId`] || '',
         openAIBaseUrl: settings[`${prefix}OpenAIBaseUrl`] || '',
         openAIModel: settings[`${prefix}OpenAIModel`] || '',
         openAIKeySet: !!settings[`${prefix}OpenAIKeySet`],
@@ -289,82 +288,6 @@ function getConnectionProfiles(ctx = getSillyTavernContext()) {
     return out;
 }
 
-function getCompletionPresets(ctx = getSillyTavernContext()) {
-    const roots = [
-        ctx,
-        typeof globalThis !== 'undefined' ? globalThis.extension_settings : null,
-        typeof globalThis !== 'undefined' ? globalThis.power_user : null,
-        typeof globalThis !== 'undefined' ? globalThis.kai_settings : null,
-        typeof globalThis !== 'undefined' ? globalThis.textgenerationwebui_settings : null,
-    ];
-    const arrays = roots.flatMap(root => collectPossibleArrays(root, ['completionPresets', 'completion_presets', 'presetList', 'presets', 'kai_settings', 'textgenerationwebui_presets']));
-    const out = [];
-    const seen = new Set();
-    function addPresetId(id, source = {}) {
-        const normalized = String(id || '').trim();
-        if (!normalized || seen.has(normalized)) return;
-        seen.add(normalized);
-        out.push({ ...source, id: normalized, name: source.name || normalized });
-    }
-
-    for (const arr of arrays) {
-        for (const item of arr) {
-            if (!item || typeof item !== 'object') continue;
-            const id = String(item.name || item.id || item.presetId || item.preset_id || item.filename || item.label || '').trim();
-            addPresetId(id, item);
-        }
-    }
-    try {
-        const pm = typeof ctx?.getPresetManager === 'function' ? ctx.getPresetManager('openai') : null;
-        const names = typeof pm?.getAllPresets === 'function' ? pm.getAllPresets() : [];
-        if (Array.isArray(names)) {
-            for (const name of names) addPresetId(name);
-        }
-    } catch (_) {}
-    return out;
-}
-
-function cloneJson(value) {
-    if (typeof structuredClone === 'function') return structuredClone(value);
-    if (value === undefined) return undefined;
-    return JSON.parse(JSON.stringify(value));
-}
-
-function profileMatchesId(profile, profileId) {
-    return String(profile?.id || profile?.name || profile?.profileId || profile?.uuid || profile?.profile_id || '') === String(profileId || '');
-}
-
-function createTemporaryProfilePresetOverride(profileId, presetName) {
-    const preset = String(presetName || '').trim();
-    if (!preset) return { profileId, cleanup: () => {} };
-
-    const ctx = getSillyTavernContext();
-    const profiles = ctx?.extensionSettings?.connectionManager?.profiles;
-    if (!Array.isArray(profiles)) return { profileId, cleanup: () => {} };
-
-    const source = profiles.find(profile => profileMatchesId(profile, profileId));
-    if (!source) return { profileId, cleanup: () => {} };
-
-    const temporary = cloneJson(source);
-    temporary.id = `wandlight-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    temporary.name = `${source.name || 'Connection Profile'} (Wandlight temporary preset override)`;
-    temporary.preset = preset;
-    profiles.push(temporary);
-
-    return {
-        profileId: temporary.id,
-        cleanup: () => {
-            const exact = profiles.indexOf(temporary);
-            if (exact >= 0) {
-                profiles.splice(exact, 1);
-                return;
-            }
-            const fallback = profiles.findIndex(profile => profile?.id === temporary.id);
-            if (fallback >= 0) profiles.splice(fallback, 1);
-        },
-    };
-}
-
 function getProfileRequestPayloadOverrides(cfg) {
     const overrides = {};
     const temperature = Number(cfg.temperature);
@@ -376,10 +299,6 @@ function getProfileRequestPayloadOverrides(cfg) {
 
 export function getAvailableConnectionProfiles() {
     return getConnectionProfiles();
-}
-
-export function getAvailableCompletionPresets() {
-    return getCompletionPresets();
 }
 
 export async function loadApiKey(kind = 'lore') {
@@ -659,12 +578,11 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
     const service = ctx?.ConnectionManagerRequestService;
     if (!cfg.profileId) throw new Error(`${cfg.title} profile is not selected.`);
     if (!service || typeof service.sendRequest !== 'function') throw new Error('ConnectionManagerRequestService unavailable.');
-    const requestProfile = createTemporaryProfilePresetOverride(cfg.profileId, cfg.completionPresetId);
     const payloadOverrides = getProfileRequestPayloadOverrides(cfg);
 
     async function send(messages, lengthMultiplier = 1) {
         return await service.sendRequest(
-            requestProfile.profileId,
+            cfg.profileId,
             messages,
             Math.max(128, Math.min(8192, Math.ceil(Number(options.maxTokens || cfg.maxTokens || 8192) * lengthMultiplier))),
             {
@@ -680,35 +598,31 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
         );
     }
 
-    try {
-        const messages = [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-        ];
+    const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+    ];
 
-        let raw = await send(messages, 1);
+    let raw = await send(messages, 1);
+    if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
+    if (raw && typeof raw === 'object') assertNotTokenLimitedResponse(cfg, raw, options);
+    let content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
+    if (content && content.trim()) return content;
+
+    const reasoning = raw && typeof raw === 'object' ? extractChatCompletionReasoning(raw) : '';
+    if (reasoning) {
+        const retryPrompts = makeFinalOnlyRetryPrompts(systemPrompt, userPrompt, options);
+        raw = await send([
+            { role: 'system', content: retryPrompts.system },
+            { role: 'user', content: retryPrompts.user },
+        ], 2);
         if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
-        if (raw && typeof raw === 'object') assertNotTokenLimitedResponse(cfg, raw, options);
-        let content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
+        if (raw && typeof raw === 'object') assertNotTokenLimitedResponse(cfg, raw, { ...options, maxTokens: Math.max(128, Math.min(8192, Math.ceil(Number(options.maxTokens || cfg.maxTokens || 8192) * 2))) });
+        content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
         if (content && content.trim()) return content;
-
-        const reasoning = raw && typeof raw === 'object' ? extractChatCompletionReasoning(raw) : '';
-        if (reasoning) {
-            const retryPrompts = makeFinalOnlyRetryPrompts(systemPrompt, userPrompt, options);
-            raw = await send([
-                { role: 'system', content: retryPrompts.system },
-                { role: 'user', content: retryPrompts.user },
-            ], 2);
-            if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
-            if (raw && typeof raw === 'object') assertNotTokenLimitedResponse(cfg, raw, { ...options, maxTokens: Math.max(128, Math.min(8192, Math.ceil(Number(options.maxTokens || cfg.maxTokens || 8192) * 2))) });
-            content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
-            if (content && content.trim()) return content;
-            throw new Error(`${cfg.title} connection profile returned reasoning-only output with empty visible content. Retried with final-only visible-output instructions but still received no visible content. Increase max tokens, reduce reasoning effort in the profile/preset, or use a non-thinking model. Reasoning preview: ${reasoning.slice(0, 300)}`);
-        }
-        return content;
-    } finally {
-        requestProfile.cleanup();
+        throw new Error(`${cfg.title} connection profile returned reasoning-only output with empty visible content. Retried with final-only visible-output instructions but still received no visible content. Increase max tokens, reduce reasoning effort in the profile/preset, or use a non-thinking model. Reasoning preview: ${reasoning.slice(0, 300)}`);
     }
+    return content;
 }
 
 export async function fetchLoreModels(kind = 'lore') {

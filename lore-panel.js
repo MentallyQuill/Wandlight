@@ -1895,6 +1895,9 @@ async function getWandlightPresetStatus() {
         installedVersion,
         bundledVersion,
         installedName: installed.name,
+        actionLabel: 'Reinstall',
+        actionTooltip: 'Reset the installed Wandlight preset to the bundled default values.',
+        canInstall: true,
     };
 }
 
@@ -2009,18 +2012,21 @@ function compareWandlightPresetVersions(installed, bundled) {
 }
 
 async function handleInstallWandlightPreset(btn, card, status) {
-    await runBusyAction(btn, status.state === 'missing' ? 'Installing...' : 'Updating...', async () => {
+    const isReinstall = status.state === 'current';
+    const busyLabel = status.state === 'missing' ? 'Installing...' : isReinstall ? 'Reinstalling...' : 'Updating...';
+    await runBusyAction(btn, busyLabel, async () => {
         if (status.state !== 'missing') {
-            const proceed = await confirmAction(
-                'Update Wandlight preset?',
-                'This will replace the installed Wandlight preset with the bundled version. It will not intentionally switch your active preset.'
-            );
+            const title = isReinstall ? 'Reinstall Wandlight preset?' : 'Update Wandlight preset?';
+            const message = isReinstall
+                ? "Are you sure you want to reset the Wandlight preset's values to the bundled defaults? This will overwrite any manual edits to that preset. It will not intentionally switch your active preset."
+                : 'This will replace the installed Wandlight preset with the bundled version. It will not intentionally switch your active preset.';
+            const proceed = await confirmAction(title, message);
             if (!proceed) return;
         }
 
         const result = await installBundledWandlightPreset();
         await refreshWandlightPresetStatusCard(card);
-        toast(status.state === 'missing' ? 'Wandlight preset installed.' : 'Wandlight preset updated.');
+        toast(status.state === 'missing' ? 'Wandlight preset installed.' : isReinstall ? 'Wandlight preset reinstalled.' : 'Wandlight preset updated.');
         if (result?.selectionTouched) {
             await showNoticePopup(
                 'Preset saved',

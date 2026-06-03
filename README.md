@@ -10,6 +10,8 @@ LLMs tend to be lore-rich but timeline-poor: they often know a fandom broadly, b
 
 Wandlight is built to solve that problem with a local date-aware lore database, reviewable lore cards, lightweight continuity tracking, and relevance-tiered prompt injection. Because of its focus on durable-lore, it can be used in tandem with general memory extensions such as [MemoryBooks](https://github.com/aikohanasaki/SillyTavern-MemoryBooks), [Summaryception](https://github.com/Lodactio/Extension-Summaryception), and [VectFox](https://github.com/KritBlade/VectFox).
 
+Relased under an MIT License, the underlying framework of Wandlight can be reskinned and lore-populated to support other fandoms that require timeline-based lore-adherance.
+
 ## Table of Contents
 
 - [Feature Overview](#feature-overview)

@@ -6,9 +6,14 @@
  * Imported by: index.js
  */
 
-import { DEFAULT_SETTINGS } from './constants.js';
+import {
+    DEFAULT_SETTINGS,
+    WANDLIGHT_PROVIDER_PRESET_ASSET_PATH,
+    WANDLIGHT_PROVIDER_PRESET_NAME,
+    WANDLIGHT_PROVIDER_PRESET_VERSION,
+} from './constants.js';
 import { getSettings, saveSettings } from './state-manager.js';
-import { storeNamedApiKey, deleteNamedApiKey } from './secure-keyring.js';
+import { storeNamedApiKey, deleteNamedApiKey, getNamedApiKeyStorageInfo } from './secure-keyring.js';
 import {
     clearCachedApiKey,
     loadApiKey,
@@ -52,6 +57,113 @@ function parseNumericSetting(input, fallback, min, max, integer = false) {
     return integer ? Math.round(clamped) : clamped;
 }
 
+const CHAT_COMPLETION_PRESET_API_ID = 'openai';
+let bundledProviderPresetCache = null;
+
+function getLocalAssetSrc(assetPath) {
+    if (!assetPath) return '';
+    try {
+        return new URL(assetPath, import.meta.url).href;
+    } catch (_) {
+        return assetPath;
+    }
+}
+
+function cloneJson(value) {
+    if (typeof structuredClone === 'function') return structuredClone(value);
+    if (value === undefined) return undefined;
+    return JSON.parse(JSON.stringify(value));
+}
+
+function isPlainObjectValue(value) {
+    return value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function getChatCompletionPresetManager() {
+    try {
+        if (typeof SillyTavern === 'undefined' || typeof SillyTavern.getContext !== 'function') return null;
+        const ctx = SillyTavern.getContext();
+        if (!ctx || typeof ctx.getPresetManager !== 'function') return null;
+        return ctx.getPresetManager(CHAT_COMPLETION_PRESET_API_ID) || null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function getInstalledProviderPreset(pm) {
+    const names = typeof pm?.getAllPresets === 'function' ? pm.getAllPresets() : [];
+    if (!Array.isArray(names)) return '';
+    return names.find(name => String(name || '').trim().toLowerCase() === WANDLIGHT_PROVIDER_PRESET_NAME.toLowerCase()) || '';
+}
+
+function ensureProviderPresetMetadata(preset) {
+    const next = cloneJson(preset || {});
+    next.extensions = isPlainObjectValue(next.extensions) ? next.extensions : {};
+    next.extensions.wandlight = {
+        ...(isPlainObjectValue(next.extensions.wandlight) ? next.extensions.wandlight : {}),
+        presetName: WANDLIGHT_PROVIDER_PRESET_NAME,
+        presetVersion: WANDLIGHT_PROVIDER_PRESET_VERSION,
+        version: '1.0',
+        providerPreset: true,
+        supportsReplyHeaders: false,
+    };
+    return next;
+}
+
+async function loadBundledProviderPreset() {
+    if (bundledProviderPresetCache) return cloneJson(bundledProviderPresetCache);
+    const response = await fetch(getLocalAssetSrc(WANDLIGHT_PROVIDER_PRESET_ASSET_PATH), { cache: 'no-store' });
+    if (!response.ok) throw new Error(`${WANDLIGHT_PROVIDER_PRESET_NAME} preset could not be loaded.`);
+    const preset = ensureProviderPresetMetadata(await response.json());
+    bundledProviderPresetCache = preset;
+    return cloneJson(preset);
+}
+
+async function installBundledProviderPreset() {
+    const pm = getChatCompletionPresetManager();
+    if (!pm || typeof pm.savePreset !== 'function') {
+        throw new Error('SillyTavern chat-completion preset manager is unavailable.');
+    }
+
+    const preset = await loadBundledProviderPreset();
+    const previousValue = typeof pm.getSelectedPreset === 'function' ? pm.getSelectedPreset() : '';
+    const previousName = typeof pm.getSelectedPresetName === 'function' ? pm.getSelectedPresetName() : '';
+
+    await pm.savePreset(WANDLIGHT_PROVIDER_PRESET_NAME, preset);
+
+    if (previousValue && typeof pm.selectPreset === 'function') {
+        try {
+            const currentName = typeof pm.getSelectedPresetName === 'function' ? pm.getSelectedPresetName() : '';
+            if (currentName !== previousName) pm.selectPreset(previousValue);
+        } catch (e) {
+            console.warn('[Wandlight] Could not restore previous preset after importing provider preset:', e);
+        }
+    }
+}
+
+async function refreshProviderPresetInstallStatus(button, statusEl) {
+    if (!button && !statusEl) return;
+    const pm = getChatCompletionPresetManager();
+    const installedName = getInstalledProviderPreset(pm);
+    if (!pm) {
+        if (button) button.disabled = true;
+        if (statusEl) {
+            statusEl.textContent = 'Preset manager unavailable.';
+            statusEl.style.color = '#cc8888';
+        }
+        return;
+    }
+
+    if (button) {
+        button.disabled = false;
+        button.textContent = installedName ? `Update ${WANDLIGHT_PROVIDER_PRESET_NAME}` : `Install ${WANDLIGHT_PROVIDER_PRESET_NAME}`;
+    }
+    if (statusEl) {
+        statusEl.textContent = installedName ? `${WANDLIGHT_PROVIDER_PRESET_NAME} installed.` : `${WANDLIGHT_PROVIDER_PRESET_NAME} not installed.`;
+        statusEl.style.color = installedName ? '#88cc88' : '#d6b35a';
+    }
+}
+
 function setupProviderControls(container, kind, label) {
     const prefix = settingPrefix(kind);
     const settings = getSettings();
@@ -60,6 +172,8 @@ function setupProviderControls(container, kind, label) {
     const profileRow = container.querySelector(`#wandlight_${prefix}_profile_row`);
     const profileIdSelect = container.querySelector(`#wandlight_${prefix}_profile_id`);
     const completionPresetSelect = container.querySelector(`#wandlight_${prefix}_completion_preset_id`);
+    const providerPresetInstallBtn = container.querySelector(`#wandlight_${prefix}_provider_preset_install`);
+    const providerPresetStatus = container.querySelector(`#wandlight_${prefix}_provider_preset_status`);
     const openaiRow = container.querySelector(`#wandlight_${prefix}_openai_row`);
     const openaiBaseUrl = container.querySelector(`#wandlight_${prefix}_openai_base_url`);
     const openaiModel = container.querySelector(`#wandlight_${prefix}_openai_model`);
@@ -107,10 +221,11 @@ function setupProviderControls(container, kind, label) {
         const provider = providerSelect?.value || 'st';
         if (profileRow) profileRow.style.display = provider === 'profile' ? '' : 'none';
         if (openaiRow) openaiRow.style.display = provider === 'openai_compatible' ? '' : 'none';
+        if (provider === 'profile') refreshProviderPresetInstallStatus(providerPresetInstallBtn, providerPresetStatus);
     }
 
     function getProfileWarningText() {
-        return `${label} connection profiles can include their own preset and generation parameters, which may change Wandlight's structured output. Test this profile before relying on model-backed tasks.`;
+        return `${label} connection profiles include a preset. Use ${WANDLIGHT_PROVIDER_PRESET_NAME} as the profile preset or preset override for Wandlight provider tasks, then test the profile.`;
     }
 
     function showProfileWarning() {
@@ -157,21 +272,40 @@ function setupProviderControls(container, kind, label) {
 
         if (completionPresetSelect) {
             const current = completionPresetSelect.value || getSettings()[presetKey] || '';
-            completionPresetSelect.innerHTML = '<option value="">Default</option>';
+            completionPresetSelect.innerHTML = '<option value="">Profile preset</option>';
             const presets = getAvailableCompletionPresets();
+            const addedPresetIds = new Set(['']);
+            const appendPresetOption = (id, labelText) => {
+                const normalizedId = String(id || '').trim();
+                if (!normalizedId || addedPresetIds.has(normalizedId)) return;
+                const opt = document.createElement('option');
+                opt.value = normalizedId;
+                opt.textContent = labelText || normalizedId;
+                completionPresetSelect.appendChild(opt);
+                addedPresetIds.add(normalizedId);
+            };
             if (!presets.length) {
                 const opt = document.createElement('option');
                 opt.value = '';
                 opt.textContent = 'No completion presets found';
                 completionPresetSelect.appendChild(opt);
             }
+            const recommended = presets.find(pr => {
+                const id = pr.name || pr.id || pr.presetId || pr.preset_id || pr.filename || pr.label || '';
+                return String(id || '').trim().toLowerCase() === WANDLIGHT_PROVIDER_PRESET_NAME.toLowerCase();
+            });
+            if (recommended) {
+                const id = recommended.name || recommended.id || recommended.presetId || recommended.preset_id || recommended.filename || recommended.label || '';
+                const text = recommended.name || recommended.label || recommended.id || recommended.presetId || recommended.preset_id || recommended.filename || id;
+                appendPresetOption(id, `${text} (recommended)`);
+            }
             for (const pr of presets) {
                 const id = pr.name || pr.id || pr.presetId || pr.preset_id || pr.filename || pr.label || '';
                 if (!id) continue;
-                const opt = document.createElement('option');
-                opt.value = id;
-                opt.textContent = pr.name || pr.label || pr.id || pr.presetId || pr.preset_id || pr.filename || id;
-                completionPresetSelect.appendChild(opt);
+                appendPresetOption(id, pr.name || pr.label || pr.id || pr.presetId || pr.preset_id || pr.filename || id);
+            }
+            if (current && !addedPresetIds.has(current)) {
+                appendPresetOption(current, `${current} (not found)`);
             }
             completionPresetSelect.value = current;
         }
@@ -194,6 +328,36 @@ function setupProviderControls(container, kind, label) {
             const next = getSettings();
             next[presetKey] = completionPresetSelect.value;
             saveLoreProviderSettings(next);
+        });
+    }
+    if (providerPresetInstallBtn) {
+        providerPresetInstallBtn.addEventListener('click', async () => {
+            const original = providerPresetInstallBtn.textContent;
+            providerPresetInstallBtn.disabled = true;
+            providerPresetInstallBtn.textContent = 'Installing...';
+            if (providerPresetStatus) {
+                providerPresetStatus.textContent = `Installing ${WANDLIGHT_PROVIDER_PRESET_NAME}...`;
+                providerPresetStatus.style.color = '';
+            }
+            try {
+                await installBundledProviderPreset();
+                const next = getSettings();
+                next[presetKey] = WANDLIGHT_PROVIDER_PRESET_NAME;
+                saveLoreProviderSettings(next);
+                populateProfiles();
+                if (completionPresetSelect) completionPresetSelect.value = WANDLIGHT_PROVIDER_PRESET_NAME;
+                await refreshProviderPresetInstallStatus(providerPresetInstallBtn, providerPresetStatus);
+                if (typeof toastr !== 'undefined') toastr.success(`${WANDLIGHT_PROVIDER_PRESET_NAME} installed and selected for ${label.toLowerCase()} provider calls.`);
+            } catch (e) {
+                providerPresetInstallBtn.textContent = original;
+                if (providerPresetStatus) {
+                    providerPresetStatus.textContent = e?.message || String(e);
+                    providerPresetStatus.style.color = '#cc8888';
+                }
+                if (typeof toastr !== 'undefined') toastr.error(`Failed to install ${WANDLIGHT_PROVIDER_PRESET_NAME}: ` + (e?.message || e));
+            } finally {
+                providerPresetInstallBtn.disabled = false;
+            }
         });
     }
 
@@ -304,11 +468,22 @@ function setupProviderControls(container, kind, label) {
 
     async function refreshKeyStatus() {
         if (!openaiKeyStatus) return;
+        const info = getNamedApiKeyStorageInfo(secretNameForProvider(kind));
         try {
             const key = await loadApiKey(kind);
             if (key) {
-                openaiKeyStatus.textContent = 'Key stored (encrypted at rest)';
-                openaiKeyStatus.style.color = '#88cc88';
+                if (info.compatibilityStorage) {
+                    openaiKeyStatus.textContent = 'Key stored (compatibility storage; use HTTPS/localhost for browser encryption)';
+                    openaiKeyStatus.style.color = '#d6b35a';
+                } else {
+                    openaiKeyStatus.textContent = 'Key stored (encrypted at rest)';
+                    openaiKeyStatus.style.color = '#88cc88';
+                }
+            } else if (info.isStored) {
+                openaiKeyStatus.textContent = info.webCryptoAvailable
+                    ? 'Stored key could not be read; store it again'
+                    : 'Stored key needs browser encryption support; store it again to use compatibility storage';
+                openaiKeyStatus.style.color = '#cc8888';
             } else {
                 openaiKeyStatus.textContent = 'No key stored';
                 openaiKeyStatus.style.color = '';
@@ -327,10 +502,16 @@ function setupProviderControls(container, kind, label) {
                 return;
             }
             try {
-                await storeNamedApiKey(secretNameForProvider(kind), raw);
+                const result = await storeNamedApiKey(secretNameForProvider(kind), raw);
                 clearCachedApiKey(kind);
                 openaiKey.value = '';
-                if (typeof toastr !== 'undefined') toastr.success(`${label} API key encrypted and stored.`);
+                if (typeof toastr !== 'undefined') {
+                    if (result?.encryptedAtRest === false) {
+                        toastr.warning(`${label} API key stored. Browser encryption is unavailable in this context, so Wandlight used compatibility storage.`);
+                    } else {
+                        toastr.success(`${label} API key encrypted and stored.`);
+                    }
+                }
                 await refreshKeyStatus();
             } catch (e) {
                 if (typeof toastr !== 'undefined') toastr.error('Failed to store key: ' + e.message);

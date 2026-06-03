@@ -1,0 +1,135 @@
+{
+  "chat_completion_source": "openai",
+  "openai_model": "gpt-4-turbo",
+  "claude_model": "claude-sonnet-4-5",
+  "openrouter_model": "OR_Website",
+  "openrouter_use_fallback": false,
+  "openrouter_group_models": false,
+  "openrouter_sort_models": "alphabetically",
+  "ai21_model": "jamba-large",
+  "mistralai_model": "mistral-large-latest",
+  "chutes_model": "deepseek-ai/DeepSeek-V3-0324",
+  "chutes_sort_models": "alphabetically",
+  "minimax_model": "MiniMax-M2.7",
+  "minimax_endpoint": "global",
+  "electronhub_model": "gpt-4o-mini",
+  "electronhub_sort_models": "alphabetically",
+  "electronhub_group_models": false,
+  "custom_model": "",
+  "custom_url": "",
+  "custom_include_body": "",
+  "custom_exclude_body": "",
+  "custom_include_headers": "",
+  "google_model": "gemini-2.5-pro",
+  "vertexai_model": "gemini-2.5-pro",
+  "temperature": 0.2,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "top_p": 0.9,
+  "top_k": 0,
+  "top_a": 0,
+  "min_p": 0,
+  "repetition_penalty": 1,
+  "openai_max_context": 131072,
+  "openai_max_tokens": 8192,
+  "names_behavior": 0,
+  "send_if_empty": "",
+  "impersonation_prompt": "",
+  "new_chat_prompt": "",
+  "new_group_chat_prompt": "",
+  "new_example_chat_prompt": "",
+  "continue_nudge_prompt": "",
+  "bias_preset_selected": "Default (none)",
+  "reverse_proxy": "",
+  "proxy_password": "",
+  "max_context_unlocked": true,
+  "wi_format": "{0}",
+  "scenario_format": "{{scenario}}",
+  "personality_format": "{{personality}}",
+  "group_nudge_prompt": "",
+  "stream_openai": false,
+  "prompts": [
+    {
+      "identifier": "provider-contract",
+      "system_prompt": false,
+      "enabled": true,
+      "marker": false,
+      "name": "Provider Contract",
+      "role": "system",
+      "content": "You are handling a Wandlight background provider request. Follow the supplied system and user instructions exactly. Return only the requested output format. Do not add roleplay prose, markdown fences, or commentary."
+    },
+    {
+      "identifier": "chatHistory",
+      "name": "Provider Request Messages",
+      "system_prompt": true,
+      "marker": true
+    }
+  ],
+  "prompt_order": [
+    {
+      "character_id": 100000,
+      "order": [
+        {
+          "identifier": "provider-contract",
+          "enabled": true
+        },
+        {
+          "identifier": "chatHistory",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "character_id": 100001,
+      "order": [
+        {
+          "identifier": "provider-contract",
+          "enabled": true
+        },
+        {
+          "identifier": "chatHistory",
+          "enabled": true
+        }
+      ]
+    }
+  ],
+  "show_external_models": false,
+  "assistant_prefill": "",
+  "assistant_impersonation": "",
+  "use_sysprompt": false,
+  "squash_system_messages": true,
+  "media_inlining": false,
+  "inline_image_quality": "high",
+  "bypass_status_check": false,
+  "continue_prefill": false,
+  "continue_postfix": " ",
+  "function_calling": false,
+  "show_thoughts": false,
+  "auto_append_reasoning_tags": false,
+  "auto_append_reasoning_tag_style": "think",
+  "reasoning_effort": "low",
+  "verbosity": "low",
+  "enable_web_search": false,
+  "request_images": false,
+  "request_image_aspect_ratio": "",
+  "request_image_resolution": "",
+  "seed": -1,
+  "n": 1,
+  "extensions": {
+    "regex_scripts": [],
+    "wandlight": {
+      "presetName": "Provider-1.0",
+      "presetVersion": "Provider-1.0",
+      "version": "1.0",
+      "providerPreset": true,
+      "supportsReplyHeaders": false
+    }
+  },
+  "bias_presets": [
+    {
+      "name": "Default (none)",
+      "bias": []
+    }
+  ],
+  "notes": "Provider-1.0 - Thin utility/reasoning preset for Wandlight background model calls through SillyTavern Connection Profiles. Use this in Wandlight provider profiles or as Wandlight's provider preset override instead of the full Wandlight roleplay preset."
+}

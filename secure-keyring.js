@@ -1,10 +1,13 @@
 /**
  * secure-keyring.js — Wandlight
- * Best-effort encrypted-at-rest secret storage using WebCrypto AES-GCM.
+ * Best-effort secret storage for direct browser-side API calls.
  *
  * Security model:
- * - API keys are encrypted with AES-GCM.
- * - Encryption key is derived from a user passphrase via PBKDF2.
+ * - When WebCrypto is available, API keys are encrypted with AES-GCM.
+ * - The encryption key is derived from a session passphrase via PBKDF2.
+ * - When WebCrypto is unavailable, Wandlight uses compatibility storage so
+ *   remote HTTP/LAN browser sessions can still save keys. This is not strong
+ *   encryption; prefer HTTPS/localhost or a SillyTavern connection profile.
  * - Decrypted keys live only in memory.
  * - This does NOT protect against malicious scripts running in the same browser.
  * - For strongest security, use a SillyTavern connection profile or backend proxy.
@@ -19,6 +22,8 @@ import { getSettings, saveSettings } from './state-manager.js';
 const memoryKeys = new Map();
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
+const AES_GCM_CIPHER = 'aes-gcm';
+const COMPAT_CIPHER = 'compat-v1';
 
 // ── Internal helpers ────────────────────────────────────────────────────────────
 
@@ -30,10 +35,70 @@ function base64ToBytes(base64) {
     return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
 }
 
+function getWebCrypto() {
+    const cryptoApi = globalThis?.crypto;
+    return cryptoApi?.subtle && typeof cryptoApi.getRandomValues === 'function' ? cryptoApi : null;
+}
+
+function getRandomBytes(length) {
+    const bytes = new Uint8Array(length);
+    const cryptoApi = globalThis?.crypto;
+    if (typeof cryptoApi?.getRandomValues === 'function') {
+        cryptoApi.getRandomValues(bytes);
+        return bytes;
+    }
+    for (let i = 0; i < bytes.length; i += 1) {
+        bytes[i] = Math.floor(Math.random() * 256);
+    }
+    return bytes;
+}
+
+function fnv1a32(value) {
+    let hash = 0x811c9dc5;
+    const text = String(value || '');
+    for (let i = 0; i < text.length; i += 1) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    return hash >>> 0;
+}
+
+function nextXorshift32(seed) {
+    let x = seed >>> 0;
+    x ^= (x << 13) >>> 0;
+    x ^= x >>> 17;
+    x ^= (x << 5) >>> 0;
+    return x >>> 0;
+}
+
+function compatTransformBytes(bytes, passphrase, saltBase64, ivBase64) {
+    const seedMaterial = `${passphrase}|${saltBase64}|${ivBase64}|wandlight-keyring-compat-v1`;
+    let state = fnv1a32(seedMaterial) || 0x9e3779b9;
+    const out = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i += 1) {
+        state = nextXorshift32(state);
+        out[i] = bytes[i] ^ (state & 0xff);
+    }
+    return out;
+}
+
+function compatEncryptSecret(plaintext, passphrase, saltBase64, ivBase64) {
+    const plaintextBytes = textEncoder.encode(plaintext);
+    return bytesToBase64(compatTransformBytes(plaintextBytes, passphrase, saltBase64, ivBase64));
+}
+
+function compatDecryptSecret(ciphertextBase64, passphrase, saltBase64, ivBase64) {
+    const ciphertextBytes = base64ToBytes(ciphertextBase64);
+    const plaintextBytes = compatTransformBytes(ciphertextBytes, passphrase, saltBase64, ivBase64);
+    return textDecoder.decode(plaintextBytes);
+}
+
 async function deriveAesKey(passphrase, saltBase64) {
+    const cryptoApi = getWebCrypto();
+    if (!cryptoApi) throw new Error('WebCrypto AES-GCM is unavailable in this browser context.');
     const salt = base64ToBytes(saltBase64);
 
-    const keyMaterial = await crypto.subtle.importKey(
+    const keyMaterial = await cryptoApi.subtle.importKey(
         'raw',
         textEncoder.encode(passphrase),
         'PBKDF2',
@@ -41,7 +106,7 @@ async function deriveAesKey(passphrase, saltBase64) {
         ['deriveKey'],
     );
 
-    return await crypto.subtle.deriveKey(
+    return await cryptoApi.subtle.deriveKey(
         {
             name: 'PBKDF2',
             salt,
@@ -75,23 +140,33 @@ export async function encryptAndStoreSecret(secretName, plaintext, passphrase) {
         throw new Error('Secret and passphrase are required.');
     }
 
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const salt = getRandomBytes(16);
+    const iv = getRandomBytes(12);
     const saltBase64 = bytesToBase64(salt);
+    const ivBase64 = bytesToBase64(iv);
+    const cryptoApi = getWebCrypto();
 
-    const key = await deriveAesKey(passphrase, saltBase64);
-
-    const ciphertext = await crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv },
-        key,
-        textEncoder.encode(plaintext),
-    );
+    let cipher = COMPAT_CIPHER;
+    let encrypted = '';
+    if (cryptoApi) {
+        const key = await deriveAesKey(passphrase, saltBase64);
+        const ciphertext = await cryptoApi.subtle.encrypt(
+            { name: 'AES-GCM', iv },
+            key,
+            textEncoder.encode(plaintext),
+        );
+        encrypted = bytesToBase64(ciphertext);
+        cipher = AES_GCM_CIPHER;
+    } else {
+        encrypted = compatEncryptSecret(plaintext, passphrase, saltBase64, ivBase64);
+    }
 
     const settings = getSettings();
 
-    settings[`${secretName}Encrypted`] = bytesToBase64(ciphertext);
+    settings[`${secretName}Encrypted`] = encrypted;
     settings[`${secretName}Salt`] = saltBase64;
-    settings[`${secretName}Iv`] = bytesToBase64(iv);
+    settings[`${secretName}Iv`] = ivBase64;
+    settings[`${secretName}Cipher`] = cipher;
     settings[`${secretName}KeySet`] = true;
 
     // Never store plaintext.
@@ -100,7 +175,7 @@ export async function encryptAndStoreSecret(secretName, plaintext, passphrase) {
     saveSettings(settings);
 
     memoryKeys.set(secretName, plaintext);
-    return true;
+    return { ok: true, encryptedAtRest: cipher === AES_GCM_CIPHER, cipher };
 }
 
 /**
@@ -118,20 +193,28 @@ export async function unlockSecret(secretName, passphrase) {
     const encrypted = settings[`${secretName}Encrypted`];
     const salt = settings[`${secretName}Salt`];
     const iv = settings[`${secretName}Iv`];
+    const cipher = settings[`${secretName}Cipher`] || AES_GCM_CIPHER;
 
     if (!encrypted || !salt || !iv) {
         throw new Error('No encrypted secret is stored.');
     }
 
-    const key = await deriveAesKey(passphrase, salt);
+    let plaintext = '';
+    if (cipher === COMPAT_CIPHER) {
+        plaintext = compatDecryptSecret(encrypted, passphrase, salt, iv);
+    } else {
+        const cryptoApi = getWebCrypto();
+        if (!cryptoApi) throw new Error('WebCrypto AES-GCM is unavailable in this browser context.');
+        const key = await deriveAesKey(passphrase, salt);
 
-    const plaintextBytes = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: base64ToBytes(iv) },
-        key,
-        base64ToBytes(encrypted),
-    );
+        const plaintextBytes = await cryptoApi.subtle.decrypt(
+            { name: 'AES-GCM', iv: base64ToBytes(iv) },
+            key,
+            base64ToBytes(encrypted),
+        );
+        plaintext = textDecoder.decode(plaintextBytes);
+    }
 
-    const plaintext = textDecoder.decode(plaintextBytes);
     memoryKeys.set(secretName, plaintext);
 
     return true;
@@ -171,6 +254,7 @@ export function clearStoredSecret(secretName) {
     delete settings[`${secretName}Encrypted`];
     delete settings[`${secretName}Salt`];
     delete settings[`${secretName}Iv`];
+    delete settings[`${secretName}Cipher`];
     delete settings[`${secretName}KeySet`];
 
     memoryKeys.delete(secretName);
@@ -224,6 +308,19 @@ export async function loadNamedApiKey(secretName) {
 
 export async function storeNamedApiKey(secretName, plaintext) {
     return await encryptAndStoreSecret(secretName, plaintext, deriveSessionPassphrase());
+}
+
+export function getNamedApiKeyStorageInfo(secretName) {
+    const settings = getSettings();
+    const isStored = !!settings[`${secretName}KeySet`];
+    const cipher = settings[`${secretName}Cipher`] || (isStored ? AES_GCM_CIPHER : '');
+    return {
+        isStored,
+        cipher,
+        encryptedAtRest: isStored && cipher !== COMPAT_CIPHER,
+        webCryptoAvailable: !!getWebCrypto(),
+        compatibilityStorage: isStored && cipher === COMPAT_CIPHER,
+    };
 }
 
 export async function deleteNamedApiKey(secretName) {

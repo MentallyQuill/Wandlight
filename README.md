@@ -112,30 +112,9 @@ Basic mode gives you the shortest path through Wandlight: set context, add or re
 
 ### Guided Tours
 
-Use **Start Walkthrough** in Basic mode for the core workflow:
+Guided tours start from the Session tab. In Basic mode, use **Start Walkthrough** for a practical first pass through Wandlight's core workflow: confirming the extension is active, setting story context, finding relevant lore, reviewing lore cards, and checking what will be injected into the next prompt.
 
-- Wandlight Active
-- Wandlight preset status
-- Session metrics
-- Detect Story Context
-- Story Context fields
-- New Lore
-- Lore Context status
-- Preview Canon Packs
-- Canon Preview Results
-- Scan Story Lore
-- Pending Lore Review
-- Accepted Lore controls
-- Injection relevance tiers
-
-Use **Start Advanced Walkthrough** in Advanced mode for the full operator tour:
-
-- experience and automation modes
-- context automation and fast header detection
-- continuity scanning and live-state editors
-- lore timeline, canon preview, story scanning, review, and workbenches
-- Auto-Relevance
-- prompt placement, injection previews, and compression prompts
+Switch to Advanced mode and use **Start Advanced Walkthrough** for the full operator tour. This walkthrough introduces the expanded controls for automation, continuity, lore generation and review, timeline tools, relevance tuning, prompt placement, injection previewing, and compression behavior.
 
 ## Operator's Manual
 
@@ -145,9 +124,10 @@ The operator manual is organized by Wandlight runtime tab. Basic mode is enough 
 
 Wandlight opens as a runtime shelf inside SillyTavern. The shelf can stay expanded while you work through context, lore, continuity, and injection tools, or collapse down when you want the chat surface back.
 
-![Wandlight Shelf Expanded](Images/documentation/renders/wandlight-shelf-expanded.png)
-
-![Wandlight Shelf Minimized](Images/documentation/renders/wandlight-shelf-minimized.png)
+<p align="center">
+  <img src="Images/documentation/renders/wandlight-shelf-minimized.png" alt="Wandlight Shelf Minimized" width="32%">
+  <img src="Images/documentation/renders/wandlight-shelf-expanded.png" alt="Wandlight Shelf Expanded" width="64%">
+</p>
 
 ### Session
 

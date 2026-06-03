@@ -6,11 +6,9 @@
 
 Wandlight is a SillyTavern extension for long-form Harry Potter writing, roleplay, and fanfiction where canon timing, secrets, alternate branches, and durable story memory matter.
 
-LLMs tend to be lore-rich but timeline-poor: they often know a fandom broadly, but lose track of what is true on a specific date, who should know a secret, which canon events have happened, and what your particular story has changed. Generalized ST memory extensions fall short in knowing how characters should act and evolve per book, what should be true, who should know it, and which facts belong in the current scene at this exact point in the timeline.
+LLMs tend to be lore-rich but timeline-poor. They know fandoms broadly, but lose track of what's true on a specific date, who should know a secret, which canon events have happened, and what your particular story has changed. Generalized ST memory extensions aren't meant to know how established canon characters should act or evolve over a specific span of time, or what facts belong in the current scene at this exact point in the timeline--they're recorders of the story, not arbitrators of truth.
 
-Wandlight is built to solve that problem with a local date-aware lore database, reviewable lore cards, lightweight continuity tracking, and relevance-tiered prompt injection. Because of its focus on durable-lore, it can be used in tandem with general memory extensions such as [MemoryBooks](https://github.com/aikohanasaki/SillyTavern-MemoryBooks), [Summaryception](https://github.com/Lodactio/Extension-Summaryception), and [VectFox](https://github.com/KritBlade/VectFox).
-
-Relased under an MIT License, the underlying framework of Wandlight can be reskinned and lore-populated to support other fandoms that require timeline-based lore-adherance.
+Wandlight is built to be that arbitrator, with a local date-aware lore database, reviewable lore cards, lightweight continuity tracking, and relevance-tiered prompt injection. Because of its focus on durable-lore, it can be used in tandem with memory extensions such as [MemoryBooks](https://github.com/aikohanasaki/SillyTavern-MemoryBooks), [Summaryception](https://github.com/Lodactio/Extension-Summaryception), and [VectFox](https://github.com/KritBlade/VectFox).
 
 ## Table of Contents
 

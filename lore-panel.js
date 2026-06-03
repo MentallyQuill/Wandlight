@@ -63,6 +63,12 @@ const DEFAULT_COMPACT_RAIL_HEIGHT_ESTIMATE = 420;
 const DEFAULT_EXPANDED_RAIL_HEIGHT_ESTIMATE = 420;
 const LAYOUT_VERSION = 2;
 const WANDLIGHT_PRESET_API_ID = 'openai';
+const LEGACY_WANDLIGHT_PRESET_NAMES = Object.freeze([
+    'Wandlight-1.0',
+    'Wandlight-1.1',
+    'Wandlight-1.2',
+    'Wandlight-1.3',
+]);
 const STORED_API_KEY_SETTING_PREFIXES = Object.freeze(['loreOpenAI', 'continuityOpenAI']);
 const STORED_API_KEY_SETTING_SUFFIXES = Object.freeze(['Encrypted', 'Salt', 'Iv', 'KeyEncrypted', 'KeySalt', 'KeyIv', 'KeySet']);
 const CONTEXT_DETECTION_SETTING_KEYS = Object.freeze([
@@ -637,7 +643,7 @@ const GUIDE_STEPS = Object.freeze({
             expected: 'When enabled, prompt injection and configured automation can run.',
             when: 'Use this to pause Wandlight without deleting state.',
         }),
-        guideStep('preset', 'Wandlight Preset', 'Detects whether the bundled Wandlight preset is installed and which version is present.', 'session', 'session.preset', {
+        guideStep('preset', 'Wandlight Preset', 'Detects whether the bundled Wandlight preset is installed and current.', 'session', 'session.preset', {
             expected: 'Install/update from here, then verify your SillyTavern connection profile if the preset changed it.',
             when: 'Check this after extension updates or when fast context detection fails.',
         }),
@@ -1753,7 +1759,7 @@ async function refreshWandlightPresetStatusCard(card) {
         actions.appendChild(createButton('Download JSON', 'Download the bundled Wandlight preset for manual import.', async (btn) => {
             await runBusyAction(btn, 'Downloading...', async () => {
                 const preset = await loadBundledWandlightPreset();
-                downloadJson(preset, `${WANDLIGHT_PRESET_NAME}.json`);
+                downloadJson(preset, `${WANDLIGHT_PRESET_VERSION}.json`);
                 toast('Bundled Wandlight preset downloaded.', 'info');
             });
         }));
@@ -1808,12 +1814,15 @@ async function getWandlightPresetStatus() {
     const installedMeta = getWandlightPresetMetadata(installed.preset);
     const installedVersion = installedMeta.displayVersion || 'unknown';
     const comparison = compareWandlightPresetVersions(installedMeta.displayVersion, bundledVersion);
+    const legacyNameMessage = installed.legacyName
+        ? ` Legacy preset name "${installed.name}" was found; updating installs the stable "${WANDLIGHT_PRESET_NAME}" preset name, and the old named preset can be removed afterward.`
+        : '';
 
     if (comparison === null) {
         return {
             state: 'unknown',
             pill: 'Version Unknown',
-            message: 'A Wandlight preset is installed, but its version metadata is missing or unreadable.',
+            message: `A Wandlight preset is installed, but its version metadata is missing or unreadable.${legacyNameMessage}`,
             installedVersion,
             bundledVersion,
             actionLabel: 'Update',
@@ -1828,7 +1837,7 @@ async function getWandlightPresetStatus() {
         return {
             state: 'behind',
             pill: 'Update Available',
-            message: 'The installed Wandlight preset is older than the bundled preset.',
+            message: `The installed Wandlight preset is older than the bundled preset.${legacyNameMessage}`,
             installedVersion,
             bundledVersion,
             actionLabel: 'Update',
@@ -1840,12 +1849,41 @@ async function getWandlightPresetStatus() {
     }
 
     if (comparison > 0) {
+        if (installed.legacyName) {
+            return {
+                state: 'legacy-name',
+                pill: 'Legacy Name',
+                message: legacyNameMessage.trim(),
+                installedVersion,
+                bundledVersion,
+                actionLabel: 'Update',
+                actionTooltip: 'Install the bundled Wandlight preset under the stable preset name.',
+                primaryAction: true,
+                canInstall: true,
+                installedName: installed.name,
+            };
+        }
         return {
             state: 'ahead',
             pill: 'Newer Installed',
             message: 'The installed Wandlight preset appears newer than the bundled preset. No update needed.',
             installedVersion,
             bundledVersion,
+            installedName: installed.name,
+        };
+    }
+
+    if (installed.legacyName) {
+        return {
+            state: 'legacy-name',
+            pill: 'Legacy Name',
+            message: legacyNameMessage.trim(),
+            installedVersion,
+            bundledVersion,
+            actionLabel: 'Update',
+            actionTooltip: 'Install the bundled Wandlight preset under the stable preset name.',
+            primaryAction: true,
+            canInstall: true,
             installedName: installed.name,
         };
     }
@@ -1873,20 +1911,44 @@ function getWandlightPresetManager() {
 
 function getInstalledWandlightPreset(pm) {
     const names = typeof pm?.getAllPresets === 'function' ? pm.getAllPresets() : [];
-    const exactName = Array.isArray(names)
-        ? names.find(name => String(name || '').trim().toLowerCase() === WANDLIGHT_PRESET_NAME.toLowerCase())
-        : '';
-    if (!exactName) return { name: '', preset: null };
-
-    let preset = null;
-    if (typeof pm.getCompletionPresetByName === 'function') {
-        preset = pm.getCompletionPresetByName(exactName) || null;
+    const candidates = [WANDLIGHT_PRESET_NAME, ...LEGACY_WANDLIGHT_PRESET_NAMES];
+    let installedName = '';
+    if (Array.isArray(names)) {
+        installedName = candidates
+            .map(candidate => names.find(name => String(name || '').trim().toLowerCase() === candidate.toLowerCase()) || '')
+            .find(Boolean) || '';
     }
-    if (!preset && typeof pm.readPresetExtensionField === 'function') {
-        const wandlightMeta = pm.readPresetExtensionField({ name: exactName, path: 'wandlight' });
+    if (!installedName) {
+        installedName = candidates.find(candidate => getWandlightPresetByName(pm, candidate)) || '';
+    }
+    if (!installedName) return { name: '', preset: null, legacyName: false };
+
+    const preset = getWandlightPresetByName(pm, installedName) || {
+        extensions: {
+            wandlight: {
+                presetName: installedName,
+                presetVersion: installedName,
+            },
+        },
+    };
+    return {
+        name: installedName,
+        preset,
+        legacyName: installedName.toLowerCase() !== WANDLIGHT_PRESET_NAME.toLowerCase(),
+    };
+}
+
+function getWandlightPresetByName(pm, name) {
+    if (!name) return null;
+    let preset = null;
+    if (typeof pm?.getCompletionPresetByName === 'function') {
+        preset = pm.getCompletionPresetByName(name) || null;
+    }
+    if (!preset && typeof pm?.readPresetExtensionField === 'function') {
+        const wandlightMeta = pm.readPresetExtensionField({ name, path: 'wandlight' });
         if (wandlightMeta) preset = { extensions: { wandlight: wandlightMeta } };
     }
-    return { name: exactName, preset };
+    return preset;
 }
 
 async function loadBundledWandlightPreset() {
@@ -1905,7 +1967,7 @@ function ensureWandlightPresetMetadata(preset) {
         ...(isPlainObjectValue(next.extensions.wandlight) ? next.extensions.wandlight : {}),
         presetName: WANDLIGHT_PRESET_NAME,
         presetVersion: WANDLIGHT_PRESET_VERSION,
-        version: formatComparablePresetVersion(WANDLIGHT_PRESET_VERSION) || '1.3',
+        version: formatComparablePresetVersion(WANDLIGHT_PRESET_VERSION) || '1.4',
         supportsReplyHeaders: true,
     };
     return next;

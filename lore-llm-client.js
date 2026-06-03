@@ -288,15 +288,6 @@ function getConnectionProfiles(ctx = getSillyTavernContext()) {
     return out;
 }
 
-function getProfileRequestPayloadOverrides(cfg) {
-    const overrides = {};
-    const temperature = Number(cfg.temperature);
-    const topP = Number(cfg.topP);
-    if (Number.isFinite(temperature)) overrides.temperature = temperature;
-    if (Number.isFinite(topP)) overrides.top_p = topP;
-    return overrides;
-}
-
 export function getAvailableConnectionProfiles() {
     return getConnectionProfiles();
 }
@@ -578,7 +569,6 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
     const service = ctx?.ConnectionManagerRequestService;
     if (!cfg.profileId) throw new Error(`${cfg.title} profile is not selected.`);
     if (!service || typeof service.sendRequest !== 'function') throw new Error('ConnectionManagerRequestService unavailable.');
-    const payloadOverrides = getProfileRequestPayloadOverrides(cfg);
 
     async function send(messages, lengthMultiplier = 1) {
         return await service.sendRequest(
@@ -594,7 +584,6 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
                 // endpoints, reject unsupported values. If a SillyTavern connection profile itself sends
                 // reasoning_effort:'auto', fix that profile/preset or use Wandlight's direct OpenAI-compatible provider.
             },
-            payloadOverrides,
         );
     }
 

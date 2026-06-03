@@ -591,8 +591,8 @@
         "regex_scripts": [],
         "wandlight": {
             "presetName": "Wandlight",
-            "presetVersion": "Wandlight-1.3",
-            "version": "1.3",
+            "presetVersion": "Wandlight-1.4",
+            "version": "1.4",
             "supportsReplyHeaders": true
         }
     },
@@ -1924,5 +1924,5 @@
         }
     ],
     "bias_preset_selected": "",
-    "notes": "Wandlight 1.3 — Timestamp at depth 1 with knowledge boundary reminder. Rational characters don’t assume malice. Mouth-choreography ban in Prose Enforcement and Scrivener’s Ward. Toggleable tense (past/present) and perspective (3rd limited — character or user, 3rd omniscient, 1st person). Default: past tense, 3rd limited anchored to {{char}}."
+    "notes": "Wandlight 1.4 — Stable front-facing preset name with metadata-backed update detection. Timestamp at depth 1 with knowledge boundary reminder. Rational characters don’t assume malice. Mouth-choreography ban in Prose Enforcement and Scrivener’s Ward. Toggleable tense (past/present) and perspective (3rd limited — character or user, 3rd omniscient, 1st person). Default: past tense, 3rd limited anchored to {{char}}."
 }

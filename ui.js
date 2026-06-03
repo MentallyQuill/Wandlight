@@ -57,6 +57,7 @@ function parseNumericSetting(input, fallback, min, max, integer = false) {
 }
 
 const CHAT_COMPLETION_PRESET_API_ID = 'openai';
+const LEGACY_PROVIDER_PRESET_NAMES = Object.freeze(['Provider-1.0', 'Provider-1.1']);
 let bundledProviderPresetCache = null;
 let providerPresetInstallConfirmed = false;
 
@@ -90,21 +91,76 @@ function getChatCompletionPresetManager() {
     }
 }
 
+function formatComparableProviderPresetVersion(value) {
+    const match = String(value || '').trim().match(/(?:Provider[-\s]*)?v?(\d+(?:\.\d+){0,3})/i);
+    return match?.[1] || '';
+}
+
+function compareProviderPresetVersions(installed, bundled) {
+    const a = formatComparableProviderPresetVersion(installed);
+    const b = formatComparableProviderPresetVersion(bundled);
+    if (!a || !b) return null;
+    const left = a.split('.').map(v => Number(v) || 0);
+    const right = b.split('.').map(v => Number(v) || 0);
+    const length = Math.max(left.length, right.length, 3);
+    for (let i = 0; i < length; i += 1) {
+        const av = left[i] || 0;
+        const bv = right[i] || 0;
+        if (av < bv) return -1;
+        if (av > bv) return 1;
+    }
+    return 0;
+}
+
+function getProviderPresetMetadata(preset, fallbackVersion = '') {
+    const ext = isPlainObjectValue(preset?.extensions?.wandlight) ? preset.extensions.wandlight : {};
+    const notes = String(preset?.notes || '');
+    const noteMatch = notes.match(/\bProvider[-\s]+v?(\d+(?:\.\d+){0,3})\b/i);
+    const rawVersion = ext.presetVersion || ext.version || (noteMatch ? noteMatch[1] : '') || fallbackVersion || '';
+    const comparable = formatComparableProviderPresetVersion(rawVersion);
+    return {
+        presetName: ext.presetName || '',
+        displayVersion: comparable ? `Provider-${comparable}` : '',
+        comparable,
+        providerPreset: ext.providerPreset === true,
+    };
+}
+
+function getPresetByName(pm, name) {
+    if (!name) return null;
+    let preset = null;
+    if (typeof pm?.getCompletionPresetByName === 'function') {
+        preset = pm.getCompletionPresetByName(name) || null;
+    }
+    if (!preset && typeof pm?.readPresetExtensionField === 'function') {
+        const wandlightMeta = pm.readPresetExtensionField({ name, path: 'wandlight' });
+        if (wandlightMeta) preset = { extensions: { wandlight: wandlightMeta } };
+    }
+    return preset;
+}
+
 function getInstalledProviderPreset(pm) {
     const names = typeof pm?.getAllPresets === 'function' ? pm.getAllPresets() : [];
+    const candidates = [WANDLIGHT_PROVIDER_PRESET_NAME, ...LEGACY_PROVIDER_PRESET_NAMES];
+    let installedName = '';
     if (Array.isArray(names)) {
-        const exact = names.find(name => String(name || '').trim().toLowerCase() === WANDLIGHT_PROVIDER_PRESET_NAME.toLowerCase());
-        if (exact) return exact;
+        installedName = candidates
+            .map(candidate => names.find(name => String(name || '').trim().toLowerCase() === candidate.toLowerCase()) || '')
+            .find(Boolean) || '';
     }
-    if (typeof pm?.getCompletionPresetByName === 'function') {
-        const preset = pm.getCompletionPresetByName(WANDLIGHT_PROVIDER_PRESET_NAME);
-        if (preset) return WANDLIGHT_PROVIDER_PRESET_NAME;
+    if (!installedName) {
+        installedName = candidates.find(candidate => getPresetByName(pm, candidate)) || '';
     }
-    if (typeof pm?.readPresetExtensionField === 'function') {
-        const meta = pm.readPresetExtensionField({ name: WANDLIGHT_PROVIDER_PRESET_NAME, path: 'wandlight' });
-        if (meta) return WANDLIGHT_PROVIDER_PRESET_NAME;
+    if (installedName) {
+        return {
+            name: installedName,
+            preset: getPresetByName(pm, installedName),
+            legacyName: installedName.toLowerCase() !== WANDLIGHT_PROVIDER_PRESET_NAME.toLowerCase(),
+        };
     }
-    return providerPresetInstallConfirmed ? WANDLIGHT_PROVIDER_PRESET_NAME : '';
+    return providerPresetInstallConfirmed
+        ? { name: WANDLIGHT_PROVIDER_PRESET_NAME, preset: null, legacyName: false, assumed: true }
+        : null;
 }
 
 function ensureProviderPresetMetadata(preset) {
@@ -114,7 +170,7 @@ function ensureProviderPresetMetadata(preset) {
         ...(isPlainObjectValue(next.extensions.wandlight) ? next.extensions.wandlight : {}),
         presetName: WANDLIGHT_PROVIDER_PRESET_NAME,
         presetVersion: WANDLIGHT_PROVIDER_PRESET_VERSION,
-        version: '1.0',
+        version: formatComparableProviderPresetVersion(WANDLIGHT_PROVIDER_PRESET_VERSION) || '1.0',
         providerPreset: true,
         supportsReplyHeaders: false,
     };
@@ -156,7 +212,6 @@ async function installBundledProviderPreset() {
 async function refreshProviderPresetInstallStatus(button, statusEl) {
     if (!button && !statusEl) return;
     const pm = getChatCompletionPresetManager();
-    const installedName = getInstalledProviderPreset(pm);
     if (!pm) {
         if (button) button.disabled = true;
         if (statusEl) {
@@ -166,15 +221,31 @@ async function refreshProviderPresetInstallStatus(button, statusEl) {
         return;
     }
 
+    const installed = getInstalledProviderPreset(pm);
+    const installedMeta = getProviderPresetMetadata(installed?.preset, installed?.assumed ? WANDLIGHT_PROVIDER_PRESET_VERSION : '');
+    const installedVersion = installedMeta.displayVersion || 'version unknown';
+    const comparison = installed ? compareProviderPresetVersions(installedMeta.displayVersion, WANDLIGHT_PROVIDER_PRESET_VERSION) : null;
+    const isCurrent = installed && !installed.legacyName && comparison === 0;
+    const needsUpdate = installed && !isCurrent;
+
     if (button) {
         button.disabled = false;
-        button.textContent = installedName ? `Update ${WANDLIGHT_PROVIDER_PRESET_NAME}` : `Install ${WANDLIGHT_PROVIDER_PRESET_NAME}`;
+        button.textContent = !installed ? 'Install Provider' : needsUpdate ? 'Update Provider' : 'Reinstall Provider';
     }
     if (statusEl) {
-        statusEl.textContent = installedName
-            ? `${WANDLIGHT_PROVIDER_PRESET_NAME} installed. Select it in your SillyTavern profile.`
-            : `${WANDLIGHT_PROVIDER_PRESET_NAME} not installed.`;
-        statusEl.style.color = installedName ? '#88cc88' : '#d6b35a';
+        if (!installed) {
+            statusEl.textContent = 'Provider preset not installed.';
+            statusEl.style.color = '#d6b35a';
+        } else if (isCurrent) {
+            statusEl.textContent = `Provider current (${WANDLIGHT_PROVIDER_PRESET_VERSION}). Select it in your SillyTavern profile.`;
+            statusEl.style.color = '#88cc88';
+        } else if (installed.legacyName) {
+            statusEl.textContent = `${installed.name} installed; update to Provider (${WANDLIGHT_PROVIDER_PRESET_VERSION}).`;
+            statusEl.style.color = '#d6b35a';
+        } else {
+            statusEl.textContent = `Provider ${installedVersion} installed; update to ${WANDLIGHT_PROVIDER_PRESET_VERSION}.`;
+            statusEl.style.color = '#d6b35a';
+        }
     }
 }
 
@@ -202,6 +273,9 @@ function setupProviderControls(container, kind, label) {
     const temperatureInput = container.querySelector(`#wandlight_${prefix}_temperature`);
     const topPInput = container.querySelector(`#wandlight_${prefix}_top_p`);
     const maxTokensInput = container.querySelector(`#wandlight_${prefix}_max_tokens`);
+    const generationParametersHeader = container.querySelector(`#wandlight_${prefix}_generation_parameters_header`);
+    const generationParameters = container.querySelector(`#wandlight_${prefix}_generation_parameters`);
+    const generationParametersNote = container.querySelector(`#wandlight_${prefix}_generation_parameters_note`);
 
     const providerKey = `${prefix}Provider`;
     const profileKey = `${prefix}ProfileId`;
@@ -235,6 +309,20 @@ function setupProviderControls(container, kind, label) {
         if (profileRow) profileRow.style.display = provider === 'profile' ? '' : 'none';
         if (openaiRow) openaiRow.style.display = provider === 'openai_compatible' ? '' : 'none';
         if (provider === 'profile') refreshProviderPresetInstallStatus(providerPresetInstallBtn, providerPresetStatus);
+        const profileControlled = provider === 'profile';
+        if (generationParametersHeader) generationParametersHeader.style.opacity = profileControlled ? '0.62' : '';
+        if (generationParameters) {
+            generationParameters.style.opacity = profileControlled ? '0.42' : '';
+            generationParameters.style.pointerEvents = profileControlled ? 'none' : '';
+        }
+        if (generationParametersNote) generationParametersNote.style.display = profileControlled ? '' : 'none';
+        for (const input of [temperatureInput, topPInput, maxTokensInput]) {
+            if (!input) continue;
+            input.disabled = profileControlled;
+            input.title = profileControlled
+                ? `${label} generation parameters are controlled by the selected SillyTavern Connection Profile and its Provider preset.`
+                : input.dataset.wandlightDefaultTitle || input.title;
+        }
     }
 
     function getProfileWarningText() {
@@ -402,6 +490,9 @@ function setupProviderControls(container, kind, label) {
     wireNumericInput(temperatureInput, temperatureKey, 0.7, 0, 2);
     wireNumericInput(topPInput, topPKey, 0.98, 0, 1);
     wireNumericInput(maxTokensInput, maxTokensKey, 8192, 64, 16384, true);
+    for (const input of [temperatureInput, topPInput, maxTokensInput]) {
+        if (input && !input.dataset.wandlightDefaultTitle) input.dataset.wandlightDefaultTitle = input.title || '';
+    }
 
     if (resetDefaultsBtn) {
         resetDefaultsBtn.addEventListener('click', () => {

@@ -60,8 +60,8 @@
                                 <select id="wandlight_continuity_profile_id" class="text_pole" style="width: 100%;" title="Connection profile used for Wandlight utility tasks."><option value="">Select Profile</option></select>
                                 <small style="opacity: 0.72; display: block; margin-top: 4px;">Connection profiles include a settings preset. Install the Provider preset here, then create or update a SillyTavern Connection Profile that uses it with your preferred utility provider, model, and key. This is the most API-secure Wandlight setup because the provider key stays in SillyTavern's server-side API handling.</small>
                                 <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap;">
-                                    <button id="wandlight_continuity_provider_preset_install" class="menu_button interactable" type="button" style="font-size: 0.78em; padding: 2px 8px;" title="Install or update the thin Provider-1.0 preset for use inside SillyTavern Connection Profiles.">
-                                        <i class="fa-solid fa-download"></i> Install Provider-1.0
+                                    <button id="wandlight_continuity_provider_preset_install" class="menu_button interactable" type="button" style="font-size: 0.78em; padding: 2px 10px; min-width: 150px; white-space: nowrap; flex: 0 0 auto;" title="Install or update the thin Provider preset for use inside SillyTavern Connection Profiles. Current bundled version: Provider-1.2.">
+                                        <i class="fa-solid fa-download"></i> Install Provider
                                     </button>
                                     <small id="wandlight_continuity_provider_preset_status" style="opacity: 0.65;"></small>
                                 </div>
@@ -87,8 +87,11 @@
                                 <small id="wandlight_continuity_openai_key_status" style="opacity: 0.6; margin-top: 2px; display: block;"></small>
                             </div>
 
-                            <label style="font-size: 0.9em; font-weight: bold; margin-top: 8px;">Utility Generation Parameters</label>
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <div id="wandlight_continuity_generation_parameters_header" style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline; margin-top: 8px;">
+                                <label style="font-size: 0.9em; font-weight: bold;">Utility Generation Parameters</label>
+                                <small id="wandlight_continuity_generation_parameters_note" style="opacity: 0.62; display: none;">Controlled by the selected Connection Profile and Provider preset.</small>
+                            </div>
+                            <div id="wandlight_continuity_generation_parameters" style="display: flex; gap: 12px; flex-wrap: wrap;">
                                 <div style="flex: 1; min-width: 100px;">
                                     <label style="font-size: 0.78em; opacity: 0.7;">Temperature</label>
                                     <input id="wandlight_continuity_temperature" class="text_pole" type="number"
@@ -135,8 +138,8 @@
                                 <select id="wandlight_lore_profile_id" class="text_pole" style="width: 100%;" title="Connection profile used for Wandlight reasoning tasks."><option value="">Select Profile</option></select>
                                 <small style="opacity: 0.72; display: block; margin-top: 4px;">Connection profiles include a settings preset. Install the Provider preset here, then create or update a SillyTavern Connection Profile that uses it with your preferred reasoning provider, model, and key. This is the most API-secure Wandlight setup because the provider key stays in SillyTavern's server-side API handling.</small>
                                 <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap;">
-                                    <button id="wandlight_lore_provider_preset_install" class="menu_button interactable" type="button" style="font-size: 0.78em; padding: 2px 8px;" title="Install or update the thin Provider-1.0 preset for use inside SillyTavern Connection Profiles.">
-                                        <i class="fa-solid fa-download"></i> Install Provider-1.0
+                                    <button id="wandlight_lore_provider_preset_install" class="menu_button interactable" type="button" style="font-size: 0.78em; padding: 2px 10px; min-width: 150px; white-space: nowrap; flex: 0 0 auto;" title="Install or update the thin Provider preset for use inside SillyTavern Connection Profiles. Current bundled version: Provider-1.2.">
+                                        <i class="fa-solid fa-download"></i> Install Provider
                                     </button>
                                     <small id="wandlight_lore_provider_preset_status" style="opacity: 0.65;"></small>
                                 </div>
@@ -163,8 +166,11 @@
                                 <small id="wandlight_lore_openai_key_status" style="opacity: 0.6; margin-top: 2px; display: block;"></small>
                             </div>
 
-                            <label style="font-size: 0.9em; font-weight: bold; margin-top: 8px;">Reasoning Generation Parameters</label>
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <div id="wandlight_lore_generation_parameters_header" style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline; margin-top: 8px;">
+                                <label style="font-size: 0.9em; font-weight: bold;">Reasoning Generation Parameters</label>
+                                <small id="wandlight_lore_generation_parameters_note" style="opacity: 0.62; display: none;">Controlled by the selected Connection Profile and Provider preset.</small>
+                            </div>
+                            <div id="wandlight_lore_generation_parameters" style="display: flex; gap: 12px; flex-wrap: wrap;">
                                 <div style="flex: 1; min-width: 100px;">
                                     <label style="font-size: 0.78em; opacity: 0.7;">Temperature</label>
                                     <input id="wandlight_lore_temperature" class="text_pole" type="number"

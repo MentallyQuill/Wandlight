@@ -59,6 +59,7 @@ function parseNumericSetting(input, fallback, min, max, integer = false) {
 
 const CHAT_COMPLETION_PRESET_API_ID = 'openai';
 let bundledProviderPresetCache = null;
+let providerPresetInstallConfirmed = false;
 
 function getLocalAssetSrc(assetPath) {
     if (!assetPath) return '';
@@ -92,8 +93,19 @@ function getChatCompletionPresetManager() {
 
 function getInstalledProviderPreset(pm) {
     const names = typeof pm?.getAllPresets === 'function' ? pm.getAllPresets() : [];
-    if (!Array.isArray(names)) return '';
-    return names.find(name => String(name || '').trim().toLowerCase() === WANDLIGHT_PROVIDER_PRESET_NAME.toLowerCase()) || '';
+    if (Array.isArray(names)) {
+        const exact = names.find(name => String(name || '').trim().toLowerCase() === WANDLIGHT_PROVIDER_PRESET_NAME.toLowerCase());
+        if (exact) return exact;
+    }
+    if (typeof pm?.getCompletionPresetByName === 'function') {
+        const preset = pm.getCompletionPresetByName(WANDLIGHT_PROVIDER_PRESET_NAME);
+        if (preset) return WANDLIGHT_PROVIDER_PRESET_NAME;
+    }
+    if (typeof pm?.readPresetExtensionField === 'function') {
+        const meta = pm.readPresetExtensionField({ name: WANDLIGHT_PROVIDER_PRESET_NAME, path: 'wandlight' });
+        if (meta) return WANDLIGHT_PROVIDER_PRESET_NAME;
+    }
+    return providerPresetInstallConfirmed ? WANDLIGHT_PROVIDER_PRESET_NAME : '';
 }
 
 function ensureProviderPresetMetadata(preset) {
@@ -130,6 +142,7 @@ async function installBundledProviderPreset() {
     const previousName = typeof pm.getSelectedPresetName === 'function' ? pm.getSelectedPresetName() : '';
 
     await pm.savePreset(WANDLIGHT_PROVIDER_PRESET_NAME, preset);
+    providerPresetInstallConfirmed = true;
 
     if (previousValue && typeof pm.selectPreset === 'function') {
         try {
@@ -274,6 +287,7 @@ function setupProviderControls(container, kind, label) {
             const current = completionPresetSelect.value || getSettings()[presetKey] || '';
             completionPresetSelect.innerHTML = '<option value="">Profile preset</option>';
             const presets = getAvailableCompletionPresets();
+            const providerPresetInstalled = !!getInstalledProviderPreset(getChatCompletionPresetManager());
             const addedPresetIds = new Set(['']);
             const appendPresetOption = (id, labelText) => {
                 const normalizedId = String(id || '').trim();
@@ -289,6 +303,9 @@ function setupProviderControls(container, kind, label) {
                 opt.value = '';
                 opt.textContent = 'No completion presets found';
                 completionPresetSelect.appendChild(opt);
+            }
+            if (providerPresetInstalled) {
+                appendPresetOption(WANDLIGHT_PROVIDER_PRESET_NAME, `${WANDLIGHT_PROVIDER_PRESET_NAME} (recommended)`);
             }
             const recommended = presets.find(pr => {
                 const id = pr.name || pr.id || pr.presetId || pr.preset_id || pr.filename || pr.label || '';

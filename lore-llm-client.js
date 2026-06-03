@@ -300,15 +300,27 @@ function getCompletionPresets(ctx = getSillyTavernContext()) {
     const arrays = roots.flatMap(root => collectPossibleArrays(root, ['completionPresets', 'completion_presets', 'presetList', 'presets', 'kai_settings', 'textgenerationwebui_presets']));
     const out = [];
     const seen = new Set();
+    function addPresetId(id, source = {}) {
+        const normalized = String(id || '').trim();
+        if (!normalized || seen.has(normalized)) return;
+        seen.add(normalized);
+        out.push({ ...source, id: normalized, name: source.name || normalized });
+    }
+
     for (const arr of arrays) {
         for (const item of arr) {
             if (!item || typeof item !== 'object') continue;
             const id = String(item.name || item.id || item.presetId || item.preset_id || item.filename || item.label || '').trim();
-            if (!id || seen.has(id)) continue;
-            seen.add(id);
-            out.push(item);
+            addPresetId(id, item);
         }
     }
+    try {
+        const pm = typeof ctx?.getPresetManager === 'function' ? ctx.getPresetManager('openai') : null;
+        const names = typeof pm?.getAllPresets === 'function' ? pm.getAllPresets() : [];
+        if (Array.isArray(names)) {
+            for (const name of names) addPresetId(name);
+        }
+    } catch (_) {}
     return out;
 }
 

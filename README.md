@@ -69,17 +69,18 @@ In SillyTavern, open **Extensions**, choose **Install extension**, and paste the
 https://github.com/MentallyQuill/Wandlight
 ```
 
-After installation, restart or reload SillyTavern and open the Wandlight runtime window from the Extensions panel.
+After installation, restart or reload SillyTavern. Open Wandlight from the **Runtime Window** dropdown in the Extensions menu; if the window is ever closed or needs to be reset, use the same dropdown to bring it back.
 
 ### Recommended First Workflow
 
-1. Open Wandlight and confirm it is active.
-2. Check the Wandlight preset status. Install or update the preset if you want structured scene headers.
-3. Detect Story Context so Wandlight knows the current date, canon boundary, and branch.
-4. Preview Canon Packs or scan Story Lore.
-5. Review Pending Lore before accepting it.
-6. Open Injection and verify what Wandlight will send into the next prompt.
-7. Move to Advanced mode when you want continuity scanning, workbenches, automation, timeline recovery, or prompt-placement controls.
+1. Open Wandlight from the Extensions menu's **Runtime Window** dropdown and confirm it is active.
+2. Open **API and Model Settings** from the Extensions menu if you want Wandlight to run model-backed tasks. Configure the provider, API, and model settings before using context detection fallback, continuity scans, compression, or story-lore generation.
+3. Check the Wandlight preset status. Install or update the preset if you want structured scene headers.
+4. Detect Story Context so Wandlight knows the current date, canon boundary, and branch.
+5. Preview Canon Packs or scan Story Lore.
+6. Review Pending Lore before accepting it.
+7. Open Injection and verify what Wandlight will send into the next prompt.
+8. Move to Advanced mode when you want continuity scanning, workbenches, automation, timeline recovery, or prompt-placement controls.
 
 ### Basic Mode
 
@@ -100,6 +101,10 @@ The operator manual is organized by Wandlight runtime tab. Basic mode is enough 
 ### Runtime Shelf
 
 Wandlight opens as a runtime shelf inside SillyTavern. The shelf can stay expanded while you work through context, lore, continuity, and injection tools, or collapse down when you want the chat surface back.
+
+Use the **Runtime Window** dropdown in SillyTavern's Extensions menu to open, refocus, or restore the Wandlight runtime window if it has been closed.
+
+![Runtime Window Dropdown](Images/documentation/renders/wandlight-runtime-window-dropdown.png)
 
 <p align="center">
   <img src="Images/documentation/renders/wandlight-shelf-minimized.png" alt="Wandlight Shelf Minimized" width="79" height="564">
@@ -294,10 +299,23 @@ Compression prompts control how Wandlight compacts Continuity and relevance-tier
 
 ### Settings And Providers
 
+Use **API and Model Settings** from SillyTavern's Extensions menu to configure Wandlight's model-backed behavior. This is where you choose provider roles, API mode, model names, token limits, sampling settings, and connection tests.
+
+<p align="center">
+  <img src="Images/documentation/renders/wandlight-API-settings-dropdown.png" alt="API and Model Settings Dropdown" width="420">
+</p>
+
 Wandlight has two provider roles:
 
 - **Utility Provider** handles frequent, cheaper tasks such as compression and continuity scans.
 - **Reasoning Provider** handles deeper tasks such as Story Context model fallback and Story Lore Scan.
+
+Suggested starting points:
+
+| Provider Role | Suggested Models |
+| --- | --- |
+| **Reasoning** | Opus 4.6+, ChatGPT-5.5, GLM-5.1, Deepseek-V4 Thinking |
+| **Utility** | Minimax-M2.7+, DeepSeek V4 Flash (Thinking), Qwen3.6 A3B Thinking |
 
 Each provider can use:
 

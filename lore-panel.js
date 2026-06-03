@@ -3116,6 +3116,13 @@ async function performStoryContextDetection(options = {}) {
         toast('Story context detection completed, but it did not find date/canon fields to populate.', 'warning');
         return false;
     }
+    const validation = validateLoreProviderConfiguration('lore');
+    if (!validation.ok) {
+        const message = `API/model settings incomplete for Detect Story Context: ${validation.message}`;
+        setFeatureProgress('context', message, 100);
+        toast(message, 'error');
+        return false;
+    }
     toast('Story context detection returned no usable result.', 'warning');
     return false;
 }

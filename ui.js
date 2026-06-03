@@ -109,6 +109,19 @@ function setupProviderControls(container, kind, label) {
         if (openaiRow) openaiRow.style.display = provider === 'openai_compatible' ? '' : 'none';
     }
 
+    function getProfileWarningText() {
+        return `${label} connection profiles can include their own preset and generation parameters, which may change Wandlight's structured output. Test this profile before relying on model-backed tasks.`;
+    }
+
+    function showProfileWarning() {
+        const warning = getProfileWarningText();
+        if (connectionStatus) {
+            connectionStatus.textContent = warning;
+            connectionStatus.style.color = '#d6b35a';
+        }
+        if (typeof toastr !== 'undefined') toastr.warning(warning);
+    }
+
     if (providerSelect) {
         providerSelect.addEventListener('change', () => {
             const next = getSettings();
@@ -116,6 +129,7 @@ function setupProviderControls(container, kind, label) {
             saveLoreProviderSettings(next);
             if (connectionStatus) connectionStatus.textContent = '';
             refreshProviderRows();
+            if (providerSelect.value === 'profile') showProfileWarning();
         });
     }
 

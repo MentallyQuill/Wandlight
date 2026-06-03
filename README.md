@@ -63,13 +63,13 @@ The lore workbench gives long-form stories a larger management surface for revie
 
 ### Install Wandlight
 
-Place the extension folder here:
+In SillyTavern, open **Extensions**, choose **Install extension**, and paste the Wandlight GitHub URL:
 
 ```text
-data/default-user/extensions/third-party/Wandlight
+https://github.com/MentallyQuill/Wandlight
 ```
 
-Restart SillyTavern and open the Wandlight runtime window from the Extensions panel.
+After installation, restart or reload SillyTavern and open the Wandlight runtime window from the Extensions panel.
 
 ### Recommended First Workflow
 

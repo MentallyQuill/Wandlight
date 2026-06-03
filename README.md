@@ -10,49 +10,32 @@ Large language models tend to be lore-rich but timeline-poor: they often know a 
 
 ## Feature Overview
 
-### Date-Aware Lore Database
-
-Wandlight includes a local Harry Potter lore database built around chronology, knowledge boundaries, canon events, secrets, spell plausibility, and AU-safe constraints. Canon lore suggestions run locally and do not require model calls.
-
-### Lore Generation From Active Chats
-
-Wandlight can scan roleplay history with a reasoning model and generate durable story-specific lore, including AU facts, relationship changes, item states, secrets, rules, and long-term continuity constraints.
-
-### Reviewable Lore Cards
-
-Generated, suggested, and manually created lore enters Pending Review before acceptance. Each lore card can be edited, retagged, reprioritized, accepted, dismissed, pinned, muted, or routed as an update to existing lore.
-
-### Lore Timeline Visualizer
-
-Accepted lore changes are tracked over time, including creation, edits, deletions, restores, pin/mute changes, and metadata updates. The timeline visualizer gives long-form stories an audit trail and recovery path.
-
-### Relevance-Tiered Injection
-
-Accepted lore is organized into High, Normal, and Low relevance tiers. Each tier has its own prompt placement, Direct/Compressed mode, token strategy, and compression cache for smarter prompt budgeting.
-
-### Continuity Tracking
-
-Wandlight tracks lightweight live-state details such as scene, timeline, active characters, emotional state, appearance, key items, objectives, and active story threads without turning every moment into permanent lore.
-
-### Story Context Detection
-
-Wandlight detects the current story date, canon boundary, and branch so canon lookup, lore generation, and relevance scoring stay aligned with the Harry Potter timeline.
-
-### Wandlight Chat Preset Support
-
-The bundled Wandlight chat preset adds structured scene headers that improve fast context detection. Wandlight can check and install the preset, but the extension still works without it.
-
-### Basic And Advanced Experience Modes
-
-Basic mode keeps Wandlight focused on the core workflow: context, lore review, and injection. Advanced mode unlocks deeper controls for continuity scanning, automation, workbenches, timeline recovery, prompt placement, compression, and tuning.
-
-### Guided Walkthroughs
-
-Built-in walkthroughs introduce the core workflow in Basic mode and the full operator toolset in Advanced mode, highlighting the relevant controls directly inside the runtime window.
-
-### Flexible Automation Modes
-
-Manual, Assisted, and Automatic modes let users choose how much Wandlight does in the background, from click-only operation to automatic continuity, context, lore, and relevance maintenance.
+<table>
+  <tr>
+    <td width="50%" valign="top"><strong>Date-Aware Lore Database</strong><br>Wandlight includes a local Harry Potter lore database built around chronology, knowledge boundaries, canon events, secrets, spell plausibility, and AU-safe constraints. Canon lore suggestions run locally and do not require model calls.</td>
+    <td width="50%" valign="top"><strong>Lore Generation From Active Chats</strong><br>Wandlight can scan roleplay history with a reasoning model and generate durable story-specific lore, including AU facts, relationship changes, item states, secrets, rules, and long-term continuity constraints.</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><strong>Reviewable Lore Cards</strong><br>Generated, suggested, and manually created lore enters Pending Review before acceptance. Each lore card can be edited, retagged, reprioritized, accepted, dismissed, pinned, muted, or routed as an update to existing lore.</td>
+    <td width="50%" valign="top"><strong>Lore Timeline Visualizer</strong><br>Accepted lore changes are tracked over time, including creation, edits, deletions, restores, pin/mute changes, and metadata updates. The timeline visualizer gives long-form stories an audit trail and recovery path.</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><strong>Relevance-Tiered Injection</strong><br>Accepted lore is organized into High, Normal, and Low relevance tiers. Each tier has its own prompt placement, Direct/Compressed mode, token strategy, and compression cache for smarter prompt budgeting.</td>
+    <td width="50%" valign="top"><strong>Continuity Tracking</strong><br>Wandlight tracks lightweight live-state details such as scene, timeline, active characters, emotional state, appearance, key items, objectives, and active story threads without turning every moment into permanent lore.</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><strong>Story Context Detection</strong><br>Wandlight detects the current story date, canon boundary, and branch so canon lookup, lore generation, and relevance scoring stay aligned with the Harry Potter timeline.</td>
+    <td width="50%" valign="top"><strong>Wandlight Chat Preset Support</strong><br>The bundled Wandlight chat preset adds structured scene headers that improve fast context detection. Wandlight can check and install the preset, but the extension still works without it.</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><strong>Basic And Advanced Experience Modes</strong><br>Basic mode keeps Wandlight focused on the core workflow: context, lore review, and injection. Advanced mode unlocks deeper controls for continuity scanning, automation, workbenches, timeline recovery, prompt placement, compression, and tuning.</td>
+    <td width="50%" valign="top"><strong>Guided Walkthroughs</strong><br>Built-in walkthroughs introduce the core workflow in Basic mode and the full operator toolset in Advanced mode, highlighting the relevant controls directly inside the runtime window.</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><strong>Flexible Automation Modes</strong><br>Manual, Assisted, and Automatic modes let users choose how much Wandlight does in the background, from click-only operation to automatic continuity, context, lore, and relevance maintenance.</td>
+    <td width="50%" valign="top"></td>
+  </tr>
+</table>
 
 ## Wandlight In Use
 
@@ -102,13 +85,7 @@ Restart SillyTavern and open the Wandlight runtime window from the Extensions pa
 
 Basic mode gives you the shortest path through Wandlight: set context, add or review lore, and inspect injection.
 
-![Basic Session](Images/documentation/renders/basic-session-overview.png)
-
-![Basic Context](Images/documentation/renders/basic-context-overview.png)
-
 ![Basic Lore](Images/documentation/renders/basic-lore-overview.png)
-
-![Basic Injection](Images/documentation/renders/basic-injection-overview.png)
 
 ### Guided Tours
 
@@ -125,8 +102,8 @@ The operator manual is organized by Wandlight runtime tab. Basic mode is enough 
 Wandlight opens as a runtime shelf inside SillyTavern. The shelf can stay expanded while you work through context, lore, continuity, and injection tools, or collapse down when you want the chat surface back.
 
 <p align="center">
-  <img src="Images/documentation/renders/wandlight-shelf-minimized.png" alt="Wandlight Shelf Minimized" width="32%">
-  <img src="Images/documentation/renders/wandlight-shelf-expanded.png" alt="Wandlight Shelf Expanded" width="64%">
+  <img src="Images/documentation/renders/wandlight-shelf-minimized.png" alt="Wandlight Shelf Minimized" width="79" height="564">
+  <img src="Images/documentation/renders/wandlight-shelf-expanded.png" alt="Wandlight Shelf Expanded" width="266" height="600">
 </p>
 
 ### Session

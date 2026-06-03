@@ -10,6 +10,31 @@ LLMs tend to be lore-rich but timeline-poor: they often know a fandom broadly, b
 
 Wandlight is built to solve that problem with a local date-aware lore database, reviewable lore cards, lightweight continuity tracking, and relevance-tiered prompt injection. Because of its focus on durable-lore, it can be used in tandem with general memory extensions such as [MemoryBooks](https://github.com/aikohanasaki/SillyTavern-MemoryBooks), [Summaryception](https://github.com/Lodactio/Extension-Summaryception), and [VectFox](https://github.com/KritBlade/VectFox).
 
+## Table of Contents
+
+- [Feature Overview](#feature-overview)
+- [Wandlight In Use](#wandlight-in-use)
+  - [Canon Lore Suggestions](#canon-lore-suggestions)
+  - [Accepted Lore Entries](#accepted-lore-entries)
+  - [Lore Workbench](#lore-workbench)
+- [Getting Started](#getting-started)
+  - [Install Wandlight](#install-wandlight)
+  - [Recommended First Workflow](#recommended-first-workflow)
+  - [Basic Mode](#basic-mode)
+  - [Guided Tours](#guided-tours)
+- [Operator's Manual](#operators-manual)
+  - [Runtime Shelf](#runtime-shelf)
+  - [Session](#session)
+  - [Context](#context)
+  - [Continuity](#continuity)
+  - [Lore](#lore)
+  - [Injection](#injection)
+  - [Settings And Providers](#settings-and-providers)
+  - [Local Lore Database](#local-lore-database)
+- [Lore Card Model](#lore-card-model)
+- [Relevance Tiers](#relevance-tiers)
+- [License](#license)
+
 ## Feature Overview
 
 <table>
@@ -340,18 +365,9 @@ The bundled `Lore/` database is a chronology and constraint layer, not a wiki. I
 
 See [Lore/README.md](Lore/README.md) for schema guidance, custom file setup, gate types, scoring, and authoring policy.
 
-## Mental Model
-
-```text
-Context    = where the story is in time, canon, and branch
-Continuity = lightweight current scene state
-Lore       = durable accepted facts and constraints
-Relevance  = how close a lore entry is to the current story moment
-Injection  = where each relevance tier is placed in the prompt
-Compression = compacting each prompt group independently
-```
-
 ## Lore Card Model
+
+![Lore Entry Card](Images/documentation/renders/lore-entry-card.png)
 
 Accepted lore entries use independent fields:
 

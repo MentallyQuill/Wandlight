@@ -1,4 +1,6 @@
-![Wandlight](Images/documentation/wandlight-banner.png)
+<p align="center">
+  <img src="Images/documentation/wandlight-banner.png" alt="Wandlight">
+</p>
 
 # Wandlight
 
@@ -51,6 +53,28 @@ Built-in walkthroughs introduce the core workflow in Basic mode and the full ope
 ### Flexible Automation Modes
 
 Manual, Assisted, and Automatic modes let users choose how much Wandlight does in the background, from click-only operation to automatic continuity, context, lore, and relevance maintenance.
+
+## Wandlight In Use
+
+Wandlight runs inside SillyTavern as a focused writing companion: it suggests relevant canon lore, keeps accepted lore editable, and provides larger workbench views when a story grows beyond a handful of cards.
+
+### Canon Lore Suggestions
+
+Local canon suggestions use the current Story Context to find date-aware lore cards from the bundled database.
+
+![Wandlight suggesting canon lore](Images/documentation/renders/wandlight-example-suggesting-canon-lore.png)
+
+### Accepted Lore Entries
+
+Accepted lore stays searchable, editable, and organized by relevance, category, source, pin/mute state, and metadata.
+
+![Wandlight accepted lore entries](Images/documentation/renders/wandlight-example-lore-entries.png)
+
+### Lore Workbench
+
+The lore workbench gives long-form stories a larger management surface for reviewing, editing, filtering, and maintaining lore cards.
+
+![Wandlight lore workbench](Images/documentation/renders/wandlight-example-lore-workbench.png)
 
 ## Getting Started
 
@@ -116,6 +140,14 @@ Use **Start Advanced Walkthrough** in Advanced mode for the full operator tour:
 ## Operator's Manual
 
 The operator manual is organized by Wandlight runtime tab. Basic mode is enough for normal use; Advanced mode exposes the full control surface.
+
+### Runtime Shelf
+
+Wandlight opens as a runtime shelf inside SillyTavern. The shelf can stay expanded while you work through context, lore, continuity, and injection tools, or collapse down when you want the chat surface back.
+
+![Wandlight Shelf Expanded](Images/documentation/renders/wandlight-shelf-expanded.png)
+
+![Wandlight Shelf Minimized](Images/documentation/renders/wandlight-shelf-minimized.png)
 
 ### Session
 

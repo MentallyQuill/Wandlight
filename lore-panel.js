@@ -3888,7 +3888,7 @@ function getContinuityScanScopeSummary(settings = getSettings()) {
 
 function getContinuityScanPerformanceSummary(settings = getSettings()) {
     const strategy = settings.continuityScanStrategy || 'adaptive';
-    const fast = settings.continuityScanFastThreshold || 20;
+    const fast = settings.continuityScanFastThreshold || 4;
     const hybrid = settings.continuityScanHybridThreshold || 80;
     return `${strategy} · fast ≤${fast} · hybrid ≤${hybrid}`;
 }
@@ -3949,7 +3949,7 @@ function createContinuityScanScopeSettingsContent() {
 
     const help = document.createElement('div');
     help.className = 'wandlight-runtime-help wandlight-compact-help';
-    help.textContent = 'Adaptive continuity scans use a single compact delta call for small recent windows, grouped calls for medium ranges, and checkpointed chunks only for large backfills.';
+    help.textContent = 'Adaptive continuity scans use a single compact delta call only for very small windows, parallel grouped calls for routine recent scans, and checkpointed chunks for large backfills.';
     content.appendChild(help);
     return content;
 }
@@ -3960,7 +3960,7 @@ function createContinuityScanPerformanceSettingsContent() {
     appendSettingsResetButton(content, CONTINUITY_SCAN_PERFORMANCE_SETTING_KEYS, 'Continuity performance and recovery settings');
     content.appendChild(createSelectSettingRow(
         'Scan strategy',
-        'Adaptive uses one fast delta call for small recent scans, grouped hybrid calls for medium ranges, and the checkpointed bulk pipeline for large backfills.',
+        'Adaptive uses one fast delta call only for very small scans, grouped hybrid calls for routine recent ranges, and the checkpointed bulk pipeline for large backfills.',
         'continuityScanStrategy',
         [
             ['adaptive', 'Adaptive'],
@@ -3969,7 +3969,7 @@ function createContinuityScanPerformanceSettingsContent() {
             ['bulk', 'Always bulk/checkpointed'],
         ]
     ));
-    content.appendChild(createRangeSettingRow('Fast threshold', 'Adaptive scans at or below this message count use the single-call fast continuity delta path.', 'continuityScanFastThreshold', { min: 1, max: 200, fallback: 20 }));
+    content.appendChild(createRangeSettingRow('Fast threshold', 'Adaptive scans at or below this message count use the single-call fast continuity delta path. Keep this low if your provider is slow on large JSON calls.', 'continuityScanFastThreshold', { min: 1, max: 200, fallback: 4 }));
     content.appendChild(createRangeSettingRow('Hybrid threshold', 'Adaptive scans above the fast threshold and at or below this count use grouped hybrid delta calls. Larger scans use the checkpointed bulk path.', 'continuityScanHybridThreshold', { min: 20, max: 500, fallback: 80 }));
     content.appendChild(createRangeSettingRow('Fast max tokens', 'Maximum output tokens for the fast single-call continuity scan.', 'continuityFastMaxTokens', { min: 512, max: 8192, fallback: 2048 }));
     content.appendChild(createRangeSettingRow('Hybrid max tokens', 'Maximum output tokens for each grouped hybrid continuity scan call.', 'continuityHybridMaxTokens', { min: 512, max: 8192, fallback: 3072 }));

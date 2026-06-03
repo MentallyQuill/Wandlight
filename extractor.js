@@ -8,13 +8,41 @@
  */
 
 import { LOG_PREFIX } from './constants.js';
-import { getSettings } from './state-manager.js';
+import { getSettings, getState, saveState } from './state-manager.js';
 import { runLoreContextDetection, runStoryLoreScan } from './lore-generator.js';
 import { runContinuityScan } from './continuity-scanner.js';
 import { validateLoreProviderConfiguration } from './lore-llm-client.js';
 
 /** Guard flag to prevent concurrent continuity scans. */
 let _extractionRunning = false;
+let _continuityProgressResetTimer = null;
+
+function setContinuityProgressState(message, percent = 0) {
+    const state = getState();
+    if (!state?.lorePanel) return;
+    const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
+    if (_continuityProgressResetTimer && safePercent < 100 && globalThis.clearTimeout) {
+        globalThis.clearTimeout(_continuityProgressResetTimer);
+        _continuityProgressResetTimer = null;
+    }
+    state.lorePanel.continuityStatus = message;
+    state.lorePanel.continuityProgress = safePercent;
+    saveState(state, { syncPrompt: false, sanitize: false });
+    if (typeof globalThis._wandlightRefreshUI === 'function') globalThis._wandlightRefreshUI();
+    if (safePercent >= 100 && globalThis.setTimeout) {
+        if (_continuityProgressResetTimer && globalThis.clearTimeout) globalThis.clearTimeout(_continuityProgressResetTimer);
+        _continuityProgressResetTimer = globalThis.setTimeout(() => {
+            const fresh = getState();
+            if (fresh?.lorePanel) {
+                fresh.lorePanel.continuityStatus = 'Idle.';
+                fresh.lorePanel.continuityProgress = 0;
+                saveState(fresh, { syncPrompt: false, sanitize: false });
+                if (typeof globalThis._wandlightRefreshUI === 'function') globalThis._wandlightRefreshUI();
+            }
+            _continuityProgressResetTimer = null;
+        }, 2200);
+    }
+}
 
 /**
  * Main continuity scan handler. Called by manual UI/slash command and by
@@ -53,12 +81,16 @@ export async function onExtractionTriggered(options = {}) {
 
     _extractionRunning = true;
     try {
+        const progress = typeof options.progress === 'function'
+            ? options.progress
+            : (message, percent) => setContinuityProgressState(message, percent);
         const result = await runContinuityScan({
             ...options,
             force,
             source: force ? 'manual' : 'auto',
             automationSafe: !force,
             applyImmediately: !!applyImmediately,
+            progress,
         });
 
         if (typeof globalThis._wandlightRefreshUI === 'function') globalThis._wandlightRefreshUI();

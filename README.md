@@ -32,6 +32,7 @@ Relased under an MIT License, the underlying framework of Wandlight can be reski
   - [Lore](#lore)
   - [Injection](#injection)
   - [Settings And Providers](#settings-and-providers)
+    - [Connection Profiles](#connection-profiles)
   - [Local Lore Database](#local-lore-database)
 - [Lore Card Model](#lore-card-model)
 - [Relevance Tiers](#relevance-tiers)
@@ -355,6 +356,25 @@ Each provider can use:
 Direct OpenAI-compatible endpoints are the simplest provider path when you are comfortable storing a Wandlight-specific key in the browser session. Connection Profiles are useful when you want SillyTavern to hold the provider key server-side, but they also carry a settings preset. When using a Connection Profile provider, install the **Provider preset** from that provider row in **API and Model Settings**, then create or update a SillyTavern Connection Profile that uses the Provider preset with your preferred provider, model, and key. The bundled Provider preset is intentionally thin, avoiding provider-specific model defaults, normal-chat prompt scaffolding, and the full Wandlight preset in background utility/reasoning calls.
 
 For direct endpoints and the current SillyTavern model, Wandlight exposes temperature, top-p, max tokens, reset defaults, and connection testing. For Connection Profiles, tune sampling and token settings in the SillyTavern profile/preset instead; Wandlight disables those local fields to avoid implying they own the profile.
+
+#### Connection Profiles
+
+Connection Profiles are the recommended setup when you want Wandlight's provider keys and provider routing handled by SillyTavern instead of by Wandlight's browser-local direct endpoint storage.
+
+<p align="center">
+  <img src="Images/documentation/renders/API-connection-profiles.png" alt="API settings using Connection Profiles" width="420">
+</p>
+
+Use separate profiles when you want different models for different job types. A Utility profile can point at a cheaper, faster model for compression and continuity scans, while a Reasoning profile can point at a stronger model for Story Context fallback and Story Lore Scan.
+
+Recommended setup:
+
+1. In Wandlight's **API and Model Settings**, set Utility Provider and/or Reasoning Provider to **Connection Profile**.
+2. Install or reinstall the **Provider preset** from the matching provider row.
+3. In SillyTavern, create or update a Connection Profile using your preferred provider, model, key, and the Provider preset.
+4. Return to Wandlight, select the saved Connection Profile from the dropdown, then run **Test Utility** or **Test Reasoning**.
+
+When a provider role uses Connection Profile mode, the local temperature, top-p, and max-token fields in Wandlight are disabled because the selected SillyTavern profile and Provider preset own those generation settings. If output shape changes unexpectedly, check the Connection Profile's selected preset first.
 
 ### Local Lore Database
 

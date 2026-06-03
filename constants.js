@@ -126,7 +126,7 @@ export const DEFAULT_SETTINGS = {
     // Runtime automation modes. These replace the old single workflow preset for new behavior.
     automationMode: 'manual',
     continuityTrackingMode: 'manual', // 'manual' | 'automatic'
-    continuityAutoInterval: 5, // turns between automatic continuity scans
+    continuityAutoInterval: 10, // turns between automatic continuity scans
     contextDetectionMode: 'manual', // 'manual' | 'automatic'
     contextDetectionAutoInterval: 5,
     contextHeaderDetectionEnabled: true,
@@ -153,7 +153,7 @@ export const DEFAULT_SETTINGS = {
     continuityScanRetainRawResponses: false,
     continuityScanRetainCompletedBatches: 3,
     continuityScanStrategy: 'adaptive', // 'adaptive' | 'fast' | 'hybrid' | 'bulk'
-    continuityScanFastThreshold: 20,
+    continuityScanFastThreshold: 4,
     continuityScanHybridThreshold: 80,
     continuityFastMaxTokens: 2048,
     continuityHybridMaxTokens: 3072,
@@ -177,6 +177,7 @@ export const DEFAULT_SETTINGS = {
     loreBootstrapStoryLoreThreshold: 12,
     loreBootstrapDefaultsMigrated20260531: true,
     loreAutomationDefaultsMigrated20260602: true,
+    continuityPerformanceDefaultsMigrated20260603: true,
     loreReplacementGuard: true,
     loreDuplicateGuard: true,
     loreSimilarityRouting: true,

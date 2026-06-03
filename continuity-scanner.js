@@ -61,6 +61,51 @@ function truncateText(value, max = 1000) {
     return `${text.slice(0, Math.max(0, max - 1))}…`;
 }
 
+function formatElapsed(ms) {
+    const total = Math.max(0, Math.floor(Number(ms || 0) / 1000));
+    const minutes = Math.floor(total / 60);
+    const seconds = total % 60;
+    return minutes ? `${minutes}m ${seconds}s` : `${seconds}s`;
+}
+
+function compactProgressClip(value, max = 180) {
+    return truncateText(String(value || '').replace(/\s+/g, ' ').trim(), max);
+}
+
+function createProgressHeartbeat(progress, options = {}) {
+    if (typeof progress !== 'function') return { stop() {}, pulse() {} };
+    const startedAt = Date.now();
+    const label = options.label || 'Continuity scan';
+    const basePercent = Math.max(0, Math.min(98, Number(options.basePercent) || 10));
+    const maxPercent = Math.max(basePercent, Math.min(99, Number(options.maxPercent) || 95));
+    const intervalMs = Math.max(2500, Number(options.intervalMs) || 8000);
+    let tick = 0;
+    let stopped = false;
+
+    function getDetailText() {
+        const detail = typeof options.detail === 'function' ? options.detail() : options.detail;
+        return compactProgressClip(detail || '', options.detailMax || 180);
+    }
+
+    function emit(prefix = 'Still working') {
+        if (stopped) return;
+        tick += 1;
+        const elapsed = formatElapsed(Date.now() - startedAt);
+        const eased = Math.min(maxPercent, basePercent + Math.floor(Math.log2(tick + 1) * 6));
+        const detail = getDetailText();
+        progress(`${prefix}: ${label} (${elapsed})${detail ? ` - ${detail}` : ''}`, eased);
+    }
+
+    const timer = globalThis.setInterval ? globalThis.setInterval(() => emit('Still working'), intervalMs) : null;
+    return {
+        pulse: emit,
+        stop() {
+            stopped = true;
+            if (timer && globalThis.clearInterval) globalThis.clearInterval(timer);
+        },
+    };
+}
+
 function stableStringHash(value) {
     const text = String(value || '');
     let hash = 2166136261;
@@ -1106,26 +1151,37 @@ async function runFastContinuityDeltaScan({ settings, plan, options, stateAtStar
     const systemPrompt = buildContinuityDeltaSystemPrompt({ settings, stateProjection: projection, enabledSections, prepass, mode: 'fast' });
     const userPrompt = buildFastContinuityUserPrompt(plan);
     progress?.('Fast continuity scan running.', 25);
+    const heartbeat = createProgressHeartbeat(progress, {
+        label: 'Fast continuity scan',
+        basePercent: 25,
+        maxPercent: 88,
+        detail: () => `single model call over messages ${plan.startIndex}-${plan.endIndex}`,
+    });
     let delta = null;
     try {
         delta = await requestContinuityDelta(systemPrompt, userPrompt, settings, options, 'fast');
     } catch (e) {
         delta = inferFallbackDeltaFromPlan(plan, getState());
         if (!delta) {
+            heartbeat.stop();
             flushContinuityFullCheckpoint(batchId, { status: 'failed', strategy: 'fast', error: e?.message || String(e || ''), failedAt: Date.now() });
             return { status: 'failed_exception', batchId, strategy: 'fast', error: e?.message || String(e || '') };
         }
+    } finally {
+        heartbeat.stop();
     }
     if (!delta || !Object.keys(delta.changes || {}).length) delta = inferFallbackDeltaFromPlan(plan, getState()) || delta;
     return finalizeContinuityScanDelta({ batchId, delta, plan, settings, options, progress, scanStatus: 'complete', meta: { strategy: 'fast', modelCallCount: 1, prepass } });
 }
 
 function getHybridDeltaGroups(stateAtStart = getState()) {
-    const groups = [
-        { id: 'essentials', label: 'Scene, Timeline, and Characters', sections: ['canon', 'scene', 'characters'].filter(section => isContinuitySectionEnabled(stateAtStart, section)) },
-        { id: 'details', label: 'Key Items, Active Goals, and Threads', sections: ['inventory', 'objectives', 'threads'].filter(section => isContinuitySectionEnabled(stateAtStart, section)) },
-    ];
-    return groups.filter(group => group.sections.length);
+    return SECTION_GROUPS
+        .map(group => ({
+            id: group.id,
+            label: group.label,
+            sections: group.sections.filter(section => isContinuitySectionEnabled(stateAtStart, section)),
+        }))
+        .filter(group => group.sections.length);
 }
 
 async function runHybridContinuityDeltaScan({ settings, plan, options, stateAtStart }) {
@@ -1151,18 +1207,47 @@ async function runHybridContinuityDeltaScan({ settings, plan, options, stateAtSt
 
     const prepass = buildLocalContinuityPrepass(plan);
     const concurrency = clampInt(settings.continuityScanReducerConcurrency, 1, 3, 2);
-    progress?.(`Hybrid continuity scan running: ${groups.length} section group(s).`, 20);
+    let completedGroups = 0;
+    let failedGroups = 0;
+    const runningGroups = new Set();
+    const groupClips = [];
+    const progressDetail = () => {
+        const running = Array.from(runningGroups).join(', ');
+        const latest = groupClips.length ? `Latest: ${groupClips[groupClips.length - 1]}` : '';
+        return [`${completedGroups}/${groups.length} groups complete`, running ? `running ${running}` : '', latest].filter(Boolean).join('; ');
+    };
+    const heartbeat = createProgressHeartbeat(progress, {
+        label: 'Hybrid continuity scan',
+        basePercent: 20,
+        maxPercent: 82,
+        detail: progressDetail,
+    });
+    progress?.(`Hybrid continuity scan running: ${groups.length} section group(s), ${concurrency} at a time.`, 20);
     const results = await runWithConcurrency(groups, concurrency, async group => {
+        runningGroups.add(group.label);
+        progress?.(`Hybrid continuity scan: ${completedGroups}/${groups.length} groups complete; scanning ${group.label}.`, Math.min(78, 22 + Math.round((completedGroups / Math.max(1, groups.length)) * 52)));
         const projection = buildContinuityProjectionForSections(stateAtStart, group.sections);
         const systemPrompt = buildContinuityDeltaSystemPrompt({ settings, stateProjection: projection, enabledSections: group.sections, prepass, mode: 'hybrid' });
         const userPrompt = buildHybridContinuityUserPrompt(group, plan);
         try {
             const delta = await requestContinuityDelta(systemPrompt, userPrompt, settings, options, 'hybrid');
-            return { status: 'complete', group, delta: restrictDeltaToGroup(delta, group) };
+            const restricted = restrictDeltaToGroup(delta, group);
+            completedGroups++;
+            runningGroups.delete(group.label);
+            const clip = compactProgressClip(restricted?.summary || Object.keys(restricted?.changes || {}).join(', ') || `No ${group.label} changes`, 160);
+            if (clip) groupClips.push(`${group.label}: ${clip}`);
+            progress?.(`Hybrid continuity scan: ${completedGroups}/${groups.length} groups complete. ${clip ? `Latest: ${clip}` : ''}`, Math.min(82, 24 + Math.round((completedGroups / Math.max(1, groups.length)) * 55)));
+            return { status: 'complete', group, delta: restricted };
         } catch (e) {
+            failedGroups++;
+            runningGroups.delete(group.label);
+            const clip = compactProgressClip(e?.message || String(e || ''), 140);
+            if (clip) groupClips.push(`${group.label} failed: ${clip}`);
+            progress?.(`Hybrid continuity scan: ${completedGroups}/${groups.length} groups complete; ${failedGroups} failed.`, Math.min(82, 24 + Math.round(((completedGroups + failedGroups) / Math.max(1, groups.length)) * 55)));
             return { status: 'failed_exception', group, delta: null, error: e?.message || String(e || '') };
         }
     });
+    heartbeat.stop();
     let delta = mergeReducerDeltas(results);
     if (!delta || !Object.keys(delta.changes || {}).length) delta = inferFallbackDeltaFromPlan(plan, getState()) || delta;
     const failures = results.filter(r => String(r?.status || '').startsWith('failed')).length;
@@ -1242,6 +1327,15 @@ async function runBulkContinuityScan(options = {}) {
 
     try {
         progress?.(`Continuity scan started: ${queuedChunks.length} chunk(s).`, 5);
+        const observationHeartbeat = createProgressHeartbeat(progress, {
+            label: 'Continuity observation extraction',
+            basePercent: 8,
+            maxPercent: 78,
+            detail: () => {
+                const latest = summaries.length ? `Latest: ${summaries[summaries.length - 1]}` : '';
+                return [`${completed + failed}/${queuedChunks.length} chunks complete`, `${observationCount} observations`, latest].filter(Boolean).join('; ');
+            },
+        });
         const chunkResults = await runWithConcurrency(queuedChunks, concurrency, async chunk => {
             progress?.(`Continuity observations: ${completed + failed}/${queuedChunks.length} chunks complete.`, Math.min(80, 8 + Math.round(((completed + failed) / queuedChunks.length) * 65)));
             const result = await extractChunkObservations({ chunk, plan, batchId, settings, stateProjection: extractionProjection, signal: options.signal });
@@ -1250,8 +1344,11 @@ async function runBulkContinuityScan(options = {}) {
                 observations.push(...(result.observations || []));
                 observationCount += (result.observations || []).length;
                 if (result.summary) summaries.push(result.summary);
+                const clip = compactProgressClip(result.summary || `${(result.observations || []).length} observations`, 160);
+                progress?.(`Continuity observations: ${completed + failed}/${queuedChunks.length} chunks complete. ${clip ? `Latest: ${clip}` : ''}`, Math.min(80, 10 + Math.round(((completed + failed) / queuedChunks.length) * 65)));
             } else {
                 failed++;
+                progress?.(`Continuity observations: ${completed + failed}/${queuedChunks.length} chunks complete; ${failed} failed.`, Math.min(80, 10 + Math.round(((completed + failed) / queuedChunks.length) * 65)));
             }
             dirtySinceFull++;
             if (dirtySinceFull >= fullEvery) {
@@ -1260,14 +1357,32 @@ async function runBulkContinuityScan(options = {}) {
             }
             return result;
         });
+        observationHeartbeat.stop();
 
         flushContinuityFullCheckpoint(batchId, { completedChunks: completed, failedChunks: failed, observationCount, summaries: summaries.slice(-20), stage: 'reducing' });
         progress?.(`Continuity reducers running on ${observationCount} observations.`, 84);
 
         const enabledGroups = SECTION_GROUPS.filter(group => group.enabled(stateAtStart));
-        const reducerResults = await runWithConcurrency(enabledGroups, reducerConcurrency, async group => {
-            return await reduceObservationGroup({ group, observations, plan, settings, stateProjection: buildContinuityProjectionForSections(stateAtStart, group.sections), signal: options.signal });
+        let completedReducers = 0;
+        const reducerClips = [];
+        const reducerHeartbeat = createProgressHeartbeat(progress, {
+            label: 'Continuity reducers',
+            basePercent: 84,
+            maxPercent: 96,
+            detail: () => {
+                const latest = reducerClips.length ? `Latest: ${reducerClips[reducerClips.length - 1]}` : '';
+                return [`${completedReducers}/${enabledGroups.length} reducers complete`, latest].filter(Boolean).join('; ');
+            },
         });
+        const reducerResults = await runWithConcurrency(enabledGroups, reducerConcurrency, async group => {
+            const result = await reduceObservationGroup({ group, observations, plan, settings, stateProjection: buildContinuityProjectionForSections(stateAtStart, group.sections), signal: options.signal });
+            completedReducers++;
+            const clip = compactProgressClip(result?.delta?.summary || result?.error || `${group.label} ${result?.status || 'done'}`, 160);
+            if (clip) reducerClips.push(`${group.label}: ${clip}`);
+            progress?.(`Continuity reducers: ${completedReducers}/${enabledGroups.length} complete. ${clip ? `Latest: ${clip}` : ''}`, Math.min(96, 84 + Math.round((completedReducers / Math.max(1, enabledGroups.length)) * 10)));
+            return result;
+        });
+        reducerHeartbeat.stop();
         let delta = mergeReducerDeltas(reducerResults);
         if (!delta || !Object.keys(delta.changes || {}).length) {
             delta = inferFallbackDeltaFromPlan(plan, getState());

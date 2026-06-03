@@ -279,6 +279,19 @@ export function getSettings() {
         merged.providerParameterDefaultsMigrated20260602 = true;
     }
 
+    // One-time continuity performance migration. Earlier defaults used a
+    // single-call scan for routine recent windows, which looked frozen on slow
+    // JSON models. Preserve explicit user changes and move only old defaults.
+    if (stored.continuityPerformanceDefaultsMigrated20260603 !== true) {
+        if (stored.continuityAutoInterval === undefined || Number(stored.continuityAutoInterval) === 5) {
+            merged.continuityAutoInterval = 10;
+        }
+        if (stored.continuityScanFastThreshold === undefined || Number(stored.continuityScanFastThreshold) === 20) {
+            merged.continuityScanFastThreshold = 4;
+        }
+        merged.continuityPerformanceDefaultsMigrated20260603 = true;
+    }
+
     // Write back merged defaults so the object is complete going forward
     extensionSettings[MODULE_KEY] = merged;
     removeLegacyBuckets(extensionSettings);

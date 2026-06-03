@@ -118,6 +118,86 @@ function extractChatCompletionReasoning(json) {
     return parts.join('').slice(0, 12000);
 }
 
+function normalizeFinishReason(value) {
+    if (value === undefined || value === null || value === '') return '';
+    if (typeof value === 'object') {
+        return normalizeFinishReason(
+            value.reason
+            ?? value.type
+            ?? value.code
+            ?? value.status
+            ?? value.finish_reason
+            ?? value.finishReason
+            ?? value.stop_reason
+            ?? value.stopReason
+            ?? value.native_finish_reason
+            ?? value.nativeFinishReason
+        );
+    }
+    return String(value).trim().toLowerCase().replace(/[\s-]+/g, '_');
+}
+
+function collectFinishReasons(json) {
+    if (!json || typeof json !== 'object') return [];
+
+    const choice = Array.isArray(json.choices) ? json.choices[0] : null;
+    const message = choice?.message || json.message || {};
+    const candidate = Array.isArray(json.candidates) ? json.candidates[0] : null;
+    const output = Array.isArray(json.outputs) ? json.outputs[0] : Array.isArray(json.output) ? json.output[0] : null;
+    const details = choice?.finish_details || choice?.finishDetails || json.finish_details || json.finishDetails;
+    const metadata = json.response_metadata || json.responseMetadata || json.metadata || {};
+
+    return [
+        choice?.finish_reason,
+        choice?.finishReason,
+        choice?.native_finish_reason,
+        choice?.nativeFinishReason,
+        choice?.stop_reason,
+        choice?.stopReason,
+        message?.finish_reason,
+        message?.finishReason,
+        message?.stop_reason,
+        message?.stopReason,
+        json.finish_reason,
+        json.finishReason,
+        json.native_finish_reason,
+        json.nativeFinishReason,
+        json.stop_reason,
+        json.stopReason,
+        details,
+        metadata?.finish_reason,
+        metadata?.finishReason,
+        metadata?.stop_reason,
+        metadata?.stopReason,
+        candidate?.finish_reason,
+        candidate?.finishReason,
+        candidate?.stop_reason,
+        candidate?.stopReason,
+        output?.finish_reason,
+        output?.finishReason,
+        output?.stop_reason,
+        output?.stopReason,
+    ].map(normalizeFinishReason).filter(Boolean);
+}
+
+function isTokenLimitFinishReason(reason) {
+    const normalized = normalizeFinishReason(reason);
+    if (!normalized) return false;
+    if (['length', 'max_tokens', 'max_token', 'max_completion_tokens', 'max_output_tokens', 'token_limit', 'token_limit_reached', 'length_limit', 'truncated', 'incomplete'].includes(normalized)) return true;
+    return normalized.includes('max_token')
+        || normalized.includes('token_limit')
+        || normalized.includes('length_limit')
+        || normalized.includes('output_limit');
+}
+
+function assertNotTokenLimitedResponse(cfg, json, options = {}) {
+    const reason = collectFinishReasons(json).find(isTokenLimitFinishReason);
+    if (!reason) return;
+
+    const maxTokens = Math.max(1, Number(options.maxTokens || cfg.maxTokens || 8192) || 8192);
+    throw new Error(`${cfg.title} provider stopped because it hit the response token limit (${reason}; max ${maxTokens}). Increase ${cfg.title} Max Tokens, reduce source messages/chunk size, or use a model/provider with a larger output limit.`);
+}
+
 function makeFinalOnlyRetryPrompts(systemPrompt, userPrompt, options = {}) {
     const expectedOutput = String(options.expectedOutput || options.outputFormat || 'json').toLowerCase();
     const wantsText = /text|plain|compression|compressed/.test(expectedOutput);
@@ -406,6 +486,8 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
         throw new Error(`${cfg.title} OpenAI request failed (${attempt.response.status}): ${attempt.text.slice(0, 500)}`);
     }
 
+    assertNotTokenLimitedResponse(cfg, attempt.json, options);
+
     let content = extractChatCompletionText(attempt.json);
     if (!content || !content.trim()) {
         const reasoning = extractChatCompletionReasoning(attempt.json);
@@ -435,6 +517,7 @@ async function sendViaOpenAICompatible(cfg, systemPrompt, userPrompt, options = 
                 retry = await post(retryBody);
             }
             if (retry.response.ok) {
+                assertNotTokenLimitedResponse(cfg, retry.json, { ...options, maxTokens: Number(retryBody.max_tokens || retryBody.max_completion_tokens || options.maxTokens || cfg.maxTokens || 8192) });
                 content = extractChatCompletionText(retry.json);
                 if (content && content.trim()) return content;
             }
@@ -463,6 +546,9 @@ async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}
             responseLength: Math.max(128, Math.min(8192, Math.ceil(Number(responseLength || 8192) * lengthMultiplier))),
             bypassAll: true,
         });
+        if (result && typeof result === 'object') {
+            assertNotTokenLimitedResponse(cfg, result, { ...options, maxTokens: Math.max(128, Math.min(8192, Math.ceil(Number(responseLength || 8192) * lengthMultiplier))) });
+        }
         const content = typeof result === 'string' ? result : extractChatCompletionText(result);
         if (content && content.trim()) return content;
         const reasoning = result && typeof result === 'object' ? extractChatCompletionReasoning(result) : '';
@@ -483,11 +569,13 @@ async function sendViaSillyTavernRaw(cfg, systemPrompt, userPrompt, options = {}
         const prompts = reasoningPreview ? makeFinalOnlyRetryPrompts(systemPrompt, userPrompt, options) : { system: systemPrompt, user: userPrompt };
         const quietPrompt = `${prompts.system}\n\n${prompts.user}`;
         let result = await ctx.generateQuietPrompt({ quietPrompt });
+        if (result && typeof result === 'object') assertNotTokenLimitedResponse(cfg, result, options);
         lastResult = typeof result === 'string' ? result : extractChatCompletionText(result);
         if (lastResult && lastResult.trim()) return lastResult;
 
         // Older SillyTavern builds accept a raw string instead of an object.
         result = await ctx.generateQuietPrompt(quietPrompt);
+        if (result && typeof result === 'object') assertNotTokenLimitedResponse(cfg, result, options);
         lastResult = typeof result === 'string' ? result : extractChatCompletionText(result);
         if (lastResult && lastResult.trim()) return lastResult;
     }
@@ -536,6 +624,7 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
 
     let raw = await send(messages, 1);
     if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
+    if (raw && typeof raw === 'object') assertNotTokenLimitedResponse(cfg, raw, options);
     let content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
     if (content && content.trim()) return content;
 
@@ -547,6 +636,7 @@ async function sendViaConnectionProfile(cfg, systemPrompt, userPrompt, options =
             { role: 'user', content: retryPrompts.user },
         ], 2);
         if (options.signal?.aborted) throw new DOMException('Request aborted', 'AbortError');
+        if (raw && typeof raw === 'object') assertNotTokenLimitedResponse(cfg, raw, { ...options, maxTokens: Math.max(128, Math.min(8192, Math.ceil(Number(options.maxTokens || cfg.maxTokens || 8192) * 2))) });
         content = typeof raw === 'string' ? raw : extractChatCompletionText(raw);
         if (content && content.trim()) return content;
         throw new Error(`${cfg.title} connection profile returned reasoning-only output with empty visible content. Retried with final-only visible-output instructions but still received no visible content. Increase max tokens, reduce reasoning effort in the profile/preset, or use a non-thinking model. Reasoning preview: ${reasoning.slice(0, 300)}`);

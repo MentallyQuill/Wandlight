@@ -9724,6 +9724,9 @@ export function resetLorePanelLayout(options = {}) {
         layoutVersion: LAYOUT_VERSION,
     });
 
+    const settings = getSettings();
+    settings.collapsedSections = { ...(DEFAULT_SETTINGS.collapsedSections || {}) };
+    saveSettings(settings);
     saveState(state);
     showLorePanel();
 

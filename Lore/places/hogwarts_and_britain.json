@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 2,
   "entries": [
     {
       "id": "canon_hogwarts_school_setting",
@@ -118,7 +119,7 @@
           "Hogsmeade"
         ]
       },
-      "priority": 60,
+      "priority": 50,
       "status": "active",
       "source": "canon-lore-db:places/hogwarts_and_britain.json",
       "locked": true,
@@ -200,7 +201,7 @@
           "Ministry"
         ]
       },
-      "priority": 68,
+      "priority": 50,
       "status": "active",
       "source": "canon-lore-db:places/hogwarts_and_britain.json",
       "locked": true,

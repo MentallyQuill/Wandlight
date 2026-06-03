@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 2,
   "entries": [
     {
       "id": "canon_dumbledore_headmaster",
@@ -33,7 +34,7 @@
           "Dumbledore"
         ]
       },
-      "priority": 93,
+      "priority": 90,
       "status": "active",
       "source": "canon-lore-db:characters/adults_and_factions.json",
       "locked": true,
@@ -157,7 +158,7 @@
           "Snape"
         ]
       },
-      "priority": 80,
+      "priority": 75,
       "status": "active",
       "source": "canon-lore-db:characters/adults_and_factions.json",
       "locked": true,

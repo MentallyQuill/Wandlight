@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 2,
   "entries": [
     {
       "id": "canon_marauders_map_known_item",
@@ -46,7 +47,7 @@
           "secret"
         ]
       },
-      "priority": 72,
+      "priority": 10,
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
       "locked": true,
@@ -138,7 +139,7 @@
           "stealth"
         ]
       },
-      "priority": 70,
+      "priority": 10,
       "status": "active",
       "source": "canon-lore-db:items/artifacts_and_objects.json",
       "locked": true,

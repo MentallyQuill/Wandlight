@@ -461,7 +461,7 @@ Wandlight now uses a relevance-tiered accepted-lore model. Older lifecycle field
   "relevance": "high|normal|low",
   "canon": "canon|au",
   "category": "character|event|location|item|spell|faction|relationship|rule|timeline|knowledge|secret|other",
-  "priority": 0
+  "priority": 75
 }
 ```
 
@@ -504,6 +504,17 @@ Categories describe what kind of lore the entry is:
 ### `priority`
 
 Priority sorts entries inside the same relevance tier. A P100 Low-Relevance entry remains in the Low-Relevance injection group, but sorts near the top of that group.
+
+Use only the supported P-scale values:
+
+- `P100`: hard guardrails, major future-spoiler controls, and reveal gates where a wrong inclusion or omission can break canon timing.
+- `P90`: major canon constraints, high-impact knowledge gates, status changes, and story-turning events.
+- `P75`: specific event anchors, present-character baselines, important spell/item constraints, and bounded facts that are useful when their scope matches.
+- `P50`: broad but useful background, recurring behavior, relationship/location state, and ordinary support lore.
+- `P25`: low-impact support metadata or weakly injectable reference context.
+- `P10`: non-injectable scaffolding, reference-only timing windows, and entries kept for lookup but not ranking.
+
+Priority is not a replacement for `relevance`. Relevance decides the injection tier; priority only fine-tunes order inside that tier.
 
 ### Pin and mute
 

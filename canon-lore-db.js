@@ -77,12 +77,12 @@ export const DEFAULT_GATE_TYPES = Object.freeze({
         fact: { label: 'Fact', defaultPriority: 50, injectionRole: 'positive_context' },
         event_anchor: { label: 'Event Anchor', defaultPriority: 75, injectionRole: 'timeline_anchor' },
         knowledge_gate: { label: 'Knowledge Gate', defaultPriority: 90, injectionRole: 'knowledge_constraint' },
-        future_guard: { label: 'Future Guard', defaultPriority: 95, injectionRole: 'negative_constraint' },
-        age_gate: { label: 'Age Gate', defaultPriority: 60, injectionRole: 'character_constraint' },
-        spell_gate: { label: 'Spell Gate', defaultPriority: 80, injectionRole: 'ability_constraint' },
-        skill_band: { label: 'Skill Band', defaultPriority: 70, injectionRole: 'ability_constraint' },
-        behavior_gate: { label: 'Behavior Gate', defaultPriority: 65, injectionRole: 'behavior_constraint' },
-        relationship_gate: { label: 'Relationship Gate', defaultPriority: 65, injectionRole: 'relationship_constraint' },
+        future_guard: { label: 'Future Guard', defaultPriority: 100, injectionRole: 'negative_constraint' },
+        age_gate: { label: 'Age Gate', defaultPriority: 25, injectionRole: 'character_constraint' },
+        spell_gate: { label: 'Spell Gate', defaultPriority: 75, injectionRole: 'ability_constraint' },
+        skill_band: { label: 'Skill Band', defaultPriority: 75, injectionRole: 'ability_constraint' },
+        behavior_gate: { label: 'Behavior Gate', defaultPriority: 50, injectionRole: 'behavior_constraint' },
+        relationship_gate: { label: 'Relationship Gate', defaultPriority: 50, injectionRole: 'relationship_constraint' },
     },
 });
 
@@ -358,11 +358,12 @@ function scoreCanonEntry(entry, state, context, sceneIso, scoring = DEFAULT_SCOR
 
 function canonPriorityBand(priority = 50) {
     const p = Number(priority) || 50;
-    if (p >= 95) return 5;
-    if (p >= 85) return 4;
-    if (p >= 70) return 3;
+    if (p >= 100) return 5;
+    if (p >= 90) return 4;
+    if (p >= 75) return 3;
     if (p >= 50) return 2;
-    return 1;
+    if (p >= 25) return 1;
+    return 0;
 }
 
 function canonScopeSpecificity(entry = {}) {
@@ -414,7 +415,7 @@ function selectPriorityAwareCanonCandidates(candidates = [], max = 10) {
         if (selected.length >= max) break;
         const key = canonKindQuotaKey(item.entry);
         const priority = Number(item.entry.priority) || 50;
-        const hardGuard = priority >= 95 && (key === 'guard' || key === 'knowledge');
+        const hardGuard = priority >= 100 && (key === 'guard' || key === 'knowledge');
         if (!hardGuard && bucketCounts[key] >= quota[key]) continue;
         selected.push(item);
         bucketCounts[key] += 1;
@@ -835,7 +836,7 @@ function inferCanonPreviewDetailLevel(entry = {}, suggestionRole = inferCanonSug
     if (priority >= 90 || ['active_guardrail', 'reveal_gate'].includes(suggestionRole)) return 'core';
     if (suggestionRole === 'character_state' || suggestionRole === 'access_gate') return 'standard';
     if (suggestionRole === 'event_anchor') return 'detailed';
-    if (suggestionRole === 'ability_gate') return includeOnlyWhenRelevant || priority < 85 ? 'detailed' : 'standard';
+    if (suggestionRole === 'ability_gate') return includeOnlyWhenRelevant || priority < 90 ? 'detailed' : 'standard';
     return 'standard';
 }
 
@@ -845,7 +846,7 @@ function shouldSuggestCanonEntryByDefault(entry = {}, suggestionRole = inferCano
     if (raw.showByDefault !== undefined) return raw.showByDefault !== false;
     if (suggestionRole === 'reference_only') return false;
     if (entry.injectableByDefault === false) return false;
-    if (suggestionRole === 'ability_gate' && entry.effects?.injectionRules?.includeOnlyWhenRelevant === true && Number(entry.priority || 50) < 85) {
+    if (suggestionRole === 'ability_gate' && entry.effects?.injectionRules?.includeOnlyWhenRelevant === true && Number(entry.priority || 50) < 90) {
         return false;
     }
     return true;
@@ -882,7 +883,7 @@ function isCanonGuardrailEntry(entry = {}) {
         || kind.includes('guard')
         || kind.includes('constraint')
         || category.includes('future_guard')
-        || (priority >= 85 && entryHasAnyText(entry, ['do not', 'should not', 'before ', 'has not', 'does not know']));
+        || (priority >= 90 && entryHasAnyText(entry, ['do not', 'should not', 'before ', 'has not', 'does not know']));
 }
 
 function isCanonSecretEntry(entry = {}) {

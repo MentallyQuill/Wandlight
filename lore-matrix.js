@@ -115,7 +115,12 @@ function asBoolean(value, fallback = false) {
 function asPriority(value) {
     const n = Number(value);
     if (!Number.isFinite(n)) return 50;
-    return Math.max(0, Math.min(100, Math.round(n)));
+    if (n >= 95) return 100;
+    if (n >= 85) return 90;
+    if (n >= 70) return 75;
+    if (n >= 50) return 50;
+    if (n >= 25) return 25;
+    return 10;
 }
 
 function stableIdFromTitle(title, fallback = 'lore_entry') {

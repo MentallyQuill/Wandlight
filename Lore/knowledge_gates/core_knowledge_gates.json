@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 2,
   "entries": [
     {
       "schemaVersion": 2,
@@ -197,7 +198,7 @@
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "do_not_reveal",
-      "priority": 96,
+      "priority": 100,
       "protected": true,
       "locked": true,
       "date": {

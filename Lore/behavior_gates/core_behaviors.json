@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 2,
   "entries": [
     {
       "schemaVersion": 2,
@@ -94,7 +95,7 @@
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 80,
+      "priority": 75,
       "protected": false,
       "locked": true,
       "date": {
@@ -179,7 +180,7 @@
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 80,
+      "priority": 75,
       "protected": false,
       "locked": true,
       "date": {
@@ -275,7 +276,7 @@
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 68,
+      "priority": 50,
       "protected": false,
       "locked": true,
       "date": {
@@ -360,7 +361,7 @@
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 90,
+      "priority": 75,
       "protected": false,
       "locked": true,
       "date": {
@@ -450,7 +451,7 @@
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 85,
+      "priority": 75,
       "protected": false,
       "locked": true,
       "date": {

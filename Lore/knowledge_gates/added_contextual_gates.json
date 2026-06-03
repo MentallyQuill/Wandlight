@@ -10,7 +10,7 @@
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 78,
+      "priority": 75,
       "date": {
         "validFrom": "1992-09-01",
         "validTo": "1998-05-02",
@@ -98,7 +98,7 @@
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 84,
+      "priority": 75,
       "date": {
         "validFrom": "1996-09-01",
         "validTo": "1997-06-30",
@@ -170,7 +170,7 @@
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 82,
+      "priority": 75,
       "date": {
         "validFrom": "1991-09-01",
         "validTo": "1998-05-02",
@@ -235,7 +235,7 @@
       "canonStatus": "canon",
       "truthStatus": "true",
       "revealPolicy": "public",
-      "priority": 88,
+      "priority": 90,
       "date": {
         "validFrom": "1996-09-01",
         "validTo": "1997-06-30",
@@ -315,7 +315,7 @@
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
-      "priority": 96,
+      "priority": 100,
       "date": {
         "validFrom": "1991-09-01",
         "validTo": "1993-12-17",
@@ -467,7 +467,7 @@
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
-      "priority": 94,
+      "priority": 90,
       "date": {
         "validFrom": "1991-09-01",
         "validTo": "1993-08-31",
@@ -542,7 +542,7 @@
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
-      "priority": 92,
+      "priority": 90,
       "date": {
         "validFrom": "1991-09-01",
         "validTo": "1995-10-15",
@@ -624,7 +624,7 @@
       "canonStatus": "canon",
       "truthStatus": "hidden",
       "revealPolicy": "private",
-      "priority": 88,
+      "priority": 90,
       "date": {
         "validFrom": "1991-09-01",
         "validTo": "1995-10-15",

@@ -22,55 +22,55 @@
     "future_guard": {
       "label": "Future Guard",
       "description": "Prevents premature future-canon leakage.",
-      "defaultPriority": 95,
+      "defaultPriority": 100,
       "injectionRole": "negative_constraint"
     },
     "age_gate": {
       "label": "Age Gate",
       "description": "Computes or constrains character age by date.",
-      "defaultPriority": 60,
+      "defaultPriority": 25,
       "injectionRole": "character_constraint"
     },
     "spell_gate": {
       "label": "Spell Gate",
       "description": "Controls spell knowledge, learning date, and plausible magical ability.",
-      "defaultPriority": 80,
+      "defaultPriority": 75,
       "injectionRole": "ability_constraint"
     },
     "skill_band": {
       "label": "Skill Band",
       "description": "Broad ability expectations for a school year or training level.",
-      "defaultPriority": 70,
+      "defaultPriority": 75,
       "injectionRole": "ability_constraint"
     },
     "behavior_gate": {
       "label": "Behavior Gate",
       "description": "Date-sensitive characterization guidance.",
-      "defaultPriority": 65,
+      "defaultPriority": 50,
       "injectionRole": "behavior_constraint"
     },
     "relationship_gate": {
       "label": "Relationship Gate",
       "description": "Date-sensitive relationship state.",
-      "defaultPriority": 65,
+      "defaultPriority": 50,
       "injectionRole": "relationship_constraint"
     },
     "institution_state": {
       "label": "Institution State",
       "description": "Date-sensitive status of places, offices, classes, and institutions.",
-      "defaultPriority": 70,
+      "defaultPriority": 75,
       "injectionRole": "setting_constraint"
     },
     "knowledge_guard": {
       "label": "Knowledge Guard",
       "description": "A negative or protective story-state gate that remains active until its story milestone happens.",
-      "defaultPriority": 95,
+      "defaultPriority": 100,
       "injectionRole": "negative_constraint"
     },
     "story_milestone": {
       "label": "Story Milestone",
       "description": "A roleplay event that activates, expires, blocks, or diverges date-sensitive lore.",
-      "defaultPriority": 70,
+      "defaultPriority": 75,
       "injectionRole": "state_control"
     },
     "lifecycle_gate": {
@@ -82,13 +82,13 @@
     "character_state": {
       "label": "Character State",
       "description": "Date-sensitive character role, status, or established state.",
-      "defaultPriority": 70,
+      "defaultPriority": 75,
       "injectionRole": "character_constraint"
     },
     "place_fact": {
       "label": "Place Fact",
       "description": "Date-sensitive location or setting fact.",
-      "defaultPriority": 65,
+      "defaultPriority": 50,
       "injectionRole": "setting_constraint"
     },
     "artifact_state": {
@@ -100,19 +100,19 @@
     "public_belief": {
       "label": "Public Belief",
       "description": "What a group believes, including false or incomplete public narratives.",
-      "defaultPriority": 70,
+      "defaultPriority": 75,
       "injectionRole": "belief_constraint"
     },
     "faction_state": {
       "label": "Faction State",
       "description": "Date-sensitive status of a group, institution, house, or faction.",
-      "defaultPriority": 70,
+      "defaultPriority": 75,
       "injectionRole": "faction_constraint"
     },
     "continuity_rule": {
       "label": "Continuity Rule",
       "description": "General rule that prevents broad continuity mistakes.",
-      "defaultPriority": 80,
+      "defaultPriority": 90,
       "injectionRole": "negative_constraint"
     },
     "data_cleanup": {

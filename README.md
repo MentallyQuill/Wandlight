@@ -2,6 +2,8 @@
   <img src="Images/documentation/wandlight-banner.png" alt="Wandlight">
 </p>
 
+Dev Note: While Wandlight has some neat HP-specific features, it has largely been depricated in favor of a newer total-framework extension, Saga. See more here: [https://github.com/MentallyQuill/Saga](https://github.com/MentallyQuill/Saga).
+
 # Wandlight
 
 Wandlight is a SillyTavern extension for long-form Harry Potter writing, roleplay, and fanfiction where canon timing, secrets, alternate branches, and durable story memory matter.
